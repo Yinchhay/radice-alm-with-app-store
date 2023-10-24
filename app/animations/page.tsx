@@ -11,7 +11,7 @@ const roboto = Roboto({ weight: ["400", "700"], subsets: ["latin"] });
 
 export default function Home() {
     return (
-        <div>
+        <div className="mt-[500px] max-w-full">
             <Eye />
         </div>
     );

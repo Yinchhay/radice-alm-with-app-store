@@ -24,7 +24,7 @@ export default function Eye() {
                 src={"/layer1.svg"}
                 width={800}
                 height={800}
-                className="absolute animate-layer1 opacity-50"
+                className="absolute animate-layer1 opacity-30"
             />
             <Image
                 alt=""
