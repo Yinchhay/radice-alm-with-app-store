@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { cookies } from "next/headers";
+import * as context from "next/headers";
 import { auth } from '@/auth/lucia';
 import type { NextRequest } from "next/server";
 
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
                 status: 400
             });
         }
-        
+
         const user = await await auth.createUser({
             // providerId + providerUserId = "username:usernameProviderUserId"
             key: {
@@ -71,10 +71,7 @@ export async function POST(request: NextRequest) {
             attributes: {}
         });
 
-        const authRequest = auth.handleRequest({
-            request,
-            cookies
-        });
+        const authRequest = auth.handleRequest(request.method, context);
 
         authRequest.setSession(session);
 

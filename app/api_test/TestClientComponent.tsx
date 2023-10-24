@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { IsLogin } from "./isLogin";
 
 export default function TestClientComponent() {
   const [users, setUsers] = useState<Record<string, string>[]>([]);
@@ -28,7 +27,7 @@ export default function TestClientComponent() {
   };
 
   const loginUser = async () => {
-    await fetch('/api/auth/user/login', {
+    await fetch('/api/public/user/login', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

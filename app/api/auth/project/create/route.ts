@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth, getPageSession } from "@/auth/lucia";
-import { cookies } from "next/headers";
+import * as context from "next/headers";
 
 interface IBody {
     name: string,
@@ -32,17 +32,14 @@ export async function POST(request: NextRequest) {
         }
 
         const session = await getPageSession();
-
+        
         if (!session) return NextResponse.json({
             message: "Unauthorized, user must login in order to create a project"
         }, {
             status: 401
         });
 
-        const authRequest = auth.handleRequest({
-            request,
-            cookies
-        });
+        const authRequest = auth.handleRequest(request.method, context);
         
         authRequest.setSession(session);
 

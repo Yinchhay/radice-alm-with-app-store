@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth/lucia";
-import { cookies } from "next/headers";
+import * as context from "next/headers";
 
 interface IBody {
     email: string,
@@ -45,10 +45,7 @@ export async function POST(request: NextRequest) {
             attributes: {}
         });
 
-        const authRequest = auth.handleRequest({
-            request,
-            cookies
-        });
+        const authRequest = auth.handleRequest(request.method, context);
         
         authRequest.setSession(session);
 

@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
 interface IParams {
-    params: { id: string }
+    params: { project_id: string }
 }
 
 export async function GET(request: Request, { params }: IParams) {
     const project = await prisma.projects.findFirst({
         where: {
-            id: Number(params.id)
+            id: Number(params.project_id)
         },
     })
     

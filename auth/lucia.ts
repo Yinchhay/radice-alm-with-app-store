@@ -1,11 +1,12 @@
 // lucia.ts
 import { lucia } from "lucia";
 import { prisma } from "@lucia-auth/adapter-prisma";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
 import "lucia/polyfill/node";
-import { nextjs } from "lucia/middleware";
+import { nextjs_future } from "lucia/middleware";
 import { cache } from "react";
-import { cookies } from "next/headers";
+import * as context from "next/headers";
+import { Session } from "@/types";
 // import { github } from "@lucia-auth/oauth/providers";
 
 // https://lucia-auth.com/guidebook/sign-in-with-username-and-password/nextjs-app
@@ -22,11 +23,11 @@ export const auth = lucia({
         // "sessions" is the name of the table in the database
         session: "session",
     }),
-	env: "DEV", // "PROD" if deployed to HTTPS
-    middleware: nextjs(),
+    env: process.env.NODE_ENV === "development" ? "DEV" : "PROD",
+    middleware: nextjs_future(),
     sessionCookie: {
-		expires: false
-	},
+        expires: false
+    },
     // when we console log session these are the attribute that we can specify to show in session
     getUserAttributes: (data) => {
         return {
@@ -48,10 +49,7 @@ export type Auth = typeof auth;
 // 	clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
 // });
 
-export const getPageSession = cache(() => {
-	const authRequest = auth.handleRequest({
-		request: null,
-		cookies
-	});
-	return authRequest.validate();
+export const getPageSession: () => Promise<Session | null> = cache(() => {
+    const authRequest = auth.handleRequest("GET", context);
+    return authRequest.validate();
 });
