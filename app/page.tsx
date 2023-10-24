@@ -5,35 +5,42 @@ import GlitchText from "@/components/GlitchText";
 import Navbar from "@/components/Navbar";
 import RandomText from "@/components/RandomText";
 import { useEffect } from "react";
+import Eye from "@/components/Eye";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
+    display: "swap",
 });
 const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
-const roboto = Roboto({ weight: ["400", "700"], subsets: ["latin"] });
+const roboto = Roboto({
+    weight: ["400", "700"],
+    subsets: ["latin"],
+    display: "swap",
+});
 
 export default function Home() {
-    useEffect(() => {
-        setTimeout(() => {
-            window.location.reload();
-        }, 4000);
-    }, []);
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         window.location.reload();
+    //     }, 4000);
+    // }, []);
     return (
         <div>
             <Navbar />
             <div className="container m-auto">
-                <div className={roboto_condensed.className}>
+                <div className={roboto.className}>
                     <div
-                        className="absolute top-[100px] uppercase font-bold text-[300px] text-transparent"
+                        className="absolute top-[100px] uppercase font-bold text-[300px] text-transparent select-none"
                         style={{
                             WebkitTextStroke: "3px rgba(0,0,0,.08)",
+                            WebkitTextFillColor: "transparent",
                             WebkitFontSmoothing: "antialiased",
                         }}
                     >
                         We Are
                     </div>
                     <div
-                        className="absolute top-[400px] left-[800px] uppercase font-bold text-[300px] text-transparent"
+                        className="absolute top-[400px] left-[800px] uppercase font-bold text-[300px] text-transparent select-none"
                         style={{
                             WebkitTextStroke: "3px rgba(0,0,0,.08)",
                             WebkitFontSmoothing: "antialiased",
@@ -81,7 +88,10 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
-                <div className="relative flex justify-center">
+                <div className="relative mt-[300px]">
+                    <Eye />
+                </div>
+                {/* <div className="relative flex justify-center">
                     <div className="grid absolute top-[-80px]">
                         <div
                             style={{
@@ -94,7 +104,7 @@ export default function Home() {
                             <div className="bg-black w-[382px] h-[0] animate-grow"></div>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
             <div className="relative bg-black h-[100vh]">
                 <div
