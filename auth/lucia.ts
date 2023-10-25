@@ -1,17 +1,16 @@
 // lucia.ts
 import { lucia } from "lucia";
 import { prisma } from "@lucia-auth/adapter-prisma";
-import { PrismaClient } from '@prisma/client'
 import "lucia/polyfill/node";
 import { nextjs_future } from "lucia/middleware";
 import { cache } from "react";
 import * as context from "next/headers";
 import { Session } from "@/types";
+import { default as client} from '../lib/prisma';
 // import { github } from "@lucia-auth/oauth/providers";
 
 // https://lucia-auth.com/guidebook/sign-in-with-username-and-password/nextjs-app
 
-const client = new PrismaClient();
 
 // expect error
 export const auth = lucia({

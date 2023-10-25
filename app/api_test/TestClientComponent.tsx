@@ -42,7 +42,7 @@ export default function TestClientComponent() {
   };
 
   const logoutUser = async () => {
-    await fetch('/api/auth/user/logout', {
+    await fetch('/api/public/user/logout', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -53,13 +53,13 @@ export default function TestClientComponent() {
   };
 
   const getOneUser = async () => {
-    await fetch('api/auth/user/get/taw709q0zkf4i4z').then(async res => {
+    await fetch('api/auth/user/taw709q0zkf4i4z').then(async res => {
       console.log(await res.json());
     });
   }
 
   const getAllUser = async () => {
-    const res = await fetch('api/auth/user/get/all');
+    const res = await fetch('api/auth/user/all');
     const data = await res.json();
     if (data) {
       setUsers([...data.users]);

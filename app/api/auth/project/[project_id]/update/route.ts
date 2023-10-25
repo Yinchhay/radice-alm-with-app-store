@@ -17,13 +17,13 @@ interface IBody {
     category_id: number,
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: { project_id: string } }) {
     try {
         const body: IBody = await request.json()
 
         const oldProject = await prisma.projects.findFirst({
             where: {
-                id: Number(params.id)
+                id: Number(params.project_id)
             }
         });
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         });
 
         const project = prisma.projects.update({
-            where: { id: Number(params.id) },
+            where: { id: Number(params.project_id) },
             data: body
         });
 
