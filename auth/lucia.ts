@@ -1,3 +1,4 @@
+// docs: https://lucia-auth.com/guidebook/sign-in-with-username-and-password/nextjs-app
 // lucia.ts
 import { lucia } from "lucia";
 import { prisma } from "@lucia-auth/adapter-prisma";
@@ -5,12 +6,9 @@ import "lucia/polyfill/node";
 import { nextjs_future } from "lucia/middleware";
 import { cache } from "react";
 import * as context from "next/headers";
-import { Session } from "@/types";
-import { default as client} from '../lib/prisma';
+import { ISession } from "@/types";
+import { default as client } from '../lib/prisma';
 // import { github } from "@lucia-auth/oauth/providers";
-
-// https://lucia-auth.com/guidebook/sign-in-with-username-and-password/nextjs-app
-
 
 // expect error
 export const auth = lucia({
@@ -32,6 +30,7 @@ export const auth = lucia({
         return {
             username: data.username,
             email: data.email,
+            preferences: data.preferences,
         };
     },
     // default session expires in 1 day and idle expires in 14 days
@@ -48,7 +47,7 @@ export type Auth = typeof auth;
 // 	clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
 // });
 
-export const getPageSession: () => Promise<Session | null> = cache(() => {
+export const getPageSession: () => Promise<ISession | null> = cache(() => {
     const authRequest = auth.handleRequest("GET", context);
     return authRequest.validate();
 });

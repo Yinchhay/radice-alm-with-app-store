@@ -7,7 +7,7 @@ export default function TestClientComponent() {
   const [user, setUser] = useState<any>();
 
   const createOneUser = async () => {
-    await fetch('/api/auth/user/create', {
+    await fetch('/api/v1/auth/user/create', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -27,7 +27,7 @@ export default function TestClientComponent() {
   };
 
   const loginUser = async () => {
-    await fetch('/api/public/user/login', {
+    await fetch('/api/v1/public/user/login', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export default function TestClientComponent() {
   };
 
   const logoutUser = async () => {
-    await fetch('/api/public/user/logout', {
+    await fetch('/api/v1/public/user/logout', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -53,13 +53,13 @@ export default function TestClientComponent() {
   };
 
   const getOneUser = async () => {
-    await fetch('api/auth/user/taw709q0zkf4i4z').then(async res => {
+    await fetch('/api/v1/auth/user/taw709q0zkf4i4z').then(async res => {
       console.log(await res.json());
     });
   }
 
   const getAllUser = async () => {
-    const res = await fetch('api/auth/user/all');
+    const res = await fetch('/api/v1/auth/user/all');
     const data = await res.json();
     if (data) {
       setUsers([...data.users]);
@@ -95,7 +95,7 @@ export default function TestClientComponent() {
       {/* if connected with github, can login without using password */}
       {/* <div className="">
         <Image src={"https://cdn.icon-icons.com/icons2/2351/PNG/512/logo_github_icon_143196.png"} width={50} height={50} alt="logo"></Image>
-        <a href="/api/user/login/github">connect with Github</a>
+        <a href="/api/v1/user/login/github">connect with Github</a>
       </div> */}
       <div className="">
         {/* <IsLogin /> */}

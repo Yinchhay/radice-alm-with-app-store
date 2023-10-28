@@ -20,7 +20,7 @@ export default function page({ params }: { params: IParams }) {
             {/* Project setting */}
             <div className="">
                 Project setting
-                <Form action={`/api/auth/project/${params.project_id}/setting`}>
+                <Form action={`/api/v1/auth/project/${params.project_id}/setting`}>
                     <div className={classes.inputContainer}>
                         <label className={classes.label} htmlFor="projectName">Project name</label>
                         <input type="text" className={classes.input} name="projectName" id="projectName" />
@@ -51,7 +51,7 @@ export default function page({ params }: { params: IParams }) {
                         <span>Radi</span>
                     </div>
                     <div className="">
-                        <Form action={`/api/auth/project/${params.project_id}/sponsor`}>
+                        <Form action={`/api/v1/auth/project/${params.project_id}/sponsor`}>
                             <div className="">
                                 <label htmlFor="sponsorLevel">Level</label>
                                 <select name="sponsorLevel" id="sponsorLevel" placeholder="sponsor level">
@@ -84,13 +84,13 @@ export default function page({ params }: { params: IParams }) {
             </div>
             {/* Make project public */}
             <div className="">
-                <Form action={`/api/auth/project/${params.project_id}/public`}>
+                <Form action={`/api/v1/auth/project/${params.project_id}/public`}>
                     <div className={classes.inputContainer}>
                         <label className={classes.label} htmlFor="projectPublicity">Make this project public</label>
                         <input type="checkbox" name="projectPublicity" id="projectPublicity" />
                     </div>
                 </Form>
-                <Form action={`/api/auth/project/${params.project_id}/delete`}>
+                <Form action={`/api/v1/auth/project/${params.project_id}/delete`}>
                     <div className={classes.inputContainer}>
                         <label className={classes.label} htmlFor="projectDelete">Delete this project</label>
                         <input type="submit" className={classes.input} name="projectDelete" id="projectDelete" value={"Delete project"}/>

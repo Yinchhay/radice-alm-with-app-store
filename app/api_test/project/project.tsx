@@ -7,7 +7,7 @@ export default function Project() {
     const [project, setProject] = useState<any>();
 
     const createOneProject = async () => {
-        await fetch('/api/auth/project/create', {
+        await fetch('/api/v1/auth/project/create', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

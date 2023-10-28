@@ -1,9 +1,7 @@
-import { NextResponse } from 'next/server'
+import { auth } from "@/auth/lucia";
+import { HttpStatusCode } from "@/types/server";
 import * as context from "next/headers";
-import { auth } from '@/auth/lucia';
-import type { NextRequest } from "next/server";
-
-// https://lucia-auth.com/guidebook/sign-in-with-username-and-password/nextjs-app
+import { NextRequest, NextResponse } from "next/server";
 
 interface IBody {
     username: string,
@@ -14,7 +12,8 @@ interface IBody {
     profile?: Record<string, any>,
     oauth_id?: Record<string, any>,
     skillset?: Record<string, any>,
-    roles: string,
+    preferences?: Record<string, any>,
+    roles: Record<string, any>,
 }
 
 export async function POST(request: NextRequest) {
@@ -27,9 +26,10 @@ export async function POST(request: NextRequest) {
             body.username.length > 31
         ) {
             return NextResponse.json({
-                message: "Invalid username"
+                message: "Invalid username",
+                status: HttpStatusCode.BAD_REQUEST_400
             }, {
-                status: 400
+                status: HttpStatusCode.BAD_REQUEST_400
             });
         }
         if (
@@ -38,9 +38,10 @@ export async function POST(request: NextRequest) {
             body.password.length > 255
         ) {
             return NextResponse.json({
-                message: "Invalid password"
+                message: "Invalid password",
+                status: HttpStatusCode.BAD_REQUEST_400
             }, {
-                status: 400
+                status: HttpStatusCode.BAD_REQUEST_400
             });
         }
 
@@ -60,11 +61,10 @@ export async function POST(request: NextRequest) {
                 profile: body.profile || undefined,
                 oauth_id: body.oauth_id || undefined,
                 skillset: body.skillset || undefined,
+                preferences: body.preferences || undefined,
                 roles: body.roles
             }
         })
-
-        // console.log(user)
 
         const session = await auth.createSession({
             userId: user.userId,
@@ -78,19 +78,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             message: "user has created",
             user: user,
-            status: 200,
+            status: HttpStatusCode.OK_200,
         }, {
-            status: 200
+            status: HttpStatusCode.OK_200
         });
-    } catch (e) {
-        // this part depends on the database you're using
-        console.log(e);
-
+    } catch (err) {
         return NextResponse.json({
             error: "An unknown error occurred :(",
-            e: e,
+            message: err,
+            status: HttpStatusCode.INTERNAL_SERVER_ERROR_500
         }, {
-            status: 500
+            status: HttpStatusCode.INTERNAL_SERVER_ERROR_500
         }
         );
     }

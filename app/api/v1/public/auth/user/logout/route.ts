@@ -1,4 +1,3 @@
-// app/api/logout/route.ts
 import { auth } from "@/auth/lucia";
 import * as context from "next/headers";
 

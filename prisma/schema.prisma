@@ -21,6 +21,8 @@ model Users {
   oauth_id     Json?
   skillset     Json?
   roles        Json
+  preferences  Json?
+  cv           Json?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
@@ -56,7 +58,7 @@ model Key {
 }
 
 model Categories {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @unique @default(cuid())
   name       String   @db.VarChar(255)
   is_public  Boolean  @default(false)
   created_at DateTime @default(now())
@@ -66,7 +68,7 @@ model Categories {
 }
 
 model Projects {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @unique @default(cuid())
   name        String   @db.VarChar(255)
   image       Json?
   description String   @db.VarChar(255)
@@ -79,8 +81,8 @@ model Projects {
   links       Json?
   user_id     String
   // partner can be optional, for example radi website does not have a sponsor
-  partner_id  Int?
-  category_id Int
+  partner_id  String?
+  category_id String
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
@@ -91,11 +93,11 @@ model Projects {
 }
 
 model Members {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @unique @default(cuid())
   title      String   @db.VarChar(255)
   can_edit   Boolean  @default(false)
   user_id    String
-  project_id Int
+  project_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -104,7 +106,7 @@ model Members {
 }
 
 model Partners {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @unique @default(cuid())
   name        String   @db.VarChar(255)
   image       String?
   link        String?
@@ -121,7 +123,7 @@ model Partners {
 }
 
 model Roles {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @unique @default(cuid())
   name        String   @db.VarChar(255)
   description String   @db.VarChar(255)
   is_active   Boolean  @default(true)
@@ -132,7 +134,7 @@ model Roles {
 }
 
 model Permissions {
-  id          Int      @id @default(autoincrement())
+  id         String   @id @unique @default(cuid())
   name        String   @db.VarChar(255)
   description String   @db.VarChar(255)
   is_active   Boolean  @default(true)
@@ -141,7 +143,7 @@ model Permissions {
 }
 
 model Technologies {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @unique @default(cuid())
   type       String   @db.VarChar(255)
   name       String   @db.VarChar(255)
   created_at DateTime @default(now())

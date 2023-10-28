@@ -6,7 +6,7 @@ export default function Page({ params }: { params: any }) {
     const [project, setProject] = useState<any>();
 
     const getProjectById = async () => {
-        await fetch(`/api/auth/project/${params.id}`, {
+        await fetch(`/api/v1/auth/project/${params.id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -24,7 +24,7 @@ export default function Page({ params }: { params: any }) {
     });
 
     const updateProjectById = async () => {
-        await fetch(`/api/auth/project/${params.id}/update`, {
+        await fetch(`/api/v1/auth/project/${params.id}/update`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
