@@ -1,5 +1,5 @@
 import Form from "@/components/Form";
-import { SponsorLevel, SponsorType } from "@/types";
+import { PartnerLevel, PartnerType } from "@/types";
 import Image from "next/image";
 
 interface IParams {
@@ -39,34 +39,34 @@ export default function page({ params }: { params: IParams }) {
             {/* Team member */}
             <div className="">
                 Team members
-                {/* TODO: love u bro */}
+                {/* TODO: add pop up */}
                 <button>Add members</button>
             </div>
-            {/* Sponsors */}
+            {/* partner */}
             <div className="bg-slate-500">
-                sponsors
+                partner
                 <div className="bg-gray-800 flex">
                     <div className="">
-                        <Image src="/app/favicon.ico" alt="sponsor" width={100} height={100} />
+                        <Image src="/app/favicon.ico" alt="partner" width={100} height={100} />
                         <span>Radi</span>
                     </div>
                     <div className="">
-                        <Form action={`/api/v1/auth/project/${params.project_id}/sponsor`}>
+                        <Form action={`/api/v1/auth/project/${params.project_id}/partner`}>
                             <div className="">
-                                <label htmlFor="sponsorLevel">Level</label>
-                                <select name="sponsorLevel" id="sponsorLevel" placeholder="sponsor level">
+                                <label htmlFor="partnerLevel">Level</label>
+                                <select name="partnerLevel" id="partnerLevel" placeholder="partner level">
                                     {
-                                        Object.keys(SponsorLevel).map((level, index) => (
+                                        Object.keys(PartnerLevel).map((level, index) => (
                                             <option key={index} value={level}>{level}</option>
                                         ))
                                     }
                                 </select>
                             </div>
                             <div className="">
-                                <label htmlFor="sponsorType">Level</label>
-                                <select name="sponsorType" id="sponsorType" placeholder="sponsor level">
+                                <label htmlFor="partnerType">Level</label>
+                                <select name="partnerType" id="partnerType" placeholder="sponsor level">
                                     {
-                                        Object.keys(SponsorType).map((type, index) => (
+                                        Object.keys(PartnerType).map((type, index) => (
                                             <option key={index} value={type}>{type}</option>
                                         ))
                                     }
@@ -93,7 +93,7 @@ export default function page({ params }: { params: IParams }) {
                 <Form action={`/api/v1/auth/project/${params.project_id}/delete`}>
                     <div className={classes.inputContainer}>
                         <label className={classes.label} htmlFor="projectDelete">Delete this project</label>
-                        <input type="submit" className={classes.input} name="projectDelete" id="projectDelete" value={"Delete project"}/>
+                        <input type="submit" className={classes.input} name="projectDelete" id="projectDelete" value={"Delete project"} />
                     </div>
                 </Form>
             </div>

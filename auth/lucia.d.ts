@@ -6,6 +6,9 @@ declare namespace Lucia {
 		username: string,
 		email: string,
 		preferences: IAuthUserPreferences,
+		roles: {
+			roleIds: string[]
+		}
 	};
 	type DatabaseSessionAttributes = {};
 }

@@ -1,6 +1,6 @@
 import { getPageSession } from "@/auth/lucia";
 
-export default async function page()  {
+export default async function IsLogin()  {
     const session = await getPageSession();
 
     return (

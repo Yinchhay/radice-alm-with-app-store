@@ -7,6 +7,9 @@ export interface IAuthUser {
     username: string,
     userId: string,
     preferences: IAuthUserPreferences,
+    roles: {
+        roleIds: string[],
+    }
 }
 
 export interface ISession {

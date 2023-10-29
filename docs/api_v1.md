@@ -41,7 +41,7 @@ This is the API V1 documentation for the project. it list all the API routes and
         - # Get Routes:
             - ❌ ``/api/v1/public/user/logout``: Allow user to logout.
         - # Post Routes:
-            - ❌ ``/api/v1/public/user/login``: Allow user to login.
+            - ✅ ``/api/v1/public/user/login``: Allow user to login.
             - ❌ ``/api/v1/public/user/register``: Allow user to register.
    - # Verification:
      - # User:

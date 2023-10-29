@@ -1,5 +1,5 @@
 import { auth } from "@/auth/lucia";
-import { HttpStatusCode } from "@/types/server";
+import { HttpStatusCode, ResponseMessage, ResponseStatus } from "@/types/server";
 import * as context from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,6 +14,7 @@ interface IBody {
     skillset?: Record<string, any>,
     preferences?: Record<string, any>,
     roles: Record<string, any>,
+    cv?: Record<string, any>,
 }
 
 export async function POST(request: NextRequest) {
@@ -26,10 +27,12 @@ export async function POST(request: NextRequest) {
             body.username.length > 31
         ) {
             return NextResponse.json({
-                message: "Invalid username",
-                status: HttpStatusCode.BAD_REQUEST_400
+                message: ResponseMessage.BAD_REQUEST_BODY,
+                data: {},
+                success: ResponseStatus.UNSUCCESSFUL,
+                status: HttpStatusCode.BAD_REQUEST_400,
             }, {
-                status: HttpStatusCode.BAD_REQUEST_400
+                status: HttpStatusCode.BAD_REQUEST_400,
             });
         }
         if (
@@ -38,10 +41,12 @@ export async function POST(request: NextRequest) {
             body.password.length > 255
         ) {
             return NextResponse.json({
-                message: "Invalid password",
-                status: HttpStatusCode.BAD_REQUEST_400
+                message: ResponseMessage.BAD_REQUEST_BODY,
+                data: {},
+                success: ResponseStatus.UNSUCCESSFUL,
+                status: HttpStatusCode.BAD_REQUEST_400,
             }, {
-                status: HttpStatusCode.BAD_REQUEST_400
+                status: HttpStatusCode.BAD_REQUEST_400,
             });
         }
 
@@ -76,20 +81,21 @@ export async function POST(request: NextRequest) {
         authRequest.setSession(session);
 
         return NextResponse.json({
-            message: "user has created",
-            user: user,
+            message: ResponseMessage.SUCCESS,
+            data: { user: user },
+            success: ResponseStatus.SUCCESS,
             status: HttpStatusCode.OK_200,
         }, {
-            status: HttpStatusCode.OK_200
+            status: HttpStatusCode.OK_200,
         });
     } catch (err) {
         return NextResponse.json({
-            error: "An unknown error occurred :(",
-            message: err,
-            status: HttpStatusCode.INTERNAL_SERVER_ERROR_500
+            message: ResponseMessage.INTERNAL_SERVER_ERROR,
+            data: {},
+            success: ResponseStatus.UNSUCCESSFUL,
+            status: HttpStatusCode.INTERNAL_SERVER_ERROR_500,
         }, {
-            status: HttpStatusCode.INTERNAL_SERVER_ERROR_500
-        }
-        );
+            status: HttpStatusCode.INTERNAL_SERVER_ERROR_500,
+        });
     }
 }
