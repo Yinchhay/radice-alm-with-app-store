@@ -455,7 +455,7 @@ const config: Config = {
                         transform: "scale(.8) translate(0,0)",
                     },
                 },
-                layer11: {
+                layer0: {
                     "0%": {
                         transform: "rotate(0)",
                     },
@@ -471,7 +471,8 @@ const config: Config = {
                 fade: "fade 1.5s ease-in-out forwards",
                 grow: "grow 1.75s ease-in-out forwards",
                 reveal: "reveal 1s ease-in-out forwards",
-                load: "load 1.5s ease-in-out 0.75s forwards",
+                load: "load 1.5s ease-in-out 1s forwards",
+                layer0: "layer0 10s ease-in-out 0.75s infinite",
                 layer1: "layer1 10s ease-in-out 0.75s infinite",
                 layer2: "layer2 10s ease-in-out 0.75s infinite",
                 layer3: "layer3 10s ease-in-out 0.75s infinite",
@@ -483,7 +484,6 @@ const config: Config = {
                 layer9: "layer9 10s ease-in-out 0.75s infinite",
                 layer10: "layer10 15s ease-in-out 0.75s infinite",
                 pupil: "pupil 15s ease-in-out 0.75s infinite",
-                layer11: "layer11 10s ease-in-out 0.75s infinite",
             },
         },
     },

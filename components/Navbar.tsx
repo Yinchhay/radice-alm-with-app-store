@@ -29,7 +29,7 @@ export default function Home() {
                 </div>
                 <div className={roboto_mono.className}>
                     <a href="/login" className="uppercase">
-                        Radi Center
+                        Into Radi Center
                     </a>
                 </div>
             </div>

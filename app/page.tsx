@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import RandomText from "@/components/RandomText";
 import { useEffect } from "react";
 import Eye from "@/components/Eye";
+import Carousel from "@/components/Carousel";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -27,6 +28,15 @@ export default function Home() {
     return (
         <div>
             <Navbar />
+            <div className="relative">
+                <Image
+                    alt=""
+                    src={"/paragon.svg"}
+                    width={240}
+                    height={784}
+                    className="absolute left-0 mt-[50px]"
+                />
+            </div>
             <div className="container m-auto">
                 <div className={roboto.className}>
                     <div
@@ -37,7 +47,7 @@ export default function Home() {
                             WebkitFontSmoothing: "antialiased",
                         }}
                     >
-                        We Are
+                        <RandomText originalText={"WE ARE"} />
                     </div>
                     <div
                         className="absolute top-[400px] left-[800px] uppercase font-bold text-[300px] text-transparent select-none"
@@ -46,7 +56,7 @@ export default function Home() {
                             WebkitFontSmoothing: "antialiased",
                         }}
                     >
-                        Radice
+                        <RandomText originalText={"RADICE"} />
                     </div>
                 </div>
             </div>
@@ -60,7 +70,7 @@ export default function Home() {
                         </div>
                     </div>
                     <div className={roboto.className}>
-                        <p className="text mt-2">
+                        <p className="text mt-4">
                             Radice is a company that helps other companies bring
                             their ideas to life through research and
                             development. Radice is passionate about innovation
@@ -110,9 +120,10 @@ export default function Home() {
                 <div
                     className="absolute top-[-48px] bg-black w-12 h-12"
                     style={{
-                        clipPath: "polygon(0 0, 0% 100%, 100% 100%);",
+                        clipPath: "polygon(0 0, 0% 100%, 100% 100%)",
                     }}
                 ></div>
+                <Carousel />
             </div>
         </div>
     );

@@ -14,10 +14,10 @@ export default function Eye() {
             />
             <Image
                 alt=""
-                src={"/layer11.svg"}
+                src={"/layer0.svg"}
                 width={570}
                 height={570}
-                className="absolute animate-layer11 opacity-25"
+                className="absolute animate-layer0 opacity-25"
             />
             <Image
                 alt=""
@@ -84,11 +84,20 @@ export default function Eye() {
             />
             <Image
                 alt=""
-                src={"/layer10.svg"}
+                src={"/iris.svg"}
                 width={110}
                 height={110}
                 className="absolute animate-layer10 scale-[0.8] opacity-90"
             />
+            <div className="absolute w-[170px] h-[170px] animate-layer11">
+                <Image
+                    alt=""
+                    src={"/layer10.svg"}
+                    width={170}
+                    height={170}
+                    className="absolute animate-layer10 opacity-90"
+                />
+            </div>
             <Image
                 alt=""
                 src={"/pupil.svg"}

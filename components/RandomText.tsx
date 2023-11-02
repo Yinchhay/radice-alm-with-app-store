@@ -12,7 +12,7 @@ const roboto = Roboto({ weight: ["400", "700"], subsets: ["latin"] });
 export default function RandomText({ originalText }: { originalText: string }) {
     const alphabets = "abcdefghijklmnopqrstuvwxyz";
     const randomAmount = 3;
-    const delay = 500;
+    const delay = 750;
     const randomSpeed = 35;
     const [first, setFirst] = useState(false);
     const [text, setText] = useState("");
