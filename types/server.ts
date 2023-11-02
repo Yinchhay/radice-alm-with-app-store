@@ -378,3 +378,18 @@ export enum HttpStatusCode {
      */
     NETWORK_AUTHENTICATION_REQUIRED_511 = 511
 }
+
+export enum ResponseMessage {
+    SUCCESS = "Request has been successfully processed",
+    BAD_REQUEST_BODY = "Request body is invalid",
+    BAD_REQUEST = "Request is invalid",
+    INTERNAL_SERVER_ERROR = "An unknown error occurred",
+    UNAUTHORIZED = "Unauthorized, user must login",
+    FORBIDDEN_NO_PERMISSION = "Forbidden, user does not have permission",
+    INVALID_CREDENTIAL = "Invalid credential",
+}
+
+export enum ResponseStatus {
+    SUCCESS = 1,
+    UNSUCCESSFUL = 0,
+}

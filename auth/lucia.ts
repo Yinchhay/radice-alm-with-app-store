@@ -31,6 +31,7 @@ export const auth = lucia({
             username: data.username,
             email: data.email,
             preferences: data.preferences,
+            roles: data.roles,
         };
     },
     // default session expires in 1 day and idle expires in 14 days

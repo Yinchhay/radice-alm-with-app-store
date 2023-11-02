@@ -1,20 +1,22 @@
 import { NextResponse } from 'next/server'
 import { getPageSession } from '@/auth/lucia';
-import { HttpStatusCode } from '@/types/server';
+import { HttpStatusCode, ResponseMessage, ResponseStatus } from '@/types/server';
 
 export async function GET(request: NextResponse) {
     try {
         const session = await getPageSession();
 
         if (!session) return NextResponse.json({
-            message: "Unauthorized, user must login",
+            message: ResponseMessage.UNAUTHORIZED,
+            success: ResponseStatus.UNSUCCESSFUL,
             status: HttpStatusCode.UNAUTHORIZED_401,
         }, {
             status: HttpStatusCode.UNAUTHORIZED_401
         });
 
         return NextResponse.json({
-            message: "User is verified",
+            message: ResponseMessage.SUCCESS,
+            success: ResponseStatus.SUCCESS,
             status: HttpStatusCode.OK_200,
         }, {
             status: HttpStatusCode.OK_200,
@@ -23,7 +25,8 @@ export async function GET(request: NextResponse) {
     } catch (error) {
         // if session is not valid lucia will throw an error meaning the user is either not logged in or the session is expired
         return NextResponse.json({
-            message: "Unauthorized, user must login",
+            message: ResponseMessage.UNAUTHORIZED,
+            success: ResponseStatus.UNSUCCESSFUL,
             status: HttpStatusCode.UNAUTHORIZED_401,
         }, {
             status: HttpStatusCode.UNAUTHORIZED_401

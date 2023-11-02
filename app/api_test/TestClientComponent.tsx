@@ -27,7 +27,7 @@ export default function TestClientComponent() {
   };
 
   const loginUser = async () => {
-    await fetch('/api/v1/public/user/login', {
+    await fetch('/api/v1/public/auth/user/login', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export default function TestClientComponent() {
   };
 
   const logoutUser = async () => {
-    await fetch('/api/v1/public/user/logout', {
+    await fetch('/api/v1/public/auth/user/logout', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

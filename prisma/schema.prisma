@@ -24,7 +24,7 @@ model Users {
   preferences  Json?
   cv           Json?
   created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  updated_at   DateTime @default(now()) @updatedAt
 
   auth_session Session[]
   key          Key[]
@@ -38,7 +38,7 @@ model Session {
   active_expires BigInt
   idle_expires   BigInt
   created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  updated_at     DateTime @default(now()) @updatedAt
 
   user Users @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
@@ -50,7 +50,7 @@ model Key {
   hashed_password String?
   user_id         String
   created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  updated_at      DateTime @default(now()) @updatedAt
 
   user Users @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
@@ -59,17 +59,17 @@ model Key {
 
 model Categories {
   id         String   @id @unique @default(cuid())
-  name       String   @db.VarChar(255)
+  name       String   @unique @db.VarChar(255)
   is_public  Boolean  @default(false)
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  updated_at DateTime @default(now()) @updatedAt
 
   project Projects[]
 }
 
 model Projects {
   id          String   @id @unique @default(cuid())
-  name        String   @db.VarChar(255)
+  name        String   @unique @db.VarChar(255)
   image       Json?
   description String   @db.VarChar(255)
   year        String
@@ -84,7 +84,7 @@ model Projects {
   partner_id  String?
   category_id String
   created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  updated_at  DateTime @default(now()) @updatedAt
 
   members  Members[]
   user     Users      @relation(references: [id], fields: [user_id])
@@ -99,7 +99,7 @@ model Members {
   user_id    String
   project_id String
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  updated_at DateTime @default(now()) @updatedAt
 
   user    Users    @relation(references: [id], fields: [user_id])
   project Projects @relation(references: [id], fields: [project_id], onDelete: Cascade)
@@ -107,7 +107,7 @@ model Members {
 
 model Partners {
   id          String   @id @unique @default(cuid())
-  name        String   @db.VarChar(255)
+  name        String   @unique @db.VarChar(255)
   image       String?
   link        String?
   type        String   @db.VarChar(255)
@@ -117,35 +117,36 @@ model Partners {
   is_public   Boolean  @default(false)
   is_feature  Boolean  @default(false)
   created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  updated_at  DateTime @default(now()) @updatedAt
 
   project Projects[]
 }
 
 model Roles {
   id          String   @id @unique @default(cuid())
-  name        String   @db.VarChar(255)
+  name        String   @unique @db.VarChar(255)
   description String   @db.VarChar(255)
   is_active   Boolean  @default(true)
   // json of permission id
   permission  Json
   created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  updated_at  DateTime @default(now()) @updatedAt
 }
 
 model Permissions {
-  id         String   @id @unique @default(cuid())
-  name        String   @db.VarChar(255)
+  id          String   @id @unique @default(cuid())
+  name        String   @unique @db.VarChar(255)
+  identifier  Int      @unique
   description String   @db.VarChar(255)
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  updated_at  DateTime @default(now()) @updatedAt
 }
 
 model Technologies {
   id         String   @id @unique @default(cuid())
   type       String   @db.VarChar(255)
-  name       String   @db.VarChar(255)
+  name       String   @unique @db.VarChar(255)
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  updated_at DateTime @default(now()) @updatedAt
 }

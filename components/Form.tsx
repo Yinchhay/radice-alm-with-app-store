@@ -1,38 +1,21 @@
 'use client'
-import { useRouter } from "next/navigation";
-import React from "react"
+import React, { useRef } from "react"
 
 interface IForm {
-    children: React.ReactNode;
-    action: string;
+    children: React.ReactNode,
+    actionCallback: (formData: FormData) => Promise<{ success: boolean } | { error: string }>,
+    resetInput?: boolean,
 }
 
-export default function Form({ children, action }: IForm) {
-    const METHOD = "POST";
-    const router = useRouter();
+export default function Form({ children, actionCallback, resetInput = false }: IForm) {
+    const formRef = useRef<HTMLFormElement>(null);
 
     return (
         <form
-            action={action}
-            method={METHOD}
-            onSubmit={async (event) => {
-                // prevent reload
-                event.preventDefault();
-                const formData = new FormData(event.currentTarget);
+            action={async (formData: FormData) => {
+                await actionCallback(formData)
 
-                // convert formData and take only object naem and value
-                const body: any = {};
-                formData.forEach((value, key) => {
-                    body[key] = value;
-                })
-
-                const res = await fetch(action, {
-                    method: METHOD,
-                    body: JSON.stringify(body),
-                })
-
-                // uncomment if want to refresh after submit
-                // router.refresh();
+                if (resetInput) formRef.current?.reset();
             }}
         >
             {children}
