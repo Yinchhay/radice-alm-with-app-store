@@ -3,6 +3,7 @@ import Logout from "@/ready/Logout";
 import IsLogin from "../api_test/isLogin";
 import CreateRole from "@/ready/CreateRole";
 import AssignRole from "@/ready/AssignRole";
+import ProjectSetting from "@/ready/ProjectSetting";
 
 // TODO: test component functionality are ready, uncomment to use it.
 export default function LoginPage() {
@@ -10,7 +11,8 @@ export default function LoginPage() {
         <IsLogin />
         <Login />
         <Logout />
-        <CreateRole />
-        <AssignRole />
+        {/* <CreateRole /> */}
+        {/* <AssignRole /> */}
+        <ProjectSetting project_id="2" />
     </>);
 }

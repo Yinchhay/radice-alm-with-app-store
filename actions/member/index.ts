@@ -1,31 +1,68 @@
 'use server'
 
-import { auth } from "@/auth/lucia";
+import prisma from "@/lib/prisma";
+import { Permissions } from "@/types";
 import { ResponseMessage } from "@/types/server";
-import * as context from "next/headers";
-import { redirect } from "next/navigation";
+import { currentUserHasPermission } from "@/utils/IAM";
 
-export const logCurrentUserOut = async (formData: FormData) => {
+export const projectSetting = async (formData: FormData) => {
     try {
-        const authRequest = auth.handleRequest("POST", context);
-        // check if user is authenticated
-        const session = await authRequest.validate();
+        const { currentUser, hasPermission } = await currentUserHasPermission({
+            permissionIdentifiers: [Permissions.EDIT_PROJECT],
+        });
 
-        if (!session) throw new Error("User is not authenticated");
+        if (!currentUser || !hasPermission) {
+            return {
+                success: false,
+                message: ResponseMessage.FORBIDDEN_NO_PERMISSION
+            }
+        }
 
-        // console.log(session.user.userId);
+        const name = formData.get('name');
+        const description = formData.get('description');
+        const year = formData.get('year');
+        const project_id = formData.get('project_id') as string;
 
-        // make sure to invalidate the current session!
-        await auth.invalidateSession(session.sessionId);
+        if (typeof name !== 'string' || name.length === 0 ||
+            typeof description !== 'string' || description.length === 0 ||
+            typeof year != 'string' || year.length === 0
+        ) {
+            return {
+                success: false,
+                message: ResponseMessage.BAD_REQUEST_BODY,
+            }
+        }
 
-        // delete dead sessions for the user | it will succeed regardless of the validity of the user id.
-        // delete the expired sessions for the user
-        await auth.deleteDeadUserSessions(session.user.userId);
+        const project = await prisma.projects.findFirstOrThrow({
+            where: {
+                id: project_id,
+            },
+            include: {
+                members: true
+            }
+        });
 
-        // delete session cookie
-        authRequest.setSession(null);
+        if (currentUser.userId != project.user_id) return {
+            success: false,
+            message: ResponseMessage.UNAUTHORIZED_ACCESS,
+        }
 
-        redirect('/login');
+        const updateProject = await prisma.projects.update({
+            where: {
+                id: project_id
+            },
+            data: {
+                name: name,
+                description: description,
+                year: year,
+            }
+        });
+
+        return {
+            success: true,
+            message: ResponseMessage.SUCCESS
+        };
+
     } catch (err) {
         return {
             success: false,

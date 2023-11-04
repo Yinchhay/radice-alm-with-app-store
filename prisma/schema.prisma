@@ -58,7 +58,7 @@ model Key {
 }
 
 model Categories {
-  id         String   @id @unique @default(cuid())
+  id         String   @id @unique @default(uuid())
   name       String   @unique @db.VarChar(255)
   is_public  Boolean  @default(false)
   created_at DateTime @default(now())
@@ -68,7 +68,7 @@ model Categories {
 }
 
 model Projects {
-  id          String   @id @unique @default(cuid())
+  id          String   @id @unique @default(uuid())
   name        String   @unique @db.VarChar(255)
   image       Json?
   description String   @db.VarChar(255)
@@ -93,7 +93,7 @@ model Projects {
 }
 
 model Members {
-  id         String   @id @unique @default(cuid())
+  id         String   @id @unique @default(uuid())
   title      String   @db.VarChar(255)
   can_edit   Boolean  @default(false)
   user_id    String
@@ -106,7 +106,7 @@ model Members {
 }
 
 model Partners {
-  id          String   @id @unique @default(cuid())
+  id          String   @id @unique @default(uuid())
   name        String   @unique @db.VarChar(255)
   image       String?
   link        String?
@@ -123,7 +123,7 @@ model Partners {
 }
 
 model Roles {
-  id          String   @id @unique @default(cuid())
+  id          String   @id @unique @default(uuid())
   name        String   @unique @db.VarChar(255)
   description String   @db.VarChar(255)
   is_active   Boolean  @default(true)
@@ -134,7 +134,7 @@ model Roles {
 }
 
 model Permissions {
-  id          String   @id @unique @default(cuid())
+  id          String   @id @unique @default(uuid())
   name        String   @unique @db.VarChar(255)
   identifier  Int      @unique
   description String   @db.VarChar(255)
@@ -144,7 +144,7 @@ model Permissions {
 }
 
 model Technologies {
-  id         String   @id @unique @default(cuid())
+  id         String   @id @unique @default(uuid())
   type       String   @db.VarChar(255)
   name       String   @unique @db.VarChar(255)
   created_at DateTime @default(now())

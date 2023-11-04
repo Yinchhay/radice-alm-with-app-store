@@ -2,7 +2,11 @@ import prisma from "@/lib/prisma";
 import { HttpStatusCode, ResponseMessage, ResponseStatus } from "@/types/server";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest, params: { role_id : string}) {
+interface IParams {
+    params: { role_id: string }
+}
+
+export async function GET(request: NextRequest, { params }: IParams) {
     try {
         const role = await prisma.roles.findFirstOrThrow({
             where: {

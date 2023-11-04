@@ -1,5 +1,6 @@
 'use client'
-import { logCurrentUserOut } from "@/actions/member"
+
+import { logCurrentUserOut } from "@/actions/guest"
 
 export default function Logout() {
     return (

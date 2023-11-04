@@ -10,6 +10,12 @@ import { ISession } from "@/types";
 import { default as client } from '../lib/prisma';
 // import { github } from "@lucia-auth/oauth/providers";
 
+const hourInADay = 24;
+const minuteInAnHour = 60;
+const secondInAMinute = 60;
+const activePeriodInDays = secondInAMinute * minuteInAnHour * hourInADay; // 1 day
+const idlePeriodInDays = secondInAMinute * minuteInAnHour * (hourInADay * 14); // 14 days
+
 // expect error
 export const auth = lucia({
     adapter: prisma(client, {
@@ -35,10 +41,11 @@ export const auth = lucia({
         };
     },
     // default session expires in 1 day and idle expires in 14 days
+    // activePeriod and idlePeriod are in milliseconds
     sessionExpiresIn: {
-        activePeriod: 60 * 24, // 1 day
-        idlePeriod: 60 * 24 * 14, // 14 day
-    }
+        activePeriod: activePeriodInDays, // 1 day
+        idlePeriod: idlePeriodInDays, // 14 day
+    },
 });
 
 export type Auth = typeof auth;

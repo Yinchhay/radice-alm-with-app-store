@@ -3,23 +3,15 @@ import { getPageSession } from "@/auth/lucia";
 import prisma from "@/lib/prisma";
 import { Permissions } from "@/types";
 import { ResponseMessage } from "@/types/server";
-import { hasPermission } from "@/utils/IAM";
-import { revalidatePath } from "next/cache";
+import { currentUserHasPermission } from "@/utils/IAM";
 
 export const createRole = async (formData: FormData) => {
     try {
-        const session = await getPageSession();
-        if (!session) {
-            return {
-                success: false,
-                message: ResponseMessage.UNAUTHORIZED
-            }
-        }
+        const { currentUser, hasPermission } = await currentUserHasPermission({
+            permissionIdentifiers: [Permissions.EDIT_PROJECT],
+        });
 
-        if (!await hasPermission({
-            permissionIdentifiers: [Permissions.MODIFY_ROLE],
-            roles: session.user.roles
-        })) {
+        if (!currentUser || !hasPermission) {
             return {
                 success: false,
                 message: ResponseMessage.FORBIDDEN_NO_PERMISSION
@@ -46,8 +38,8 @@ export const createRole = async (formData: FormData) => {
                 description: description,
                 permission: {
                     // cast array of string to array of number
-                    permissionIdentifiers: permissions.map(i=>Number(i))
-                } as any,
+                    permissionIdentifiers: permissions.map(i => Number(i))
+                },
             }
         })
 
@@ -66,6 +58,17 @@ export const createRole = async (formData: FormData) => {
 
 export const assignRole = async (formData: FormData) => {
     try {
+        const { currentUser, hasPermission } = await currentUserHasPermission({
+            permissionIdentifiers: [Permissions.EDIT_PROJECT],
+        });
+
+        if (!currentUser || !hasPermission) {
+            return {
+                success: false,
+                message: ResponseMessage.FORBIDDEN_NO_PERMISSION
+            }
+        }
+
         const userId = formData.get('userId') as string;
         const roleIds = formData.getAll('roleId') as string[];
 
@@ -102,7 +105,6 @@ export const assignRole = async (formData: FormData) => {
         };
 
     } catch (err) {
-        console.log(err)
         return {
             success: false,
             message: ResponseMessage.INTERNAL_SERVER_ERROR,

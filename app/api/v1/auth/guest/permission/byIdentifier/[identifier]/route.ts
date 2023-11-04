@@ -2,7 +2,11 @@ import prisma from "@/lib/prisma";
 import { HttpStatusCode, ResponseMessage, ResponseStatus } from "@/types/server";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest, params: { identifier: string }) {
+interface IParams {
+    params: { identifier: string }
+}
+
+export async function GET(request: NextRequest, { params }: IParams) {
     try {
         const permission = await prisma.permissions.findFirstOrThrow({
             where: {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { HttpStatusCode, ResponseMessage, ResponseStatus } from './types/server';
 import { serverUrlPath } from './utils';
 
@@ -18,9 +18,7 @@ export async function middleware(request: NextRequest) {
 
         const res = await fetch(serverUrlPath(`/api/v1/verify/auth/user`), {
             credentials: 'include',
-            mode: "no-cors",
-            cache: "no-store",
-            headers: request.headers,
+            headers: { Cookie: cookies().toString() },
         });
 
         const json = await res.json();
@@ -33,9 +31,7 @@ export async function middleware(request: NextRequest) {
 
         const res = await fetch(serverUrlPath(`/api/v1/verify/auth/user`), {
             credentials: 'include',
-            mode: "no-cors",
-            cache: "no-store",
-            headers: request.headers,
+            headers: { Cookie: cookies().toString() },
         });
 
         const json = await res.json();

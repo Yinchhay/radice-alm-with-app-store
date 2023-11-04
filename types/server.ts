@@ -385,6 +385,7 @@ export enum ResponseMessage {
     BAD_REQUEST = "Request is invalid",
     INTERNAL_SERVER_ERROR = "An unknown error occurred",
     UNAUTHORIZED = "Unauthorized, user must login",
+    UNAUTHORIZED_ACCESS = "Unauthorized access, user does not have access to the resource",
     FORBIDDEN_NO_PERMISSION = "Forbidden, user does not have permission",
     INVALID_CREDENTIAL = "Invalid credential",
 }
