@@ -2,7 +2,7 @@
  * Next js cache using server action experiment
  */
 
-import { getUserById } from "@/repositories/users"
+import { getUserById_C } from "@/repositories/users"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { Button } from "./btn"
 import { getBaseUrl } from "@/lib/utils"
@@ -10,7 +10,7 @@ import { Metadata } from "next";
 
 // dynamic metadata
 export async function generateMetadata() : Promise<Metadata> {
-    const user = await getUserById("100")
+    const user = await getUserById_C("100")
 
     return {
         title: user?.username || "Unkown user",
@@ -19,12 +19,12 @@ export async function generateMetadata() : Promise<Metadata> {
 
 
 export default async function TestPage() {
-    const user = await getUserById("1")
+    const user = await getUserById_C("oisuvsh01q5sl0g")
     async function revalidateUser() {
         "use server"
         console.log("Revalidat user by id")
-        // revalidateTag("userById")
-        revalidatePath("/test")
+        revalidateTag("getUserById_C")
+        // revalidatePath("/test")
     }
 
     return (
