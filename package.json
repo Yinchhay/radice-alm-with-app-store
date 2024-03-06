@@ -8,8 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "npx drizzle-kit generate:mysql && npx tsx src/drizzle/migrate.ts",
-    "introspect": "npx drizzle-kit introspect:mysql"
+    "db_migrate": "npx drizzle-kit generate:mysql && npx tsx src/drizzle/migrate.ts",
+    "db_pull": "npx drizzle-kit introspect:mysql",
+    "db_push": "npx drizzle-kit push:mysql"
   },
   "dependencies": {
     "@lucia-auth/adapter-drizzle": "^1.0.2",
@@ -17,7 +18,7 @@
     "drizzle-orm": "^0.29.4",
     "lucia": "^3.0.1",
     "mysql2": "^3.9.2",
-    "next": "14.1.0",
+    "next": "14.1.2",
     "oslo": "^1.1.3",
     "react": "^18",
     "react-dom": "^18"

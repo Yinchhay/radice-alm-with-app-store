@@ -9,3 +9,8 @@ Start the migration process:
 ```bash
 npx tsx src/drizzle/migrate.ts
 ```
+
+Pull the latest schema from the database:
+```bash
+npx drizzle-kit pull:mysql
+```
