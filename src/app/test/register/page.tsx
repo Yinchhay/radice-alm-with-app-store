@@ -1,5 +1,5 @@
 import { lucia } from "@/auth/lucia";
-import { createUser, getUserByUsername } from "@/repositories/users";
+import { createUser, getUserByEmail } from "@/repositories/users";
 import bcrypt from "bcrypt";
 import { generateId } from "lucia";
 import { cookies } from "next/headers";
@@ -10,8 +10,14 @@ export default async function Page() {
         <>
             <h1>Create an account</h1>
             <form action={signup}>
-                <label htmlFor="username">Username</label>
-                <input name="username" id="username" />
+                <label htmlFor="firstName">First Name</label>
+                <input name="firstName" id="firstName" />
+                <br />
+                <label htmlFor="lastName">Last Name</label>
+                <input name="lastName" id="lastName" />
+                <br />
+                <label htmlFor="email">Email</label>
+                <input name="email" id="email" />
                 <br />
                 <label htmlFor="password">Password</label>
                 <input type="password" name="password" id="password" />
@@ -30,17 +36,10 @@ async function signup(formData: FormData): Promise<ActionResult> {
     "use server";
     const SALT_ROUNDS = 10;
 
-    const username = formData.get("username");
-    // username must be between 4 ~ 31 characters
-    if (
-        typeof username !== "string" ||
-        username.length < 3 ||
-        username.length > 31
-    ) {
-        return {
-            error: "Invalid username",
-        };
-    }
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const email = formData.get("email") as string;
+  
     const password = formData.get("password");
     if (
         typeof password !== "string" ||
@@ -55,7 +54,7 @@ async function signup(formData: FormData): Promise<ActionResult> {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const userId = generateId(15);
 
-    const userExists = await getUserByUsername(username);
+    const userExists = await getUserByEmail(email);
     if (userExists) {
         return {
             error: "Username already exists",
@@ -64,8 +63,11 @@ async function signup(formData: FormData): Promise<ActionResult> {
 
     const createdUser = await createUser({
         id: userId,
-        username,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
         password: hashedPassword,
+        type: 'user',
     });
 
     if (!createdUser) {

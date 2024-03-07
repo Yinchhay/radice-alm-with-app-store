@@ -1,7 +1,7 @@
 import { Lucia, Session, TimeSpan, User } from "lucia";
 import { DrizzleMySQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { db } from "@/drizzle/db";
-import { users, sessions } from "@/drizzle/migrations/schema";
+import { users, sessions } from "@/drizzle/schema";
 import { InferSelectModel } from "drizzle-orm";
 import { cache } from "react";
 import { cookies } from "next/headers";
@@ -21,7 +21,8 @@ export const lucia = new Lucia(adapter, {
     sessionExpiresIn: new TimeSpan(2, "w"),
     getUserAttributes: (attributes) => {
         return {
-            username: attributes.username,
+            firstName: attributes.firstName,
+            lastName: attributes.lastName,
             userId: attributes.id,
         };
     },

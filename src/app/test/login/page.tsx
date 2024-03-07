@@ -1,5 +1,5 @@
 import { lucia } from "@/auth/lucia";
-import { getUserByUsername } from "@/repositories/users";
+import { getUserByEmail } from "@/repositories/users";
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -9,8 +9,8 @@ export default async function Page() {
         <>
             <h1>Sign in</h1>
             <form action={login}>
-                <label htmlFor="username">Username</label>
-                <input name="username" id="username" />
+                <label htmlFor="email">Email</label>
+                <input name="email" id="email" />
                 <br />
                 <label htmlFor="password">Password</label>
                 <input type="password" name="password" id="password" />
@@ -27,16 +27,7 @@ interface ActionResult {
 
 async function login(formData: FormData): Promise<ActionResult> {
     "use server";
-    const username = formData.get("username");
-    if (
-        typeof username !== "string" ||
-        username.length < 3 ||
-        username.length > 31
-    ) {
-        return {
-            error: "Invalid username",
-        };
-    }
+    const email = formData.get("email") as string;
     
     const password = formData.get("password");
     if (
@@ -49,7 +40,7 @@ async function login(formData: FormData): Promise<ActionResult> {
         };
     }
 
-    const userExists = await getUserByUsername(username);
+    const userExists = await getUserByEmail(email);
     if (!userExists) {
         return {
             error: "Incorrect username or password",

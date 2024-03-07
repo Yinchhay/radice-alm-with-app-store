@@ -13,7 +13,7 @@ export async function generateMetadata() : Promise<Metadata> {
     const user = await getUserById_C("100")
 
     return {
-        title: user?.username || "Unkown user",
+        title: user?.firstName || "Unkown user",
     }
 }
 
@@ -30,7 +30,7 @@ export default async function TestPage() {
     return (
         <div>
             <h1>Server url {getBaseUrl()}</h1>
-            <h1>User name: {user?.username}</h1>
+            <h1>User name: {user?.firstName}</h1>
             <h1>Test Page</h1>
             <p>
                 This is a test page. You can edit this page by opening{" dd"}

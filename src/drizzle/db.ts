@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/mysql2"
 import mysql, { ConnectionOptions } from "mysql2/promise"
-import * as schema from "./migrations/schema"
+import * as schema from "./schema"
 import "@/lib/loadEnv"
 
 export const connectionConfig: ConnectionOptions = {

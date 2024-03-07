@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { users } from "@/drizzle/migrations/schema";
+import { users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
 
 /**
@@ -27,9 +27,9 @@ export const getUserById_C = cache(
  * not everywhere is required to use cache, for example this function
  * is used in the login page, and we don't want to cache the user
  */
-export const getUserByUsername = async (username: string) => {
+export const getUserByEmail = async (email: string) => {
     return await db.query.users.findFirst({
-        where: (user, { eq }) => eq(user.username, username),
+        where: (user, { eq }) => eq(user.email, email),
     });
 };
 

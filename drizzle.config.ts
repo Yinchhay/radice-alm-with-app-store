@@ -2,8 +2,13 @@ import type { Config } from 'drizzle-kit';
 import '@/lib/loadEnv'
 
 export default {
-  schema: './src/drizzle/migrations/schema.ts',
-  // migration files will be generated in this folder
+  introspect: {
+    casing: 'camel',
+  },
+  schema: './src/drizzle/schema.ts',
+  /**
+   * schema.ts will be introspected and migration files will be generated in this folder
+   */
   out: './src/drizzle/migrations',
   driver: 'mysql2', // 'pg' | 'mysql2' | 'better-sqlite' | 'libsql' | 'turso'
   dbCredentials: {
