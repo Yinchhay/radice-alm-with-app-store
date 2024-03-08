@@ -1,8 +1,63 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Eye() {
+    const stopDistance = 220;
+    const irisMove = 34;
+    const irisOffset = 8;
+    const pupilMove = 50;
+    const pupilOffset = 10;
+    const iris = useRef<HTMLImageElement>(null);
+    const irisRing = useRef<HTMLImageElement>(null);
+    const pupil = useRef<HTMLImageElement>(null);
+
+    useEffect(() => {
+        const handleMouseMove = (event: MouseEvent) => {
+            if (iris.current && pupil.current && irisRing.current) {
+                const containerRect = iris.current.getBoundingClientRect();
+                const containerCenterX =
+                    containerRect.left + containerRect.width / 2;
+                const containerCenterY =
+                    containerRect.top + containerRect.height / 2;
+
+                const mouseX = event.clientX;
+                const mouseY = event.clientY;
+
+                const distanceX = mouseX - containerCenterX;
+                const distanceY = mouseY - containerCenterY;
+
+                const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
+
+                let scaleFactor = 1;
+
+                if (distance < stopDistance) {
+                    scaleFactor = distance / stopDistance;
+                }
+
+                const irisPosX =
+                    (distanceX / distance) * irisMove * scaleFactor;
+                const irisPosY =
+                    (distanceY / distance) * irisMove * scaleFactor;
+                const pupilPosX =
+                    (distanceX / distance) * pupilMove * scaleFactor;
+                const pupilPosY =
+                    (distanceY / distance) * pupilMove * scaleFactor;
+
+                iris.current.style.transform = `scale(0.8) translate(${irisPosX}px, ${irisPosY}px)`;
+                irisRing.current.style.transform = `scale(0.8) translate(${irisPosX}px, ${irisPosY}px)`;
+                pupil.current.style.transform = `scale(0.8) translate(${pupilPosX}px, ${pupilPosY}px)`;
+            }
+        };
+
+        // Add event listener when component mounts
+        document.addEventListener("mousemove", handleMouseMove);
+
+        // Cleanup by removing event listener when component unmounts
+        return () => {
+            document.removeEventListener("mousemove", handleMouseMove);
+        };
+    }, []);
     return (
         <div className="relative grid place-items-center select-none pointer-events-none animate-fade">
             <Image
@@ -83,27 +138,30 @@ export default function Eye() {
                 className="absolute animate-layer9"
             />
             <Image
+                ref={iris}
                 alt=""
                 src={"/iris.svg"}
                 width={110}
                 height={110}
-                className="absolute animate-layer10 scale-[0.8] opacity-90"
+                className="absolute opacity-90"
             />
             <div className="absolute w-[170px] h-[170px] animate-layer11">
                 <Image
+                    ref={irisRing}
                     alt=""
                     src={"/layer10.svg"}
                     width={170}
                     height={170}
-                    className="absolute animate-layer10 opacity-90"
+                    className="absolute opacity-90"
                 />
             </div>
             <Image
+                ref={pupil}
                 alt=""
                 src={"/pupil.svg"}
                 width={35}
                 height={35}
-                className="absolute animate-pupil scale-[0.8]"
+                className="absolute"
             />
         </div>
     );
