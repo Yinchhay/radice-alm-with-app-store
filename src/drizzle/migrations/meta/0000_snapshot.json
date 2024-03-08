@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "a15b9a0c-3794-4a90-8e54-400c9029f6ed",
+  "id": "f55aa937-714c-48db-b3a2-0b37a81a957e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "application_forms": {
@@ -193,13 +193,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "user_id": {
           "name": "user_id",
           "type": "varchar(255)",
@@ -261,12 +254,6 @@
           "name": "email_verifications_code_unique",
           "columns": [
             "code"
-          ]
-        },
-        "email_verifications_email_unique": {
-          "name": "email_verifications_email_unique",
-          "columns": [
-            "email"
           ]
         },
         "email_verifications_user_id_unique": {
@@ -381,7 +368,7 @@
           "type": "int",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "name": {
           "name": "name",

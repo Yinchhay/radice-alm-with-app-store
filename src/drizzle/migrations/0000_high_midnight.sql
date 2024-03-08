@@ -26,14 +26,12 @@ CREATE TABLE `categories` (
 CREATE TABLE `email_verifications` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`code` varchar(255) NOT NULL,
-	`email` varchar(255) NOT NULL,
 	`user_id` varchar(255) NOT NULL,
 	`expires_at` datetime NOT NULL,
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `email_verifications_id` PRIMARY KEY(`id`),
 	CONSTRAINT `email_verifications_code_unique` UNIQUE(`code`),
-	CONSTRAINT `email_verifications_email_unique` UNIQUE(`email`),
 	CONSTRAINT `email_verifications_user_id_unique` UNIQUE(`user_id`)
 );
 --> statement-breakpoint
@@ -51,7 +49,7 @@ CREATE TABLE `oauth_providers` (
 );
 --> statement-breakpoint
 CREATE TABLE `permissions` (
-	`id` int AUTO_INCREMENT NOT NULL,
+	`id` int NOT NULL,
 	`name` varchar(50) NOT NULL,
 	`description` varchar(255),
 	`is_active` boolean DEFAULT true,

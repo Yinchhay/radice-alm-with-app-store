@@ -1,16 +1,30 @@
 import { getAuthUser, lucia, validateRequest } from "@/auth/lucia";
+import { hasPermission } from "@/lib/IAM";
+import { PermissionNames } from "@/lib/utils";
+import { Permissions } from "@/types/IAM";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+const requiredPermissions = new Set([
+    Permissions.CREATE_USERS,
+    Permissions.EDIT_USERS,
+    Permissions.DELETE_USERS,
+]);
 
 export default async function Page() {
     const user = await getAuthUser();
     if (!user) {
         return redirect("/test/login");
     }
+    const userPermission = await hasPermission(
+        user.id,
+        requiredPermissions,
+    );
 
     return (
         <>
             <h1>Hi {user.lastName}</h1>
+            <p>{userPermission.message}</p>
             <form action={logout}>
                 <button>Sign out</button>
             </form>

@@ -1,5 +1,12 @@
 import { db } from "@/drizzle/db";
-import { users } from "@/drizzle/schema";
+import {
+    permissions,
+    rolePermissions,
+    roles,
+    userRoles,
+    users,
+} from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
 import { unstable_cache as cache } from "next/cache";
 
 /**
@@ -8,6 +15,8 @@ import { unstable_cache as cache } from "next/cache";
  * the cache will still be there, unless the cache is invalidated by the user.
  * on the other hand, react cache is a client side cache, when the page is refreshed
  * the cache will be invalidated.
+ * Note: cache will memoized the arguments, so if the arguments are the same,
+ * the cache will return the same value
  */
 export const getUserById_C = cache(
     async (userId: string) => {
@@ -35,4 +44,27 @@ export const getUserByEmail = async (email: string) => {
 
 export const createUser = async (user: typeof users.$inferInsert) => {
     return await db.insert(users).values(user);
-} 
+};
+
+export const getUserRolesAndRolePermissions_C = cache(
+    async (userId: string) => {
+        return await db.query.userRoles.findMany({
+            where: (userRole, { eq }) => eq(userRole.userId, userId),
+            with: {
+                role: {
+                    with: {
+                        rolePermissions: {
+                            with: {
+                                permission: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    },
+    ["getUserRolesAndRolePermissions_C"],
+    {
+        tags: ["getUserRolesAndRolePermissions_C"],
+    },
+);

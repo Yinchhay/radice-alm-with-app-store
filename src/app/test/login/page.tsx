@@ -1,6 +1,7 @@
 import { lucia } from "@/auth/lucia";
 import { getUserByEmail } from "@/repositories/users";
 import bcrypt from "bcrypt";
+import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -62,5 +63,8 @@ async function login(formData: FormData): Promise<ActionResult> {
         sessionCookie.attributes,
     );
 
-    return redirect("/");
+    // invalidate permission cache
+    revalidateTag("getUserRolesAndRolePermissions_C");
+
+    return redirect("/test/dashboard");
 }

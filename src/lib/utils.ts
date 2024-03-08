@@ -1,12 +1,35 @@
 // this utils file is server side only
 
-import { NextRequest } from "next/server";
 import { headers } from "next/headers";
+import { Permissions } from "@/types/IAM";
 
-export const getBaseUrl = () => {
+export const PermissionNames = new Map<number, string>([
+    [Permissions.CREATE_USERS, "Create users"],
+    [Permissions.EDIT_USERS, "Edit users"],
+    [Permissions.DELETE_USERS, "Delete users"],
+    [Permissions.CREATE_CATEGORIES, "Create categories"],
+    [Permissions.EDIT_CATEGORIES, "Edit categories"],
+    [Permissions.DELETE_CATEGORIES, "Delete categories"],
+    [Permissions.CREATE_ROLES, "Create roles"],
+    [Permissions.EDIT_ROLES, "Edit roles"],
+    [Permissions.DELETE_ROLES, "Delete roles"],
+    [Permissions.CREATE_PARTNERS, "Create partners"],
+    [Permissions.EDIT_PARTNERS, "Edit partners"],
+    [Permissions.DELETE_PARTNERS, "Delete partners"],
+    [Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS, "Approve and reject application forms"],
+    [Permissions.CREATE_OWN_PROJECTS, "Create own projects"],
+]);
+
+export const getBaseUrl = (): string => {
     const headersList = headers();
     const domain = headersList.get("x-forwarded-host") || "";
     // const protocol = headersList.get("x-forwarded-proto") || ""
     // const pathname = headersList.get("x-invoke-path") || ""
     return domain;
+};
+
+export const localDebug = (message: string, from: string): void => {
+    if (process.env.NODE_ENV === "development") {
+        console.debug(`From ${from}: ${message}`);
+    }
 };

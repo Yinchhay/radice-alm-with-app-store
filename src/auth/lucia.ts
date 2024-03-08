@@ -23,7 +23,7 @@ export const lucia = new Lucia(adapter, {
         return {
             firstName: attributes.firstName,
             lastName: attributes.lastName,
-            userId: attributes.id,
+            id: attributes.id,
         };
     },
 });

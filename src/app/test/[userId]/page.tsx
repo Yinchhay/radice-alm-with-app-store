@@ -1,0 +1,50 @@
+/**
+ * Next js cache using server action experiment
+ */
+
+import { getUserById_C } from "@/repositories/users";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { Button } from "./btn";
+import { getBaseUrl } from "@/lib/utils";
+import { Metadata } from "next";
+
+// dynamic metadata
+export async function generateMetadata({
+    params,
+}: {
+    params: { userId: string };
+}): Promise<Metadata> {
+    const user = await getUserById_C(params.userId);
+    return {
+        title: user?.firstName || "Unkown user",
+    };
+}
+
+export default async function TestPage({
+    params,
+}: {
+    params: { userId: string };
+}) {
+    const user = await getUserById_C(params.userId);
+
+    async function revalidateUser() {
+        "use server";
+        console.log("Revalidat user");
+        // revalidateTag("getUserById_C");
+        // revalidateTag("getUserRolesAndRolePermissions_C");
+        revalidatePath("/test")
+    }
+
+    return (
+        <div>
+            <h1>Server url {getBaseUrl()}</h1>
+            <h1>User name: {user?.firstName}</h1>
+            <h1>Test Page</h1>
+            <p>
+                This is a test page. You can edit this page by opening{" dd"}
+                <code>src/app/test/page.tsx</code>.
+            </p>
+            <Button revalidateUser={revalidateUser} />
+        </div>
+    );
+}
