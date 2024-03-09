@@ -6,19 +6,20 @@ import bcrypt from "bcrypt";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { T_LoginActionSchema, formDataSchema } from "./page";
+import { loginFormSchema } from "./page";
+import { z } from "zod";
 
 export async function loginAction(
     prevState: any,
     formData: FormData,
-): Promise<ActionResult<T_LoginActionSchema>> {
+): Promise<ActionResult<z.infer<typeof loginFormSchema>>> {
     "use server";
-    const data: T_LoginActionSchema = {
+    const data: z.infer<typeof loginFormSchema> = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
     };
 
-    const validationResult = formDataSchema.safeParse(data);
+    const validationResult = loginFormSchema.safeParse(data);
     if (!validationResult.success) {
         return {
             errors: formatZodError(validationResult.error),

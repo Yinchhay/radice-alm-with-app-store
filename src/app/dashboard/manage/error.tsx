@@ -14,7 +14,7 @@ export default function Error({
     const router = useRouter();
 
     useEffect(() => {
-        localDebug(error.message, "Manage/error.tsx error:");
+        localDebug(error.message, "/dashboard/manage/error.tsx error:");
     }, [error]);
 
     const noPermission =

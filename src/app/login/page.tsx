@@ -5,7 +5,7 @@ import { z } from "zod";
 // Write schema in server component then import to server action.
 // if write in client nextjs will throw error
 // 'safeParse()' doesn't work in server component'
-export const formDataSchema = z.object({
+export const loginFormSchema = z.object({
     email: z
         .string({
             required_error: "Email is required",
@@ -22,7 +22,6 @@ export const formDataSchema = z.object({
             message: "Password must be at most 32 characters long",
         }),
 });
-export type T_LoginActionSchema = z.infer<typeof formDataSchema>;
 
 export default async function Page() {
     return (
