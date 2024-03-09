@@ -18,16 +18,14 @@ export const PermissionNames = new Map<number, string>([
     [Permissions.DELETE_PARTNERS, "Delete partners"],
     [Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS, "Approve and reject application forms"],
     [Permissions.CREATE_OWN_PROJECTS, "Create own projects"],
+    [Permissions.CHANGE_PROJECT_STATUS, "Change project status"],
+    [Permissions.DELETE_PROJECTS, "Delete projects"],
 ]);
 
 export const getBaseUrl = (): string => {
-    const headersList = headers();
-    const domain = headersList.get("x-forwarded-host") || "";
-    // const protocol = headersList.get("x-forwarded-proto") || ""
-    // const pathname = headersList.get("x-invoke-path") || ""
-    return domain;
+    return headers().get("x-forwarded-host") || "";
 };
-
+ 
 export const localDebug = (message: string, from: string): void => {
     if (process.env.NODE_ENV === "development") {
         console.debug(`From ${from}: ${message}`);

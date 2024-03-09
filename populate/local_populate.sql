@@ -16,6 +16,8 @@ INSERT INTO permissions (id, name, description) VALUES
 (12, 'Delete partners', 'Permission to delete partners'),
 (13, 'Approve and reject application forms', 'Permission to approve and reject application forms'),
 (14, 'Create own projects', 'Permission to create own projects');
+(15, 'Change project status', 'Permission to change project status'),
+(16, 'Delete project', "Permission to delete other user's project without having to be the owner");
 
 -- roles
 INSERT INTO roles (name, description) VALUES ('admin', 'Admin role');

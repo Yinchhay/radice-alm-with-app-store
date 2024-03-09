@@ -24,4 +24,8 @@ export enum Permissions {
 
     // Manage projects
     CREATE_OWN_PROJECTS = 14,
+
+    // Manage all projects
+    CHANGE_PROJECT_STATUS = 15,
+    DELETE_PROJECTS = 16,
 }

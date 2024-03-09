@@ -11,7 +11,7 @@ export const connectionConfig: ConnectionOptions = {
     password: process.env.DB_PASSWORD ?? "",
 };
 
-export const poolConnection  = await mysql.createPool(connectionConfig);
+export const poolConnection  = mysql.createPool(connectionConfig)
 
 export const db = drizzle(poolConnection , {
     schema,

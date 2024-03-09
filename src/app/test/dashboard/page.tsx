@@ -16,10 +16,7 @@ export default async function Page() {
     if (!user) {
         return redirect("/test/login");
     }
-    const userPermission = await hasPermission(
-        user.id,
-        requiredPermissions,
-    );
+    const userPermission = await hasPermission(user.id, requiredPermissions);
 
     return (
         <>

@@ -3,6 +3,7 @@ import { useState } from "react";
 
 export default function InputField({
     className = "",
+    type = "text",
     disabled = false,
     placeholder = "",
     value,
@@ -12,6 +13,7 @@ export default function InputField({
 }: {
     disabled?: boolean;
     className?: string;
+    type?: React.HTMLInputTypeAttribute;
     placeholder?: string;
     id?: string;
     name?: string;
@@ -20,6 +22,7 @@ export default function InputField({
 }) {
     return (
         <input
+            type={type}
             onChange={onChange}
             value={value}
             placeholder={placeholder}
