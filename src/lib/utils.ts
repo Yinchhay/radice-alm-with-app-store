@@ -1,6 +1,3 @@
-// this utils file is server side only
-
-import { headers } from "next/headers";
 import { Permissions } from "@/types/IAM";
 
 export const PermissionNames = new Map<number, string>([
@@ -21,10 +18,6 @@ export const PermissionNames = new Map<number, string>([
     [Permissions.CHANGE_PROJECT_STATUS, "Change project status"],
     [Permissions.DELETE_PROJECTS, "Delete projects"],
 ]);
-
-export const getBaseUrl = (): string => {
-    return headers().get("x-forwarded-host") || "";
-};
  
 export const localDebug = (message: string, from: string): void => {
     if (process.env.NODE_ENV === "development") {

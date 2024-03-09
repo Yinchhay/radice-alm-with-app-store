@@ -1,0 +1,43 @@
+"use client"; // Error components must be Client Components
+
+import { localDebug } from "@/lib/utils";
+import { redirect, useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export default function Error({
+    error,
+    reset,
+}: {
+    error: Error & { digest?: string };
+    reset: () => void;
+}) {
+    const router = useRouter();
+
+    useEffect(() => {
+        localDebug(error.message, "Manage/error.tsx error:");
+    }, [error]);
+
+    const noPermission =
+        error.message == "You don't have permission to access this page";
+
+    // TODO: add ui to the error page
+    return (
+        <div>
+            <h2>{noPermission ? error.message : "Something went wrong!"}</h2>
+            <button
+                onClick={
+                    // Attempt to recover by trying to re-render the segment
+                    () => {
+                        if (noPermission) {
+                            return router.back();
+                        }
+
+                        reset();
+                    }
+                }
+            >
+                {noPermission ? "Go back" : "Try again"}
+            </button>
+        </div>
+    );
+}

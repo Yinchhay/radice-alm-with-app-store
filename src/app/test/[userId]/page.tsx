@@ -5,8 +5,8 @@
 import { getUserById_C } from "@/repositories/users";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { Button } from "./btn";
-import { getBaseUrl } from "@/lib/utils";
 import { Metadata } from "next";
+import { getBaseUrl } from "@/lib/serverUtils";
 
 // dynamic metadata
 export async function generateMetadata({

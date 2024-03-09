@@ -21,7 +21,7 @@ export default async function ManagePartnersLayout({
 
     const userPermission = await hasPermission(user.id, requiredPermissions);
     if (!userPermission.canAccess) {
-        return redirect("/dashboard");
+        throw new Error("You don't have permission to access this page");
     }
 
     return <>{children}</>;
