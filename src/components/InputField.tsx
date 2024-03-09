@@ -2,7 +2,6 @@
 import { useState } from "react";
 
 export default function InputField({
-    onClick,
     className = "",
     disabled = false,
     placeholder = "",
@@ -11,7 +10,6 @@ export default function InputField({
     name,
     onChange,
 }: {
-    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     disabled?: boolean;
     className?: string;
     placeholder?: string;
