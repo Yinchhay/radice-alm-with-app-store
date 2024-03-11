@@ -18,13 +18,14 @@ export default function Error({
         localDebug(error.message, "/dashboard/manage/error.tsx error:");
     }, [error]);
 
-    const noPermission =
-        error.message == "You don't have permission to access this page";
+    const noPermission = error.message === ErrorMessage.NoPermissionToThisPage;
 
     // TODO: add ui to the error page
     return (
         <div>
-            <h2>{noPermission ? error.message : ErrorMessage.SomethingWentWrong}</h2>
+            <h2>
+                {noPermission ? error.message : ErrorMessage.SomethingWentWrong}
+            </h2>
             <button
                 onClick={
                     // Attempt to recover by trying to re-render the segment

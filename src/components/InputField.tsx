@@ -6,11 +6,13 @@ export default function InputField({
     type = "text",
     disabled = false,
     placeholder = "",
+    hidden = false,
     value,
     id,
     name,
     onChange,
 }: {
+    hidden?: boolean;
     disabled?: boolean;
     className?: string;
     type?: React.HTMLInputTypeAttribute;
@@ -22,6 +24,7 @@ export default function InputField({
 }) {
     return (
         <input
+            hidden={hidden}
             type={type}
             onChange={onChange}
             value={value}

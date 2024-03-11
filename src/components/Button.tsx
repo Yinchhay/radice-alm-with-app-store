@@ -8,7 +8,7 @@ export default function Button({
     type?: "submit" | "reset" | "button" | undefined;
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     disabled?: boolean;
-    styleType?: string;
+    styleType?: "outline" | "primary" | "secondary" | "danger" | undefined;
     children: React.ReactNode;
 }) {
     let buttonStyle = "";

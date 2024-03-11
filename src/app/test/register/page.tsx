@@ -1,5 +1,7 @@
 import { lucia } from "@/auth/lucia";
+import { localDebug } from "@/lib/utils";
 import { createUser, getUserByEmail } from "@/repositories/users";
+import { MysqlErrorCodes } from "@/types/db";
 import bcrypt from "bcrypt";
 import { generateId } from "lucia";
 import { cookies } from "next/headers";
@@ -34,56 +36,71 @@ interface ActionResult {
 
 async function signup(formData: FormData): Promise<ActionResult> {
     "use server";
-    const SALT_ROUNDS = 10;
 
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const email = formData.get("email") as string;
-  
-    const password = formData.get("password");
-    if (
-        typeof password !== "string" ||
-        password.length < 6 ||
-        password.length > 255
-    ) {
+    try {
+        const SALT_ROUNDS = 10;
+
+        const firstName = formData.get("firstName") as string;
+        const lastName = formData.get("lastName") as string;
+        const email = formData.get("email") as string;
+
+        const password = formData.get("password");
+        if (
+            typeof password !== "string" ||
+            password.length < 6 ||
+            password.length > 255
+        ) {
+            return {
+                error: "Invalid password",
+            };
+        }
+
+        // const userExists = await getUserByEmail(email);
+        // if (userExists) {
+        //     return {
+        //         error: "Email already exists",
+        //     };
+        // }
+
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+        const userId = generateId(15);
+
+        const createdUser = await createUser({
+            id: userId,
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            password: hashedPassword,
+            type: "user",
+        });
+
+        if (!createdUser) {
+            return {
+                error: "Failed to create user",
+            };
+        }
+
+        // remove session and set session if being used by internal user (admin)
+        const session = await lucia.createSession(userId, {});
+        const sessionCookie = lucia.createSessionCookie(session.id);
+        cookies().set(
+            sessionCookie.name,
+            sessionCookie.value,
+            sessionCookie.attributes,
+        );
+
+        return redirect("/");
+    } catch (error: any) {
+        localDebug(error.message, "signUpAction");
+
+        if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
+            return {
+                error: "Email already exists",
+            };
+        }
+
         return {
-            error: "Invalid password",
+            error: "Unknown error",
         };
     }
-
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const userId = generateId(15);
-
-    const userExists = await getUserByEmail(email);
-    if (userExists) {
-        return {
-            error: "Username already exists",
-        };
-    }
-
-    const createdUser = await createUser({
-        id: userId,
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        password: hashedPassword,
-        type: 'user',
-    });
-
-    if (!createdUser) {
-        return {
-            error: "Failed to create user",
-        };
-    }
-
-    // remove session and set session if being used by internal user (admin)
-    const session = await lucia.createSession(userId, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(
-        sessionCookie.name,
-        sessionCookie.value,
-        sessionCookie.attributes,
-    );
-
-    return redirect("/");
 }

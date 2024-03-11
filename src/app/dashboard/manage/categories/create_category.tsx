@@ -2,7 +2,7 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Overlay from "@/components/Overlay";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createCategoryAction } from "./action";
 import InputField from "@/components/InputField";
@@ -14,6 +14,13 @@ export function CreateCategoriesOverlay() {
     const [formState, formAction] = useFormState(createCategoryAction, {
         errors: null,
     });
+
+    useEffect(() => {
+        // close the overlay after creating successfully
+        if (showOverlay && formState.errors === null) {
+            setShowOverlay(false);
+        }
+    }, [formState]);
 
     return (
         <>
@@ -44,18 +51,18 @@ export function CreateCategoriesOverlay() {
                             {formState.errors && (
                                 <FormErrorMessages errors={formState.errors} />
                             )}
-                        <div className="flex justify-end gap-2 my-3">
-                            <Button
-                                type="button"
-                                styleType="outline"
-                                onClick={() => {
-                                    setShowOverlay(false);
-                                }}
+                            <div className="flex justify-end gap-2 my-3">
+                                <Button
+                                    type="button"
+                                    styleType="outline"
+                                    onClick={() => {
+                                        setShowOverlay(false);
+                                    }}
                                 >
-                                Cancel
-                            </Button>
-                            <Btn />
-                        </div>
+                                    Cancel
+                                </Button>
+                                <CreateCategoryBtn />
+                            </div>
                         </form>
                     </Card>
                 </Overlay>
@@ -64,7 +71,7 @@ export function CreateCategoriesOverlay() {
     );
 }
 
-function Btn() {
+function CreateCategoryBtn() {
     const formStatus = useFormStatus();
     return (
         <Button disabled={formStatus.pending} styleType="primary">

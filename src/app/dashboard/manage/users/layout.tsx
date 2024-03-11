@@ -1,6 +1,7 @@
 import { getAuthUser } from "@/auth/lucia";
 import { hasPermission } from "@/lib/IAM";
 import { Permissions } from "@/types/IAM";
+import { ErrorMessage } from "@/types/error";
 import { redirect } from "next/navigation";
 
 const requiredPermissions = new Set([
@@ -21,7 +22,7 @@ export default async function ManageUsersLayout({
 
     const userPermission = await hasPermission(user.id, requiredPermissions);
     if (!userPermission.canAccess) {
-        throw new Error("You don't have permission to access this page");
+        throw new Error(ErrorMessage.NoPermissionToThisPage);
     }
 
     return <>{children}</>;
