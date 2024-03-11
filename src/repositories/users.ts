@@ -1,12 +1,7 @@
 import { db } from "@/drizzle/db";
 import {
-    permissions,
-    rolePermissions,
-    roles,
-    userRoles,
     users,
 } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
 import { unstable_cache as cache } from "next/cache";
 
 /**

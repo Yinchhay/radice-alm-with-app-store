@@ -1,5 +1,14 @@
+import { Metadata } from "next";
 import LoginForm from "./login_form";
 import { z } from "zod";
+import { getAuthUser } from "@/auth/lucia";
+import { redirect } from "next/navigation";
+
+// static metadata
+export const metadata: Metadata = {
+    title: 'Login into your account | Radi Center',
+    description: 'Login into your account to access your dashboard',
+};
 
 // TODO: in user story, password must contain at least 1 upper case.
 // Write schema in server component then import to server action.
@@ -24,6 +33,11 @@ export const loginFormSchema = z.object({
 });
 
 export default async function Page() {
+    const user = await getAuthUser();
+    if (user) {
+        return redirect('/dashboard/manage/associated-project');
+    }
+
     return (
         <>
             <LoginForm />

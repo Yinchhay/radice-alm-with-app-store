@@ -1,6 +1,6 @@
 "use client";
 import InputField from "@/components/InputField";
-import { loginAction } from "./_action";
+import { loginAction } from "./action";
 import { useFormState, useFormStatus } from "react-dom";
 import Button from "@/components/Button";
 import FormErrorMessages from "@/components/FormErrorMessages";

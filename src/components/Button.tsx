@@ -3,7 +3,9 @@ export default function Button({
     disabled = false,
     styleType = "outline",
     children,
+    type= "submit",
 }: {
+    type?: "submit" | "reset" | "button" | undefined;
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     disabled?: boolean;
     styleType?: string;
@@ -29,6 +31,7 @@ export default function Button({
     }
     return (
         <button
+            type={type}
             onClick={onClick}
             className={[
                 buttonStyle,

@@ -1,6 +1,12 @@
 import { getAuthUser } from "@/auth/lucia";
+import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+    title: "Dashboard | Radi Center",
+    description: "Dashboard",
+};
 
 export default async function DashboardLayout({
     children,
