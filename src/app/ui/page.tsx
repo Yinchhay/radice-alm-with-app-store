@@ -3,7 +3,20 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import InputField from "@/components/InputField";
 import Overlay from "@/components/Overlay";
+import ColumName from "@/components/table/ColumnName";
+import Table from "@/components/table/Table";
+import TableBody from "@/components/table/TableBody";
+import Cell from "@/components/table/Cell";
+import TableHeader from "@/components/table/TableHeader";
+import TableRow from "@/components/table/TableRow";
 import { useState } from "react";
+import {
+    IconEdit,
+    IconPlus,
+    IconSquarePlus,
+    IconSquareRoundedPlusFilled,
+    IconX,
+} from "@tabler/icons-react";
 
 export default function Home() {
     const [showOverlay, setShowOverlay] = useState(false);
@@ -98,6 +111,45 @@ export default function Home() {
                     />
                     <p>Reactive Value: {fieldValue}</p>
                 </div>
+            </div>
+            <div>
+                <Table>
+                    <TableHeader>
+                        <ColumName>Name</ColumName>
+                        <ColumName>Description</ColumName>
+                        <ColumName className="flex justify-end">
+                            <Button square={true} styleType="primary">
+                                <IconPlus></IconPlus>
+                            </Button>
+                        </ColumName>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow>
+                            <Cell>EdTech</Cell>
+                            <Cell>EdTech</Cell>
+                            <Cell className="flex gap-2">
+                                <Button square={true}>
+                                    <IconEdit></IconEdit>
+                                </Button>
+                                <Button square={true} styleType="danger">
+                                    <IconX></IconX>
+                                </Button>
+                            </Cell>
+                        </TableRow>
+                        <TableRow>
+                            <Cell>FinTech</Cell>
+                            <Cell>FinTech</Cell>
+                            <Cell className="flex gap-2">
+                                <Button square={true}>
+                                    <IconEdit></IconEdit>
+                                </Button>
+                                <Button square={true} styleType="danger">
+                                    <IconX></IconX>
+                                </Button>
+                            </Cell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
             </div>
         </div>
     );

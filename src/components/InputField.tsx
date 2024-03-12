@@ -1,6 +1,3 @@
-"use client";
-import { useState } from "react";
-
 export default function InputField({
     className = "",
     type = "text",
@@ -33,6 +30,7 @@ export default function InputField({
             name={name}
             className={[
                 "w-full bg-gray-100 text-black px-3 py-1 rounded-md outline outline-1 outline-gray-300 transition-all duration-150 focus:outline-2 focus:outline-blue-400",
+                className,
                 disabled ? "brightness-90" : "",
             ].join(" ")}
             disabled={disabled}
