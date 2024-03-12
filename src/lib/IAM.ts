@@ -21,10 +21,6 @@ export const hasPermission = async (
         const userRoleAndRolePermissions =
             await getUserRolesAndRolePermissions_C(userId);
 
-        if (!userRoleAndRolePermissions) {
-            throw new Error("User not found");
-        }
-
         for (const userRole of userRoleAndRolePermissions) {
             if (!userRole.role.isActive) {
                 continue;

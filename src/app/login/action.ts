@@ -5,15 +5,18 @@ import {
     formatZodError,
     generateAndFormatZodError,
 } from "@/lib/form";
-import { getUserByEmail } from "@/repositories/users";
+import {
+    GetUserRolesAndRolePermissions_C_Tag,
+    getUserByEmail,
+} from "@/repositories/users";
 import bcrypt from "bcrypt";
-import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { loginFormSchema } from "./page";
 import { z } from "zod";
 import { ErrorMessage } from "@/types/error";
 import { localDebug } from "@/lib/utils";
+import { revalidateTags } from "@/lib/serverUtils";
 
 export async function loginAction(
     prevState: any,
@@ -66,9 +69,11 @@ export async function loginAction(
 
         // invalidate permission cache
         // this invalidate apply to all users in system
-        revalidateTag("getUserRolesAndRolePermissions_C");
+        revalidateTags<GetUserRolesAndRolePermissions_C_Tag>(
+            `getUserRolesAndRolePermissions_C:${userExists.id}`,
+        );
 
-        return redirect("dashboard/manage/associated-project");
+        return redirect("/dashboard/manage/associated-project");
     } catch (error: any) {
         localDebug(error.message, "loginAction");
 

@@ -1,7 +1,7 @@
 import { lucia } from "@/auth/lucia";
-import { getUserByEmail } from "@/repositories/users";
+import { revalidateTags } from "@/lib/serverUtils";
+import { GetUserRolesAndRolePermissions_C_Tag, getUserByEmail } from "@/repositories/users";
 import bcrypt from "bcrypt";
-import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -64,7 +64,7 @@ async function login(formData: FormData): Promise<ActionResult> {
     );
 
     // invalidate permission cache
-    revalidateTag("getUserRolesAndRolePermissions_C");
+    revalidateTags<GetUserRolesAndRolePermissions_C_Tag>(`getUserRolesAndRolePermissions_C:${userExists.id}`);
 
     return redirect("/test/dashboard");
 }

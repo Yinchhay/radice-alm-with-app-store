@@ -13,11 +13,12 @@ export const deleteCategoryById = async (categoryId: number) => {
     return db.delete(categories).where(eq(categories.id, categoryId));
 };
 
+export type GetCategories_C_Tag = `getCategories_C`;
 export const getCategories_C = cache(
     async () => {
         return db.query.categories.findMany();
     },
-    ["getCategories_C"],
+    [],
     {
         tags: ["getCategories_C"],
     },

@@ -6,14 +6,14 @@ import {
     formatZodError,
     generateAndFormatZodError,
 } from "@/lib/form";
-import { createCategory, deleteCategoryById } from "@/repositories/category";
+import { GetCategories_C_Tag, createCategory, deleteCategoryById } from "@/repositories/category";
 import { ErrorMessage } from "@/types/error";
 import { localDebug } from "@/lib/utils";
 import { MysqlErrorCodes } from "@/types/db";
-import { revalidateTag } from "next/cache";
 import { hasPermission } from "@/lib/IAM";
 import { getAuthUser } from "@/auth/lucia";
 import { Permissions } from "@/types/IAM";
+import { revalidateTags } from "@/lib/serverUtils";
 
 export async function createCategoryAction(
     prevState: any,
@@ -54,7 +54,7 @@ export async function createCategoryAction(
         }
 
         await createCategory(data);
-        revalidateTag("getCategories_C");
+        revalidateTags<GetCategories_C_Tag>("getCategories_C");
 
         return {
             errors: null,
@@ -119,7 +119,7 @@ export async function deleteCategoryAction(
         }
 
         await deleteCategoryById(data.categoryId);
-        revalidateTag("getCategories_C");
+        revalidateTags<GetCategories_C_Tag>("getCategories_C");
 
         return {
             errors: null,

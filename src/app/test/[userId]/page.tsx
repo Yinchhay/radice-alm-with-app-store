@@ -2,11 +2,10 @@
  * Next js cache using server action experiment
  */
 
-import { getUserById_C } from "@/repositories/users";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { GetUserById_C_Tag, getUserById_C } from "@/repositories/users";
 import { Button } from "./btn";
 import { Metadata } from "next";
-import { getBaseUrl } from "@/lib/serverUtils";
+import { getBaseUrl, revalidateTags } from "@/lib/serverUtils";
 
 // dynamic metadata
 export async function generateMetadata({
@@ -27,12 +26,12 @@ export default async function TestPage({
 }) {
     const user = await getUserById_C(params.userId);
 
-    async function revalidateUser() {
+    async function revalidateUserById() {
         "use server";
-        console.log("Revalidat user");
-        // revalidateTag("getUserById_C");
-        // revalidateTag("getUserRolesAndRolePermissions_C");
-        revalidatePath("/test")
+        if (!user) return;
+
+        console.log(`Revalidat user ${params.userId}`);
+        revalidateTags<GetUserById_C_Tag>(`getUserById_C:${params.userId}`);
     }
 
     return (
@@ -44,7 +43,7 @@ export default async function TestPage({
                 This is a test page. You can edit this page by opening{" dd"}
                 <code>src/app/test/page.tsx</code>.
             </p>
-            <Button revalidateUser={revalidateUser} />
+            {user && <Button revalidateUser={revalidateUserById} />}
         </div>
     );
 }
