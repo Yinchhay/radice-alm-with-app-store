@@ -7,6 +7,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { createCategoryAction } from "./action";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
+import { IconPlus } from "@tabler/icons-react";
 
 export function CreateCategoriesOverlay() {
     // TODO: temporarily use button, can change later once we focus on ui
@@ -24,7 +25,13 @@ export function CreateCategoriesOverlay() {
 
     return (
         <>
-            <Button onClick={() => setShowOverlay(true)}>+</Button>
+            <Button
+                onClick={() => setShowOverlay(true)}
+                square={true}
+                styleType="primary"
+            >
+                <IconPlus></IconPlus>
+            </Button>
             {showOverlay && (
                 <Overlay
                     onClose={() => {
@@ -38,16 +45,25 @@ export function CreateCategoriesOverlay() {
                             </h1>
                         </div>
                         <form action={formAction}>
-                            <label htmlFor="name">Name</label>
-                            <InputField name="name" id="name" />
-                            <br />
-                            <label htmlFor="description">Description</label>
-                            <InputField
-                                type="description"
-                                name="description"
-                                id="description"
-                            />
-                            <br />
+                            <div className="flex flex-col items-start my-1">
+                                <label htmlFor="name" className="font-normal">
+                                    Name
+                                </label>
+                                <InputField name="name" id="name" />
+                            </div>
+                            <div className="flex flex-col items-start my-1">
+                                <label
+                                    htmlFor="description"
+                                    className="font-normal"
+                                >
+                                    Description
+                                </label>
+                                <InputField
+                                    type="description"
+                                    name="description"
+                                    id="description"
+                                />
+                            </div>
                             {formState.errors && (
                                 <FormErrorMessages errors={formState.errors} />
                             )}

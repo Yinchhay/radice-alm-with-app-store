@@ -5,6 +5,7 @@ import { users, sessions } from "@/drizzle/schema";
 import { InferSelectModel } from "drizzle-orm";
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { localDebug } from "@/lib/utils";
 
 const adapter = new DrizzleMySQLAdapter(db, sessions, users);
 
@@ -55,8 +56,9 @@ export const validateRequest = cache(
             };
         }
 
-        const result = await lucia.validateSession(sessionId);
         try {
+            const result = await lucia.validateSession(sessionId);
+            // If Session.fresh is true, it indicates the session expiration has been extended and you should set a new session cookie.
             if (result.session && result.session.fresh) {
                 const sessionCookie = lucia.createSessionCookie(
                     result.session.id,
@@ -67,6 +69,8 @@ export const validateRequest = cache(
                     sessionCookie.attributes,
                 );
             }
+
+            // If the session is not found, it means the session has expired or the session ID is invalid. You should clear the session cookie.
             if (!result.session) {
                 const sessionCookie = lucia.createBlankSessionCookie();
                 cookies().set(
@@ -75,10 +79,16 @@ export const validateRequest = cache(
                     sessionCookie.attributes,
                 );
             }
-        } catch {
+            return result;
+        } catch (error: any) {
+            localDebug(error.message, "/auth/lucia.ts, validateRequest()");
             // next.js throws when you attempt to set cookie when rendering page
         }
-        return result;
+
+        return {
+            user: null,
+            session: null,
+        };
     },
 );
 

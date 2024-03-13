@@ -1,3 +1,4 @@
+"use client";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
@@ -7,6 +8,7 @@ import { categories } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { deleteCategoryAction } from "./action";
+import { IconX } from "@tabler/icons-react";
 
 export function DeleteCategory({
     category,
@@ -28,7 +30,13 @@ export function DeleteCategory({
     return (
         <>
             <div className="">
-                <Button onClick={() => setShowOverlay(true)}>Delete</Button>
+                <Button
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    styleType="danger"
+                >
+                    <IconX></IconX>
+                </Button>
             </div>
             {showOverlay && (
                 <Overlay
@@ -49,14 +57,15 @@ export function DeleteCategory({
                             </div>
                         </div>
                         <form action={formAction}>
-                            <InputField
-                                hidden
-                                name="categoryId"
-                                id="categoryId"
-                                value={category.id.toString()}
-                                type="hidden"
-                            />
-                            <br />
+                            <div className="flex flex-col items-start my-1">
+                                <InputField
+                                    hidden
+                                    name="categoryId"
+                                    id="categoryId"
+                                    value={category.id.toString()}
+                                    type="hidden"
+                                />
+                            </div>
                             {formState.errors && (
                                 <FormErrorMessages errors={formState.errors} />
                             )}
