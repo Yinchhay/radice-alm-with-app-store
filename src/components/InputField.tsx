@@ -3,27 +3,30 @@ export default function InputField({
     type = "text",
     disabled = false,
     placeholder = "",
-    hidden = false,
+    readOnly = false,
     value,
+    defaultValue,
     id,
     name,
     onChange,
 }: {
-    hidden?: boolean;
     disabled?: boolean;
     className?: string;
     type?: React.HTMLInputTypeAttribute;
+    readOnly?: boolean;
     placeholder?: string;
     id?: string;
     name?: string;
     value?: string;
+    defaultValue?: string;
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void; // Changed the type to React.ChangeEvent<HTMLInputElement>
 }) {
     return (
         <input
-            hidden={hidden}
+            readOnly={readOnly}
             type={type}
             onChange={onChange}
+            // if using value, changing in the ui will reset back to the original value, use defaultValue instead
             value={value}
             placeholder={placeholder}
             id={id}
@@ -34,6 +37,7 @@ export default function InputField({
                 disabled ? "brightness-90" : "",
             ].join(" ")}
             disabled={disabled}
+            defaultValue={defaultValue}
         />
     );
 }

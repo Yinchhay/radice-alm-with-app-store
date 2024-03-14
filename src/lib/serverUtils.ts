@@ -5,6 +5,10 @@ export const getBaseUrl = (): string => {
     return headers().get("x-forwarded-host") || "";
 };
 
+export const getFullUrl = (): string => {
+    return headers().get("referer") || "";
+}
+
 /**
  * custom revalidateTag because I want to have type for it 
  * when passing generic to the function it will infer the type so that we can ensure that the tag 

@@ -1,28 +1,39 @@
 import { z } from "zod";
-import { CreateCategoriesOverlay } from "./create_category";
 import { getCategories_C } from "@/repositories/category";
 import { Suspense } from "react";
 import Table from "@/components/table/Table";
 import TableHeader from "@/components/table/TableHeader";
 import ColumName from "@/components/table/ColumnName";
-import Button from "@/components/Button";
-import { IconEdit } from "@tabler/icons-react";
 import TableBody from "@/components/table/TableBody";
 import TableRow from "@/components/table/TableRow";
 import Cell from "@/components/table/Cell";
 import { categories } from "@/drizzle/schema";
-import { DeleteCategory } from "./delete_category";
+import { CreateCategoryOverlay } from "./create_category";
+import { EditCategoryOverlay } from "./edit_category";
+import { DeleteCategoryOverlay } from "./delete_category";
 
 export const createCategoryFormSchema = z.object({
     name: z.string().min(1, {
         message: "Category name is required",
     }),
-    description: z.string().min(1, {
-        message: "Category description is required",
-    }),
+    description: z.string(),
 });
 
 export const deleteCategoryFormSchema = z.object({
+    categoryId: z
+        .number({
+            required_error: "Category id is required",
+        })
+        .positive({
+            message: "Category id must be positive",
+        }),
+});
+
+export const editCategoryFormSchema = z.object({
+    name: z.string().min(1, {
+        message: "Category name is required",
+    }),
+    description: z.string(),
     categoryId: z
         .number({
             required_error: "Category id is required",
@@ -38,7 +49,6 @@ export default async function ManageCategories() {
         return <Category key={category.id} category={category} />;
     });
 
-    // TODO: style here later
     return (
         <Suspense fallback={"loading..."}>
             <div>
@@ -48,7 +58,7 @@ export default async function ManageCategories() {
                         <ColumName>Name</ColumName>
                         <ColumName>Description</ColumName>
                         <ColumName className="flex justify-end">
-                            <CreateCategoriesOverlay />
+                            <CreateCategoryOverlay />
                         </ColumName>
                     </TableHeader>
                     <TableBody>
@@ -81,10 +91,8 @@ function Category({ category }: { category: typeof categories.$inferSelect }) {
             <Cell>{category.name}</Cell>
             <Cell>{category.description}</Cell>
             <Cell className="flex gap-2">
-                <Button square={true}>
-                    <IconEdit></IconEdit>
-                </Button>
-                <DeleteCategory category={category} />
+                <EditCategoryOverlay category={category} />
+                <DeleteCategoryOverlay category={category} />
             </Cell>
         </TableRow>
     );

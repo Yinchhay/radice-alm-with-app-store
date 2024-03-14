@@ -10,13 +10,24 @@ import { useFormState, useFormStatus } from "react-dom";
 import { deleteCategoryAction } from "./action";
 import { IconX } from "@tabler/icons-react";
 
-export function DeleteCategory({
+export function DeleteCategoryOverlay({
     category,
 }: {
     category: typeof categories.$inferSelect;
 }) {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
-    const [formState, formAction] = useFormState(deleteCategoryAction, {
+    /**
+     * bind the category id to the deleteCategoryAction to prevent client side from changing the
+     * category id via inspect element.
+     * for the bind function, the first argument is the context, and the second argument is the
+     * first arg of the function. if the function has more than one arg, the second arg will be the
+     * second arg of the function, and so on.
+     */
+    const boundDeleteCategoryAction = deleteCategoryAction.bind(
+        null,
+        category.id,
+    );
+    const [formState, formAction] = useFormState(boundDeleteCategoryAction, {
         errors: null,
     });
 
@@ -57,15 +68,6 @@ export function DeleteCategory({
                             </div>
                         </div>
                         <form action={formAction}>
-                            <div className="flex flex-col items-start my-1">
-                                <InputField
-                                    hidden
-                                    name="categoryId"
-                                    id="categoryId"
-                                    value={category.id.toString()}
-                                    type="hidden"
-                                />
-                            </div>
                             {formState.errors && (
                                 <FormErrorMessages errors={formState.errors} />
                             )}

@@ -13,6 +13,19 @@ export const deleteCategoryById = async (categoryId: number) => {
     return db.delete(categories).where(eq(categories.id, categoryId));
 };
 
+export const editCategory = async (
+    categoryId: number,
+    category: typeof categories.$inferInsert,
+) => {
+    return db
+        .update(categories)
+        .set({
+            name: category.name,
+            description: category.description,
+        })
+        .where(eq(categories.id, categoryId));
+};
+
 export type GetCategories_C_Tag = `getCategories_C`;
 export const getCategories_C = cache(
     async () => {

@@ -1,6 +1,5 @@
 import { getAuthUser, lucia, validateRequest } from "@/auth/lucia";
 import { hasPermission } from "@/lib/IAM";
-import { PermissionNames } from "@/lib/utils";
 import { Permissions } from "@/types/IAM";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
