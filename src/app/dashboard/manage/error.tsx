@@ -23,7 +23,7 @@ export default function Error({
     // TODO: add ui to the error page
     return (
         <div>
-            <h2>
+            <h2 data-test="errorMessage">
                 {noPermission ? error.message : ErrorMessage.SomethingWentWrong}
             </h2>
             <button

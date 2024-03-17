@@ -6,6 +6,7 @@ export default function Button({
     children,
     type = "submit",
     square = false,
+    dataTest,
 }: {
     type?: "submit" | "reset" | "button" | undefined;
     className?: string;
@@ -14,6 +15,7 @@ export default function Button({
     styleType?: "outline" | "primary" | "secondary" | "danger" | undefined;
     children: React.ReactNode;
     square?: boolean;
+    dataTest?: string;
 }) {
     let buttonStyle = "";
     switch (styleType) {
@@ -40,6 +42,7 @@ export default function Button({
     }
     return (
         <button
+            data-test={dataTest}
             type={type}
             onClick={onClick}
             className={[

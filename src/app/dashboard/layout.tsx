@@ -25,26 +25,48 @@ export default async function DashboardLayout({
         <>
             <div className="flex flex-col bg-blue-500">
                 <h1>Dashboard Layout Link</h1>
-                <Link href="/dashboard/manage/account"> Manage Account</Link>
-                <Link href="/dashboard/manage/associated-project">
-                    {" "}
+                <Link
+                    data-test="manageAccount"
+                    href="/dashboard/manage/account"
+                >
+                    Manage Account
+                </Link>
+                <Link
+                    data-test="manageAssociatedProject"
+                    href="/dashboard/manage/associated-project"
+                >
                     Manage Associated Project
                 </Link>
-                <Link href="/dashboard/manage/application-forms">
-                    {" "}
+                <Link
+                    data-test="manageApplicationForm"
+                    href="/dashboard/manage/application-forms"
+                >
                     Manage Application Forms
                 </Link>
-                <Link href="/dashboard/manage/all-projects">
-                    {" "}
+                <Link
+                    data-test="manageAllProjects"
+                    href="/dashboard/manage/all-projects"
+                >
                     Manage All Projects
                 </Link>
-                <Link href="/dashboard/manage/categories">
-                    {" "}
+                <Link
+                    data-test="manageCategories"
+                    href="/dashboard/manage/categories"
+                >
                     Manage Categories
                 </Link>
-                <Link href="/dashboard/manage/partners"> Manage Partners</Link>
-                <Link href="/dashboard/manage/roles"> Manage Roles</Link>
-                <Link href="/dashboard/manage/users"> Manage Users</Link>
+                <Link
+                    data-test="managePartners"
+                    href="/dashboard/manage/partners"
+                >
+                    Manage Partners
+                </Link>
+                <Link data-test="manageRoles" href="/dashboard/manage/roles">
+                    Manage Roles
+                </Link>
+                <Link data-test="manageUsers" href="/dashboard/manage/users">
+                    Manage Users
+                </Link>
             </div>
             {children}
         </>
