@@ -10,7 +10,8 @@
     "lint": "next lint",
     "db_migrate": "npx drizzle-kit generate:mysql && npx tsx src/drizzle/migrate.ts",
     "db_pull": "npx drizzle-kit introspect:mysql",
-    "db_push": "npx drizzle-kit push:mysql"
+    "db_push": "npx drizzle-kit push:mysql",
+    "cypress:open": "cypress open"
   },
   "dependencies": {
     "@lucia-auth/adapter-drizzle": "^1.0.2",
@@ -31,6 +32,7 @@
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "autoprefixer": "^10.4.18",
+    "cypress": "^13.7.0",
     "drizzle-kit": "^0.20.14",
     "postcss": "^8.4.35",
     "prettier": "3.2.5",

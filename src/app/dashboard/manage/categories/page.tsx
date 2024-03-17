@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { getCategories_C } from "@/repositories/category";
 import { Suspense } from "react";
 import Table from "@/components/table/Table";
@@ -11,37 +10,6 @@ import { categories } from "@/drizzle/schema";
 import { CreateCategoryOverlay } from "./create_category";
 import { EditCategoryOverlay } from "./edit_category";
 import { DeleteCategoryOverlay } from "./delete_category";
-
-export const createCategoryFormSchema = z.object({
-    name: z.string().min(1, {
-        message: "Category name is required",
-    }),
-    description: z.string(),
-});
-
-export const deleteCategoryFormSchema = z.object({
-    categoryId: z
-        .number({
-            required_error: "Category id is required",
-        })
-        .positive({
-            message: "Category id must be positive",
-        }),
-});
-
-export const editCategoryFormSchema = z.object({
-    name: z.string().min(1, {
-        message: "Category name is required",
-    }),
-    description: z.string(),
-    categoryId: z
-        .number({
-            required_error: "Category id is required",
-        })
-        .positive({
-            message: "Category id must be positive",
-        }),
-});
 
 export default async function ManageCategories() {
     const categories = await getCategories_C();

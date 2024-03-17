@@ -4,7 +4,7 @@ import {
     createCategoryFormSchema,
     deleteCategoryFormSchema,
     editCategoryFormSchema,
-} from "./page";
+} from "./schema";
 import {
     ActionResult,
     formatZodError,

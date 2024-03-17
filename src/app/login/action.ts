@@ -11,17 +11,18 @@ import {
 } from "@/repositories/users";
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { loginFormSchema } from "./page";
+import { loginFormSchema } from "./schema";
 import { z } from "zod";
 import { ErrorMessage } from "@/types/error";
 import { localDebug } from "@/lib/utils";
 import { revalidateTags } from "@/lib/serverUtils";
+import { redirect } from "next/navigation";
 
 export async function loginAction(
     prevState: any,
     formData: FormData,
 ): Promise<ActionResult<z.infer<typeof loginFormSchema>>> {
+    "use server";
     try {
         const data: z.infer<typeof loginFormSchema> = {
             email: formData.get("email") as string,
@@ -72,8 +73,6 @@ export async function loginAction(
         revalidateTags<GetUserRolesAndRolePermissions_C_Tag>(
             `getUserRolesAndRolePermissions_C:${userExists.id}`,
         );
-
-        return redirect("/dashboard/manage/associated-project");
     } catch (error: any) {
         localDebug(error.message, "loginAction");
 
@@ -88,4 +87,9 @@ export async function loginAction(
             ),
         };
     }
+
+    // redirect should be called outside of try catch block because next js will throw
+    // error for next js to handle itself
+    // ref: https://www.youtube.com/watch?v=53slouncImA
+    redirect("/dashboard/manage/associated-project");
 }
