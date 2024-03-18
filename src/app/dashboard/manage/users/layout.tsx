@@ -1,14 +1,7 @@
 import { getAuthUser } from "@/auth/lucia";
-import { hasPermission } from "@/lib/IAM";
-import { Permissions } from "@/types/IAM";
+import { hasPermission, routeRequiredPermissions } from "@/lib/IAM";
 import { ErrorMessage } from "@/types/error";
 import { redirect } from "next/navigation";
-
-const requiredPermissions = new Set([
-    Permissions.CREATE_USERS,
-    Permissions.EDIT_USERS,
-    Permissions.DELETE_USERS,
-]);
 
 export default async function ManageUsersLayout({
     children,
@@ -20,7 +13,10 @@ export default async function ManageUsersLayout({
         return redirect("/login");
     }
 
-    const userPermission = await hasPermission(user.id, requiredPermissions);
+    const userPermission = await hasPermission(
+        user.id,
+        routeRequiredPermissions.get("manageUsers")!,
+    );
     if (!userPermission.canAccess) {
         throw new Error(ErrorMessage.NoPermissionToThisPage);
     }

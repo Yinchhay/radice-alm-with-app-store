@@ -1,5 +1,6 @@
 import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
 import { localDebug } from "./utils";
+import { Permissions } from "@/types/IAM";
 
 /**
  * This function take a user id and a set of required permissions and return a boolean and a message
@@ -12,12 +13,20 @@ import { localDebug } from "./utils";
  */
 export const hasPermission = async (
     userId: string,
-    requiredPermissions: Set<number>,
+    requiredPermissions: Set<Permissions>,
 ): Promise<{
     canAccess: boolean;
     message: string;
 }> => {
     try {
+        if (requiredPermissions.size === 0) {
+            return {
+                canAccess: false,
+                message:
+                    "Required permission is required to check user has permission or not",
+            };
+        }
+
         const userRoleAndRolePermissions =
             await getUserRolesAndRolePermissions_C(userId);
 
@@ -48,3 +57,64 @@ export const hasPermission = async (
         message: "The user does not have the required permission.",
     };
 };
+
+/**
+ * I believe since this is often used for internal users,
+ * the data structure for this should be Map so that it will improve performance
+ * which is better than using object. And the reason I create the routeRequiredPermissions
+ * here because exporting in page.tsx is not allow in production, and I need route required 
+ * permissions for e2e test 
+ * - YatoRizzGod
+ */
+type routeKey =
+    | "manageAllProjects"
+    | "manageApplicationForms"
+    | "manageCategories"
+    | "managePartners"
+    | "manageRoles"
+    | "manageUsers";
+export const routeRequiredPermissions = new Map<routeKey, Set<Permissions>>([
+    [
+        "manageAllProjects",
+        new Set([
+            Permissions.CHANGE_PROJECT_STATUS,
+            Permissions.DELETE_PROJECTS,
+        ]),
+    ],
+    [
+        "manageApplicationForms",
+        new Set([Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS]),
+    ],
+    [
+        "manageCategories",
+        new Set([
+            Permissions.CREATE_CATEGORIES,
+            Permissions.EDIT_CATEGORIES,
+            Permissions.DELETE_CATEGORIES,
+        ]),
+    ],
+    [
+        "managePartners",
+        new Set([
+            Permissions.CREATE_PARTNERS,
+            Permissions.EDIT_PARTNERS,
+            Permissions.DELETE_PARTNERS,
+        ]),
+    ],
+    [
+        "manageRoles",
+        new Set([
+            Permissions.CREATE_ROLES,
+            Permissions.EDIT_ROLES,
+            Permissions.DELETE_ROLES,
+        ]),
+    ],
+    [
+        "manageUsers",
+        new Set([
+            Permissions.CREATE_USERS,
+            Permissions.EDIT_USERS,
+            Permissions.DELETE_USERS,
+        ]),
+    ],
+]);

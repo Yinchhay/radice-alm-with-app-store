@@ -11,7 +11,8 @@
     "db_migrate": "npx drizzle-kit generate:mysql && npx tsx src/drizzle/migrate.ts",
     "db_pull": "npx drizzle-kit introspect:mysql",
     "db_push": "npx drizzle-kit push:mysql",
-    "cypress:open": "cypress open"
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "dependencies": {
     "@lucia-auth/adapter-drizzle": "^1.0.2",

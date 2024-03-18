@@ -62,10 +62,21 @@ Sometimes, changes happen as the project progresses. Here are what required to c
 
 ## Testing
 
-Run the cypress test:
+Ensure that everything is working as expected, like the database, etc. before running the tests.
 
+Run the cypress e2e test on browser:
 ```bash
 npm run cypress:open
+```
+
+Run the cypress e2e test on terminal:
+```bash
+npm run cypress:run
+```
+
+Run the cypress e2e with specific test file:
+```bash
+npx cypress run --spec cypress/e2e/file_name.spec.ts
 ```
 
 ## Learn More
