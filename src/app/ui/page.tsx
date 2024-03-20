@@ -17,10 +17,13 @@ import {
     IconSquareRoundedPlusFilled,
     IconX,
 } from "@tabler/icons-react";
+import Pagination from "@/components/Pagination";
 
 export default function Home() {
     const [showOverlay, setShowOverlay] = useState(false);
     const [fieldValue, setFieldValue] = useState("");
+    const [paginationNumber, setPaginationNumber] = useState(1);
+    const maxPage = 10;
 
     return (
         <div className="w-screen h-screen flex p-8 gap-8">
@@ -113,43 +116,59 @@ export default function Home() {
                 </div>
             </div>
             <div>
-                <Table>
-                    <TableHeader>
-                        <ColumName>Name</ColumName>
-                        <ColumName>Description</ColumName>
-                        <ColumName className="flex justify-end">
-                            <Button square={true} styleType="primary">
-                                <IconPlus></IconPlus>
-                            </Button>
-                        </ColumName>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow>
-                            <Cell>EdTech</Cell>
-                            <Cell>EdTech</Cell>
-                            <Cell className="flex gap-2">
-                                <Button square={true}>
-                                    <IconEdit></IconEdit>
+                <div>
+                    <h1 className="mb-2 font-bold">Table:</h1>
+                    <Table>
+                        <TableHeader>
+                            <ColumName>Name</ColumName>
+                            <ColumName>Description</ColumName>
+                            <ColumName className="flex justify-end">
+                                <Button square={true} styleType="primary">
+                                    <IconPlus></IconPlus>
                                 </Button>
-                                <Button square={true} styleType="danger">
-                                    <IconX></IconX>
-                                </Button>
-                            </Cell>
-                        </TableRow>
-                        <TableRow>
-                            <Cell>FinTech</Cell>
-                            <Cell>FinTech</Cell>
-                            <Cell className="flex gap-2">
-                                <Button square={true}>
-                                    <IconEdit></IconEdit>
-                                </Button>
-                                <Button square={true} styleType="danger">
-                                    <IconX></IconX>
-                                </Button>
-                            </Cell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                            </ColumName>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow>
+                                <Cell>EdTech</Cell>
+                                <Cell>EdTech</Cell>
+                                <Cell className="flex gap-2">
+                                    <Button square={true}>
+                                        <IconEdit></IconEdit>
+                                    </Button>
+                                    <Button square={true} styleType="danger">
+                                        <IconX></IconX>
+                                    </Button>
+                                </Cell>
+                            </TableRow>
+                            <TableRow>
+                                <Cell>FinTech</Cell>
+                                <Cell>FinTech</Cell>
+                                <Cell className="flex gap-2">
+                                    <Button square={true}>
+                                        <IconEdit></IconEdit>
+                                    </Button>
+                                    <Button square={true} styleType="danger">
+                                        <IconX></IconX>
+                                    </Button>
+                                </Cell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+            <div>
+                <h1 className="mb-2 font-bold">
+                    Page Current: {paginationNumber}
+                </h1>
+                <Pagination
+                    currentPage={paginationNumber}
+                    maxPage={maxPage}
+                    onSetPage={(pageNumber) => {
+                        setPaginationNumber(pageNumber);
+                        console.log(pageNumber);
+                    }}
+                />
             </div>
         </div>
     );
