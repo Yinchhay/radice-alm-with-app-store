@@ -1,22 +1,13 @@
-export default function Button({
-    onClick,
-    className,
-    disabled = false,
-    styleType = "outline",
-    children,
-    type = "submit",
-    square = false,
-    dataTest,
-}: {
-    type?: "submit" | "reset" | "button" | undefined;
-    className?: string;
-    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    disabled?: boolean;
+import { forwardRef } from "react";
+
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    className?: string,
     styleType?: "outline" | "primary" | "secondary" | "danger" | undefined;
-    children: React.ReactNode;
     square?: boolean;
-    dataTest?: string;
-}) {
+    children: React.ReactNode
+}
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(({className, styleType, square, children, ...props}, ref) => {
     let buttonStyle = "";
     switch (styleType) {
         case "outline":
@@ -42,18 +33,18 @@ export default function Button({
     }
     return (
         <button
-            data-test={dataTest}
-            type={type}
-            onClick={onClick}
+            ref={ref}
             className={[
                 buttonStyle,
                 "transition-all duration-150",
                 className,
-                disabled ? "brightness-75" : "hover:brightness-90",
+                props.disabled ? "brightness-75" : "hover:brightness-90",
             ].join(" ")}
-            disabled={disabled}
+            {...props}
         >
             {children}
         </button>
     );
-}
+})
+
+export default Button
