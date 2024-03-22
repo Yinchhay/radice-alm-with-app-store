@@ -4,19 +4,27 @@ import Card from "@/components/Card";
 import Overlay from "@/components/Overlay";
 import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { createCategoryAction } from "./action";
+import { editCategoryAction } from "./action";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconPlus } from "@tabler/icons-react";
+import { IconEdit } from "@tabler/icons-react";
+import { categories } from "@/drizzle/schema";
 
-export function CreateCategoryOverlay() {
+export function EditCategoryOverlay({
+    category,
+}: {
+    category: typeof categories.$inferSelect;
+}) {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
-    const [formState, formAction] = useFormState(createCategoryAction, {
+    // bind the category id to the editCategoryAction to prevent client side from changing the
+    // category id via inspect element.
+    const boundEditCategoryAction = editCategoryAction.bind(null, category.id);
+    const [formState, formAction] = useFormState(boundEditCategoryAction, {
         errors: null,
     });
 
     useEffect(() => {
-        // close the overlay after creating successfully
+        // close the overlay after editing successfully
         if (showOverlay && formState.errors === null) {
             setShowOverlay(false);
         }
@@ -25,12 +33,11 @@ export function CreateCategoryOverlay() {
     return (
         <>
             <Button
-                data-test="createCategory"
+                data-test={`editCategory-${category.name}`}
                 onClick={() => setShowOverlay(true)}
                 square={true}
-                styleType="primary"
             >
-                <IconPlus></IconPlus>
+                <IconEdit></IconEdit>
             </Button>
             {showOverlay && (
                 <Overlay
@@ -41,7 +48,7 @@ export function CreateCategoryOverlay() {
                     <Card className="w-[300px]">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
-                                Create Category
+                                Edit Category
                             </h1>
                         </div>
                         <form action={formAction}>
@@ -49,7 +56,11 @@ export function CreateCategoryOverlay() {
                                 <label htmlFor="name" className="font-normal">
                                     Name
                                 </label>
-                                <InputField name="name" id="name" />
+                                <InputField
+                                    name="name"
+                                    id="name"
+                                    defaultValue={category.name}
+                                />
                             </div>
                             <div className="flex flex-col items-start my-1">
                                 <label
@@ -59,9 +70,9 @@ export function CreateCategoryOverlay() {
                                     Description
                                 </label>
                                 <InputField
-                                    type="description"
                                     name="description"
                                     id="description"
+                                    defaultValue={category.description ?? ""}
                                 />
                             </div>
                             {formState.errors && (
@@ -77,7 +88,7 @@ export function CreateCategoryOverlay() {
                                 >
                                     Cancel
                                 </Button>
-                                <CreateCategoryBtn />
+                                <EditCategoryBtn />
                             </div>
                         </form>
                     </Card>
@@ -87,11 +98,11 @@ export function CreateCategoryOverlay() {
     );
 }
 
-function CreateCategoryBtn() {
+function EditCategoryBtn() {
     const formStatus = useFormStatus();
     return (
         <Button disabled={formStatus.pending} styleType="primary">
-            {formStatus.pending ? "Creating" : "Create"}
+            {formStatus.pending ? "Editing" : "Edit"}
         </Button>
     );
 }

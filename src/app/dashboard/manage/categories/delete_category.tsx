@@ -1,3 +1,4 @@
+"use client";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
@@ -7,14 +8,26 @@ import { categories } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { deleteCategoryAction } from "./action";
+import { IconX } from "@tabler/icons-react";
 
-export function DeleteCategory({
+export function DeleteCategoryOverlay({
     category,
 }: {
     category: typeof categories.$inferSelect;
 }) {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
-    const [formState, formAction] = useFormState(deleteCategoryAction, {
+    /**
+     * bind the category id to the deleteCategoryAction to prevent client side from changing the
+     * category id via inspect element.
+     * for the bind function, the first argument is the context, and the second argument is the
+     * first arg of the function. if the function has more than one arg, the second arg will be the
+     * second arg of the function, and so on.
+     */
+    const boundDeleteCategoryAction = deleteCategoryAction.bind(
+        null,
+        category.id,
+    );
+    const [formState, formAction] = useFormState(boundDeleteCategoryAction, {
         errors: null,
     });
 
@@ -28,7 +41,14 @@ export function DeleteCategory({
     return (
         <>
             <div className="">
-                <Button onClick={() => setShowOverlay(true)}>Delete</Button>
+                <Button
+                    data-test={`deleteCategory-${category.name}`}
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    styleType="danger"
+                >
+                    <IconX></IconX>
+                </Button>
             </div>
             {showOverlay && (
                 <Overlay
@@ -49,14 +69,6 @@ export function DeleteCategory({
                             </div>
                         </div>
                         <form action={formAction}>
-                            <InputField
-                                hidden
-                                name="categoryId"
-                                id="categoryId"
-                                value={category.id.toString()}
-                                type="hidden"
-                            />
-                            <br />
                             {formState.errors && (
                                 <FormErrorMessages errors={formState.errors} />
                             )}
@@ -83,7 +95,7 @@ export function DeleteCategory({
 function DeleteCategoryBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button disabled={formStatus.pending} styleType="danger">
+        <Button data-test="deleteCategoryBtn" disabled={formStatus.pending} styleType="danger">
             {formStatus.pending ? "Deleting" : "Delete"}
         </Button>
     );

@@ -1,13 +1,7 @@
 import { getAuthUser } from "@/auth/lucia";
-import { hasPermission } from "@/lib/IAM";
-import { Permissions } from "@/types/IAM";
+import { hasPermission, routeRequiredPermissions } from "@/lib/IAM";
 import { ErrorMessage } from "@/types/error";
 import { redirect } from "next/navigation";
-
-const requiredPermissions = new Set([
-    Permissions.CHANGE_PROJECT_STATUS,
-    Permissions.DELETE_PROJECTS,
-]);
 
 export default async function ManageAllProjectsLayout({
     children,
@@ -19,7 +13,10 @@ export default async function ManageAllProjectsLayout({
         return redirect("/login");
     }
 
-    const userPermission = await hasPermission(user.id, requiredPermissions);
+    const userPermission = await hasPermission(
+        user.id,
+        routeRequiredPermissions.get("manageAllProjects")!,
+    );
     if (!userPermission.canAccess) {
         throw new Error(ErrorMessage.NoPermissionToThisPage);
     }

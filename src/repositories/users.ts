@@ -1,7 +1,5 @@
 import { db } from "@/drizzle/db";
-import {
-    users,
-} from "@/drizzle/schema";
+import { users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
 
 /**
@@ -13,19 +11,23 @@ import { unstable_cache as cache } from "next/cache";
  * Note: cache will memoized the arguments, so if the arguments are the same,
  * the cache will return the same value
  */
-export const getUserById_C = cache(
-    async (userId: string) => {
-        return (
-            (await db.query.users.findFirst({
-                where: (user, { eq }) => eq(user.id, userId),
-            })) || null
-        );
-    },
-    ["getUserById_C"],
-    {
-        tags: ["getUserById_C"],
-    },
-);
+export type GetUserById_C_Tag = `getUserById_C:${string}`;
+export const getUserById_C = async (userId: string) => {
+    // dynamically cache user by their userId
+    return await cache(
+        async (userId: string) => {
+            return (
+                (await db.query.users.findFirst({
+                    where: (user, { eq }) => eq(user.id, userId),
+                })) || null
+            );
+        },
+        [],
+        {
+            tags: [`getUserById_C:${userId}`],
+        },
+    )(userId);
+};
 
 /**
  * not everywhere is required to use cache, for example this function
@@ -41,25 +43,33 @@ export const createUser = async (user: typeof users.$inferInsert) => {
     return await db.insert(users).values(user);
 };
 
-export const getUserRolesAndRolePermissions_C = cache(
-    async (userId: string) => {
-        return await db.query.userRoles.findMany({
-            where: (userRole, { eq }) => eq(userRole.userId, userId),
-            with: {
-                role: {
-                    with: {
-                        rolePermissions: {
-                            with: {
-                                permission: true,
+export type GetUserRolesAndRolePermissions_C_Tag =
+    | `getUserRolesAndRolePermissions_C:${string}`
+    | `getUserRolesAndRolePermissions_C`;
+export const getUserRolesAndRolePermissions_C = async (userId: string) => {
+    return await cache(
+        async (userId: string) => {
+            return await db.query.userRoles.findMany({
+                where: (userRole, { eq }) => eq(userRole.userId, userId),
+                with: {
+                    role: {
+                        with: {
+                            rolePermissions: {
+                                with: {
+                                    permission: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-        });
-    },
-    ["getUserRolesAndRolePermissions_C"],
-    {
-        tags: ["getUserRolesAndRolePermissions_C"],
-    },
-);
+            });
+        },
+        [],
+        {
+            tags: [
+                `getUserRolesAndRolePermissions_C:${userId}`,
+                `getUserRolesAndRolePermissions_C`,
+            ],
+        },
+    )(userId);
+};

@@ -1,14 +1,7 @@
 import { getAuthUser } from "@/auth/lucia";
-import { hasPermission } from "@/lib/IAM";
-import { Permissions } from "@/types/IAM";
+import { hasPermission, routeRequiredPermissions } from "@/lib/IAM";
 import { ErrorMessage } from "@/types/error";
 import { redirect } from "next/navigation";
-
-const requiredPermissions = new Set([
-    Permissions.CREATE_ROLES,
-    Permissions.EDIT_ROLES,
-    Permissions.DELETE_ROLES,
-]);
 
 export default async function ManageRolesLayout({
     children,
@@ -20,7 +13,10 @@ export default async function ManageRolesLayout({
         return redirect("/login");
     }
 
-    const userPermission = await hasPermission(user.id, requiredPermissions);
+    const userPermission = await hasPermission(
+        user.id,
+        routeRequiredPermissions.get("manageRoles")!,
+    );
     if (!userPermission.canAccess) {
         throw new Error(ErrorMessage.NoPermissionToThisPage);
     }
