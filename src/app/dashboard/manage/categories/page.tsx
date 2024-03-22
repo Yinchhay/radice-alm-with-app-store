@@ -10,7 +10,6 @@ import { categories } from "@/drizzle/schema";
 import { CreateCategoryOverlay } from "./create_category";
 import { EditCategoryOverlay } from "./edit_category";
 import { DeleteCategoryOverlay } from "./delete_category";
-import { time } from "console";
 
 export default async function ManageCategories() {
     const categories = await getCategories_C();
@@ -57,10 +56,10 @@ function NoCategory() {
 function Category({ category }: { category: typeof categories.$inferSelect }) {
     return (
         <TableRow>
-            <Cell dataTest={`categoryName-${category.name}`}>
+            <Cell data-test={`categoryName-${category.name}`}>
                 {category.name}
             </Cell>
-            <Cell dataTest={`categoryDescription-${category.description}`}>
+            <Cell data-test={`categoryDescription-${category.description}`}>
                 {category.description}
             </Cell>
             <Cell className="flex gap-2">

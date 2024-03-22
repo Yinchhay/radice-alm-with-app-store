@@ -33,7 +33,7 @@ export function EditCategoryOverlay({
     return (
         <>
             <Button
-                dataTest={`editCategory-${category.name}`}
+                data-test={`editCategory-${category.name}`}
                 onClick={() => setShowOverlay(true)}
                 square={true}
             >

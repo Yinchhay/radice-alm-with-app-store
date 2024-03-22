@@ -25,7 +25,7 @@ export function CreateCategoryOverlay() {
     return (
         <>
             <Button
-                dataTest="createCategory"
+                data-test="createCategory"
                 onClick={() => setShowOverlay(true)}
                 square={true}
                 styleType="primary"

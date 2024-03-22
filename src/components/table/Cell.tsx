@@ -1,12 +1,23 @@
-export default function Cell({
-    children,
-    className = "",
-    dataTest,
-}: {
-    children?: React.ReactNode;
+import { forwardRef } from "react";
+
+type TableCell = React.TdHTMLAttributes<HTMLTableCellElement> & {
+    children: React.ReactNode;
     className?: string;
-    dataTest?: string;
-}) {
-    let cellStyle = "text-black px-6 py-4 rounded-md";
-    return <td data-test={dataTest} className={[cellStyle, className].join(" ")}>{children}</td>;
-}
+};
+
+const Cell = forwardRef<HTMLTableCellElement, TableCell>(
+    ({ className, children, ...props }, ref) => {
+        let cellStyle = "text-black px-6 py-4 rounded-md";
+        return (
+            <td
+                ref={ref}
+                className={[cellStyle, className].join(" ")}
+                {...props}
+            >
+                {children}
+            </td>
+        );
+    },
+);
+
+export default Cell;

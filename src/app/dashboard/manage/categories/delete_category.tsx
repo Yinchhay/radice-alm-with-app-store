@@ -42,7 +42,7 @@ export function DeleteCategoryOverlay({
         <>
             <div className="">
                 <Button
-                    dataTest={`deleteCategory-${category.name}`}
+                    data-test={`deleteCategory-${category.name}`}
                     onClick={() => setShowOverlay(true)}
                     square={true}
                     styleType="danger"
@@ -95,7 +95,7 @@ export function DeleteCategoryOverlay({
 function DeleteCategoryBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button dataTest="deleteCategoryBtn" disabled={formStatus.pending} styleType="danger">
+        <Button data-test="deleteCategoryBtn" disabled={formStatus.pending} styleType="danger">
             {formStatus.pending ? "Deleting" : "Delete"}
         </Button>
     );
