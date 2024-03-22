@@ -18,15 +18,30 @@ import {
     IconX,
 } from "@tabler/icons-react";
 import Pagination from "@/components/Pagination";
+import CheckList from "@/components/CheckList";
+import { arrayToCheckList } from "@/lib/arrayToCheckList";
 
 export default function Home() {
     const [showOverlay, setShowOverlay] = useState(false);
     const [fieldValue, setFieldValue] = useState("");
     const [paginationNumber, setPaginationNumber] = useState(1);
     const maxPage = 10;
-
+    const userMessyList = [
+        { username: "John", user_id: "32", age: 24 },
+        { username: "Sam", user_id: "2", age: 33 },
+        { username: "Dan", user_id: "44", age: 23 },
+    ];
+    const userMessyList2 = [
+        { username: "John", user_id: "12", age: 24 },
+        { username: "Sam", user_id: "54", age: 33 },
+        { username: "Tom", user_id: "2", age: 23 },
+    ];
+    let userList = arrayToCheckList(userMessyList, "username", "user_id");
+    userList[0].checked = true; // setting default first selected
+    let userList2 = arrayToCheckList(userMessyList2, "username", "user_id");
+    userList2[0].checked = true;
     return (
-        <div className="w-screen h-screen flex p-8 gap-8">
+        <div className="w-screen h-screen flex p-8 gap-8 flex-wrap justify-center">
             <div className="grid gap-4">
                 <div>
                     <div className="grid gap-2">
@@ -168,6 +183,24 @@ export default function Home() {
                         setPaginationNumber(pageNumber);
                         console.log(pageNumber);
                     }}
+                />
+            </div>
+            <div>
+                <h1 className="mb-2 font-bold">Checklist</h1>
+                <CheckList
+                    onChange={(updatedList) => {
+                        console.log(updatedList);
+                    }}
+                    title="Users"
+                    checkList={userList}
+                />
+                <CheckList
+                    atLeastOne={true}
+                    onChange={(updatedList) => {
+                        console.log(updatedList);
+                    }}
+                    title="Users (Atleast One)"
+                    checkList={userList2}
                 />
             </div>
         </div>
