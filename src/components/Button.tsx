@@ -2,15 +2,15 @@ import { forwardRef } from "react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     className?: string;
-    styleType?: "outline" | "primary" | "secondary" | "danger" | undefined;
+    variant?: "outline" | "primary" | "secondary" | "danger" | undefined;
     square?: boolean;
     children: React.ReactNode;
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, styleType, square, children, ...props }, ref) => {
+    ({ className, variant, square, children, ...props }, ref) => {
         let buttonStyle = "";
-        switch (styleType) {
+        switch (variant) {
             case "outline":
                 buttonStyle =
                     "bg-gray-100 text-black rounded-md outline outline-1 outline-gray-300";

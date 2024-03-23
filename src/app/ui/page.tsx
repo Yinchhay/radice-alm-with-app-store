@@ -24,6 +24,7 @@ import { arrayToCheckList } from "@/lib/arrayToCheckList";
 export default function Home() {
     const [showOverlay, setShowOverlay] = useState(false);
     const [fieldValue, setFieldValue] = useState("");
+    const [fieldSearchValue, setFieldSearchValue] = useState("");
     const [paginationNumber, setPaginationNumber] = useState(1);
     const maxPage = 10;
     const userMessyList = [
@@ -46,21 +47,21 @@ export default function Home() {
                 <div>
                     <div className="grid gap-2">
                         <h1 className="font-bold">Buttons:</h1>
-                        <Button styleType="outline">Outline</Button>
-                        <Button styleType="primary">Primary</Button>
-                        <Button styleType="secondary">Secondary</Button>
-                        <Button styleType="danger">Danger</Button>
+                        <Button variant="outline">Outline</Button>
+                        <Button variant="primary">Primary</Button>
+                        <Button variant="secondary">Secondary</Button>
+                        <Button variant="danger">Danger</Button>
                         <h1 className="font-bold">Buttons (Disabled):</h1>
-                        <Button styleType="outline" disabled={true}>
+                        <Button variant="outline" disabled={true}>
                             Outline
                         </Button>
-                        <Button styleType="primary" disabled={true}>
+                        <Button variant="primary" disabled={true}>
                             Primary
                         </Button>
-                        <Button styleType="secondary" disabled={true}>
+                        <Button variant="secondary" disabled={true}>
                             Secondary
                         </Button>
-                        <Button styleType="danger" disabled={true}>
+                        <Button variant="danger" disabled={true}>
                             Danger
                         </Button>
                     </div>
@@ -70,18 +71,18 @@ export default function Home() {
                 <h1 className="font-bold">Card:</h1>
                 <Card>
                     <p>Anything can go in here</p>
-                    <Button styleType="outline">Button</Button>
+                    <Button variant="outline">Button</Button>
                 </Card>
                 <h1 className="font-bold">Card (with custom className):</h1>
                 <Card className="grid place-items-end gap-2">
                     <p>className = grid place-items-end gap-2</p>
-                    <Button styleType="outline">Button</Button>
+                    <Button variant="outline">Button</Button>
                 </Card>
             </div>
             <div>
                 <h1 className="mb-2 font-bold">Overlay (Popup):</h1>
                 <Button
-                    styleType="outline"
+                    variant="outline"
                     onClick={() => {
                         setShowOverlay(true);
                     }}
@@ -100,14 +101,14 @@ export default function Home() {
                             </h1>
                             <div className="flex justify-end gap-2">
                                 <Button
-                                    styleType="outline"
+                                    variant="outline"
                                     onClick={() => {
                                         setShowOverlay(false);
                                     }}
                                 >
                                     Close
                                 </Button>
-                                <Button styleType="primary">Do Sth</Button>
+                                <Button variant="primary">Do Sth</Button>
                             </div>
                         </Card>
                     </Overlay>
@@ -115,7 +116,7 @@ export default function Home() {
             </div>
             <div>
                 <div className="grid gap-2">
-                    <h1 className="mb-2 font-bold">Input Fields:</h1>
+                    <h1 className="font-bold">Input Fields:</h1>
                     <InputField
                         placeholder="Basic Field"
                         id="myId"
@@ -128,6 +129,13 @@ export default function Home() {
                         onChange={(e) => setFieldValue(e.target.value)}
                     />
                     <p>Reactive Value: {fieldValue}</p>
+                    <InputField
+                        isSearch={true}
+                        placeholder="Search Field"
+                        value={fieldSearchValue}
+                        onChange={(e) => setFieldSearchValue(e.target.value)}
+                    />
+                    <p>Search for: {fieldSearchValue}</p>
                 </div>
             </div>
             <div>
@@ -138,7 +146,7 @@ export default function Home() {
                             <ColumName>Name</ColumName>
                             <ColumName>Description</ColumName>
                             <ColumName className="flex justify-end">
-                                <Button square={true} styleType="primary">
+                                <Button square={true} variant="primary">
                                     <IconPlus></IconPlus>
                                 </Button>
                             </ColumName>
@@ -151,7 +159,7 @@ export default function Home() {
                                     <Button square={true}>
                                         <IconEdit></IconEdit>
                                     </Button>
-                                    <Button square={true} styleType="danger">
+                                    <Button square={true} variant="danger">
                                         <IconX></IconX>
                                     </Button>
                                 </Cell>
@@ -163,7 +171,7 @@ export default function Home() {
                                     <Button square={true}>
                                         <IconEdit></IconEdit>
                                     </Button>
-                                    <Button square={true} styleType="danger">
+                                    <Button square={true} variant="danger">
                                         <IconX></IconX>
                                     </Button>
                                 </Cell>
