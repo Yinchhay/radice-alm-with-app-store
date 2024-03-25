@@ -28,7 +28,7 @@ export function CreateCategoryOverlay() {
                 data-test="createCategory"
                 onClick={() => setShowOverlay(true)}
                 square={true}
-                styleType="primary"
+                variant="primary"
             >
                 <IconPlus></IconPlus>
             </Button>
@@ -70,7 +70,7 @@ export function CreateCategoryOverlay() {
                             <div className="flex justify-end gap-2 my-3">
                                 <Button
                                     type="button"
-                                    styleType="outline"
+                                    variant="outline"
                                     onClick={() => {
                                         setShowOverlay(false);
                                     }}
@@ -90,7 +90,7 @@ export function CreateCategoryOverlay() {
 function CreateCategoryBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button disabled={formStatus.pending} styleType="primary">
+        <Button disabled={formStatus.pending} variant="primary">
             {formStatus.pending ? "Creating" : "Create"}
         </Button>
     );

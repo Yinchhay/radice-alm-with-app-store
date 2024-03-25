@@ -81,7 +81,7 @@ export function EditCategoryOverlay({
                             <div className="flex justify-end gap-2 my-3">
                                 <Button
                                     type="button"
-                                    styleType="outline"
+                                    variant="outline"
                                     onClick={() => {
                                         setShowOverlay(false);
                                     }}
@@ -101,7 +101,7 @@ export function EditCategoryOverlay({
 function EditCategoryBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button disabled={formStatus.pending} styleType="primary">
+        <Button disabled={formStatus.pending} variant="primary">
             {formStatus.pending ? "Editing" : "Edit"}
         </Button>
     );

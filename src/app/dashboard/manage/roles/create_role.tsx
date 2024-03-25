@@ -40,14 +40,14 @@ export function CreateRolesOverlay() {
                             <label htmlFor="name">Name</label>
                             <InputField name="name" id="name" />
                             <br />
-                            
+
                             {formState.errors && (
                                 <FormErrorMessages errors={formState.errors} />
                             )}
                             <div className="flex justify-end gap-2 my-3">
                                 <Button
                                     type="button"
-                                    styleType="outline"
+                                    variant="outline"
                                     onClick={() => {
                                         setShowOverlay(false);
                                     }}
@@ -67,7 +67,7 @@ export function CreateRolesOverlay() {
 function CreateRoleBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button disabled={formStatus.pending} styleType="primary">
+        <Button disabled={formStatus.pending} variant="primary">
             {formStatus.pending ? "Creating" : "Create"}
         </Button>
     );

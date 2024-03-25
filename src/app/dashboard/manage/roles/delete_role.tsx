@@ -8,11 +8,7 @@ import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { deleteRoleAction } from "./action";
 
-export function DeleteRole({
-    role,
-}: {
-    role: typeof roles.$inferSelect;
-}) {
+export function DeleteRole({ role }: { role: typeof roles.$inferSelect }) {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [formState, formAction] = useFormState(deleteRoleAction, {
         errors: null,
@@ -63,7 +59,7 @@ export function DeleteRole({
                             <div className="flex justify-end gap-2 my-3">
                                 <Button
                                     type="button"
-                                    styleType="outline"
+                                    variant="outline"
                                     onClick={() => {
                                         setShowOverlay(false);
                                     }}
@@ -83,7 +79,7 @@ export function DeleteRole({
 function DeleteRoleBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button disabled={formStatus.pending} styleType="danger">
+        <Button disabled={formStatus.pending} variant="danger">
             {formStatus.pending ? "Deleting" : "Delete"}
         </Button>
     );

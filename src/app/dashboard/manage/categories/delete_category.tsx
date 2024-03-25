@@ -45,7 +45,7 @@ export function DeleteCategoryOverlay({
                     data-test={`deleteCategory-${category.name}`}
                     onClick={() => setShowOverlay(true)}
                     square={true}
-                    styleType="danger"
+                    variant="danger"
                 >
                     <IconX></IconX>
                 </Button>
@@ -75,7 +75,7 @@ export function DeleteCategoryOverlay({
                             <div className="flex justify-end gap-2 my-3">
                                 <Button
                                     type="button"
-                                    styleType="outline"
+                                    variant="outline"
                                     onClick={() => {
                                         setShowOverlay(false);
                                     }}
@@ -95,7 +95,11 @@ export function DeleteCategoryOverlay({
 function DeleteCategoryBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button data-test="deleteCategoryBtn" disabled={formStatus.pending} styleType="danger">
+        <Button
+            data-test="deleteCategoryBtn"
+            disabled={formStatus.pending}
+            variant="danger"
+        >
             {formStatus.pending ? "Deleting" : "Delete"}
         </Button>
     );

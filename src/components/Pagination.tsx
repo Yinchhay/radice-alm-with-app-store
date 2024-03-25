@@ -37,7 +37,7 @@ export default function Pagination({
                     <div>{currentPage - 1}</div>
                 </Button>
             )}
-            <Button square={true} className="min-w-8" styleType="primary">
+            <Button square={true} className="min-w-8" variant="primary">
                 <div>{currentPage}</div>
             </Button>
             {currentPage + 1 < maxPage && (

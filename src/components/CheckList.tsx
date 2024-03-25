@@ -36,7 +36,7 @@ export default function CheckList({
                             key={checkboxElement.name + checkboxElement.value}
                         >
                             <input
-                                className="w-4 aspect-square"
+                                className="w-4 aspect-square flex-shrink-0"
                                 type="checkbox"
                                 id={
                                     checkboxElement.name + checkboxElement.value

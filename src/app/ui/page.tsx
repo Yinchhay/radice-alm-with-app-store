@@ -20,6 +20,7 @@ import {
 import Pagination from "@/components/Pagination";
 import CheckList from "@/components/CheckList";
 import { arrayToCheckList } from "@/lib/arrayToCheckList";
+import Selector from "@/components/Selector";
 
 export default function Home() {
     const [showOverlay, setShowOverlay] = useState(false);
@@ -37,10 +38,23 @@ export default function Home() {
         { username: "Sam", user_id: "54", age: 33 },
         { username: "Tom", user_id: "2", age: 23 },
     ];
+    const userMessyList3 = [
+        {
+            username: "Ema addsa d adsd adsadas",
+            user_id: "7",
+            age: 24,
+        },
+        { username: "Tyler", user_id: "8", age: 33 },
+        { username: "Ted", user_id: "9", age: 23 },
+    ];
     let userList = arrayToCheckList(userMessyList, "username", "user_id");
     userList[0].checked = true; // setting default first selected
     let userList2 = arrayToCheckList(userMessyList2, "username", "user_id");
     userList2[0].checked = true;
+    let userList3 = arrayToCheckList(userMessyList3, "username", "user_id");
+    userList3[0].checked = true;
+
+    const [showSelectorOverlay, setShowSelectorOverlay] = useState(false);
     return (
         <div className="w-screen h-screen flex p-8 gap-8 flex-wrap justify-center">
             <div className="grid gap-4">
@@ -210,6 +224,43 @@ export default function Home() {
                     title="Users (Atleast One)"
                     checkList={userList2}
                 />
+            </div>
+            <div>
+                <h1 className="mb-2 font-bold">Selector</h1>
+                <Button
+                    onClick={() => {
+                        setShowSelectorOverlay(true);
+                    }}
+                >
+                    Show Selector
+                </Button>
+                <div>
+                    {showSelectorOverlay && (
+                        <Selector
+                            className=""
+                            selectorTitle="Add Something"
+                            searchPlaceholder="Search Something"
+                            checkListTitle="Somethings"
+                            checkList={userList3}
+                            onSearchChange={(searchText) => {
+                                console.log(searchText);
+                            }}
+                            onCheckChange={(updatedList) => {
+                                console.log(updatedList);
+                            }}
+                            onCancel={() => {
+                                setShowSelectorOverlay(false);
+                            }}
+                            onConfirm={() => {
+                                alert(
+                                    "User confirmed (this alert is for testing)",
+                                );
+                                console.log("User confirmed");
+                                setShowSelectorOverlay(false);
+                            }}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );
