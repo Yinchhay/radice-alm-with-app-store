@@ -10,11 +10,13 @@ export default function CheckList({
     title,
     checkList,
     atLeastOne = false,
+    disabled,
     onChange,
 }: {
     title: string;
     checkList: CheckBoxElement[];
     atLeastOne?: boolean;
+    disabled?: boolean;
     onChange?: (updatedList: CheckBoxElement[]) => void;
 }) {
     const [checkboxElements, setCheckboxElements] = useState<CheckBoxElement[]>(
@@ -36,6 +38,7 @@ export default function CheckList({
                             key={checkboxElement.name + checkboxElement.value}
                         >
                             <input
+                                disabled={disabled}
                                 className="w-4 aspect-square flex-shrink-0"
                                 type="checkbox"
                                 id={
