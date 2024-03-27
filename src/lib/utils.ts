@@ -19,8 +19,16 @@ export const PermissionNames = new Map<number, string>([
     [Permissions.DELETE_PROJECTS, "Delete projects"],
 ]);
  
-export const localDebug = (message: string, from: string): void => {
+export function localDebug(message: string, from: string): void {
     if (process.env.NODE_ENV === "development") {
         console.debug(`From ${from}: ${message}`);
     }
 };
+
+export function readBearerToken(authorizationHeader: string): string | null {
+    const [authScheme, token] = authorizationHeader.split(" ") as [string, string | undefined];
+    if (authScheme !== "Bearer") {
+        return null;
+    }
+    return token ?? null;
+}

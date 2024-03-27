@@ -15,7 +15,7 @@ import { loginFormSchema } from "./schema";
 import { z } from "zod";
 import { ErrorMessage } from "@/types/error";
 import { localDebug } from "@/lib/utils";
-import { revalidateTags } from "@/lib/serverUtils";
+import { revalidateTags } from "@/lib/server_utils";
 import { redirect } from "next/navigation";
 
 export async function loginAction(

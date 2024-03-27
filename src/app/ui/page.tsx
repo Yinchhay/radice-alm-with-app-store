@@ -19,7 +19,7 @@ import {
 } from "@tabler/icons-react";
 import Pagination from "@/components/Pagination";
 import CheckList from "@/components/CheckList";
-import { arrayToCheckList } from "@/lib/arrayToCheckList";
+import { arrayToCheckList } from "@/lib/array_to_check_list";
 import Selector from "@/components/Selector";
 
 export default function Home() {

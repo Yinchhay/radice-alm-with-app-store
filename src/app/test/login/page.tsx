@@ -1,5 +1,5 @@
 import { lucia } from "@/auth/lucia";
-import { revalidateTags } from "@/lib/serverUtils";
+import { revalidateTags } from "@/lib/server_utils";
 import { GetUserRolesAndRolePermissions_C_Tag, getUserByEmail } from "@/repositories/users";
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers";

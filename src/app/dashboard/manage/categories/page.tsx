@@ -1,4 +1,3 @@
-import { getCategories_C } from "@/repositories/category";
 import { Suspense } from "react";
 import Table from "@/components/table/Table";
 import TableHeader from "@/components/table/TableHeader";
@@ -6,14 +5,19 @@ import ColumName from "@/components/table/ColumnName";
 import TableBody from "@/components/table/TableBody";
 import TableRow from "@/components/table/TableRow";
 import Cell from "@/components/table/Cell";
-import { categories } from "@/drizzle/schema";
 import { CreateCategoryOverlay } from "./create_category";
 import { EditCategoryOverlay } from "./edit_category";
 import { DeleteCategoryOverlay } from "./delete_category";
+import { fetchCategories } from "./fetch";
+import { categories } from "@/drizzle/schema";
 
 export default async function ManageCategories() {
-    const categories = await getCategories_C();
-    const CategoryList = categories.map((category) => {
+    const result = await fetchCategories();
+    if (!result.success) {
+        throw new Error(result.message);
+    }
+
+    const CategoryList = result.data.categories.map((category) => {
         return <Category key={category.id} category={category} />;
     });
 
@@ -30,7 +34,7 @@ export default async function ManageCategories() {
                         </ColumName>
                     </TableHeader>
                     <TableBody>
-                        {categories.length > 0 ? (
+                        {result.data.categories.length > 0 ? (
                             CategoryList
                         ) : (
                             // TODO: style here

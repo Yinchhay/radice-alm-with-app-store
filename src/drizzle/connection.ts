@@ -1,5 +1,5 @@
 import mysql, { ConnectionOptions } from "mysql2/promise";
-import "@/lib/loadEnv";
+import "@/lib/load_env";
 
 export const connectionConfig: ConnectionOptions = {
     host: process.env.DB_HOST ?? "localhost",

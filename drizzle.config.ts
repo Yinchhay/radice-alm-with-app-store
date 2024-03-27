@@ -1,5 +1,5 @@
 import type { Config } from 'drizzle-kit';
-import '@/lib/loadEnv'
+import '@/lib/load_env'
 
 export default {
   introspect: {

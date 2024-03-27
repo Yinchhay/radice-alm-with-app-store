@@ -5,7 +5,7 @@
 import { GetUserById_C_Tag, getUserById_C } from "@/repositories/users";
 import { Button } from "./btn";
 import { Metadata } from "next";
-import { getBaseUrl, revalidateTags } from "@/lib/serverUtils";
+import { getBaseUrl, revalidateTags } from "@/lib/server_utils";
 
 // dynamic metadata
 export async function generateMetadata({

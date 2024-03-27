@@ -1,6 +1,13 @@
 import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
 import { localDebug } from "./utils";
 import { Permissions } from "@/types/IAM";
+import { cache } from "react";
+import {
+    buildErrorResponse,
+    buildNoBearerTokenErrorResponse,
+    buildNoPermissionErrorResponse,
+} from "./response";
+import { lucia } from "@/auth/lucia";
 
 /**
  * This function take a user id and a set of required permissions and return a boolean and a message
@@ -11,59 +18,61 @@ import { Permissions } from "@/types/IAM";
  * if user has permission in the array of required permissions, return true.
  * Important: getUserRolesAndRolePermissions_C is cached and is invalidated upon login.
  */
-export const hasPermission = async (
-    userId: string,
-    requiredPermissions: Set<Permissions>,
-): Promise<{
-    canAccess: boolean;
-    message: string;
-}> => {
-    try {
-        if (requiredPermissions.size === 0) {
-            return {
-                canAccess: false,
-                message:
-                    "Required permission is required to check user has permission or not",
-            };
-        }
-
-        const userRoleAndRolePermissions =
-            await getUserRolesAndRolePermissions_C(userId);
-
-        for (const userRole of userRoleAndRolePermissions) {
-            if (!userRole.role.isActive) {
-                continue;
+export const hasPermission = cache(
+    async (
+        userId: string,
+        requiredPermissions: Set<Permissions>,
+    ): Promise<{
+        canAccess: boolean;
+        message: string;
+    }> => {
+        try {
+            if (requiredPermissions.size === 0) {
+                return {
+                    canAccess: false,
+                    message:
+                        "Required permission is required to check user has permission or not",
+                };
             }
 
-            for (const rolePermission of userRole.role.rolePermissions) {
-                if (requiredPermissions.has(rolePermission.permissionId)) {
-                    if (!rolePermission.permission.isActive) {
-                        continue;
-                    }
+            const userRoleAndRolePermissions =
+                await getUserRolesAndRolePermissions_C(userId);
 
-                    return {
-                        canAccess: true,
-                        message: `The user has and uses ${rolePermission.permission.name} permission.`,
-                    };
+            for (const userRole of userRoleAndRolePermissions) {
+                if (!userRole.role.isActive) {
+                    continue;
+                }
+
+                for (const rolePermission of userRole.role.rolePermissions) {
+                    if (requiredPermissions.has(rolePermission.permissionId)) {
+                        if (!rolePermission.permission.isActive) {
+                            continue;
+                        }
+
+                        return {
+                            canAccess: true,
+                            message: `The user has and uses ${rolePermission.permission.name} permission.`,
+                        };
+                    }
                 }
             }
+        } catch (error: any) {
+            localDebug(error.message, "hasPermission()");
         }
-    } catch (error: any) {
-        localDebug(error.message, "hasPermission()");
-    }
 
-    return {
-        canAccess: false,
-        message: "The user does not have the required permission.",
-    };
-};
+        return {
+            canAccess: false,
+            message: "The user does not have the required permission.",
+        };
+    },
+);
 
 /**
  * I believe since this is often used for internal users,
  * the data structure for this should be Map so that it will improve performance
  * which is better than using object. And the reason I create the routeRequiredPermissions
- * here because exporting in page.tsx is not allow in production, and I need route required 
- * permissions for e2e test 
+ * here because exporting in page.tsx is not allow in production, and I need route required
+ * permissions for e2e test
  * - YatoRizzGod
  */
 type routeKey =
@@ -118,3 +127,38 @@ export const routeRequiredPermissions = new Map<routeKey, Set<Permissions>>([
         ]),
     ],
 ]);
+
+export const checkBearerAndPermission = async (
+    request: Request,
+    requiredPermissions: Set<Permissions>,
+): Promise<{ errorNoBearerToken: boolean; errorNoPermission: boolean }> => {
+    const authorizationHeader = request.headers.get("Authorization");
+    const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+    if (!sessionId) {
+        return {
+            errorNoBearerToken: true,
+            errorNoPermission: false,
+        };
+    }
+
+    const { session, user } = await lucia.validateSession(sessionId);
+    if (!session || !user) {
+        return {
+            errorNoBearerToken: true,
+            errorNoPermission: false,
+        };
+    }
+
+    const userPermission = await hasPermission(user.id, requiredPermissions);
+    if (!userPermission.canAccess) {
+        return {
+            errorNoBearerToken: false,
+            errorNoPermission: true,
+        };
+    }
+
+    return {
+        errorNoBearerToken: false,
+        errorNoPermission: false,
+    };
+};

@@ -1,24 +1,7 @@
-import { z } from "zod";
 import { CreateRolesOverlay } from "./create_role";
 import { getRoles_C } from "@/repositories/role";
 import { Role } from "./role";
 import { Suspense } from "react";
-
-export const createRoleFormSchema = z.object({
-    name: z.string().min(1, {
-        message: "Role name is required",
-    }),
-});
-
-export const deleteRoleFormSchema = z.object({
-    roleId: z
-        .number({
-            required_error: "Role id is required",
-        })
-        .positive({
-            message: "Role id must be positive",
-        }),
-});
 
 export default async function ManageRoles() {
     const roles = await getRoles_C();

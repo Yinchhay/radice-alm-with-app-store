@@ -39,6 +39,10 @@ declare module "lucia" {
 // declare type for lucia so that we when we get session from lucia it has type
 interface DatabaseUserAttributes extends InferSelectModel<typeof users> {}
 
+export const getSessionCookie = (): string | null => {
+    return cookies().get(lucia.sessionCookieName)?.value ?? null;
+}
+
 /**
  * using cache to prevent multiple calls to database, upon page render
  * react will memoize the result of this function
@@ -48,7 +52,7 @@ export const validateRequest = cache(
     async (): Promise<
         { user: User; session: Session } | { user: null; session: null }
     > => {
-        const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
+        const sessionId = getSessionCookie();
         if (!sessionId) {
             return {
                 user: null,

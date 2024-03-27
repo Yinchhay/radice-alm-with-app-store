@@ -1,6 +1,5 @@
 "use server";
 import { z } from "zod";
-import { createRoleFormSchema, deleteRoleFormSchema } from "./page";
 import {
     ActionResult,
     formatZodError,
@@ -14,6 +13,7 @@ import { revalidateTag } from "next/cache";
 import { hasPermission } from "@/lib/IAM";
 import { getAuthUser } from "@/auth/lucia";
 import { Permissions } from "@/types/IAM";
+import { createRoleFormSchema, deleteRoleFormSchema } from "./schema";
 
 export async function createRoleAction(
     prevState: any,

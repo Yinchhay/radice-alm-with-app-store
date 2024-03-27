@@ -27,12 +27,6 @@ export const editCategory = async (
 };
 
 export type GetCategories_C_Tag = `getCategories_C`;
-export const getCategories_C = cache(
-    async () => {
-        return db.query.categories.findMany();
-    },
-    [],
-    {
-        tags: ["getCategories_C"],
-    },
-);
+export const getCategories = async () => {
+    return db.query.categories.findMany();
+};

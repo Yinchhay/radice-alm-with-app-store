@@ -22,7 +22,7 @@ import { MysqlErrorCodes } from "@/types/db";
 import { hasPermission } from "@/lib/IAM";
 import { getAuthUser } from "@/auth/lucia";
 import { Permissions } from "@/types/IAM";
-import { revalidateTags } from "@/lib/serverUtils";
+import { revalidateTags } from "@/lib/server_utils";
 
 export async function createCategoryAction(
     prevState: any,

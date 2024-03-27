@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { readBearerToken } from "./lib/utils";
+import { HttpStatusCode } from "./types/http";
+import { buildErrorResponse, buildNoBearerTokenErrorResponse } from "./lib/response";
 
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
@@ -16,6 +19,15 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(
             new URL("/dashboard/manage/associated-project", request.url),
         );
+    }
+
+    if (pathname.startsWith("/api/internal")) {
+        const authorizationHeader = request.headers.get("Authorization");
+        const sessionId = readBearerToken(authorizationHeader ?? "");
+
+        if (!sessionId) {
+            return buildNoBearerTokenErrorResponse();
+        }
     }
 
     return NextResponse.next();
