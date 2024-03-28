@@ -1,19 +1,20 @@
-import { generateAndFormatZodError } from "@/lib/form";
 import { checkBearerAndPermission, routeRequiredPermissions } from "@/lib/IAM";
 import {
-    buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
+    buildSomethingWentWrongErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { getCategories } from "@/repositories/category";
-import { ErrorMessage } from "@/types/error";
 
 type GetCategoriesReturnType = Awaited<ReturnType<typeof getCategories>>;
 
 export type FetchCategoriesData = {
     categories: GetCategoriesReturnType;
 };
+
+const successMessage = "Get categories successfully";
+const unsuccessMessage = "Get categories failed";
 
 export async function GET(request: Request) {
     try {
@@ -30,19 +31,10 @@ export async function GET(request: Request) {
         }
 
         const categories = await getCategories();
-        return buildSuccessResponse(
-            {
-                categories: categories,
-            } as FetchCategoriesData,
-            "Get categories successfully.",
-        );
+        return buildSuccessResponse<FetchCategoriesData>(successMessage, {
+            categories: categories,
+        });
     } catch (error: any) {
-        return buildErrorResponse(
-            "Get categories failed.",
-            generateAndFormatZodError(
-                "unknown",
-                ErrorMessage.SomethingWentWrong,
-            ),
-        );
+        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
     }
 }

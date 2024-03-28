@@ -6,6 +6,7 @@ import {
     editCategoryFormSchema,
 } from "./schema";
 import {
+    actionErrorSomethingWentWrong,
     ActionResult,
     formatZodError,
     generateAndFormatZodError,
@@ -23,6 +24,7 @@ import { hasPermission } from "@/lib/IAM";
 import { getAuthUser } from "@/auth/lucia";
 import { Permissions } from "@/types/IAM";
 import { revalidateTags } from "@/lib/server_utils";
+import { fetchDeleteCategoryById } from "./fetch";
 
 export async function createCategoryAction(
     prevState: any,
@@ -163,50 +165,22 @@ export async function deleteCategoryAction(
     formData: FormData,
 ): Promise<ActionResult<z.infer<typeof deleteCategoryFormSchema>>> {
     try {
-        const requiredPermission = new Set([Permissions.DELETE_CATEGORIES]);
-        const user = await getAuthUser();
-        if (!user) {
+        const result = await fetchDeleteCategoryById(categoryId);
+        if (!result.success) {
             return {
-                errors: generateAndFormatZodError(
-                    "unknown",
-                    ErrorMessage.UserUnauthenticated,
-                ),
+                errors: result.errors,
             };
         }
 
-        const userPermission = await hasPermission(user.id, requiredPermission);
-        if (!userPermission.canAccess) {
-            return {
-                errors: generateAndFormatZodError(
-                    "unknown",
-                    ErrorMessage.NoPermissionToPerformThisAction,
-                ),
-            };
-        }
-
-        const data: z.infer<typeof deleteCategoryFormSchema> = {
-            categoryId: categoryId,
-        };
-
-        const validationResult = deleteCategoryFormSchema.safeParse(data);
-        if (!validationResult.success) {
-            return {
-                errors: formatZodError(validationResult.error),
-            };
-        }
-
-        await deleteCategoryById(data.categoryId);
+        // even though we invalidated the cache tag in api, however it will not update the ui 
+        // until we refresh the page. so we invalidate cache tag in server action to make ui change
         revalidateTags<GetCategories_C_Tag>("getCategories_C");
-
         return {
             errors: null,
         };
     } catch (error) {
-        return {
-            errors: generateAndFormatZodError(
-                "unknown",
-                ErrorMessage.SomethingWentWrong,
-            ),
-        };
+        return actionErrorSomethingWentWrong<
+            z.infer<typeof deleteCategoryFormSchema>
+        >();
     }
 }

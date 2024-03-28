@@ -1,3 +1,4 @@
+import { ErrorMessage } from "@/types/error";
 import z from "zod";
 
 export const generateZodError = (path: string, message: string): z.ZodError => {
@@ -35,4 +36,13 @@ export const generateAndFormatZodError = <T>(
 
 export type ActionResult<T> = {
     errors: T_ZodErrorFormatted<T> | null;
+};
+
+export const actionErrorSomethingWentWrong = <T>(): ActionResult<T> => {
+    return {
+        errors: generateAndFormatZodError(
+            "unknown",
+            ErrorMessage.SomethingWentWrong,
+        ),
+    };
 };

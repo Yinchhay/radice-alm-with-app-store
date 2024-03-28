@@ -1,9 +1,9 @@
-import { ResponseJson } from "@/lib/response";
+import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchCategoriesData } from "@/app/api/internal/category/route";
 import { getBaseUrl } from "@/lib/server_utils";
 import { getSessionCookie } from "@/auth/lucia";
 import { GetCategories_C_Tag } from "@/repositories/category";
-import { ErrorMessage } from "@/types/error";
+import { FetchDeleteCategory } from "@/app/api/internal/category/[category_id]/delete/route";
 
 export const fetchCategories = async (): ResponseJson<FetchCategoriesData> => {
     try {
@@ -22,10 +22,26 @@ export const fetchCategories = async (): ResponseJson<FetchCategoriesData> => {
         });
         return await response.json();
     } catch (error: any) {
-        return {
-            success: false,
-            message: ErrorMessage.SomethingWentWrong,
-            errors: {},
-        };
+        return fetchErrorSomethingWentWrong;
+    }
+};
+
+export const fetchDeleteCategoryById = async (
+    categoryId: number,
+): ResponseJson<FetchDeleteCategory> => {
+    try {
+        const sessionId = getSessionCookie();
+        const response = await fetch(
+            `${getBaseUrl()}/api/internal/category/${categoryId}/delete`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
     }
 };

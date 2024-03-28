@@ -1,22 +1,21 @@
 import { HttpStatusCode } from "@/types/http";
-import { T_ZodErrorFormatted } from "./form";
+import { generateAndFormatZodError, T_ZodErrorFormatted } from "./form";
+import { ErrorMessage } from "@/types/error";
 
 export type SuccessResponse<T> = {
     data: T;
     message: string;
     success: true;
 };
-export const buildSuccessResponse = <T>(data: T, message: string) => {
-    return Response.json(
-        {
-            data: data,
-            message: message,
-            success: true,
-        } as SuccessResponse<T>,
-        {
-            status: HttpStatusCode.OK_200,
-        },
-    );
+export const buildSuccessResponse = <T>(message: string, data: T) => {
+    const obj: SuccessResponse<T> = {
+        data: data,
+        message: message,
+        success: true,
+    };
+    return Response.json(obj, {
+        status: HttpStatusCode.OK_200,
+    });
 };
 
 export type ErrorResponse<T> = {
@@ -29,21 +28,26 @@ export const buildErrorResponse = <T>(
     errors: T_ZodErrorFormatted<T>,
     status: HttpStatusCode = HttpStatusCode.INTERNAL_SERVER_ERROR_500,
 ) => {
-    return Response.json(
-        {
-            message: message,
-            errors: errors,
-            success: false,
-        } as ErrorResponse<T>,
-        {
-            status,
-        },
-    );
+    const obj: ErrorResponse<T> = {
+        message: message,
+        errors: errors,
+        success: false,
+    };
+    return Response.json(obj, {
+        status,
+    });
 };
 
 export type ResponseJson<T, E = unknown> = Promise<
     SuccessResponse<T> | ErrorResponse<E>
 >;
+
+// fetch catch error return to ensure consistency
+export const fetchErrorSomethingWentWrong: ErrorResponse<{}> = {
+    success: false,
+    message: ErrorMessage.SomethingWentWrong,
+    errors: {},
+};
 
 // Frequently used error responses
 export const buildNoBearerTokenErrorResponse = () => {
@@ -59,5 +63,12 @@ export const buildNoPermissionErrorResponse = () => {
         "Unauthorized, you don't have permission to access this route",
         {},
         HttpStatusCode.FORBIDDEN_403,
+    );
+};
+
+export const buildSomethingWentWrongErrorResponse = (message: string) => {
+    return buildErrorResponse(
+        message,
+        generateAndFormatZodError("unknown", ErrorMessage.SomethingWentWrong),
     );
 };

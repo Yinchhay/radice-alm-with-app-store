@@ -8,6 +8,7 @@ import {
     buildNoPermissionErrorResponse,
 } from "./response";
 import { lucia } from "@/auth/lucia";
+import { User } from "lucia";
 
 /**
  * This function take a user id and a set of required permissions and return a boolean and a message
@@ -131,13 +132,18 @@ export const routeRequiredPermissions = new Map<routeKey, Set<Permissions>>([
 export const checkBearerAndPermission = async (
     request: Request,
     requiredPermissions: Set<Permissions>,
-): Promise<{ errorNoBearerToken: boolean; errorNoPermission: boolean }> => {
+): Promise<{
+    errorNoBearerToken: boolean;
+    errorNoPermission: boolean;
+    user: User | null;
+}> => {
     const authorizationHeader = request.headers.get("Authorization");
     const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
     if (!sessionId) {
         return {
             errorNoBearerToken: true,
             errorNoPermission: false,
+            user: null,
         };
     }
 
@@ -146,6 +152,7 @@ export const checkBearerAndPermission = async (
         return {
             errorNoBearerToken: true,
             errorNoPermission: false,
+            user: null,
         };
     }
 
@@ -154,11 +161,13 @@ export const checkBearerAndPermission = async (
         return {
             errorNoBearerToken: false,
             errorNoPermission: true,
+            user: null,
         };
     }
 
     return {
         errorNoBearerToken: false,
         errorNoPermission: false,
+        user: user,
     };
 };
