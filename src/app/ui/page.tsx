@@ -22,7 +22,7 @@ import CheckList from "@/components/CheckList";
 import { arrayToCheckList } from "@/lib/array_to_check_list";
 import Selector from "@/components/Selector";
 import Dropdown from "@/components/Dropdown";
-import { arrayToDropdownList } from "@/lib/arrayToDropdownList";
+import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
 
 export default function Home() {
     const [showOverlay, setShowOverlay] = useState(false);

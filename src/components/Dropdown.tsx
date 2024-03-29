@@ -1,7 +1,7 @@
 import { IconCheck, IconChevronDown } from "@tabler/icons-react";
 import { useState } from "react";
 
-interface DropdownElement {
+export interface DropdownElement {
     name: string;
     value: string;
 }

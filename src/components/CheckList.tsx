@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-interface CheckBoxElement {
+export interface CheckBoxElement {
     name: string;
     value: string;
     checked: boolean;

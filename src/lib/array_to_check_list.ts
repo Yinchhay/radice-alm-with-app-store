@@ -1,13 +1,9 @@
-interface CheckBoxElement {
-    name: string;
-    value: string;
-    checked: boolean;
-}
+import { CheckBoxElement } from "@/components/CheckList";
 
 export function arrayToCheckList<T>(
     array: T[],
     nameKey: keyof T,
-    valueKey: keyof T
+    valueKey: keyof T,
 ): CheckBoxElement[] {
     return array.map((item) => ({
         name: item[nameKey] as unknown as string,

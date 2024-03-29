@@ -1,7 +1,4 @@
-interface DropdownElement {
-    name: string;
-    value: string;
-}
+import { DropdownElement } from "@/components/Dropdown";
 
 export function arrayToDropdownList<T>(
     array: T[],
