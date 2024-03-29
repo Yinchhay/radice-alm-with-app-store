@@ -6,6 +6,7 @@ import { InferSelectModel } from "drizzle-orm";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { localDebug } from "@/lib/utils";
+import { getSessionCookie } from "@/lib/server_utils";
 
 const adapter = new DrizzleMySQLAdapter(db, sessions, users);
 
@@ -39,10 +40,6 @@ declare module "lucia" {
 // declare type for lucia so that we when we get session from lucia it has type
 interface DatabaseUserAttributes extends InferSelectModel<typeof users> {}
 
-export const getSessionCookie = (): string | null => {
-    return cookies().get(lucia.sessionCookieName)?.value ?? null;
-}
-
 /**
  * using cache to prevent multiple calls to database, upon page render
  * react will memoize the result of this function
@@ -52,7 +49,7 @@ export const validateRequest = cache(
     async (): Promise<
         { user: User; session: Session } | { user: null; session: null }
     > => {
-        const sessionId = getSessionCookie();
+        const sessionId = await getSessionCookie();
         if (!sessionId) {
             return {
                 user: null,

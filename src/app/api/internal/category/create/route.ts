@@ -1,4 +1,3 @@
-import { createCategoryFormSchema } from "@/app/dashboard/manage/categories/schema";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
@@ -15,6 +14,7 @@ import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
+import { createCategoryFormSchema } from "../schema";
 
 export type FetchCreateCategory = Record<string, never>;
 
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             throw new Error(ErrorMessage.SomethingWentWrong);
         }
 
-        revalidateTags<GetCategories_C_Tag>("getCategories_C");
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return buildSuccessResponse<FetchCreateCategory>(successMessage, {});
     } catch (error: any) {
         if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {

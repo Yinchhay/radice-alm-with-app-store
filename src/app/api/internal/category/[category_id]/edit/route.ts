@@ -1,4 +1,3 @@
-import { editCategoryFormSchema } from "@/app/dashboard/manage/categories/schema";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
@@ -15,6 +14,7 @@ import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
+import { editCategoryFormSchema } from "../../schema";
 
 export type FetchEditCategory = Record<string, never>;
 
@@ -56,7 +56,7 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        revalidateTags<GetCategories_C_Tag>("getCategories_C");
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return buildSuccessResponse<FetchEditCategory>(successMessage, {});
     } catch (error: any) {
         if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {

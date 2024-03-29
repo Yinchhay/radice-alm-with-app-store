@@ -1,42 +1,54 @@
+// add 'use server' on top of the file if u want to make api request on the server
+// instead of client side.
+// Note: adding 'use server' require proper testing to ensure nothing break
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchCategoriesData } from "@/app/api/internal/category/route";
-import { getBaseUrl } from "@/lib/server_utils";
-import { getSessionCookie } from "@/auth/lucia";
+import {
+    getBaseUrl,
+    getSessionCookie,
+    revalidateTags,
+} from "@/lib/server_utils";
 import { GetCategories_C_Tag } from "@/repositories/category";
 import { FetchDeleteCategory } from "@/app/api/internal/category/[category_id]/delete/route";
-import { FetchEditCategory } from "@/app/api/internal/category/[category_id]/edit/route";
 import { z } from "zod";
-import { createCategoryFormSchema, editCategoryFormSchema } from "./schema";
+import {
+    createCategoryFormSchema,
+    editCategoryFormSchema,
+} from "@/app/api/internal/category/schema";
 import { FetchCreateCategory } from "@/app/api/internal/category/create/route";
+import { FetchEditCategory } from "@/app/api/internal/category/[category_id]/edit/route";
 
-export const fetchCategories = async (): ResponseJson<FetchCategoriesData> => {
+export async function fetchCategories(): ResponseJson<FetchCategoriesData> {
     try {
-        const sessionId = getSessionCookie();
+        const sessionId = await getSessionCookie();
         // type casting to ensure that the tags are correct, if there is a typo, it will show an error
         const cacheTag: GetCategories_C_Tag = "getCategories_C";
-        const response = await fetch(`${getBaseUrl()}/api/internal/category`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${sessionId}`,
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/category`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                next: {
+                    tags: [cacheTag],
+                },
+                cache: "force-cache",
             },
-            next: {
-                tags: [cacheTag],
-            },
-            cache: "force-cache",
-        });
+        );
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
     }
-};
+}
 
-export const fetchCreateCategory = async (
+export async function fetchCreateCategory(
     body: z.infer<typeof createCategoryFormSchema>,
-): ResponseJson<FetchCreateCategory> => {
+): ResponseJson<FetchCreateCategory> {
     try {
-        const sessionId = getSessionCookie();
+        const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${getBaseUrl()}/api/internal/category/create`,
+            `${await getBaseUrl()}/api/internal/category/create`,
             {
                 method: "POST",
                 headers: {
@@ -45,19 +57,20 @@ export const fetchCreateCategory = async (
                 body: JSON.stringify(body),
             },
         );
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
     }
-};
+}
 
-export const fetchDeleteCategoryById = async (
+export async function fetchDeleteCategoryById(
     categoryId: number,
-): ResponseJson<FetchDeleteCategory> => {
+): ResponseJson<FetchDeleteCategory> {
     try {
-        const sessionId = getSessionCookie();
+        const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${getBaseUrl()}/api/internal/category/${categoryId}/delete`,
+            `${await getBaseUrl()}/api/internal/category/${categoryId}/delete`,
             {
                 method: "DELETE",
                 headers: {
@@ -65,19 +78,20 @@ export const fetchDeleteCategoryById = async (
                 },
             },
         );
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
     }
-};
+}
 
-export const fetchEditCategoryById = async (
+export async function fetchEditCategoryById(
     body: z.infer<typeof editCategoryFormSchema>,
-): ResponseJson<FetchEditCategory> => {
+): ResponseJson<FetchEditCategory> {
     try {
-        const sessionId = getSessionCookie();
+        const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${getBaseUrl()}/api/internal/category/${body.categoryId}/edit`,
+            `${await getBaseUrl()}/api/internal/category/${body.categoryId}/edit`,
             {
                 method: "PATCH",
                 headers: {
@@ -86,8 +100,9 @@ export const fetchEditCategoryById = async (
                 body: JSON.stringify(body),
             },
         );
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
     }
-};
+}

@@ -2,13 +2,12 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import InputField from "@/components/InputField";
 import Overlay from "@/components/Overlay";
 import { categories } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
-import { deleteCategoryAction } from "./action";
+import { useFormStatus } from "react-dom";
 import { IconX } from "@tabler/icons-react";
+import { fetchDeleteCategoryById } from "./fetch";
 
 export function DeleteCategoryOverlay({
     category,
@@ -16,27 +15,15 @@ export function DeleteCategoryOverlay({
     category: typeof categories.$inferSelect;
 }) {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
-    /**
-     * bind the category id to the deleteCategoryAction to prevent client side from changing the
-     * category id via inspect element.
-     * for the bind function, the first argument is the context, and the second argument is the
-     * first arg of the function. if the function has more than one arg, the second arg will be the
-     * second arg of the function, and so on.
-     */
-    const boundDeleteCategoryAction = deleteCategoryAction.bind(
-        null,
-        category.id,
-    );
-    const [formState, formAction] = useFormState(boundDeleteCategoryAction, {
-        errors: null,
-    });
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchDeleteCategoryById>>>();
 
     useEffect(() => {
         // close the overlay after deleting successfully
-        if (showOverlay && formState.errors === null) {
+        if (showOverlay && result?.success) {
             setShowOverlay(false);
         }
-    }, [formState]);
+    }, [result]);
 
     return (
         <>
@@ -68,9 +55,16 @@ export function DeleteCategoryOverlay({
                                 </p>
                             </div>
                         </div>
-                        <form action={formAction}>
-                            {formState.errors && (
-                                <FormErrorMessages errors={formState.errors} />
+                        <form
+                            action={async (formData: FormData) => {
+                                const result = await fetchDeleteCategoryById(
+                                    category.id,
+                                );
+                                setResult(result);
+                            }}
+                        >
+                            {!result?.success && result?.errors && (
+                                <FormErrorMessages errors={result?.errors} />
                             )}
                             <div className="flex justify-end gap-2 my-3">
                                 <Button

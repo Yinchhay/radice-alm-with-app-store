@@ -64,7 +64,7 @@ async function login(formData: FormData): Promise<ActionResult> {
     );
 
     // invalidate permission cache
-    revalidateTags<GetUserRolesAndRolePermissions_C_Tag>(`getUserRolesAndRolePermissions_C:${userExists.id}`);
+    await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>(`getUserRolesAndRolePermissions_C:${userExists.id}`);
 
     return redirect("/test/dashboard");
 }

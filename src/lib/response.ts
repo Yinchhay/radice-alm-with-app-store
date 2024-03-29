@@ -52,7 +52,7 @@ export const fetchErrorSomethingWentWrong: ErrorResponse<{}> = {
 // Frequently used error responses
 export const buildNoBearerTokenErrorResponse = () => {
     return buildErrorResponse(
-        "Unauthorized, authorization header is missing or invalid",
+        "Unauthorized, authorization token is missing or invalid",
         {},
         HttpStatusCode.UNAUTHORIZED_401,
     );
@@ -60,7 +60,7 @@ export const buildNoBearerTokenErrorResponse = () => {
 
 export const buildNoPermissionErrorResponse = () => {
     return buildErrorResponse(
-        "Unauthorized, you don't have permission to access this route",
+        ErrorMessage.NoPermissionToPerformThisAction,
         {},
         HttpStatusCode.FORBIDDEN_403,
     );

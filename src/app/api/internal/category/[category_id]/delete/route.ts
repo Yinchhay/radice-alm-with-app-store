@@ -1,4 +1,3 @@
-import { deleteCategoryFormSchema } from "@/app/dashboard/manage/categories/schema";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
@@ -17,6 +16,7 @@ import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
+import { deleteCategoryFormSchema } from "../../schema";
 
 // update type if we were to return any data back to the response
 export type FetchDeleteCategory = Record<string, never>;
@@ -59,7 +59,7 @@ export async function DELETE(request: Request, { params }: Params) {
             );
         }
 
-        revalidateTags<GetCategories_C_Tag>("getCategories_C");
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return buildSuccessResponse<FetchDeleteCategory>(successMessage, {});
     } catch (error: any) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);

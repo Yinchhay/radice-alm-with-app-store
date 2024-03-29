@@ -3,24 +3,23 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Overlay from "@/components/Overlay";
 import { useEffect, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
-import { createCategoryAction } from "./action";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconPlus } from "@tabler/icons-react";
+import { fetchCreateCategory } from "./fetch";
+import { useFormStatus } from "react-dom";
 
 export function CreateCategoryOverlay() {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
-    const [formState, formAction] = useFormState(createCategoryAction, {
-        errors: null,
-    });
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchCreateCategory>>>();
 
     useEffect(() => {
         // close the overlay after creating successfully
-        if (showOverlay && formState.errors === null) {
+        if (showOverlay && result?.success) {
             setShowOverlay(false);
         }
-    }, [formState]);
+    }, [result]);
 
     return (
         <>
@@ -45,7 +44,17 @@ export function CreateCategoryOverlay() {
                                     Create Category
                                 </h1>
                             </div>
-                            <form action={formAction}>
+                            <form
+                                action={async (formData: FormData) => {
+                                    const result = await fetchCreateCategory({
+                                        name: formData.get("name") as string,
+                                        description: formData.get(
+                                            "description",
+                                        ) as string,
+                                    });
+                                    setResult(result);
+                                }}
+                            >
                                 <div className="flex flex-col items-start my-1">
                                     <label
                                         htmlFor="name"
@@ -68,9 +77,9 @@ export function CreateCategoryOverlay() {
                                         id="description"
                                     />
                                 </div>
-                                {formState.errors && (
+                                {!result?.success && result?.errors && (
                                     <FormErrorMessages
-                                        errors={formState.errors}
+                                        errors={result?.errors}
                                     />
                                 )}
                                 <div className="flex justify-end gap-2 my-3">

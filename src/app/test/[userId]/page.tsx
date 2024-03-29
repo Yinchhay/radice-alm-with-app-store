@@ -31,7 +31,7 @@ export default async function TestPage({
         if (!user) return;
 
         console.log(`Revalidat user ${params.userId}`);
-        revalidateTags<GetUserById_C_Tag>(`getUserById_C:${params.userId}`);
+        await revalidateTags<GetUserById_C_Tag>(`getUserById_C:${params.userId}`);
     }
 
     return (

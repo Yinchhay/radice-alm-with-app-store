@@ -34,10 +34,12 @@ export const generateAndFormatZodError = <T>(
     return formatZodError(generateZodError(path, message));
 };
 
+// TODO: Meng todo remove this because we no longer use server action
 export type ActionResult<T> = {
     errors: T_ZodErrorFormatted<T> | null;
 };
 
+// TODO: Meng todo remove this because we no longer use server action
 export const actionErrorSomethingWentWrong = <T>(): ActionResult<T> => {
     return {
         errors: generateAndFormatZodError(
