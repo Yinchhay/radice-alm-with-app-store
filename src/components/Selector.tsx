@@ -33,7 +33,7 @@ export default function Selector({
     onCancel?: () => void;
 }) {
     return (
-        <Overlay>
+        <Overlay onClose={onCancel}>
             <Card className={["max-w-[420px] grid gap-4", className].join(" ")}>
                 <h1 className="text-2xl font-bold text-center">
                     {selectorTitle}

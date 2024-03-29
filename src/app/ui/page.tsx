@@ -21,6 +21,8 @@ import Pagination from "@/components/Pagination";
 import CheckList from "@/components/CheckList";
 import { arrayToCheckList } from "@/lib/array_to_check_list";
 import Selector from "@/components/Selector";
+import Dropdown from "@/components/Dropdown";
+import { arrayToDropdownList } from "@/lib/arrayToDropdownList";
 
 export default function Home() {
     const [showOverlay, setShowOverlay] = useState(false);
@@ -47,12 +49,34 @@ export default function Home() {
         { username: "Tyler", user_id: "8", age: 33 },
         { username: "Ted", user_id: "9", age: 23 },
     ];
+    const messyFruitList = [
+        {
+            fruit_name: "Apple",
+            fruit_id: "ab",
+            fruit_price: 1,
+        },
+        {
+            fruit_name: "Banana",
+            fruit_id: "ba",
+            fruit_price: 2,
+        },
+        {
+            fruit_name: "Mango",
+            fruit_id: "man",
+            fruit_price: 8,
+        },
+    ];
     let userList = arrayToCheckList(userMessyList, "username", "user_id");
     userList[0].checked = true; // setting default first selected
     let userList2 = arrayToCheckList(userMessyList2, "username", "user_id");
     userList2[0].checked = true;
     let userList3 = arrayToCheckList(userMessyList3, "username", "user_id");
     userList3[0].checked = true;
+    let fruitDropdownList = arrayToDropdownList(
+        messyFruitList,
+        "fruit_name",
+        "fruit_price",
+    );
 
     const [showSelectorOverlay, setShowSelectorOverlay] = useState(false);
     return (
@@ -260,6 +284,18 @@ export default function Home() {
                             }}
                         />
                     )}
+                </div>
+            </div>
+            <div>
+                <h1 className="mb-2 font-bold">Dropdown:</h1>
+                <div className="w-[128px]">
+                    <Dropdown
+                        onChange={(selectedElement) => {
+                            console.log(selectedElement);
+                        }}
+                        dropdownList={fruitDropdownList}
+                        defaultSelectedElement={fruitDropdownList[1]}
+                    />
                 </div>
             </div>
         </div>

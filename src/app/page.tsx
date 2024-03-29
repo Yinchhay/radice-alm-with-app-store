@@ -40,7 +40,7 @@ export default function Home() {
             <div className="container m-auto">
                 <div className={roboto.className}>
                     <div
-                        className="absolute top-[100px] uppercase font-bold text-[300px] text-transparent select-none"
+                        className="absolute top-[100px] font-bold text-[300px] text-transparent select-none"
                         style={{
                             WebkitTextStroke: "3px rgba(0,0,0,.08)",
                             WebkitTextFillColor: "transparent",
@@ -50,7 +50,7 @@ export default function Home() {
                         <RandomText originalText={"WE ARE"} />
                     </div>
                     <div
-                        className="absolute top-[400px] left-[800px] uppercase font-bold text-[300px] text-transparent select-none"
+                        className="absolute top-[400px] left-[800px] font-bold text-[300px] text-transparent select-none"
                         style={{
                             WebkitTextStroke: "3px rgba(0,0,0,.08)",
                             WebkitFontSmoothing: "antialiased",
@@ -89,9 +89,9 @@ export default function Home() {
                                 </div>
                             </div>
                             <div className="ml-6 relative">
-                                <div className="w-24 uppercase text-sm h-[36px] leading-[1.25]">
-                                    <RandomText originalText={"Research &"} />
-                                    <RandomText originalText={"Development"} />
+                                <div className="w-24 text-sm h-[36px] leading-[1.25]">
+                                    <RandomText originalText={"RESEARCH &"} />
+                                    <RandomText originalText={"DEVELOPMENT"} />
                                 </div>
                                 <div className="bg-black h-[3px] w-0 animate-load"></div>
                             </div>
