@@ -33,55 +33,62 @@ export function CreateCategoryOverlay() {
                 <IconPlus></IconPlus>
             </Button>
             {showOverlay && (
-                <Overlay
-                    onClose={() => {
-                        setShowOverlay(false);
-                    }}
-                >
-                    <Card className="w-[300px]">
-                        <div className="flex flex-col items-center gap-2">
-                            <h1 className="text-2xl font-bold capitalize">
-                                Create Category
-                            </h1>
-                        </div>
-                        <form action={formAction}>
-                            <div className="flex flex-col items-start my-1">
-                                <label htmlFor="name" className="font-normal">
-                                    Name
-                                </label>
-                                <InputField name="name" id="name" />
+                <div className="font-normal">
+                    <Overlay
+                        onClose={() => {
+                            setShowOverlay(false);
+                        }}
+                    >
+                        <Card className="w-[300px]">
+                            <div className="flex flex-col items-center gap-2">
+                                <h1 className="text-2xl font-bold capitalize">
+                                    Create Category
+                                </h1>
                             </div>
-                            <div className="flex flex-col items-start my-1">
-                                <label
-                                    htmlFor="description"
-                                    className="font-normal"
-                                >
-                                    Description
-                                </label>
-                                <InputField
-                                    type="description"
-                                    name="description"
-                                    id="description"
-                                />
-                            </div>
-                            {formState.errors && (
-                                <FormErrorMessages errors={formState.errors} />
-                            )}
-                            <div className="flex justify-end gap-2 my-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                                <CreateCategoryBtn />
-                            </div>
-                        </form>
-                    </Card>
-                </Overlay>
+                            <form action={formAction}>
+                                <div className="flex flex-col items-start my-1">
+                                    <label
+                                        htmlFor="name"
+                                        className="font-normal"
+                                    >
+                                        Name
+                                    </label>
+                                    <InputField name="name" id="name" />
+                                </div>
+                                <div className="flex flex-col items-start my-1">
+                                    <label
+                                        htmlFor="description"
+                                        className="font-normal"
+                                    >
+                                        Description
+                                    </label>
+                                    <InputField
+                                        type="description"
+                                        name="description"
+                                        id="description"
+                                    />
+                                </div>
+                                {formState.errors && (
+                                    <FormErrorMessages
+                                        errors={formState.errors}
+                                    />
+                                )}
+                                <div className="flex justify-end gap-2 my-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowOverlay(false);
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <CreateCategoryBtn />
+                                </div>
+                            </form>
+                        </Card>
+                    </Overlay>
+                </div>
             )}
         </>
     );

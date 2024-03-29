@@ -5,90 +5,41 @@ import {
     deleteCategoryFormSchema,
     editCategoryFormSchema,
 } from "./schema";
-import {
-    actionErrorSomethingWentWrong,
-    ActionResult,
-    formatZodError,
-    generateAndFormatZodError,
-} from "@/lib/form";
-import {
-    GetCategories_C_Tag,
-    createCategory,
-    deleteCategoryById,
-    editCategory,
-} from "@/repositories/category";
-import { ErrorMessage } from "@/types/error";
-import { localDebug } from "@/lib/utils";
-import { MysqlErrorCodes } from "@/types/db";
-import { hasPermission } from "@/lib/IAM";
-import { getAuthUser } from "@/auth/lucia";
-import { Permissions } from "@/types/IAM";
+import { actionErrorSomethingWentWrong, ActionResult } from "@/lib/form";
+import { GetCategories_C_Tag } from "@/repositories/category";
 import { revalidateTags } from "@/lib/server_utils";
-import { fetchDeleteCategoryById } from "./fetch";
+import {
+    fetchCreateCategory,
+    fetchDeleteCategoryById,
+    fetchEditCategoryById,
+} from "./fetch";
 
 export async function createCategoryAction(
     prevState: any,
     formData: FormData,
 ): Promise<ActionResult<z.infer<typeof createCategoryFormSchema>>> {
     try {
-        const requiredPermission = new Set([Permissions.CREATE_CATEGORIES]);
-        const user = await getAuthUser();
-        if (!user) {
-            return {
-                errors: generateAndFormatZodError(
-                    "unknown",
-                    ErrorMessage.UserUnauthenticated,
-                ),
-            };
-        }
-
-        const userPermission = await hasPermission(user.id, requiredPermission);
-        if (!userPermission.canAccess) {
-            return {
-                errors: generateAndFormatZodError(
-                    "unknown",
-                    ErrorMessage.NoPermissionToPerformThisAction,
-                ),
-            };
-        }
-
-        const data: z.infer<typeof createCategoryFormSchema> = {
+        const body: z.infer<typeof createCategoryFormSchema> = {
             name: formData.get("name") as string,
             description: formData.get("description") as string,
         };
-
-        const validationResult = createCategoryFormSchema.safeParse(data);
-        if (!validationResult.success) {
+        const result = await fetchCreateCategory(body);
+        if (!result.success) {
             return {
-                errors: formatZodError(validationResult.error),
+                errors: result.errors,
             };
         }
 
-        await createCategory(data);
+        // even though we invalidated the cache tag in api, however it will not update the ui
+        // until we refresh the page. so we invalidate cache tag in server action to make ui change
         revalidateTags<GetCategories_C_Tag>("getCategories_C");
-
         return {
             errors: null,
         };
-    } catch (error: any) {
-        localDebug(error.message, "createCategoryAction");
-
-        if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
-            return {
-                errors: generateAndFormatZodError(
-                    "name",
-                    // remember try to make message clear, in this case only name has unique constraint
-                    "Category name already exists",
-                ),
-            };
-        }
-
-        return {
-            errors: generateAndFormatZodError(
-                "unknown",
-                ErrorMessage.SomethingWentWrong,
-            ),
-        };
+    } catch (error) {
+        return actionErrorSomethingWentWrong<
+            z.infer<typeof createCategoryFormSchema>
+        >();
     }
 }
 
@@ -98,64 +49,28 @@ export async function editCategoryAction(
     formData: FormData,
 ): Promise<ActionResult<z.infer<typeof editCategoryFormSchema>>> {
     try {
-        const requiredPermission = new Set([Permissions.EDIT_CATEGORIES]);
-        const user = await getAuthUser();
-        if (!user) {
-            return {
-                errors: generateAndFormatZodError(
-                    "unknown",
-                    ErrorMessage.UserUnauthenticated,
-                ),
-            };
-        }
-
-        const userPermission = await hasPermission(user.id, requiredPermission);
-        if (!userPermission.canAccess) {
-            return {
-                errors: generateAndFormatZodError(
-                    "unknown",
-                    ErrorMessage.NoPermissionToPerformThisAction,
-                ),
-            };
-        }
-
-        const data: z.infer<typeof editCategoryFormSchema> = {
+        const body: z.infer<typeof editCategoryFormSchema> = {
+            categoryId: categoryId,
             name: formData.get("name") as string,
             description: formData.get("description") as string,
-            categoryId: categoryId,
         };
-
-        const validationResult = editCategoryFormSchema.safeParse(data);
-        if (!validationResult.success) {
+        const result = await fetchEditCategoryById(body);
+        if (!result.success) {
             return {
-                errors: formatZodError(validationResult.error),
+                errors: result.errors,
             };
         }
 
-        await editCategory(categoryId, data);
+        // even though we invalidated the cache tag in api, however it will not update the ui
+        // until we refresh the page. so we invalidate cache tag in server action to make ui change
         revalidateTags<GetCategories_C_Tag>("getCategories_C");
-
         return {
             errors: null,
         };
-    } catch (error: any) {
-        localDebug(error.message, "editCategoryAction");
-        if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
-            return {
-                errors: generateAndFormatZodError(
-                    "name",
-                    // remember try to make message clear, in this case only name has unique constraint
-                    "Category name already exists",
-                ),
-            };
-        }
-
-        return {
-            errors: generateAndFormatZodError(
-                "unknown",
-                ErrorMessage.SomethingWentWrong,
-            ),
-        };
+    } catch (error) {
+        return actionErrorSomethingWentWrong<
+            z.infer<typeof editCategoryFormSchema>
+        >();
     }
 }
 
@@ -172,7 +87,7 @@ export async function deleteCategoryAction(
             };
         }
 
-        // even though we invalidated the cache tag in api, however it will not update the ui 
+        // even though we invalidated the cache tag in api, however it will not update the ui
         // until we refresh the page. so we invalidate cache tag in server action to make ui change
         revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return {

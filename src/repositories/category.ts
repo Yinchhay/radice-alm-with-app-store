@@ -1,7 +1,6 @@
 import { db } from "@/drizzle/db";
 import { categories } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
-import { unstable_cache as cache } from "next/cache";
 
 export const createCategory = async (
     category: typeof categories.$inferInsert,
@@ -13,7 +12,7 @@ export const deleteCategoryById = async (categoryId: number) => {
     return db.delete(categories).where(eq(categories.id, categoryId));
 };
 
-export const editCategory = async (
+export const editCategoryById = async (
     categoryId: number,
     category: typeof categories.$inferInsert,
 ) => {

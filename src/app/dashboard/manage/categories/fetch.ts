@@ -4,6 +4,10 @@ import { getBaseUrl } from "@/lib/server_utils";
 import { getSessionCookie } from "@/auth/lucia";
 import { GetCategories_C_Tag } from "@/repositories/category";
 import { FetchDeleteCategory } from "@/app/api/internal/category/[category_id]/delete/route";
+import { FetchEditCategory } from "@/app/api/internal/category/[category_id]/edit/route";
+import { z } from "zod";
+import { createCategoryFormSchema, editCategoryFormSchema } from "./schema";
+import { FetchCreateCategory } from "@/app/api/internal/category/create/route";
 
 export const fetchCategories = async (): ResponseJson<FetchCategoriesData> => {
     try {
@@ -26,6 +30,27 @@ export const fetchCategories = async (): ResponseJson<FetchCategoriesData> => {
     }
 };
 
+export const fetchCreateCategory = async (
+    body: z.infer<typeof createCategoryFormSchema>,
+): ResponseJson<FetchCreateCategory> => {
+    try {
+        const sessionId = getSessionCookie();
+        const response = await fetch(
+            `${getBaseUrl()}/api/internal/category/create`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+};
+
 export const fetchDeleteCategoryById = async (
     categoryId: number,
 ): ResponseJson<FetchDeleteCategory> => {
@@ -38,6 +63,27 @@ export const fetchDeleteCategoryById = async (
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+};
+
+export const fetchEditCategoryById = async (
+    body: z.infer<typeof editCategoryFormSchema>,
+): ResponseJson<FetchEditCategory> => {
+    try {
+        const sessionId = getSessionCookie();
+        const response = await fetch(
+            `${getBaseUrl()}/api/internal/category/${body.categoryId}/edit`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
             },
         );
         return await response.json();
