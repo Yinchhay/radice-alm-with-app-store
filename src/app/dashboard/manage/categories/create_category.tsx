@@ -13,7 +13,7 @@ export function CreateCategoryOverlay() {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateCategory>>>();
-
+        
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {

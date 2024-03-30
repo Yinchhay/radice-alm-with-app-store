@@ -23,12 +23,12 @@ export type ErrorResponse<T> = {
     errors: T_ZodErrorFormatted<T>;
     success: false;
 };
-export const buildErrorResponse = <T>(
+export const buildErrorResponse = <E>(
     message: string,
-    errors: T_ZodErrorFormatted<T>,
+    errors: T_ZodErrorFormatted<E>,
     status: HttpStatusCode = HttpStatusCode.INTERNAL_SERVER_ERROR_500,
 ) => {
-    const obj: ErrorResponse<T> = {
+    const obj: ErrorResponse<E> = {
         message: message,
         errors: errors,
         success: false,

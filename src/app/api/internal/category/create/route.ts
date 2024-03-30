@@ -32,7 +32,6 @@ export async function POST(request: Request) {
         if (errorNoPermission) {
             return buildNoPermissionErrorResponse();
         }
-
         const body: z.infer<typeof createCategoryFormSchema> =
             await request.json();
         const validationResult = createCategoryFormSchema.safeParse(body);
