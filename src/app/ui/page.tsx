@@ -10,19 +10,14 @@ import Cell from "@/components/table/Cell";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
 import { useState } from "react";
-import {
-    IconEdit,
-    IconPlus,
-    IconSquarePlus,
-    IconSquareRoundedPlusFilled,
-    IconX,
-} from "@tabler/icons-react";
+import { IconEdit, IconPlus, IconX } from "@tabler/icons-react";
 import Pagination from "@/components/Pagination";
 import CheckList from "@/components/CheckList";
 import { arrayToCheckList } from "@/lib/array_to_check_list";
 import Selector from "@/components/Selector";
 import Dropdown from "@/components/Dropdown";
 import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
+import ToggleSwitch from "@/components/ToggleSwitch";
 
 export default function Home() {
     const [showOverlay, setShowOverlay] = useState(false);
@@ -297,6 +292,23 @@ export default function Home() {
                         defaultSelectedElement={fruitDropdownList[1]}
                     />
                 </div>
+            </div>
+            <div>
+                <h1 className="mb-2 font-bold">Toggle Switch:</h1>
+                <ToggleSwitch
+                    onChange={(state) => {
+                        console.log(state);
+                    }}
+                />
+                <h1 className="my-2 font-bold">
+                    Toggle Switch(Default State):
+                </h1>
+                <ToggleSwitch
+                    defaultState={true}
+                    onChange={(state) => {
+                        console.log(state);
+                    }}
+                />
             </div>
         </div>
     );
