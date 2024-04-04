@@ -1,25 +1,26 @@
 "use client";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
-import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
-import { roles } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { IconX } from "@tabler/icons-react";
-import { fetchDeleteRoleById } from "./fetch";
+import InputField from "@/components/InputField";
+import FormErrorMessages from "@/components/FormErrorMessages";
+import { IconEdit } from "@tabler/icons-react";
+import { roles } from "@/drizzle/schema";
+import { fetchEditRoleById } from "./fetch";
 
-export function DeleteRoleOverlay({
+export function EditRoleOverlay({
     role,
 }: {
     role: typeof roles.$inferSelect;
 }) {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
-        useState<Awaited<ReturnType<typeof fetchDeleteRoleById>>>();
+        useState<Awaited<ReturnType<typeof fetchEditRoleById>>>();
 
     useEffect(() => {
-        // close the overlay after deleting successfully
+        // close the overlay after editing successfully
         if (showOverlay && result?.success) {
             setShowOverlay(false);
         }
@@ -27,16 +28,13 @@ export function DeleteRoleOverlay({
 
     return (
         <>
-            <div className="">
-                <Button
-                    data-test={`deleteRole-${role.name}`}
-                    onClick={() => setShowOverlay(true)}
-                    square={true}
-                    variant="danger"
-                >
-                    <IconX></IconX>
-                </Button>
-            </div>
+            <Button
+                data-test={`editRole-${role.name}`}
+                onClick={() => setShowOverlay(true)}
+                square={true}
+            >
+                <IconEdit></IconEdit>
+            </Button>
             {showOverlay && (
                 <Overlay
                     onClose={() => {
@@ -46,23 +44,30 @@ export function DeleteRoleOverlay({
                     <Card className="w-[300px]">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
-                                Delete
+                                Edit Role
                             </h1>
-                            <div className="">
-                                <p>
-                                    You are about to delete role name{" "}
-                                    <strong>{role.name}</strong>
-                                </p>
-                            </div>
                         </div>
                         <form
                             action={async (formData: FormData) => {
-                                const result = await fetchDeleteRoleById(
-                                    role.id,
-                                );
+                                const result = await fetchEditRoleById({
+                                    roleId: role.id,
+                                    name: formData.get("name") as string,
+                                    
+                                });
                                 setResult(result);
                             }}
                         >
+                            <div className="flex flex-col items-start my-1">
+                                <label htmlFor="name" className="font-normal">
+                                    Name
+                                </label>
+                                <InputField
+                                    name="name"
+                                    id="name"
+                                    defaultValue={role.name}
+                                />
+                            </div>
+
                             {!result?.success && result?.errors && (
                                 <FormErrorMessages errors={result?.errors} />
                             )}
@@ -76,7 +81,7 @@ export function DeleteRoleOverlay({
                                 >
                                     Cancel
                                 </Button>
-                                <DeleteRoleBtn />
+                                <EditRoleBtn />
                             </div>
                         </form>
                     </Card>
@@ -86,15 +91,11 @@ export function DeleteRoleOverlay({
     );
 }
 
-function DeleteRoleBtn() {
+function EditRoleBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button
-            data-test="deleteRoleBtn"
-            disabled={formStatus.pending}
-            variant="danger"
-        >
-            {formStatus.pending ? "Deleting" : "Delete"}
+        <Button disabled={formStatus.pending} variant="primary">
+            {formStatus.pending ? "Editing" : "Edit"}
         </Button>
     );
 }

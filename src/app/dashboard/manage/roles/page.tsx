@@ -1,31 +1,69 @@
-import { CreateRolesOverlay } from "./create_role";
-import { getRoles_C } from "@/repositories/role";
-import { Role } from "./role";
 import { Suspense } from "react";
+import Table from "@/components/table/Table";
+import TableHeader from "@/components/table/TableHeader";
+import ColumName from "@/components/table/ColumnName";
+import TableBody from "@/components/table/TableBody";
+import TableRow from "@/components/table/TableRow";
+import Cell from "@/components/table/Cell";
+import { CreateRoleOverlay } from "./create_role";
+import { EditRoleOverlay } from "./edit_role";
+import { DeleteRoleOverlay } from "./delete_role";
+import { fetchRoles } from "./fetch";
+import { roles } from "@/drizzle/schema";
 
 export default async function ManageRoles() {
-    const roles = await getRoles_C();
-    const roleList = roles.map((role) => {
+    const result = await fetchRoles();
+    if (!result.success) {
+        throw new Error(result.message);
+    }
+
+    const RoleList = result.data.roles.map((role) => {
         return <Role key={role.id} role={role} />;
     });
 
-    // TODO: style here later
     return (
         <Suspense fallback={"loading..."}>
             <div>
                 <h1>Manage Roles</h1>
-                <div className="max-w-96">
-                    <div className="flex justify-between">
-                        <h2 className="text-2xl font-bold capitalize">Name</h2>
-                        <CreateRolesOverlay />
-                    </div>
-                    <div className="">
-                        {roles.length > 0
-                            ? roleList
-                            : "No role in the system"}
-                    </div>
-                </div>
+                <Table>
+                    <TableHeader>
+                        <ColumName>Name</ColumName>
+                        <ColumName className="flex justify-end">
+                            <CreateRoleOverlay />
+                        </ColumName>
+                    </TableHeader>
+                    <TableBody>
+                        {result.data.roles.length > 0 ? (
+                            RoleList
+                        ) : (
+                            // TODO: style here
+                            <NoRole />
+                        )}
+                    </TableBody>
+                </Table>
             </div>
         </Suspense>
+    );
+}
+
+function NoRole() {
+    return (
+        <>
+            <TableRow>
+                <Cell>No role found in the system!</Cell>
+            </TableRow>
+        </>
+    );
+}
+
+function Role({ role }: { role: typeof roles.$inferSelect }) {
+    return (
+        <TableRow>
+            <Cell data-test={`roleName-${role.name}`}>{role.name}</Cell>
+            <Cell className="flex gap-2">
+                <EditRoleOverlay role={role} />
+                <DeleteRoleOverlay role={role} />
+            </Cell>
+        </TableRow>
     );
 }
