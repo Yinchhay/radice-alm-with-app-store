@@ -1,27 +1,41 @@
 "use client";
 import InputField from "@/components/InputField";
-import { loginAction } from "./action";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import Button from "@/components/Button";
 import FormErrorMessages from "@/components/FormErrorMessages";
+import { fetchLoginCredential } from "./fetch";
+import { useState } from "react";
+import { redirect } from "next/navigation";
 
 export default function LoginForm() {
-    const [formState, formAction] = useFormState(loginAction, {
-        errors: null,
-    });
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchLoginCredential>>>();
 
     return (
         <>
             <h1>Sign in</h1>
-            <form action={formAction}>
+            <form
+                action={async (formData: FormData) => {
+                    const result = await fetchLoginCredential({
+                        email: formData.get("email") as string,
+                        password: formData.get("password") as string,
+                    });
+
+                    if (result?.success) {
+                        redirect("/dashboard/manage/associated-project");
+                    }
+                    
+                    setResult(result);
+                }}
+            >
                 <label htmlFor="email">Email</label>
                 <InputField name="email" id="email" />
                 <br />
                 <label htmlFor="password">Password</label>
                 <InputField type="password" name="password" id="password" />
                 <br />
-                {formState.errors && (
-                    <FormErrorMessages errors={formState.errors} />
+                {!result?.success && result?.errors && (
+                    <FormErrorMessages errors={result?.errors} />
                 )}
                 <Btn />
             </form>
