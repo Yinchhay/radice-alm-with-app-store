@@ -12,11 +12,14 @@ import {
     boolean,
     json,
 } from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
 
 export const users = mysqlTable("users", {
     id: varchar("id", {
         length: 255,
-    }).primaryKey(),
+    })
+        .primaryKey()
+        .default(sql`(uuid())`),
     firstName: varchar("first_name", {
         length: 50,
     }).notNull(),
@@ -88,7 +91,7 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
     user: one(users, {
         fields: [sessions.userId],
         references: [users.id],
-    })
+    }),
 }));
 
 export const roles = mysqlTable("roles", {
@@ -143,16 +146,19 @@ export const rolePermissions = mysqlTable("role_permissions", {
         .references(() => permissions.id),
 });
 
-export const rolePermissionsRelations = relations(rolePermissions, ({ one }) => ({
-    role: one(roles, {
-        fields: [rolePermissions.roleId],
-        references: [roles.id],
+export const rolePermissionsRelations = relations(
+    rolePermissions,
+    ({ one }) => ({
+        role: one(roles, {
+            fields: [rolePermissions.roleId],
+            references: [roles.id],
+        }),
+        permission: one(permissions, {
+            fields: [rolePermissions.permissionId],
+            references: [permissions.id],
+        }),
     }),
-    permission: one(permissions, {
-        fields: [rolePermissions.permissionId],
-        references: [permissions.id],
-    }),
-}));
+);
 
 export const userRoles = mysqlTable("user_roles", {
     id: int("id").primaryKey().autoincrement(),
@@ -213,7 +219,9 @@ export const emailVerifications = mysqlTable("email_verifications", {
     id: int("id").primaryKey().autoincrement(),
     code: varchar("code", {
         length: 255,
-    }).notNull().unique(),
+    })
+        .notNull()
+        .unique(),
     userId: varchar("user_id", {
         length: 255,
     })
@@ -225,12 +233,15 @@ export const emailVerifications = mysqlTable("email_verifications", {
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const emailVerificationsRelations = relations(emailVerifications, ({ one }) => ({
-    user: one(users, {
-        fields: [emailVerifications.userId],
-        references: [users.id],
+export const emailVerificationsRelations = relations(
+    emailVerifications,
+    ({ one }) => ({
+        user: one(users, {
+            fields: [emailVerifications.userId],
+            references: [users.id],
+        }),
     }),
-}));
+);
 
 export const applicationForms = mysqlTable("application_forms", {
     id: int("id").primaryKey().autoincrement(),
@@ -258,12 +269,15 @@ export const applicationForms = mysqlTable("application_forms", {
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const applicationFormsRelations = relations(applicationForms, ({ one }) => ({
-    user: one(users, {
-        fields: [applicationForms.reviewedByUserId],
-        references: [users.id],
+export const applicationFormsRelations = relations(
+    applicationForms,
+    ({ one }) => ({
+        user: one(users, {
+            fields: [applicationForms.reviewedByUserId],
+            references: [users.id],
+        }),
     }),
-}));
+);
 
 export const categories = mysqlTable("categories", {
     id: int("id").primaryKey().autoincrement(),
@@ -327,16 +341,19 @@ export const projectCategories = mysqlTable("project_categories", {
         .references(() => categories.id),
 });
 
-export const projectCategoriesRelations = relations(projectCategories, ({ one }) => ({
-    project: one(projects, {
-        fields: [projectCategories.projectId],
-        references: [projects.id],
+export const projectCategoriesRelations = relations(
+    projectCategories,
+    ({ one }) => ({
+        project: one(projects, {
+            fields: [projectCategories.projectId],
+            references: [projects.id],
+        }),
+        category: one(categories, {
+            fields: [projectCategories.categoryId],
+            references: [categories.id],
+        }),
     }),
-    category: one(categories, {
-        fields: [projectCategories.categoryId],
-        references: [categories.id],
-    }),
-}));
+);
 
 export const projectMembers = mysqlTable("project_members", {
     id: int("id").primaryKey().autoincrement(),
@@ -380,13 +397,16 @@ export const projectPartners = mysqlTable("project_partners", {
         .references(() => users.id),
 });
 
-export const projectPartnersRelations = relations(projectPartners, ({ one }) => ({
-    project: one(projects, {
-        fields: [projectPartners.projectId],
-        references: [projects.id],
+export const projectPartnersRelations = relations(
+    projectPartners,
+    ({ one }) => ({
+        project: one(projects, {
+            fields: [projectPartners.projectId],
+            references: [projects.id],
+        }),
+        partner: one(users, {
+            fields: [projectPartners.partnerId],
+            references: [users.id],
+        }),
     }),
-    partner: one(users, {
-        fields: [projectPartners.partnerId],
-        references: [users.id],
-    }),
-}));
+);

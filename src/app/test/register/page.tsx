@@ -63,10 +63,10 @@ async function signup(formData: FormData): Promise<ActionResult> {
         // }
 
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-        const userId = generateId(15);
+        // const userId = generateId(15);
 
         const createdUser = await createUser({
-            id: userId,
+            // id: userId,
             email: email,
             firstName: firstName,
             lastName: lastName,
@@ -81,7 +81,7 @@ async function signup(formData: FormData): Promise<ActionResult> {
         }
 
         // remove session and set session if being used by internal user (admin)
-        const session = await lucia.createSession(userId, {});
+        const session = await lucia.createSession(createdUser[0].insertId.toString(), {});
         const sessionCookie = lucia.createSessionCookie(session.id);
         cookies().set(
             sessionCookie.name,

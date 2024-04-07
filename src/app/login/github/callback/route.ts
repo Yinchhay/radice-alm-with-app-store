@@ -22,7 +22,10 @@ export async function GET(request: Request): Promise<Response> {
 
     if (!code || !state || !storedState || state !== storedState) {
         return new Response(null, {
-            status: HttpStatusCode.BAD_REQUEST_400,
+            status: HttpStatusCode.TEMPORARY_REDIRECT_307,
+            headers: {
+                Location: "/login?type=github&error_message=Bad request",
+            },
         });
     }
 
