@@ -45,7 +45,7 @@ export const users = mysqlTable("users", {
     // type 'user', 'superadmin', 'partner'
     type: varchar("type", {
         length: 50,
-    }).notNull(),
+    }).notNull().default("user"),
     skillset: json("skillset").default({
         // todo: add default type so that we can infer the type of the object
     }),

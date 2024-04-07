@@ -1,6 +1,8 @@
 import { db } from "@/drizzle/db";
-import { users } from "@/drizzle/schema";
+import { sessions, users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
+import { eq } from "drizzle-orm";
+import bcrypt from 'bcrypt';
 
 /**
  * cache by next js is different from cache by react.
@@ -40,7 +42,14 @@ export const getUserByEmail = async (email: string) => {
 };
 
 export const createUser = async (user: typeof users.$inferInsert) => {
-    return await db.insert(users).values(user);
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    console.log(user.password, hashedPassword);
+    
+    const userWithHashedPassword = {
+        ...user,
+        password: hashedPassword,
+    };
+    return await db.insert(users).values(userWithHashedPassword);
 };
 
 export type GetUserRolesAndRolePermissions_C_Tag =
@@ -72,4 +81,18 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
             ],
         },
     )(userId);
+};
+
+
+export const deleteUserById = async (userId: string) => {
+    return db.transaction(async transaction => {
+        await transaction.delete(sessions).where(eq(sessions.userId, userId));
+        return transaction.delete(users).where(eq(users.id, userId));
+    });
+};
+
+export type GetUsers_C_Tag = `getUsers_C`;
+
+export const getUsers = async () => {
+    return db.query.users.findMany();
 };
