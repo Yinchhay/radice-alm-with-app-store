@@ -189,7 +189,7 @@ export const oauthProviders = mysqlTable("oauth_providers", {
         .unique(),
     accessToken: varchar("access_token", {
         length: 255,
-    }).notNull(),
+    }),
     refreshToken: varchar("refresh_token", {
         length: 255,
     }),
