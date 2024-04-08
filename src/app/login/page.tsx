@@ -20,7 +20,7 @@ export default async function Page() {
     return (
         <>
             <LoginForm />
-            <Link href="/login/github">
+            <Link href="/api/oauth/github/login">
                 <Button className="mt-4">Sign in with GitHub</Button>
             </Link>
         </>

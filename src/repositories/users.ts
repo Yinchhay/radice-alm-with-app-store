@@ -2,7 +2,7 @@ import { db } from "@/drizzle/db";
 import { sessions, users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
 import { eq } from "drizzle-orm";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 
 /**
  * cache by next js is different from cache by react.
@@ -44,7 +44,7 @@ export const getUserByEmail = async (email: string) => {
 export const createUser = async (user: typeof users.$inferInsert) => {
     const hashedPassword = await bcrypt.hash(user.password, 10);
     console.log(user.password, hashedPassword);
-    
+
     const userWithHashedPassword = {
         ...user,
         password: hashedPassword,
@@ -84,14 +84,25 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
 };
 
 export const deleteUserById = async (userId: string) => {
-    return await db.transaction(async transaction => {
+    return await db.transaction(async (transaction) => {
         await transaction.delete(sessions).where(eq(sessions.userId, userId));
-        return await transaction.delete(users).where(eq(users.id, userId));
+        await transaction.delete(users).where(eq(users.id, userId));
     });
 };
 
 export type GetUsers_C_Tag = `getUsers_C`;
-
 export const getUsers = async () => {
     return await db.query.users.findMany();
+};
+
+export const updateUserHasLinkedGithubByUserId = async (
+    userId: string,
+    attributes: { hasLinkedGithub: boolean },
+) => {
+    return await db
+        .update(users)
+        .set({
+            hasLinkedGithub: attributes.hasLinkedGithub,
+        })
+        .where(eq(users.id, userId));
 };

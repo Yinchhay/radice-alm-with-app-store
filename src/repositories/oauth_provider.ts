@@ -13,6 +13,16 @@ export const getOAuthProviderByGithubId = async (githubId: string) => {
     });
 };
 
+export const getOAuthProviderByUserId = async (userId: string) => {
+    return await db.query.oauthProviders.findFirst({
+        where: (oauthProviders, { eq, and }) =>
+            and(
+                eq(oauthProviders.providerId, OAuthProviderId.Github),
+                eq(oauthProviders.userId, userId),
+            ),
+    });
+};
+
 export const updateOAuthProviderAccessTokenById = async (
     oauthProvidersId: number,
     accessToken: string,
@@ -23,4 +33,10 @@ export const updateOAuthProviderAccessTokenById = async (
             accessToken: accessToken,
         })
         .where(eq(oauthProviders.id, oauthProvidersId));
+};
+
+export const createOauthProvider = async (
+    oauthProvider: typeof oauthProviders.$inferInsert,
+) => {
+    return db.insert(oauthProviders).values(oauthProvider);
 };
