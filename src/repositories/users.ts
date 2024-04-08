@@ -42,8 +42,8 @@ export const getUserByEmail = async (email: string) => {
 };
 
 export const createUser = async (user: typeof users.$inferInsert) => {
-    const hashedPassword = await bcrypt.hash(user.password, 10);
-    console.log(user.password, hashedPassword);
+    const SALT_ROUNDS = 10;
+    const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
 
     const userWithHashedPassword = {
         ...user,
