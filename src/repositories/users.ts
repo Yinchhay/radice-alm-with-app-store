@@ -83,7 +83,6 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
     )(userId);
 };
 
-
 export const deleteUserById = async (userId: string) => {
     return await db.transaction(async transaction => {
         await transaction.delete(sessions).where(eq(sessions.userId, userId));
