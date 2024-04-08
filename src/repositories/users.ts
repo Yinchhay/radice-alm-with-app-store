@@ -85,14 +85,14 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
 
 
 export const deleteUserById = async (userId: string) => {
-    return db.transaction(async transaction => {
+    return await db.transaction(async transaction => {
         await transaction.delete(sessions).where(eq(sessions.userId, userId));
-        return transaction.delete(users).where(eq(users.id, userId));
+        return await transaction.delete(users).where(eq(users.id, userId));
     });
 };
 
 export type GetUsers_C_Tag = `getUsers_C`;
 
 export const getUsers = async () => {
-    return db.query.users.findMany();
+    return await db.query.users.findMany();
 };
