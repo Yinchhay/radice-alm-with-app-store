@@ -2,6 +2,7 @@ import { getAuthUser } from "@/auth/lucia";
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Logout } from "./logout";
 
 export const metadata: Metadata = {
     title: "Dashboard | Radi Center",
@@ -67,6 +68,7 @@ export default async function DashboardLayout({
                 <Link data-test="manageUsers" href="/dashboard/manage/users">
                     Manage Users
                 </Link>
+                <Logout />
             </div>
             {children}
         </>

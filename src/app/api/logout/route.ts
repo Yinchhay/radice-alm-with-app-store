@@ -1,26 +1,35 @@
 import {
     buildErrorResponse,
-    buildNoBearerTokenErrorResponse,
     buildSomethingWentWrongErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 
 import { lucia, validateRequest } from "@/auth/lucia";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
+import { generateAndFormatZodError } from "@/lib/form";
 
 export type FetchLogoutUser = Record<string, never>;
 
 const successMessage = "Logout successfully";
 const unsuccessMessage = "Logout failed";
 
+/**
+ * It's not necessary to send session via bearer token, we can check user's cookie
+ */
 export async function POST() {
     try {
-        const validationResponse = await validateRequest();
+        const { session } = await validateRequest();
 
-        const { session } = validationResponse;
         if (!session) {
-            return buildNoBearerTokenErrorResponse();
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "unknown",
+                    "No session to invalidate",
+                ),
+            );
         }
+
         await lucia.invalidateSession(session.id);
 
         const sessionCookie = lucia.createBlankSessionCookie();
@@ -31,7 +40,6 @@ export async function POST() {
         );
         return buildSuccessResponse<FetchLogoutUser>(successMessage, {});
     } catch (error) {
-        console.error(error); // Log the error for debugging
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);
     }
 }
