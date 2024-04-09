@@ -6,6 +6,7 @@ import { FetchCategoriesData } from "@/app/api/internal/category/route";
 import {
     getBaseUrl,
     getSessionCookie,
+    revalidateTags,
 } from "@/lib/server_utils";
 import { GetCategories_C_Tag } from "@/repositories/category";
 import { FetchDeleteCategory } from "@/app/api/internal/category/[category_id]/delete/route";
@@ -56,6 +57,7 @@ export async function fetchCreateCategory(
                 body: JSON.stringify(body),
             },
         );
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -76,6 +78,7 @@ export async function fetchDeleteCategoryById(
                 },
             },
         );
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -97,6 +100,7 @@ export async function fetchEditCategoryById(
                 body: JSON.stringify(body),
             },
         );
+        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

@@ -49,5 +49,7 @@ export async function GET(request: Request) {
         });
 
         return Response.redirect(url);
-    } catch (error: any) {}
+    } catch (error: any) {
+        return new Response("Something went wrong", { status: 500 });
+    }
 }

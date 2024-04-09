@@ -6,13 +6,12 @@ import { FetchUsersData } from "@/app/api/internal/users/route";
 import {
     getBaseUrl,
     getSessionCookie,
+    revalidateTags,
 } from "@/lib/server_utils";
 import { GetUsers_C_Tag } from "@/repositories/users";
 import { FetchDeleteUser } from "@/app/api/internal/users/[user_id]/delete/route";
 import { z } from "zod";
-import {
-    createUserFormSchema,
-} from "@/app/api/internal/users/schema";
+import { createUserFormSchema } from "@/app/api/internal/users/schema";
 import { FetchCreateUser } from "@/app/api/internal/users/create/route";
 
 export async function fetchUsers(): ResponseJson<FetchUsersData> {
@@ -54,6 +53,7 @@ export async function fetchCreateUser(
                 body: JSON.stringify(body),
             },
         );
+        await revalidateTags<GetUsers_C_Tag>("getUsers_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -74,6 +74,7 @@ export async function fetchDeleteUserById(
                 },
             },
         );
+        await revalidateTags<GetUsers_C_Tag>("getUsers_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

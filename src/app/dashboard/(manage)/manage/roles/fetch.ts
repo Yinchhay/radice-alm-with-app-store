@@ -6,6 +6,7 @@ import { FetchRolesData } from "@/app/api/internal/role/route";
 import {
     getBaseUrl,
     getSessionCookie,
+    revalidateTags,
 } from "@/lib/server_utils";
 import { GetRoles_C_Tag } from "@/repositories/role";
 import { FetchDeleteRole } from "@/app/api/internal/role/[role_id]/delete/route";
@@ -56,6 +57,7 @@ export async function fetchCreateRole(
                 body: JSON.stringify(body),
             },
         );
+        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -76,6 +78,7 @@ export async function fetchDeleteRoleById(
                 },
             },
         );
+        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -97,6 +100,7 @@ export async function fetchEditRoleById(
                 body: JSON.stringify(body),
             },
         );
+        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

@@ -53,7 +53,7 @@ export const fetchErrorSomethingWentWrong: ErrorResponse<{}> = {
 export const buildNoBearerTokenErrorResponse = () => {
     return buildErrorResponse(
         "Unauthorized, authorization token is missing or invalid",
-        {},
+        generateAndFormatZodError("unknown", ErrorMessage.NoPermissionToPerformThisAction),
         HttpStatusCode.UNAUTHORIZED_401,
     );
 };
@@ -61,7 +61,10 @@ export const buildNoBearerTokenErrorResponse = () => {
 export const buildNoPermissionErrorResponse = () => {
     return buildErrorResponse(
         ErrorMessage.NoPermissionToPerformThisAction,
-        {},
+        generateAndFormatZodError(
+            "unknown",
+            ErrorMessage.NoPermissionToPerformThisAction,
+        ),
         HttpStatusCode.FORBIDDEN_403,
     );
 };
