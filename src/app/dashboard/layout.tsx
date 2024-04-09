@@ -33,10 +33,10 @@ export default async function DashboardLayout({
                     Manage Account
                 </Link>
                 <Link
-                    data-test="manageAssociatedProject"
-                    href="/dashboard/manage/associated-project"
+                    data-test="manageProjects"
+                    href="/dashboard/manage/projects"
                 >
-                    Manage Associated Project
+                    Manage Projects
                 </Link>
                 <Link
                     data-test="manageApplicationForm"

@@ -29,7 +29,7 @@ Cypress.Commands.add("login", (email, password) => {
     });
 
     // we should be redirected to /dashboard
-    cy.url().should("include", "/dashboard/manage/associated-project");
+    cy.url().should("include", "/dashboard/manage/projects");
     // expect a cookie to be set
     cy.getCookie("auth_session").should("exist");
 });

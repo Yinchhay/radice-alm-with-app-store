@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { readBearerToken } from "./lib/utils";
 import { HttpStatusCode } from "./types/http";
-import { buildErrorResponse, buildNoBearerTokenErrorResponse } from "./lib/response";
+import {
+    buildErrorResponse,
+    buildNoBearerTokenErrorResponse,
+} from "./lib/response";
 
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
@@ -17,7 +20,7 @@ export function middleware(request: NextRequest) {
     //  compare case insensitive, return 0 if the two strings are equal
     if (pathname.localeCompare("/dashboard") === 0) {
         return NextResponse.redirect(
-            new URL("/dashboard/manage/associated-project", request.url),
+            new URL("/dashboard/manage/projects", request.url),
         );
     }
 

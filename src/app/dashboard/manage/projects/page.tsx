@@ -1,7 +1,7 @@
 export default function ManageAssociatedProject() {
     return (
         <div>
-            <h1>Manage Associated Project</h1>
+            <h1>Manage Projects</h1>
         </div>
     );
 }

@@ -22,9 +22,9 @@ export default function LoginForm() {
                     });
 
                     if (result?.success) {
-                        redirect("/dashboard/manage/associated-project");
+                        redirect("/dashboard/manage/projects");
                     }
-                    
+
                     setResult(result);
                 }}
             >
