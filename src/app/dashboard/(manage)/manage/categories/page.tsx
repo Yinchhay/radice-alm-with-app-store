@@ -10,9 +10,25 @@ import { EditCategoryOverlay } from "./edit_category";
 import { DeleteCategoryOverlay } from "./delete_category";
 import { fetchCategories } from "./fetch";
 import { categories } from "@/drizzle/schema";
+import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
+import Pagination from "@/components/Pagination";
 
-export default async function ManageCategories() {
-    const result = await fetchCategories();
+type ManageCategoriesProps = {
+    searchParams?: {
+        page?: string;
+    };
+};
+
+export default async function ManageCategories({
+    searchParams,
+}: ManageCategoriesProps) {
+    let page = Number(searchParams?.page) || 1;
+    if (page < 1) {
+        page = 1;
+    }
+
+    const result = await fetchCategories(page, ROWS_PER_PAGE);
+
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -24,7 +40,6 @@ export default async function ManageCategories() {
     return (
         <Suspense fallback={"loading..."}>
             <div>
-                <h1>Manage Categories</h1>
                 <Table>
                     <TableHeader>
                         <ColumName>Name</ColumName>
@@ -42,6 +57,9 @@ export default async function ManageCategories() {
                         )}
                     </TableBody>
                 </Table>
+                {result.data.maxPage > 1 && (
+                    <Pagination page={page} maxPage={result.data.maxPage} />
+                )}
             </div>
         </Suspense>
     );

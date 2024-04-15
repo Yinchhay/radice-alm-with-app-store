@@ -1,26 +1,45 @@
+"use client";
 import {
     IconChevronLeft,
     IconChevronRight,
     IconDots,
 } from "@tabler/icons-react";
 import Button from "./Button";
+import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 
-export default function Pagination({
-    currentPage,
-    maxPage,
-    onSetPage,
-}: {
-    currentPage: number;
+export type PaginationProps = {
+    page: number;
     maxPage: number;
-    onSetPage: (pageNumber: number) => void;
-}) {
+};
+
+export default function Pagination({ page, maxPage }: PaginationProps) {
+    const [currentPage, setCurrentPage] = useState<number>(page || 1);
+
+    if (currentPage < 1) {
+        setCurrentPage(1);
+    }
+
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+
+    useEffect(() => {
+        if (searchParams.get("page") == currentPage.toString()) {
+            return;
+        }
+
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set("page", currentPage.toString());
+        window.location.href = `${pathname}?${newSearchParams.toString()}`;
+    }, [currentPage]);
+
     return (
         <div className="flex gap-2 items-end">
             {currentPage - 1 > 0 && (
                 <Button
                     square={true}
                     onClick={() => {
-                        onSetPage(currentPage - 1);
+                        setCurrentPage(currentPage - 1);
                     }}
                 >
                     <IconChevronLeft />
@@ -31,7 +50,7 @@ export default function Pagination({
                     square={true}
                     className="min-w-8 "
                     onClick={() => {
-                        onSetPage(currentPage - 1);
+                        setCurrentPage(currentPage - 1);
                     }}
                 >
                     <div>{currentPage - 1}</div>
@@ -45,7 +64,7 @@ export default function Pagination({
                     square={true}
                     className="min-w-8"
                     onClick={() => {
-                        onSetPage(currentPage + 1);
+                        setCurrentPage(currentPage + 1);
                     }}
                 >
                     <div>{currentPage + 1}</div>
@@ -57,17 +76,17 @@ export default function Pagination({
                     square={true}
                     className="min-w-8"
                     onClick={() => {
-                        onSetPage(maxPage);
+                        setCurrentPage(maxPage);
                     }}
                 >
                     <div>{maxPage}</div>
                 </Button>
             )}
             {currentPage != maxPage && (
-                <Button square={true}>
+                <Button square={true} data-test="paginationNextBtn">
                     <IconChevronRight
                         onClick={() => {
-                            onSetPage(currentPage + 1);
+                            setCurrentPage(currentPage + 1);
                         }}
                     />
                 </Button>

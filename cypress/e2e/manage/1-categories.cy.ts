@@ -6,7 +6,7 @@ describe("Manage Categories Test", () => {
     // run once before all tests
     before(() => {
         // Cypress automatically clears all session storage before each test to prevent state from being shared across tests when test isolation is enabled. You shouldn't need to use this command unless you're using it to clear sessionStorage inside a single test or test isolation is disabled.
-        cy.clearAllSessionStorage()
+        cy.clearAllSessionStorage();
     });
 
     // run on every it block test
@@ -20,7 +20,7 @@ describe("Manage Categories Test", () => {
 
     // run once after all tests
     after(() => {
-        cy.clearAllSessionStorage()
+        cy.clearAllSessionStorage();
     });
 
     it("Should be able to visit manage categories", () => {
@@ -41,7 +41,6 @@ describe("Manage Categories Test", () => {
         cy.get('input[name="name"]').type(name);
         cy.get('input[name="description"]').type(`${description}{enter}`);
 
-        // check if the category is added
         cy.getByTest(`categoryName-${name}`).should("contain.text", name);
         cy.getByTest(`categoryDescription-${description}`).should(
             "contain.text",

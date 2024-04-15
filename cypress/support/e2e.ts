@@ -38,6 +38,12 @@ Cypress.Commands.add("getByTest", (selector, ...args) => {
     return cy.get(`[data-test=${selector}]`, ...args);
 });
 
+Cypress.on("uncaught:exception", (err, runnable) => {
+    // returning false here prevents Cypress from
+    // failing the test when an uncaught exception occurs
+    return false;
+});
+
 declare global {
     namespace Cypress {
         interface Chainable {

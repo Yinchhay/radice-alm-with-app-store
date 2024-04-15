@@ -38,5 +38,5 @@ export const updateOAuthProviderAccessTokenById = async (
 export const createOauthProvider = async (
     oauthProvider: typeof oauthProviders.$inferInsert,
 ) => {
-    return db.insert(oauthProviders).values(oauthProvider);
+    return await db.insert(oauthProviders).values(oauthProvider);
 };

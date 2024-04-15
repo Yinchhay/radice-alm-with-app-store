@@ -1,22 +1,27 @@
 import { checkBearerAndPermission, routeRequiredPermissions } from "@/lib/IAM";
+import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import {
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
     buildSomethingWentWrongErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { getCategories } from "@/repositories/category";
+import { getCategories, getCategoriesTotalRow } from "@/repositories/category";
+import { NextRequest } from "next/server";
 
 type GetCategoriesReturnType = Awaited<ReturnType<typeof getCategories>>;
 
 export type FetchCategoriesData = {
     categories: GetCategoriesReturnType;
+    totalRows: number;
+    rowsPerPage: number;
+    maxPage: number;
 };
 
 const successMessage = "Get categories successfully";
 const unsuccessMessage = "Get categories failed";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(
@@ -30,9 +35,20 @@ export async function GET(request: Request) {
             return buildNoPermissionErrorResponse();
         }
 
-        const categories = await getCategories();
+        const page: number =
+            Number(request.nextUrl.searchParams.get("page")) || 1;
+        const rowsPerPage: number =
+            Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
+            ROWS_PER_PAGE;
+
+        const categories = await getCategories(page, rowsPerPage);
+        const totalRows = await getCategoriesTotalRow();
+
         return buildSuccessResponse<FetchCategoriesData>(successMessage, {
             categories: categories,
+            totalRows: totalRows,
+            rowsPerPage: rowsPerPage,
+            maxPage: getPaginationMaxPage(totalRows, rowsPerPage),
         });
     } catch (error: any) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);
