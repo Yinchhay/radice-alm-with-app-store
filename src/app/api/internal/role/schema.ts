@@ -33,3 +33,9 @@ export const editRoleFormSchema = z.object({
             message: "Role id must be positive",
         }),
 });
+
+export const addUserToRoleFormSchema = z.object({
+    userId: z.string().min(1, {
+        message: "A user is required",
+    }),
+});

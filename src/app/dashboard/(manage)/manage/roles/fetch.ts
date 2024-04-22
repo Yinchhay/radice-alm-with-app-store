@@ -3,6 +3,7 @@
 // Note: adding 'use server' require proper testing to ensure nothing break
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchRolesData } from "@/app/api/internal/role/route";
+import { FetchRoleData } from "@/app/api/internal/role/[role_id]/route";
 import {
     getBaseUrl,
     getSessionCookie,
@@ -14,17 +15,48 @@ import { z } from "zod";
 import {
     createRoleFormSchema,
     editRoleFormSchema,
+    addUserToRoleFormSchema,
 } from "@/app/api/internal/role/schema";
 import { FetchCreateRole } from "@/app/api/internal/role/create/route";
 import { FetchEditRole } from "@/app/api/internal/role/[role_id]/edit/route";
+import { FetchUnlistedUserToRole } from "@/app/api/internal/role/[role_id]/users/route";
+import { ROWS_PER_PAGE } from "@/lib/pagination";
 
-export async function fetchRoles(): ResponseJson<FetchRolesData> {
+export async function fetchRoles(
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_PAGE,
+): ResponseJson<FetchRolesData> {
     try {
         const sessionId = await getSessionCookie();
         // type casting to ensure that the tags are correct, if there is a typo, it will show an error
         const cacheTag: GetRoles_C_Tag = "getRoles_C";
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/role`,
+            `${await getBaseUrl()}/api/internal/role?page=${page}&rowsPerPage=${rowsPerPage}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                next: {
+                    tags: [cacheTag],
+                },
+                cache: "force-cache",
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchRoleById(
+    roleId: number,
+): ResponseJson<FetchRoleData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const cacheTag: GetRoles_C_Tag = "getRoles_C";
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/role/${roleId}`,
             {
                 method: "GET",
                 headers: {
@@ -85,6 +117,32 @@ export async function fetchDeleteRoleById(
     }
 }
 
+export async function fetchUnlistedUserToRole(
+    roleId: number,
+): ResponseJson<FetchUnlistedUserToRole> {
+    try {
+        const sessionId = await getSessionCookie();
+        // type casting to ensure that the tags are correct, if there is a typo, it will show an error
+        const cacheTag: GetRoles_C_Tag = "getRoles_C";
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/role/${roleId}/users`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                next: {
+                    tags: [cacheTag],
+                },
+                cache: "force-cache",
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
 export async function fetchEditRoleById(
     body: z.infer<typeof editRoleFormSchema>,
 ): ResponseJson<FetchEditRole> {
@@ -94,6 +152,28 @@ export async function fetchEditRoleById(
             `${await getBaseUrl()}/api/internal/role/${body.roleId}/edit`,
             {
                 method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchAddUserToRole(
+    body: z.infer<typeof addUserToRoleFormSchema>,
+): ResponseJson<FetchRoleData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/role/user/add`,
+            {
+                method: "POST",
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },

@@ -6,13 +6,29 @@ import TableBody from "@/components/table/TableBody";
 import TableRow from "@/components/table/TableRow";
 import Cell from "@/components/table/Cell";
 import { CreateRoleOverlay } from "./create_role";
-import { EditRoleOverlay } from "./edit_role";
+import { IconEdit } from "@tabler/icons-react";
+
 import { DeleteRoleOverlay } from "./delete_role";
 import { fetchRoles } from "./fetch";
 import { roles } from "@/drizzle/schema";
+import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
+import Pagination from "@/components/Pagination";
+import Button from "@/components/Button";
 
-export default async function ManageRoles() {
-    const result = await fetchRoles();
+type ManageRolesProps = {
+    searchParams?: {
+        page?: string;
+    };
+};
+
+export default async function ManageRoles({ searchParams }: ManageRolesProps) {
+    let page = Number(searchParams?.page) || 1;
+    if (page < 1) {
+        page = 1;
+    }
+
+    const result = await fetchRoles(page, ROWS_PER_PAGE);
+
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -41,6 +57,9 @@ export default async function ManageRoles() {
                         )}
                     </TableBody>
                 </Table>
+                {result.data.maxPage > 1 && (
+                    <Pagination page={page} maxPage={result.data.maxPage} />
+                )}
             </div>
         </Suspense>
     );
@@ -61,7 +80,15 @@ function Role({ role }: { role: typeof roles.$inferSelect }) {
         <TableRow>
             <Cell data-test={`roleName-${role.name}`}>{role.name}</Cell>
             <Cell className="flex gap-2">
-                <EditRoleOverlay role={role} />
+                <a href={`/dashboard/manage/roles/edit/${role.id}`}>
+                    <Button
+                        data-test={`editRole-${role.name}`}
+                        square={true}
+                    >
+                        <IconEdit></IconEdit>
+                    </Button>
+                </a>
+                {/* <EditRoleOverlay role={role} /> */}
                 <DeleteRoleOverlay role={role} />
             </Cell>
         </TableRow>
