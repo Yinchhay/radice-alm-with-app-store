@@ -2,6 +2,8 @@ import Button from "@/components/Button";
 import { Component } from "@/types/content";
 import React, { useState } from "react";
 import ReactTextareaAutosize from "react-textarea-autosize";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export default function ListComponent({
     component,
@@ -91,6 +93,7 @@ export default function ListComponent({
             onBlur={() => {
                 if (!isHovering) handleCancel();
             }}
+            className="hover:bg-gray-200 p-4 rounded-lg"
         >
             <ReactTextareaAutosize
                 className="w-full h-full resize-none focus:outline-none overflow-hidden"

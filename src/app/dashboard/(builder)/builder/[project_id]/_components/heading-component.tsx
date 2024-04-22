@@ -5,6 +5,8 @@ import { Component } from "@/types/content";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import ReactTextareaAutosize from "react-textarea-autosize";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export default function HeadingComponent({
     component,
@@ -36,7 +38,7 @@ export default function HeadingComponent({
         <div>
             <ReactTextareaAutosize
                 ref={textRef}
-                className="text-5xl font-extrabold text-center w-full h-full resize-none focus:outline-none overflow-hidden"
+                className="text-5xl font-extrabold text-center w-full h-full resize-none focus:outline-none overflow-hidden hover:bg-gray-200 p-4 rounded-lg"
                 onFocus={() => {
                     setShowEdit(true);
                 }}

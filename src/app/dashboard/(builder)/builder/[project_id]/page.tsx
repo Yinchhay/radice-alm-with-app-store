@@ -66,7 +66,7 @@ export default function ProjectBuilderPage() {
             <div className="col-span-6">
                 <div className="w-full max-w-[1000px] mx-auto">
                     <h1 className="text-lg font-bold">Content</h1>
-                    <ul className="grid gap-8">
+                    <ul className="grid gap-4">
                         {content.map((component, i) => {
                             let componentBlock;
                             switch (component.type) {
