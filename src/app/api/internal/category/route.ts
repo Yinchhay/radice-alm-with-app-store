@@ -16,6 +16,7 @@ export type FetchCategoriesData = {
     totalRows: number;
     rowsPerPage: number;
     maxPage: number;
+    page: number;
 };
 
 const successMessage = "Get categories successfully";
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
             categories: categories,
             totalRows: totalRows,
             rowsPerPage: rowsPerPage,
+            page: page,
             maxPage: getPaginationMaxPage(totalRows, rowsPerPage),
         });
     } catch (error: any) {

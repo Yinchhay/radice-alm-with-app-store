@@ -10,7 +10,7 @@ import { EditCategoryOverlay } from "./edit_category";
 import { DeleteCategoryOverlay } from "./delete_category";
 import { fetchCategories } from "./fetch";
 import { categories } from "@/drizzle/schema";
-import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
+import { ROWS_PER_PAGE } from "@/lib/pagination";
 import Pagination from "@/components/Pagination";
 
 type ManageCategoriesProps = {
