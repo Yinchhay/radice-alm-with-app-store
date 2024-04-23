@@ -9,7 +9,7 @@ import TableBody from "@/components/table/TableBody";
 import Cell from "@/components/table/Cell";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { IconEdit, IconPlus, IconX } from "@tabler/icons-react";
 import Pagination from "@/components/Pagination";
 import CheckList from "@/components/CheckList";
@@ -19,11 +19,17 @@ import Dropdown from "@/components/Dropdown";
 import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
 import ToggleSwitch from "@/components/ToggleSwitch";
 
-export default function Home() {
+export default function Home({
+    searchParams,
+}: {
+    searchParams?: {
+        page?: string;
+    };
+}) {
     const [showOverlay, setShowOverlay] = useState(false);
     const [fieldValue, setFieldValue] = useState("");
     const [fieldSearchValue, setFieldSearchValue] = useState("");
-    const [paginationNumber, setPaginationNumber] = useState(1);
+    const [paginationNumber, setPaginationNumber] = useState(Number(searchParams?.page) || 1);
     const maxPage = 10;
     const userMessyList = [
         { username: "John", user_id: "32", age: 24 },
@@ -217,14 +223,16 @@ export default function Home() {
                 <h1 className="mb-2 font-bold">
                     Page Current: {paginationNumber}
                 </h1>
-                <Pagination
-                    currentPage={paginationNumber}
-                    maxPage={maxPage}
-                    onSetPage={(pageNumber) => {
-                        setPaginationNumber(pageNumber);
-                        console.log(pageNumber);
-                    }}
-                />
+                <Suspense>
+                    <Pagination
+                        page={paginationNumber}
+                        maxPage={maxPage}
+                        // onSetPage={(pageNumber) => {
+                        //     setPaginationNumber(pageNumber);
+                        //     console.log(pageNumber);
+                        // }}
+                    />
+                </Suspense>
             </div>
             <div>
                 <h1 className="mb-2 font-bold">Checklist</h1>
