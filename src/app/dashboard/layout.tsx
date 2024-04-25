@@ -2,10 +2,10 @@ import { getAuthUser } from "@/auth/lucia";
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Logout } from "../_components/logout";
+import { Logout } from "./_components/logout";
 import Image from "next/image";
-import NavGroup from "../_components/nav-group";
-import NavItem from "../_components/nav-item";
+import NavGroup from "./_components/nav-group";
+import NavItem from "./_components/nav-item";
 import {
     IconCategory,
     IconChecklist,

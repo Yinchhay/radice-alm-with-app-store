@@ -17,6 +17,19 @@ export default function ParagraphComponent({
     onSave?: (newData: Component) => void;
     onDelete?: (ID: string) => void;
 }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: component.id });
+
+    const style = {
+        transform: CSS.Translate.toString(transform),
+        transition,
+    };
     const [showEdit, setShowEdit] = useState<boolean>(false);
     const [isHovering, setIsHovering] = useState<boolean>(false);
     const textRef = useRef<HTMLTextAreaElement>(null);
@@ -34,13 +47,29 @@ export default function ParagraphComponent({
         }
     }
 
+    useEffect(() => {
+        if (isDragging) {
+            setShowEdit(false);
+        }
+    }, [isDragging]);
+
     return (
-        <div className="hover:bg-gray-200 p-4 rounded-lg">
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...(!showEdit ? listeners : {})}
+            aria-describedby=""
+            data-no-dnd="true"
+            className="hover:outline hover:outline-1 hover:outline-gray-400 p-4 rounded-md focus-within:outline focus-within:outline-1 focus-within:outline-gray-400"
+        >
             <ReactTextareaAutosize
                 ref={textRef}
-                className="w-full h-full resize-none focus:outline-none overflow-hidden"
-                onFocus={() => {
-                    setShowEdit(true);
+                className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                onClick={() => {
+                    if (!isDragging) {
+                        setShowEdit(true);
+                    }
                 }}
                 onBlur={() => {
                     if (!isHovering) Cancel();

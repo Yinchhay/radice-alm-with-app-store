@@ -1,12 +1,10 @@
 "use client";
-import Button from "@/components/Button";
-import InputField from "@/components/InputField";
-import { Component } from "@/types/content";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import ReactTextareaAutosize from "react-textarea-autosize";
+import { Component } from "@/types/content";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useRef, useState } from "react";
+import Button from "@/components/Button";
 
 export default function ImageComponent({
     component,
@@ -17,6 +15,14 @@ export default function ImageComponent({
     onSave?: (newData: Component) => void;
     onDelete?: (ID: string) => void;
 }) {
+    const { attributes, listeners, setNodeRef, transform, transition } =
+        useSortable({ id: component.id });
+
+    const style = {
+        transform: CSS.Translate.toString(transform),
+        transition,
+    };
+
     const [showEdit, setShowEdit] = useState<boolean>(false);
     const [isHovering, setIsHovering] = useState<boolean>(false);
     const [imageSrc, setImageSrc] = useState<string>(
@@ -30,10 +36,18 @@ export default function ImageComponent({
     }
 
     return (
-        <div className="hover:bg-gray-200 p-4 rounded-lg">
+        <div
+            className="bg-transparent hover:outline hover:outline-1 hover:outline-gray-400 p-4 rounded-md focus-within:outline focus-within:outline-1 focus-within:outline-gray-400"
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...(!showEdit ? listeners : {})}
+            aria-describedby=""
+            data-no-dnd="true"
+        >
             <button
                 ref={buttonRef}
-                onFocus={() => {
+                onClick={() => {
                     setShowEdit(true);
                 }}
                 onBlur={() => {

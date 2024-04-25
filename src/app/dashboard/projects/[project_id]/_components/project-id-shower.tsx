@@ -6,7 +6,9 @@ export default function ProjectsIDShower() {
     return (
         <div>
             <h1>Project {params.project_id} Page</h1>
-            <a href={`/dashboard/builder/${params.project_id}`}>Builder</a>
+            <a href={`/dashboard/projects/${params.project_id}/builder`}>
+                Builder
+            </a>
         </div>
     );
 }

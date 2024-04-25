@@ -1,6 +1,7 @@
+"use client";
 import Button from "@/components/Button";
 import { Component } from "@/types/content";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactTextareaAutosize from "react-textarea-autosize";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -14,6 +15,25 @@ export default function ListComponent({
     onSave?: (newData: Component) => void;
     onDelete?: (ID: string) => void;
 }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: component.id });
+
+    const style = {
+        transform: CSS.Translate.toString(transform),
+        transition,
+    };
+    useEffect(() => {
+        if (isDragging) {
+            setShowEdit(false);
+        }
+    }, [isDragging]);
+
     const [showEdit, setShowEdit] = useState<boolean>(false);
     const [isHovering, setIsHovering] = useState<boolean>(false);
     const [currentComponent, setCurrentComponent] =
@@ -89,45 +109,58 @@ export default function ListComponent({
 
     return (
         <div
-            onFocus={() => setShowEdit(true)}
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...(!showEdit ? listeners : {})}
+            aria-describedby=""
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            data-no-dnd="true"
             onBlur={() => {
+                console.log("blur");
                 if (!isHovering) handleCancel();
             }}
-            className="hover:bg-gray-200 p-4 rounded-lg"
+            className="bg-transparent hover:outline hover:outline-1 hover:outline-gray-400 p-4 rounded-md focus-within:outline focus-within:outline-1 focus-within:outline-gray-400"
         >
-            <ReactTextareaAutosize
-                className="w-full h-full resize-none focus:outline-none overflow-hidden"
-                value={currentComponent.text}
-                onChange={(e) =>
-                    setCurrentComponent((prevComponent) => ({
-                        ...prevComponent,
-                        text: e.target.value,
-                    }))
-                }
-            />
-            <ul className="list-disc ml-6">
-                {currentComponent.rows?.map((row, i) => (
-                    <li key={"row" + i}>
-                        <div className="flex items-center">
-                            <ReactTextareaAutosize
-                                id={`row_${currentComponent.id}_${i}`}
-                                className="w-full h-full resize-none focus:outline-none overflow-hidden"
-                                value={row}
-                                onChange={(e) =>
-                                    handleRowChange(i, e.target.value)
-                                }
-                                onKeyDown={(e) => handleKeyDown(e, i)}
-                            />
-                        </div>
-                    </li>
-                ))}
-            </ul>
+            <div
+                onClick={() => {
+                    if (!isDragging) {
+                        setShowEdit(true);
+                        console.log("show again");
+                    }
+                }}
+            >
+                <ReactTextareaAutosize
+                    className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                    value={currentComponent.text}
+                    onChange={(e) =>
+                        setCurrentComponent((prevComponent) => ({
+                            ...prevComponent,
+                            text: e.target.value,
+                        }))
+                    }
+                />
+                <ul className="list-disc ml-6">
+                    {currentComponent.rows?.map((row, i) => (
+                        <li key={"row" + i}>
+                            <div className="flex items-center">
+                                <ReactTextareaAutosize
+                                    id={`row_${currentComponent.id}_${i}`}
+                                    className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                    value={row}
+                                    onChange={(e) =>
+                                        handleRowChange(i, e.target.value)
+                                    }
+                                    onKeyDown={(e) => handleKeyDown(e, i)}
+                                />
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </div>
             {showEdit && (
-                <div
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
-                    className="flex gap-3 justify-end items-center"
-                >
+                <div className="flex gap-3 justify-end items-center">
                     <Button
                         variant="danger"
                         onClick={() => {
