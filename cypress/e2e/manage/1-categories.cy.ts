@@ -24,7 +24,7 @@ describe("Manage Categories Test", () => {
     });
 
     it("Should be able to visit manage categories", () => {
-        cy.url().should("include", "/dashboard/manage/categories");
+        cy.url().should("include", "/dashboard/categories");
         cy.getByTest("errorMessage").should(
             "not.eq",
             ErrorMessage.NoPermissionToThisPage,

@@ -22,7 +22,7 @@ export default function LoginForm() {
                     });
 
                     if (result?.success) {
-                        redirect("/dashboard/manage/projects");
+                        redirect("/dashboard/projects");
                     }
 
                     setResult(result);

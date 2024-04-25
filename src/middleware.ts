@@ -20,7 +20,7 @@ export function middleware(request: NextRequest) {
     //  compare case insensitive, return 0 if the two strings are equal
     if (pathname.localeCompare("/dashboard") === 0) {
         return NextResponse.redirect(
-            new URL("/dashboard/manage/projects", request.url),
+            new URL("/dashboard/projects", request.url),
         );
     }
 

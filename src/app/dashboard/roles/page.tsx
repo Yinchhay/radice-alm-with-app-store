@@ -80,11 +80,8 @@ function Role({ role }: { role: typeof roles.$inferSelect }) {
         <TableRow>
             <Cell data-test={`roleName-${role.name}`}>{role.name}</Cell>
             <Cell className="flex gap-2">
-                <a href={`/dashboard/manage/roles/edit/${role.id}`}>
-                    <Button
-                        data-test={`editRole-${role.name}`}
-                        square={true}
-                    >
+                <a href={`/dashboard/roles/edit/${role.id}`}>
+                    <Button data-test={`editRole-${role.name}`} square={true}>
                         <IconEdit></IconEdit>
                     </Button>
                 </a>
