@@ -58,35 +58,35 @@ export default async function DashboardManageLayout({
                     </div>
                 </NavGroup>
                 <NavGroup title="Features">
-                    <NavItem link="/dashboard/manage/account">
+                    <NavItem link="/dashboard/account">
                         <IconUserCog size={28} />
                         <h2>Manage Account</h2>
                     </NavItem>
-                    <NavItem link="/dashboard/manage/projects">
+                    <NavItem link="/dashboard/projects">
                         <IconStack2 size={28} />
                         <h2>Manage Projects</h2>
                     </NavItem>
-                    <NavItem link="/dashboard/manage/all-projects">
+                    <NavItem link="/dashboard/all-projects">
                         <IconStack3 size={28} />
                         <h2>Manage All Projects</h2>
                     </NavItem>
-                    <NavItem link="/dashboard/manage/application-forms">
+                    <NavItem link="/dashboard/application-forms">
                         <IconChecklist size={28} />
                         <h2>Manage Application Forms</h2>
                     </NavItem>
-                    <NavItem link="/dashboard/manage/categories">
+                    <NavItem link="/dashboard/categories">
                         <IconCategory size={28} />
                         <h2>Manage Categories</h2>
                     </NavItem>
-                    <NavItem link="/dashboard/manage/partners">
+                    <NavItem link="/dashboard/partners">
                         <IconUserCheck size={28} />
                         <h2>Manage Partners</h2>
                     </NavItem>
-                    <NavItem link="/dashboard/manage/roles">
+                    <NavItem link="/dashboard/roles">
                         <IconUserCog size={28} />
                         <h2>Manage Roles</h2>
                     </NavItem>
-                    <NavItem link="/dashboard/manage/users">
+                    <NavItem link="/dashboard/users">
                         <IconUsers size={28} />
                         <h2>Manage Users</h2>
                     </NavItem>
