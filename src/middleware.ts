@@ -1,21 +1,26 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { readBearerToken } from "./lib/utils";
-import { HttpStatusCode } from "./types/http";
-import {
-    buildErrorResponse,
-    buildNoBearerTokenErrorResponse,
-} from "./lib/response";
+import { buildNoBearerTokenErrorResponse } from "./lib/response";
 
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
     // experiment route will be disabled in production
-    // if (pathname.startsWith("/test")) {
-    //     if (process.env.NODE_ENV !== "development") {
-    //         return NextResponse.redirect(new URL("/", request.url));
-    //     }
-    // }
+    const prodRestrictedRoutes = [
+        "/api",
+        "/dashboard",
+        "/link_oauth",
+        "/login",
+        "/ui",
+        "/test",
+        "/animations",
+    ];
+    if (prodRestrictedRoutes.some((restrictedRoute) => pathname.startsWith(restrictedRoute))) {
+        if (process.env.NODE_ENV !== "development") {
+            return NextResponse.redirect(new URL("/", request.url));
+        }
+    }
 
     //  compare case insensitive, return 0 if the two strings are equal
     if (pathname.localeCompare("/dashboard") === 0) {
