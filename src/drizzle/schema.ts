@@ -320,6 +320,11 @@ export const projects = mysqlTable("projects", {
     projectContent: json("project_content").default({
         // todo: add default type so that we can infer the type of the object
     }),
+    userId: varchar("user_id", {
+        length: 255,
+    })
+        .notNull()
+        .references(() => users.id),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -330,7 +335,7 @@ export const projectsRelations = relations(projects, ({ many, one }) => ({
     projectPartners: many(projectPartners),
     files: many(files),
     user: one(users, {
-        fields: [projects.id],
+        fields: [projects.userId],
         references: [users.id],
     }),
 }));

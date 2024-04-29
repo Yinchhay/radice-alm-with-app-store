@@ -24,7 +24,7 @@ const unsuccessMessage = "Create project failed";
 export async function POST(request: Request) {
     try {
         const requiredPermission = new Set([Permissions.CREATE_OWN_PROJECTS]);
-        const { errorNoBearerToken, errorNoPermission } =
+        const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(request, requiredPermission);
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();
@@ -32,8 +32,11 @@ export async function POST(request: Request) {
         if (errorNoPermission) {
             return buildNoPermissionErrorResponse();
         }
-        const body: z.infer<typeof createProjectFormSchema> =
+
+        let body: z.infer<typeof createProjectFormSchema> =
             await request.json();
+        body.userId = user.id;
+        
         const validationResult = createProjectFormSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(

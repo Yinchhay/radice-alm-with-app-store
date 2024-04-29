@@ -183,8 +183,11 @@ CREATE TABLE `projects`  (
   `project_content` json NULL,
   `created_at` timestamp NULL DEFAULT (now()),
   `updated_at` timestamp NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `projects_name_unique`(`name` ASC) USING BTREE
+  UNIQUE INDEX `projects_name_unique`(`name` ASC) USING BTREE,
+  INDEX `projects_user_id_users_id_fk`(`user_id` ASC) USING BTREE,
+  CONSTRAINT `projects_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
