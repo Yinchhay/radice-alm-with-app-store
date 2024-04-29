@@ -6,18 +6,22 @@ import { buildNoBearerTokenErrorResponse } from "./lib/response";
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
-    // experiment route will be disabled in production
-    const prodRestrictedRoutes = [
-        "/api",
-        "/dashboard",
-        "/link_oauth",
-        "/login",
-        "/ui",
-        "/test",
-        "/animations",
-    ];
-    if (prodRestrictedRoutes.some((restrictedRoute) => pathname.startsWith(restrictedRoute))) {
-        if (process.env.NODE_ENV !== "development") {
+    if (process.env.NODE_ENV !== "development") {
+        // experiment route will be disabled in production
+        const prodRestrictedRoutes = [
+            "/api",
+            "/dashboard",
+            "/link_oauth",
+            "/login",
+            "/ui",
+            "/test",
+            "/animations",
+        ];
+        if (
+            prodRestrictedRoutes.some((restrictedRoute) =>
+                pathname.startsWith(restrictedRoute),
+            )
+        ) {
             return NextResponse.redirect(new URL("/", request.url));
         }
     }

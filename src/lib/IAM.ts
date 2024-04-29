@@ -2,11 +2,6 @@ import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
 import { localDebug } from "./utils";
 import { Permissions } from "@/types/IAM";
 import { cache } from "react";
-import {
-    buildErrorResponse,
-    buildNoBearerTokenErrorResponse,
-    buildNoPermissionErrorResponse,
-} from "./response";
 import { lucia } from "@/auth/lucia";
 import { User } from "lucia";
 
@@ -132,11 +127,23 @@ export const routeRequiredPermissions = new Map<routeKey, Set<Permissions>>([
 export const checkBearerAndPermission = async (
     request: Request,
     requiredPermissions: Set<Permissions>,
-): Promise<{
-    errorNoBearerToken: boolean;
-    errorNoPermission: boolean;
-    user: User | null;
-}> => {
+): Promise<
+    | {
+          errorNoBearerToken: false;
+          errorNoPermission: true;
+          user: null;
+      }
+    | {
+          errorNoBearerToken: true;
+          errorNoPermission: false;
+          user: null;
+      }
+    | {
+          errorNoBearerToken: false;
+          errorNoPermission: false;
+          user: User;
+      }
+> => {
     const authorizationHeader = request.headers.get("Authorization");
     const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
     if (!sessionId) {
@@ -156,13 +163,19 @@ export const checkBearerAndPermission = async (
         };
     }
 
-    const userPermission = await hasPermission(user.id, requiredPermissions);
-    if (!userPermission.canAccess) {
-        return {
-            errorNoBearerToken: false,
-            errorNoPermission: true,
-            user: null,
-        };
+    // if no required permission passed, skip the permission check
+    if (requiredPermissions.size > 0) {
+        const userPermission = await hasPermission(
+            user.id,
+            requiredPermissions,
+        );
+        if (!userPermission.canAccess) {
+            return {
+                errorNoBearerToken: false,
+                errorNoPermission: true,
+                user: null,
+            };
+        }
     }
 
     return {

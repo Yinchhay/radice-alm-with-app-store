@@ -1,35 +1,40 @@
 "use client";
 
 import Button from "@/components/Button";
+import { getSessionCookie } from "@/lib/server_utils";
 import Image from "next/image";
 import { useRef, useState } from "react";
 
 export default function UploadImage() {
     const imageRef = useRef<HTMLInputElement>(null);
     const [image, setImage] = useState<string | null>(null);
-
     const handleUpload = async () => {
         if (!imageRef.current || !imageRef.current.files) {
             return;
         }
 
-        const image = imageRef.current.files[0];
-
-        if (!image) {
+        const files = imageRef.current.files;
+        if (!files) {
             return;
         }
 
         const formData = new FormData();
-        formData.append("file", image);
+        for (const file of files) {
+            formData.append("files", file);
+        }
 
-        const response = await fetch("/api/file/store", {
+        const sessionId = await getSessionCookie();
+        const response = await fetch("/api/internal/file/store", {
             method: "POST",
             body: formData,
+            headers: {
+                Authorization: `Bearer ${sessionId}`,
+            },
         });
 
         if (response.ok) {
-            console.log(await response.json());
-            setImage(image.name);
+            const data = await response.json();
+            setImage(data.data.filenames[0]);
         } else {
             console.error("Failed to upload image");
         }
@@ -37,7 +42,7 @@ export default function UploadImage() {
 
     return (
         <div>
-            <input type="file" ref={imageRef} />
+            <input type="file" ref={imageRef} multiple/>
             <Button onClick={handleUpload}>Upload</Button>
             {image && (
                 <>

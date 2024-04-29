@@ -13,21 +13,27 @@ export const PermissionNames = new Map<number, string>([
     [Permissions.CREATE_PARTNERS, "Create partners"],
     [Permissions.EDIT_PARTNERS, "Edit partners"],
     [Permissions.DELETE_PARTNERS, "Delete partners"],
-    [Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS, "Approve and reject application forms"],
+    [
+        Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS,
+        "Approve and reject application forms",
+    ],
     [Permissions.CREATE_OWN_PROJECTS, "Create own projects"],
     [Permissions.CHANGE_PROJECT_STATUS, "Change project status"],
     [Permissions.DELETE_PROJECTS, "Delete projects"],
 ]);
- 
+
 export function localDebug(message: string, from: string): void {
     if (process.env.NODE_ENV === "development") {
         console.debug(`From ${from}: ${message}`);
     }
-};
+}
 
 export function readBearerToken(authorizationHeader: string): string | null {
-    const [authScheme, token] = authorizationHeader.split(" ") as [string, string | undefined];
-    if (authScheme !== "Bearer") {
+    const [authScheme, token] = authorizationHeader.split(" ") as [
+        string,
+        string | undefined,
+    ];
+    if (authScheme.toUpperCase() !== "BEARER") {
         return null;
     }
     return token ?? null;

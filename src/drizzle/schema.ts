@@ -45,7 +45,9 @@ export const users = mysqlTable("users", {
     // type 'user', 'superadmin', 'partner'
     type: varchar("type", {
         length: 50,
-    }).notNull().default("user"),
+    })
+        .notNull()
+        .default("user"),
     skillset: json("skillset").default({
         // todo: add default type so that we can infer the type of the object
     }),
@@ -66,6 +68,7 @@ export const userRelations = relations(users, ({ many, one }) => ({
     projectMembers: many(projectMembers),
     projectPartners: many(projectPartners),
     sessions: many(sessions),
+    files: many(files),
     // one user can only have one email verification code
     emailVerification: one(emailVerifications, {
         fields: [users.id],
@@ -312,9 +315,9 @@ export const projects = mysqlTable("projects", {
     logoUrl: varchar("logo_url", {
         length: 2083,
     }),
-    is_public: boolean("is_public").default(false),
+    isPublic: boolean("is_public").default(false),
     // can be used to store 'links', 'files', 'chapters.components', 'pipline status'
-    project_content: json("project_content").default({
+    projectContent: json("project_content").default({
         // todo: add default type so that we can infer the type of the object
     }),
     createdAt: timestamp("created_at").defaultNow(),
@@ -325,9 +328,40 @@ export const projectsRelations = relations(projects, ({ many, one }) => ({
     projectCategories: many(projectCategories),
     projectMembers: many(projectMembers),
     projectPartners: many(projectPartners),
+    files: many(files),
     user: one(users, {
         fields: [projects.id],
         references: [users.id],
+    }),
+}));
+
+export const files = mysqlTable("files", {
+    id: int("id").primaryKey().autoincrement(),
+    filename: varchar("filename", {
+        length: 255,
+    })
+        .notNull()
+        .unique(),
+    size: varchar("size", {
+        length: 50,
+    }).notNull(),
+    userId: varchar("user_id", {
+        length: 255,
+    })
+        .notNull()
+        .references(() => users.id),
+    // if project id is null, it mean that the file is not belong to a project
+    projectId: int("project_id").references(() => projects.id),
+});
+
+export const filesRelations = relations(files, ({ one }) => ({
+    user: one(users, {
+        fields: [files.userId],
+        references: [users.id],
+    }),
+    project: one(projects, {
+        fields: [files.projectId],
+        references: [projects.id],
     }),
 }));
 
