@@ -5,6 +5,7 @@ import { User } from "lucia";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { profile } from "console";
 
 export default function Navbar({
     onClick,
@@ -30,7 +31,11 @@ export default function Navbar({
                 </h1>
                 <Image
                     className="rounded-full"
-                    src={"/profile_placeholder.jpg"}
+                    src={
+                        user.profileUrl
+                            ? user.profileUrl
+                            : "/profile_placeholder.jpg"
+                    }
                     width={52}
                     height={52}
                     alt="Profile Picture"
