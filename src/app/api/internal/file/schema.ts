@@ -32,3 +32,9 @@ export const createFileFormSchema = z.object({
         ),
     projectId: z.number().nullable(),
 });
+
+export const deleteFileFormSchema = z.object({
+    filename: z.string().min(1, {
+        message: "Filename is required",
+    }),
+});

@@ -4,6 +4,7 @@ import { Permissions } from "@/types/IAM";
 import { cache } from "react";
 import { lucia } from "@/auth/lucia";
 import { User } from "lucia";
+import { projects } from "@/drizzle/schema";
 
 /**
  * This function take a user id and a set of required permissions and return a boolean and a message

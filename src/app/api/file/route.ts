@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
         const filename = request.nextUrl.searchParams.get("filename");
         if (!filename) {
             return new Response("Filename is required", {
-                status: HttpStatusCode.NOT_FOUND_404,
+                status: HttpStatusCode.BAD_REQUEST_400,
             });
         }
 
@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         }
 
         // check permission to access the file only if the file is in a project
+        // we do not check by who uploaded the file, because there might be a case where the file is uploaded by a someone in the project but then the person is removed from the project
         if (fileDetail.project) {
             // check by user's cookie, if failed, check by bearer token
             let authUser = await getAuthUser();
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
                 authUser = user;
             }
 
-            // if has project, check by membership of the project, if not found, check by ownership
+            // if has project, check by membership of the project, if not found, check by project ownership
             const isMember = fileDetail.project.projectMembers.some(
                 (member) => member.userId === authUser.id,
             );
