@@ -13,6 +13,11 @@ import { getAuthUser } from "@/auth/lucia";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import { z } from "zod";
 import { deleteFileFormSchema } from "../schema";
+import {
+    checkProjectRole,
+    ProjectJoinMembers,
+    ProjectRole,
+} from "@/lib/project";
 
 const successMessage = "Delete file successfully";
 const unsuccessMessage = "Delete file failed";
@@ -21,6 +26,20 @@ export type FetchDeleteFile = Record<string, never>;
 
 export async function DELETE(request: NextRequest) {
     try {
+        const requiredPermission = new Set([]);
+        const { errorNoBearerToken, errorNoPermission, user } =
+            await checkBearerAndPermission(request, requiredPermission);
+        if (errorNoBearerToken || errorNoPermission) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "unknown",
+                    "Unauthorized to delete the file!!",
+                ),
+                HttpStatusCode.UNAUTHORIZED_401,
+            );
+        }
+
         const body: z.infer<typeof deleteFileFormSchema> = await request.json();
         const validationResult = deleteFileFormSchema.safeParse(body);
         if (!validationResult.success) {
@@ -52,35 +71,17 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        // check by user's cookie, if failed, check by bearer token
-        let authUser = await getAuthUser();
-
-        if (!authUser) {
-            const requiredPermission = new Set([]);
-            const { errorNoBearerToken, errorNoPermission, user } =
-                await checkBearerAndPermission(request, requiredPermission);
-            if (errorNoBearerToken || errorNoPermission) {
-                return buildErrorResponse(
-                    unsuccessMessage,
-                    generateAndFormatZodError(
-                        "unknown",
-                        "Unauthorized to delete the file!!",
-                    ),
-                    HttpStatusCode.UNAUTHORIZED_401,
-                );
-            }
-
-            authUser = user;
-        }
-
         // check permission to access the file only if the file is in a project
         if (fileDetail.project) {
-            // if has project, check by membership of the project, if not found, check by ownership
-            const isMember = fileDetail.project.projectMembers.some(
-                (member) => member.userId === authUser.id,
+            const userRoleInProject = checkProjectRole(
+                user.id,
+                fileDetail.project as ProjectJoinMembers,
             );
 
-            if (!isMember && fileDetail.project.userId !== authUser.id) {
+            if (
+                userRoleInProject !== ProjectRole.MEMBER &&
+                userRoleInProject !== ProjectRole.OWNER
+            ) {
                 return buildErrorResponse(
                     unsuccessMessage,
                     generateAndFormatZodError(
@@ -90,16 +91,9 @@ export async function DELETE(request: NextRequest) {
                     HttpStatusCode.UNAUTHORIZED_401,
                 );
             }
-
-            // For debugging purpose
-            // console.log(
-            //     `${authUser.firstName} ${authUser.lastName} is owner ${
-            //         fileDetail.project.userId === authUser.id
-            //     }, is member ${isMember}`,
-            // );
         } else {
             // if the file is not in a project, check by comparing who uploaded the file
-            if (fileDetail.userId !== authUser.id) {
+            if (fileDetail.userId !== user.id) {
                 return buildErrorResponse(
                     unsuccessMessage,
                     generateAndFormatZodError(

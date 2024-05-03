@@ -5,6 +5,11 @@ import { getFileStoragePath } from "@/lib/file";
 import { getAuthUser } from "@/auth/lucia";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import { getFileByFilename } from "@/repositories/files";
+import {
+    checkProjectRole,
+    ProjectJoinMembers,
+    ProjectRole,
+} from "@/lib/project";
 
 export async function GET(request: NextRequest) {
     try {
@@ -50,23 +55,19 @@ export async function GET(request: NextRequest) {
                 authUser = user;
             }
 
-            // if has project, check by membership of the project, if not found, check by project ownership
-            const isMember = fileDetail.project.projectMembers.some(
-                (member) => member.userId === authUser.id,
+            const userRoleInProject = checkProjectRole(
+                authUser.id,
+                fileDetail.project as ProjectJoinMembers,
             );
 
-            if (!isMember && fileDetail.project.userId !== authUser.id) {
+            if (
+                userRoleInProject !== ProjectRole.MEMBER &&
+                userRoleInProject !== ProjectRole.OWNER
+            ) {
                 return new Response("Unauthorized to access the file!!", {
                     status: HttpStatusCode.UNAUTHORIZED_401,
                 });
             }
-
-            // For debugging purpose
-            // console.log(
-            //     `${authUser.firstName} ${authUser.lastName} is owner ${
-            //         fileDetail.project.userId === authUser.id
-            //     }, is member ${isMember}`,
-            // );
         }
 
         const file = await fs.promises.readFile(fileAbsPath);
