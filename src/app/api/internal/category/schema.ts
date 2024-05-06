@@ -8,8 +8,12 @@ import { z } from "zod";
 export const createCategoryFormSchema = z.object({
     name: z.string().min(1, {
         message: "Category name is required",
+    }).max(50, {
+        message: "Category name must be less than or equal to 50 characters",
     }),
-    description: z.string(),
+    description: z.string().max(255, {
+        message: "Description must be less than or equal to 255 characters",
+    }),
 });
 
 export const deleteCategoryFormSchema = z.object({
@@ -25,8 +29,12 @@ export const deleteCategoryFormSchema = z.object({
 export const editCategoryFormSchema = z.object({
     name: z.string().min(1, {
         message: "Category name is required",
+    }).max(50, {
+        message: "Category name must be less than or equal to 50 characters",
     }),
-    description: z.string(),
+    description: z.string().max(255, {
+        message: "Description must be less than or equal to 255 characters",
+    }),
     categoryId: z
         .number({
             required_error: "Category id is required",

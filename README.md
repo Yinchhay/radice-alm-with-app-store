@@ -29,9 +29,10 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Migrate change of the schema `src/drizzle/schema.ts`:
 
 -   Recommended to run this command after making changes to the schema in `src/drizzle/schema.ts`.
+-   Upon development in this project, it's recommended to use this command to update the database schema. I put this command in ```npm run start``` to automatically update the production database schema when the project is deployed.
 
 ```bash
-npm run db_migrate
+npm run db:migrate
 ```
 
 Pull the latest schema from the database, the schema will be saved in `src/drizzle/migrations/schema.ts`. However, the schema being used is in `src/drizzle/schema.ts`.
@@ -41,15 +42,15 @@ So compare the two files to see the difference and copy changes to the schema be
 -   The reason for separating the schema being used and the schema pulled from the database is to avoid overwriting the schema being used. The schema being used should be updated manually.
 
 ```bash
-npm run db_pull
+npm run db:pull
 ```
 
-Push the latest schema to the database:
+Push the latest schema to the database (Not recommended, use ```npm run db:migrate``` instead):
 
 -   The schema being used is in `src/drizzle/schema.ts`.
 
 ```bash
-npm run db_push
+npm run db:push
 ```
 
 -   Read further about `migrate` and `push` to understand the difference between the two commands [Drizzle Faq](https://orm.drizzle.team/kit-docs/faq#should-i-use-generate-or-push).
@@ -58,7 +59,7 @@ npm run db_push
 
 Sometimes, changes happen as the project progresses. Here are what required to check upon making changes to the project:
 
--   Database schema: updating erd and relation between tables must also update the relation in `src/drizzle/schema.ts`. after change either run `npm run db_migrate` or `npm run db_push` to update the database schema.
+-   Database schema: updating erd and relation between tables must also update the relation in `src/drizzle/schema.ts`. after change either run `npm run db:migrate` or `npm run db:push` to update the database schema.
 
 ## Testing
 

@@ -35,11 +35,21 @@ CREATE TABLE `email_verifications` (
 	CONSTRAINT `email_verifications_user_id_unique` UNIQUE(`user_id`)
 );
 --> statement-breakpoint
+CREATE TABLE `files` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`filename` varchar(255) NOT NULL,
+	`size` varchar(50) NOT NULL,
+	`user_id` varchar(255) NOT NULL,
+	`project_id` int,
+	CONSTRAINT `files_id` PRIMARY KEY(`id`),
+	CONSTRAINT `files_filename_unique` UNIQUE(`filename`)
+);
+--> statement-breakpoint
 CREATE TABLE `oauth_providers` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`provider_id` varchar(50) NOT NULL,
 	`provider_user_id` varchar(255) NOT NULL,
-	`access_token` varchar(255) NOT NULL,
+	`access_token` varchar(255),
 	`refresh_token` varchar(255),
 	`user_id` varchar(255) NOT NULL,
 	`created_at` timestamp DEFAULT (now()),
@@ -91,6 +101,7 @@ CREATE TABLE `projects` (
 	`logo_url` varchar(2083),
 	`is_public` boolean DEFAULT false,
 	`project_content` json DEFAULT ('{}'),
+	`user_id` varchar(255) NOT NULL,
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `projects_id` PRIMARY KEY(`id`),
@@ -132,7 +143,7 @@ CREATE TABLE `user_roles` (
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
-	`id` varchar(255) NOT NULL,
+	`id` varchar(255) NOT NULL DEFAULT (uuid()),
 	`first_name` varchar(50) NOT NULL,
 	`last_name` varchar(50) NOT NULL,
 	`email` varchar(255) NOT NULL,
@@ -141,7 +152,7 @@ CREATE TABLE `users` (
 	`is_active` boolean DEFAULT true,
 	`has_linked_github` boolean DEFAULT false,
 	`profile_url` varchar(255),
-	`type` varchar(50) NOT NULL,
+	`type` varchar(50) NOT NULL DEFAULT 'user',
 	`skillset` json DEFAULT ('{}'),
 	`description` varchar(255),
 	`join_since` timestamp DEFAULT (now()),
@@ -154,6 +165,8 @@ CREATE TABLE `users` (
 --> statement-breakpoint
 ALTER TABLE `application_forms` ADD CONSTRAINT `application_forms_reviewed_by_user_id_users_id_fk` FOREIGN KEY (`reviewed_by_user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `email_verifications` ADD CONSTRAINT `email_verifications_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `files` ADD CONSTRAINT `files_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `files` ADD CONSTRAINT `files_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `oauth_providers` ADD CONSTRAINT `oauth_providers_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `project_categories` ADD CONSTRAINT `project_categories_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `project_categories` ADD CONSTRAINT `project_categories_category_id_categories_id_fk` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -161,6 +174,7 @@ ALTER TABLE `project_members` ADD CONSTRAINT `project_members_project_id_project
 ALTER TABLE `project_members` ADD CONSTRAINT `project_members_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `project_partners` ADD CONSTRAINT `project_partners_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `project_partners` ADD CONSTRAINT `project_partners_partner_id_users_id_fk` FOREIGN KEY (`partner_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `projects` ADD CONSTRAINT `projects_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `role_permissions` ADD CONSTRAINT `role_permissions_role_id_roles_id_fk` FOREIGN KEY (`role_id`) REFERENCES `roles`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `role_permissions` ADD CONSTRAINT `role_permissions_permission_id_permissions_id_fk` FOREIGN KEY (`permission_id`) REFERENCES `permissions`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `sessions` ADD CONSTRAINT `sessions_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint

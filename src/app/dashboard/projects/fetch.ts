@@ -9,8 +9,10 @@ import {
 import { GetProjects_C_Tag } from "@/repositories/project";
 import { z } from "zod";
 
+type Body = Omit<z.infer<typeof createProjectFormSchema>, "userId">;
+
 export async function fetchCreateProject(
-    body: z.infer<typeof createProjectFormSchema>,
+    body: Body,
 ): ResponseJson<FetchCreateProject> {
     try {
         const sessionId = await getSessionCookie();

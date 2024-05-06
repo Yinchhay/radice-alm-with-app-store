@@ -28,7 +28,6 @@ export default async function ManageCategories({
     }
 
     const result = await fetchCategories(page, ROWS_PER_PAGE);
-
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -37,39 +36,42 @@ export default async function ManageCategories({
         return <Category key={category.id} category={category} />;
     });
 
+    const showPagination = result.data.maxPage >= page && result.data.maxPage > 1;
+
     return (
         <Suspense fallback={"loading..."}>
-            <div>
-                <Table>
-                    <TableHeader>
-                        <ColumName>Name</ColumName>
-                        <ColumName>Description</ColumName>
-                        <ColumName className="flex justify-end">
-                            <CreateCategoryOverlay />
-                        </ColumName>
-                    </TableHeader>
-                    <TableBody>
-                        {result.data.categories.length > 0 ? (
-                            CategoryList
-                        ) : (
-                            // TODO: style here
-                            <NoCategory />
-                        )}
-                    </TableBody>
-                </Table>
-                {result.data.maxPage > 1 && (
+            <h1 className="text-2xl">Category</h1>
+            <Table className="my-4 w-full">
+                <TableHeader>
+                    <ColumName>Name</ColumName>
+                    <ColumName>Description</ColumName>
+                    <ColumName className="flex justify-end">
+                        <CreateCategoryOverlay />
+                    </ColumName>
+                </TableHeader>
+                <TableBody>
+                    {result.data.categories.length > 0 ? (
+                        CategoryList
+                    ) : (
+                        // TODO: style here
+                        <NoCategory page={page}/>
+                    )}
+                </TableBody>
+            </Table>
+            {showPagination && (
+                <div className="float-right">
                     <Pagination page={page} maxPage={result.data.maxPage} />
-                )}
-            </div>
+                </div>
+            )}
         </Suspense>
     );
 }
 
-function NoCategory() {
+function NoCategory({ page}: { page: number }) {
     return (
         <>
             <TableRow>
-                <Cell>No category found in the system!</Cell>
+                <Cell>{`No category found in the system for page ${page}!`}</Cell>
             </TableRow>
         </>
     );
@@ -77,16 +79,18 @@ function NoCategory() {
 
 function Category({ category }: { category: typeof categories.$inferSelect }) {
     return (
-        <TableRow>
+        <TableRow className="text-center align-middle">
             <Cell data-test={`categoryName-${category.name}`}>
                 {category.name}
             </Cell>
             <Cell data-test={`categoryDescription-${category.description}`}>
                 {category.description}
             </Cell>
-            <Cell className="flex gap-2">
-                <EditCategoryOverlay category={category} />
-                <DeleteCategoryOverlay category={category} />
+            <Cell>
+                <div className="flex gap-2 justify-end">
+                    <EditCategoryOverlay category={category} />
+                    <DeleteCategoryOverlay category={category} />
+                </div>
             </Cell>
         </TableRow>
     );

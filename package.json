@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start:dev": "next start",
+    "start": "npm run db:migrate && next start",
     "lint": "next lint",
-    "db_migrate": "npx drizzle-kit generate:mysql && npx tsx src/drizzle/migrate.ts",
-    "db_pull": "npx drizzle-kit introspect:mysql",
-    "db_push": "npx drizzle-kit push:mysql",
+    "db:migrate": "npx drizzle-kit generate:mysql && npx tsx src/drizzle/migrate.ts",
+    "db:pull": "npx drizzle-kit introspect:mysql",
+    "db:push": "npx drizzle-kit push:mysql",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
   },
