@@ -7,7 +7,7 @@ type TableCell = React.TdHTMLAttributes<HTMLTableCellElement> & {
 
 const Cell = forwardRef<HTMLTableCellElement, TableCell>(
     ({ className, children, ...props }, ref) => {
-        let cellStyle = "text-black px-6 py-4 rounded-md";
+        let cellStyle = "text-gray-600 px-6 py-4 rounded-md";
         return (
             <td
                 ref={ref}

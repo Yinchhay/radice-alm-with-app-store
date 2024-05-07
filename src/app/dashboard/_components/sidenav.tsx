@@ -17,7 +17,7 @@ export default function SideNav({ showSideNav }: { showSideNav: boolean }) {
     return (
         <aside
             className={[
-                "absolute top-0 left-0 bg-gray-900 h-screen z-50 transition-all w-[300px]",
+                "fixed top-70 left-0 bg-gray-900 h-screen z-40 transition-all w-[300px]",
                 showSideNav ? "translate-x-0" : "translate-x-[-100%]",
             ].join(" ")}
         >

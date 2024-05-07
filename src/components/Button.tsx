@@ -13,20 +13,20 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         switch (variant) {
             case "outline":
                 buttonStyle =
-                    "bg-gray-100 text-black rounded-md outline outline-1 outline-gray-300";
+                    "bg-white text-black rounded-sm outline outline-1 outline-gray-300";
                 break;
             case "primary":
-                buttonStyle = "bg-blue-500 text-white rounded-md";
+                buttonStyle = "bg-blue-500 text-white rounded-sm";
                 break;
             case "secondary":
-                buttonStyle = "bg-gray-100 text-black rounded-md";
+                buttonStyle = "bg-gray-100 text-black rounded-sm";
                 break;
             case "danger":
-                buttonStyle = "bg-red-500 text-white rounded-md";
+                buttonStyle = "bg-red-500 text-white rounded-sm";
                 break;
             default:
                 buttonStyle =
-                    "bg-gray-100 text-black rounded-md outline outline-1 outline-gray-300";
+                    "bg-white text-black rounded-sm outline outline-1 outline-gray-300";
         }
         if (square) {
             buttonStyle += " px-1 py-1 aspect-square";
@@ -40,7 +40,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     buttonStyle,
                     "transition-all duration-150",
                     className,
-                    props.disabled ? "brightness-75" : "hover:brightness-90",
+                    props.disabled
+                        ? "brightness-75 cursor-not-allowed"
+                        : "hover:brightness-90",
                 ].join(" ")}
                 {...props}
             >

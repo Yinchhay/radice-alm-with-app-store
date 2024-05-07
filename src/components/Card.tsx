@@ -6,6 +6,6 @@ export default function Card({
     className?: string;
 }) {
     let cardStyle =
-        "bg-gray-50 text-black px-6 py-4 rounded-md outline outline-1 outline-gray-300";
+        "bg-white text-black px-6 py-4 rounded-sm outline outline-1 outline-gray-300";
     return <div className={[cardStyle, className].join(" ")}>{children}</div>;
 }

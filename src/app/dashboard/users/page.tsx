@@ -59,7 +59,9 @@ function NoUser() {
 function User({ user }: { user: typeof users.$inferSelect }) {
     return (
         <TableRow>
-            <Cell data-test={`userName-${user.firstName}${user.lastName}`}>{user.firstName} {user.lastName}</Cell>
+            <Cell data-test={`userName-${user.firstName}${user.lastName}`}>
+                {user.firstName} {user.lastName}
+            </Cell>
             <Cell data-test={`email-${user.email}`}>{user.email}</Cell>
             <Cell className="flex gap-2">
                 <DeleteUserOverlay user={user} />

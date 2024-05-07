@@ -17,7 +17,7 @@ const InputField = forwardRef<HTMLInputElement, InputProps>(
                     <input
                         ref={ref}
                         className={[
-                            "w-full bg-gray-100 text-black px-3 pl-8 py-1 rounded-md outline outline-1 outline-gray-300 transition-all duration-150 focus:outline-2 focus:outline-blue-400",
+                            "w-full bg-white text-black px-3 pl-8 py-1 rounded-sm outline outline-1 outline-gray-300 transition-all duration-150 focus:outline-2 focus:outline-blue-400",
                             className,
                             props.disabled ? "brightness-90" : "",
                         ].join(" ")}
@@ -30,7 +30,7 @@ const InputField = forwardRef<HTMLInputElement, InputProps>(
                 <input
                     ref={ref}
                     className={[
-                        "w-full bg-gray-100 text-black px-3 py-1 rounded-md outline outline-1 outline-gray-300 transition-all duration-150 focus:outline-2 focus:outline-blue-400",
+                        "w-full bg-white text-black px-3 py-1 rounded-sm outline outline-1 outline-gray-300 transition-all duration-150 focus:outline-2 focus:outline-blue-400",
                         className,
                         props.disabled ? "brightness-90" : "",
                     ].join(" ")}

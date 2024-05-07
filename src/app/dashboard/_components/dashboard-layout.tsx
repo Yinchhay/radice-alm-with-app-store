@@ -17,19 +17,19 @@ export default function DashboardLayout({
         setShowSideNav(!showSideNav);
     }
     return (
-        <>
+        <div className="relative">
             <Navbar onClick={toggleSideNav} user={user} />
             <div className="relative">
                 <SideNav showSideNav={showSideNav} />
                 <main
                     className={[
-                        "min-h-screen bg-slate-50 p-4 transition-all",
+                        "min-h-screen bg-slate-50 p-8 transition-all",
                         showSideNav ? "ml-[300px]" : "",
                     ].join(" ")}
                 >
                     {children}
                 </main>
             </div>
-        </>
+        </div>
     );
 }
