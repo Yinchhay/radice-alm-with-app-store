@@ -13,7 +13,7 @@ import {
     arrayMove,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ErrorComponent } from "./_components/error-component";
 import { Component } from "@/types/content";
 import { parse } from "path";
@@ -21,6 +21,8 @@ import ImageComponent from "./_components/image-component";
 import ParagraphComponent from "./_components/paragraph-component";
 import ListComponent from "./_components/list-component";
 import HeadingComponent from "./_components/heading-component";
+import ComponentAdder from "./_components/component-adder";
+import { v4 } from "uuid";
 
 export default function ProjectBuilderPage() {
     const mouseSensor = useSensor(MouseSensor, {
@@ -95,86 +97,173 @@ export default function ProjectBuilderPage() {
         );
     }
 
+    // Function to generate a new component
+    const generateComponent = (type: string, text: string = ""): Component => ({
+        id: v4(), // Generate unique ID
+        type,
+        text,
+        // Default values for specific types if needed
+        rows: type === "list" ? [] : undefined,
+    });
+
+    // Function to add a heading component
+    const addHeading = () => {
+        console.log("Adding Heading");
+        const newComponent = generateComponent("heading", "New Heading");
+        setComponents((prevComponents) => [...prevComponents, newComponent]);
+    };
+
+    // Function to add an image component
+    const addImage = () => {
+        const newComponent = generateComponent("image", "/placeholder.webp"); // Provide default image URL
+        setComponents((prevComponents) => [...prevComponents, newComponent]);
+    };
+
+    // Function to add a list component
+    const addList = () => {
+        const newComponent = generateComponent("list");
+        setComponents((prevComponents) => [...prevComponents, newComponent]);
+    };
+
+    // Function to add a paragraph component
+    const addParagraph = () => {
+        const newComponent = generateComponent("paragraph", "New paragraph");
+        setComponents((prevComponents) => [...prevComponents, newComponent]);
+    };
+
+    // Ref to the last component
+    const lastComponentRef = useRef<HTMLDivElement>(null);
+
+    // Scroll to the last component when a new one is added
+    useEffect(() => {
+        if (lastComponentRef.current) {
+            lastComponentRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }
+    }, [components]); // Trigger effect when components change
+
     return (
-        <div className="w-full max-w-[1000px] mx-auto">
-            <DndContext
-                sensors={sensors}
-                onDragEnd={(e) => {
-                    reOrderComponentList(e);
-                }}
-            >
-                <SortableContext items={components}>
-                    {components.map((component, i) => {
-                        let componentBlock;
-                        switch (component.type) {
-                            case "heading":
-                                componentBlock = (
-                                    <HeadingComponent
-                                        key={component.id}
-                                        component={component}
-                                        onSave={(newData) => {
-                                            SaveComponent(newData);
-                                        }}
-                                        onDelete={(ID) => {
-                                            DeleteComponent(ID);
-                                        }}
-                                    />
-                                );
-                                break;
-                            case "image":
-                                componentBlock = (
-                                    <ImageComponent
-                                        key={component.id}
-                                        component={component}
-                                        onSave={(newData) => {
-                                            SaveComponent(newData);
-                                        }}
-                                        onDelete={(ID) => {
-                                            DeleteComponent(ID);
-                                        }}
-                                    />
-                                );
-                                break;
-                            case "paragraph":
-                                componentBlock = (
-                                    <ParagraphComponent
-                                        key={component.id}
-                                        component={component}
-                                        onSave={(newData) => {
-                                            SaveComponent(newData);
-                                        }}
-                                        onDelete={(ID) => {
-                                            DeleteComponent(ID);
-                                        }}
-                                    />
-                                );
-                                break;
-                            case "list":
-                                componentBlock = (
-                                    <ListComponent
-                                        key={component.id}
-                                        component={component}
-                                        onSave={(newData) => {
-                                            SaveComponent(newData);
-                                        }}
-                                        onDelete={(ID) => {
-                                            DeleteComponent(ID);
-                                        }}
-                                    />
-                                );
-                                break;
-                            default:
-                                componentBlock = (
-                                    <ErrorComponent
-                                        component={component}
-                                        key={component.id}
-                                    />
-                                );
-                        }
-                        return componentBlock;
-                    })}
-                </SortableContext>
-            </DndContext>
+        <div className="relative">
+            <ComponentAdder
+                onAddHeading={addHeading}
+                onAddImage={addImage}
+                onAddList={addList}
+                onAddParagraph={addParagraph}
+            />
+            <div className="w-full max-w-[1000px] mx-auto">
+                <DndContext
+                    sensors={sensors}
+                    onDragEnd={(e) => {
+                        reOrderComponentList(e);
+                    }}
+                >
+                    <SortableContext items={components}>
+                        {components.map((component, i) => {
+                            let componentBlock;
+                            switch (component.type) {
+                                case "heading":
+                                    componentBlock = (
+                                        <div
+                                            key={component.id}
+                                            ref={
+                                                i === components.length - 1
+                                                    ? lastComponentRef
+                                                    : undefined
+                                            }
+                                        >
+                                            <HeadingComponent
+                                                component={component}
+                                                onSave={(newData) => {
+                                                    SaveComponent(newData);
+                                                }}
+                                                onDelete={(ID) => {
+                                                    DeleteComponent(ID);
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                    break;
+                                case "image":
+                                    componentBlock = (
+                                        <div
+                                            key={component.id}
+                                            ref={
+                                                i === components.length - 1
+                                                    ? lastComponentRef
+                                                    : undefined
+                                            }
+                                        >
+                                            <ImageComponent
+                                                component={component}
+                                                onSave={(newData) => {
+                                                    SaveComponent(newData);
+                                                }}
+                                                onDelete={(ID) => {
+                                                    DeleteComponent(ID);
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                    break;
+                                case "paragraph":
+                                    componentBlock = (
+                                        <div
+                                            key={component.id}
+                                            ref={
+                                                i === components.length - 1
+                                                    ? lastComponentRef
+                                                    : undefined
+                                            }
+                                        >
+                                            <ParagraphComponent
+                                                component={component}
+                                                onSave={(newData) => {
+                                                    SaveComponent(newData);
+                                                }}
+                                                onDelete={(ID) => {
+                                                    DeleteComponent(ID);
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                    break;
+                                case "list":
+                                    componentBlock = (
+                                        <div
+                                            key={component.id}
+                                            ref={
+                                                i === components.length - 1
+                                                    ? lastComponentRef
+                                                    : undefined
+                                            }
+                                        >
+                                            <ListComponent
+                                                component={component}
+                                                onSave={(newData) => {
+                                                    SaveComponent(newData);
+                                                }}
+                                                onDelete={(ID) => {
+                                                    DeleteComponent(ID);
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                    break;
+                                default:
+                                    componentBlock = (
+                                        <ErrorComponent
+                                            component={component}
+                                            key={component.id}
+                                        />
+                                    );
+                            }
+                            return componentBlock;
+                        })}
+                    </SortableContext>
+                </DndContext>
+            </div>
         </div>
     );
 }

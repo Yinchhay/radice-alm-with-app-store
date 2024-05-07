@@ -21,6 +21,7 @@
     "@lucia-auth/adapter-drizzle": "^1.0.2",
     "@tabler/icons-react": "^3.0.1",
     "@types/nodemailer": "^6.4.15",
+    "@types/uuid": "^9.0.8",
     "arctic": "^1.5.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
@@ -32,6 +33,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-textarea-autosize": "^8.5.3",
+    "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
