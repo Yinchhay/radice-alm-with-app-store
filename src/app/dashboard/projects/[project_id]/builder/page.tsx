@@ -106,43 +106,53 @@ export default function ProjectBuilderPage() {
         rows: type === "list" ? [] : undefined,
     });
 
+    const [lastComponentId, setLastComponentId] = useState<string | null>(null);
+    const lastComponentRef = useRef<HTMLDivElement>(null);
+
+    // State to track whether the component is being initialized
+    const [initializing, setInitializing] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (!initializing && lastComponentId && lastComponentRef.current) {
+            lastComponentRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+            setLastComponentId(null); // Reset last component ID
+        }
+    }, [lastComponentId, initializing]); // Trigger effect when last component ID or initializing state changes
+
     // Function to add a heading component
     const addHeading = () => {
-        console.log("Adding Heading");
         const newComponent = generateComponent("heading", "New Heading");
         setComponents((prevComponents) => [...prevComponents, newComponent]);
+        setLastComponentId(newComponent.id); // Set last component ID
+        setInitializing(false); // Component initialization is complete
     };
 
     // Function to add an image component
     const addImage = () => {
-        const newComponent = generateComponent("image", "/placeholder.webp"); // Provide default image URL
+        const newComponent = generateComponent("image", "/placeholder.webp");
         setComponents((prevComponents) => [...prevComponents, newComponent]);
+        setLastComponentId(newComponent.id); // Set last component ID
+        setInitializing(false); // Component initialization is complete
     };
 
     // Function to add a list component
     const addList = () => {
         const newComponent = generateComponent("list");
         setComponents((prevComponents) => [...prevComponents, newComponent]);
+        setLastComponentId(newComponent.id); // Set last component ID
+        setInitializing(false); // Component initialization is complete
     };
 
     // Function to add a paragraph component
     const addParagraph = () => {
         const newComponent = generateComponent("paragraph", "New paragraph");
         setComponents((prevComponents) => [...prevComponents, newComponent]);
+        setLastComponentId(newComponent.id); // Set last component ID
+        setInitializing(false); // Component initialization is complete
     };
-
-    // Ref to the last component
-    const lastComponentRef = useRef<HTMLDivElement>(null);
-
-    // Scroll to the last component when a new one is added
-    useEffect(() => {
-        if (lastComponentRef.current) {
-            lastComponentRef.current.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
-        }
-    }, [components]); // Trigger effect when components change
 
     return (
         <div className="relative">
