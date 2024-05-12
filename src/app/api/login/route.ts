@@ -13,7 +13,7 @@ import {
 } from "@/repositories/users";
 import bcrypt from "bcrypt";
 import { lucia } from "@/auth/lucia";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { revalidateTags } from "@/lib/server_utils";
 
 export type FetchLoginCredential = {
@@ -73,7 +73,7 @@ export async function POST(request: Request, response: Response) {
         );
 
         // invalidate permission cache
-        // this invalidate apply to all users in system
+        // this invalidate apply to current user only
         await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>(
             `getUserRolesAndRolePermissions_C:${userExists.id}`,
         );

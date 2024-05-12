@@ -58,14 +58,18 @@ export type GetUserRolesAndRolePermissions_C_Tag =
 export const getUserRolesAndRolePermissions_C = async (userId: string) => {
     return await cache(
         async (userId: string) => {
-            return await db.query.userRoles.findMany({
-                where: (userRole, { eq }) => eq(userRole.userId, userId),
+            return await db.query.users.findFirst({
+                where: (table, { eq }) => eq(table.id, userId),
                 with: {
-                    role: {
+                    userRoles: {
                         with: {
-                            rolePermissions: {
+                            role: {
                                 with: {
-                                    permission: true,
+                                    rolePermissions: {
+                                        with: {
+                                            permission: true,
+                                        },
+                                    },
                                 },
                             },
                         },

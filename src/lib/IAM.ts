@@ -4,7 +4,7 @@ import { Permissions } from "@/types/IAM";
 import { cache } from "react";
 import { lucia } from "@/auth/lucia";
 import { User } from "lucia";
-import { projects } from "@/drizzle/schema";
+import { UserType } from "@/types/user";
 
 /**
  * This function take a user id and a set of required permissions and return a boolean and a message
@@ -32,10 +32,28 @@ export const hasPermission = cache(
                 };
             }
 
-            const userRoleAndRolePermissions =
-                await getUserRolesAndRolePermissions_C(userId);
+            const user = await getUserRolesAndRolePermissions_C(userId);
 
-            for (const userRole of userRoleAndRolePermissions) {
+            if (!user) {
+                localDebug("User not found.", "hasPermission()");
+                return {
+                    canAccess: false,
+                    message: "User not found.",
+                };
+            }
+
+            if (user.type === UserType.SUPERADMIN) {
+                localDebug(
+                    "Access granted because user is superadmin",
+                    "hasPermission()",
+                );
+                return {
+                    canAccess: true,
+                    message: "Access granted because user is superadmin",
+                };
+            }
+
+            for (const userRole of user?.userRoles ?? []) {
                 if (!userRole.role.isActive) {
                     continue;
                 }
@@ -46,6 +64,10 @@ export const hasPermission = cache(
                             continue;
                         }
 
+                        localDebug(
+                            `User has ${rolePermission.permission.name} permission.`,
+                            "hasPermission()",
+                        );
                         return {
                             canAccess: true,
                             message: `The user has and uses ${rolePermission.permission.name} permission.`,
@@ -57,6 +79,10 @@ export const hasPermission = cache(
             localDebug(error.message, "hasPermission()");
         }
 
+        localDebug(
+            "The user does not have the required permission.",
+            "hasPermission()",
+        );
         return {
             canAccess: false,
             message: "The user does not have the required permission.",

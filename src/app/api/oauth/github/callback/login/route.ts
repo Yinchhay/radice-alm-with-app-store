@@ -1,9 +1,11 @@
 import { github } from "@/auth/github";
 import { lucia } from "@/auth/lucia";
+import { revalidateTags } from "@/lib/server_utils";
 import {
     getOAuthProviderByGithubId,
     updateOAuthProviderAccessTokenById,
 } from "@/repositories/oauth_provider";
+import { GetUserRolesAndRolePermissions_C_Tag } from "@/repositories/users";
 import { HttpStatusCode } from "@/types/http";
 import { OAuth2RequestError } from "arctic";
 import { cookies } from "next/headers";
@@ -37,37 +39,49 @@ export async function GET(request: Request): Promise<Response> {
             },
         });
         const githubUser: GitHubUser = await githubUserResponse.json();
-        const existingUser = await getOAuthProviderByGithubId(githubUser.id);
+        const existingUserOAuthProvider = await getOAuthProviderByGithubId(
+            githubUser.id,
+        );
 
-        if (existingUser) {
-            // even though currently we don't need access token, but we store it anyway in case we need to use it.
-            await updateOAuthProviderAccessTokenById(
-                existingUser.id,
-                tokens.accessToken,
-            );
-
-            const session = await lucia.createSession(existingUser.userId, {});
-            const sessionCookie = lucia.createSessionCookie(session.id);
-            cookies().set(
-                sessionCookie.name,
-                sessionCookie.value,
-                sessionCookie.attributes,
-            );
+        if (!existingUserOAuthProvider) {
+            // if not found, user is not in the system (they must request to join and get accepted by application reviewer first, then login. for the first time login, we will ask the user to connect to github)
+            // Note: use a 3XX code to let the browser know a redirect is required.
+            // ref: https://stackoverflow.com/questions/66108986/nodejs-doesnt-redirect-when-changing-location-header
             return new Response(null, {
-                status: HttpStatusCode.FOUND_302,
+                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
                 headers: {
-                    Location: "/dashboard",
+                    Location: "/login?type=github&error_message=User not found",
                 },
             });
         }
 
-        // if not found, user is not in the system (they must request to join and get accepted by application reviewer first, then login. for the first time login, we will ask the user to connect to github)
-        // Note: use a 3XX code to let the browser know a redirect is required.
-        // ref: https://stackoverflow.com/questions/66108986/nodejs-doesnt-redirect-when-changing-location-header
+        // even though currently we don't need access token, but we store it anyway in case we need to use it.
+        await updateOAuthProviderAccessTokenById(
+            existingUserOAuthProvider.id,
+            tokens.accessToken,
+        );
+
+        const session = await lucia.createSession(
+            existingUserOAuthProvider.userId,
+            {},
+        );
+        const sessionCookie = lucia.createSessionCookie(session.id);
+        cookies().set(
+            sessionCookie.name,
+            sessionCookie.value,
+            sessionCookie.attributes,
+        );
+
+        // invalidate permission cache
+        // this invalidate apply to current user only
+        await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>(
+            `getUserRolesAndRolePermissions_C:${existingUserOAuthProvider.userId}`,
+        );
+
         return new Response(null, {
-            status: HttpStatusCode.TEMPORARY_REDIRECT_307,
+            status: HttpStatusCode.FOUND_302,
             headers: {
-                Location: "/login?type=github&error_message=User not found",
+                Location: "/dashboard",
             },
         });
     } catch (e) {
