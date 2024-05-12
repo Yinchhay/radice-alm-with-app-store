@@ -16,36 +16,34 @@ export const getAssociatedProjectsTotalRowByUserId = async (userId: string) => {
         .from(projectMembers)
         .where(eq(projectMembers.userId, userId));
 
-    const associatedProjectIdArray = currentUserAssociatedProjects.map(
+    let associatedProjectIdArray = currentUserAssociatedProjects.map(
         (p) => p.projectId,
     );
 
     const totalRows = await db
         .select()
         .from(projects)
-        .leftJoin(projectMembers, eq(projectMembers.projectId, projects.id))
         .where(
             or(
                 // check if the user is the owner of the project
                 eq(projects.userId, userId),
                 // if not, check if the user is associated with the project
-                inArray(projects.id, associatedProjectIdArray),
+                inArray(
+                    projects.id,
+                    associatedProjectIdArray.length > 0
+                        ? associatedProjectIdArray
+                        : [0],
+                ),
             ),
         );
 
-    // remove duplicate projects
-    const uniqueProjects = totalRows.filter((project, index, self) => {
-        return index === self.findIndex((p) => p.projects.id === project.projects.id);
-    });
-
-    return uniqueProjects.length;
+    return totalRows.length;
 };
 
 export type GetProjects_C_Tag = `getProjects_C_Tag`;
 /**
  * raw SQL query if raw sql test is needed
  * SELECT * FROM projects AS p
- * LEFT JOIN project_members AS pm ON pm.project_id = p.id
  * WHERE p.user_id = 'userId' OR
  * p.id = (SELECT project_id FROM project_members WHERE project_members.user_id = 'userId')
  * LIMIT rowsPerPage
@@ -65,46 +63,29 @@ export const getAssociatedProjectsByUserId = async (
         .from(projectMembers)
         .where(eq(projectMembers.userId, userId));
 
-    const associatedProjectIdArray = currentUserAssociatedProjects.map(
+    let associatedProjectIdArray = currentUserAssociatedProjects.map(
         (p) => p.projectId,
     );
 
     const projectsRaw = await db
         .select()
         .from(projects)
-        .leftJoin(projectMembers, eq(projectMembers.projectId, projects.id))
-        // .leftJoin(users, eq(users.id, projectMembers.userId))
         .where(
             or(
                 // check if the user is the owner of the project
                 eq(projects.userId, userId),
                 // if not, check if the user is associated with the project
-                inArray(projects.id, associatedProjectIdArray),
+                inArray(
+                    projects.id,
+                    associatedProjectIdArray.length > 0
+                        ? associatedProjectIdArray
+                        : [0],
+                ),
             ),
         )
         .limit(rowsPerPage)
         .offset((page - 1) * rowsPerPage)
         .orderBy(desc(projects.createdAt));
 
-    // structure the projects data to look like drizzle builder query result
-    const projectStructured = projectsRaw
-        .map((project) => {
-            // get all current project members
-            const projectMembers = projectsRaw
-                .filter((p) => p.projects.id === project.projects.id)
-                .map((p) => p.project_members);
-
-            // return the project with the project members
-            return {
-                ...project.projects,
-                projectMembers,
-            };
-            // remove duplicate projects
-        })
-        .filter(
-            (project, index, self) =>
-                index === self.findIndex((p) => p.id === project.id),
-        );
-
-    return projectStructured;
+    return projectsRaw;
 };

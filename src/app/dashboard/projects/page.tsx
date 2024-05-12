@@ -63,10 +63,7 @@ function NoProject({ page }: { page: number }) {
     );
 }
 
-type ProjectJoinMember = typeof projects.$inferSelect & {
-    projectMembers: (typeof projectMembers.$inferSelect | null)[];
-};
-function Project({ project }: { project: ProjectJoinMember }) {
+function Project({ project }: { project: typeof projects.$inferSelect }) {
     // TODO: fix ui
     return (
         <div className="">
