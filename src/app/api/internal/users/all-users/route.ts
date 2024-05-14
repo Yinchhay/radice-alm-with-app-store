@@ -5,26 +5,23 @@ import {
     buildSomethingWentWrongErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
+import { getUsers } from "@/repositories/users";
 
-import { getRoleById } from "@/repositories/role";
+type GetUsersReturnType = Awaited<ReturnType<typeof getUsers>>;
 
-type GetRoleReturnType = Awaited<ReturnType<typeof getRoleById>>;
-
-export type FetchRoleData = {
-    role: GetRoleReturnType;
+export type FetchUsersData = {
+    users: GetUsersReturnType;
 };
 
-type Params = { params: { role_id: number } };
+const successMessage = "Get all users successfully";
+const unsuccessMessage = "Get all users failed";
 
-const successMessage = "Get role successfully";
-const unsuccessMessage = "Get role failed";
-
-export async function GET(request: Request, { params }: Params) {
+export async function GET(request: Request) {
     try {
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(
                 request,
-                routeRequiredPermissions.get("manageRoles")!,
+                routeRequiredPermissions.get("manageUsers")!,
             );
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();
@@ -33,10 +30,9 @@ export async function GET(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const role = await getRoleById(Number(params.role_id));
-
-        return buildSuccessResponse<FetchRoleData>(successMessage, {
-            role: role,
+        const users = await getUsers();
+        return buildSuccessResponse<FetchUsersData>(successMessage, {
+            users: users,
         });
     } catch (error: any) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);

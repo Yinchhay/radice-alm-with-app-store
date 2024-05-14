@@ -1,6 +1,7 @@
 // add 'use server' on top of the file if u want to make api request on the server
 // instead of client side.
 // Note: adding 'use server' require proper testing to ensure nothing break
+"use server";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchRolesData } from "@/app/api/internal/role/route";
 import { FetchRoleData } from "@/app/api/internal/role/[role_id]/route";
@@ -19,7 +20,8 @@ import {
 } from "@/app/api/internal/role/schema";
 import { FetchCreateRole } from "@/app/api/internal/role/create/route";
 import { FetchEditRole } from "@/app/api/internal/role/[role_id]/edit/route";
-import { FetchUnlistedUserToRole } from "@/app/api/internal/role/[role_id]/users/route";
+import { FetchUsersInRole } from "@/app/api/internal/role/[role_id]/users/route";
+import { FetchUsersNotInRole } from "@/app/api/internal/role/[role_id]/users-not-in-role/route";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 
 export async function fetchRoles(
@@ -117,15 +119,41 @@ export async function fetchDeleteRoleById(
     }
 }
 
-export async function fetchUnlistedUserToRole(
+export async function fetchUsersInRole(
     roleId: number,
-): ResponseJson<FetchUnlistedUserToRole> {
+): ResponseJson<FetchUsersInRole> {
     try {
         const sessionId = await getSessionCookie();
         // type casting to ensure that the tags are correct, if there is a typo, it will show an error
         const cacheTag: GetRoles_C_Tag = "getRoles_C";
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/role/${roleId}/users`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                next: {
+                    tags: [cacheTag],
+                },
+                cache: "force-cache",
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchUsersNotInRole(
+    roleId: number,
+): ResponseJson<FetchUsersNotInRole> {
+    try {
+        const sessionId = await getSessionCookie();
+        // type casting to ensure that the tags are correct, if there is a typo, it will show an error
+        const cacheTag: GetRoles_C_Tag = "getRoles_C";
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/role/${roleId}/users-not-in-role`,
             {
                 method: "GET",
                 headers: {

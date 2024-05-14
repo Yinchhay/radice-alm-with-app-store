@@ -1,8 +1,9 @@
 import { db } from "@/drizzle/db";
 import { sessions, users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
-import { eq } from "drizzle-orm";
+import { eq, count, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
+import { ROWS_PER_PAGE } from "@/lib/pagination";
 
 /**
  * cache by next js is different from cache by react.
@@ -95,8 +96,25 @@ export const deleteUserById = async (userId: string) => {
 };
 
 export type GetUsers_C_Tag = `getUsers_C`;
-export const getUsers = async () => {
+
+export const getAllUsers = async () => {
     return await db.query.users.findMany();
+};
+
+export const getUsers = async (
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_PAGE,
+) => {
+    return await db.query.users.findMany({
+        limit: rowsPerPage,
+        offset: (page - 1) * rowsPerPage,
+        orderBy: sql`id DESC`,
+    });
+};
+
+export const getUsersTotalRow = async () => {
+    const totalRows = await db.select({ count: count() }).from(users);
+    return totalRows[0].count;
 };
 
 export const updateUserHasLinkedGithubByUserId = async (

@@ -5,17 +5,20 @@ import {
     buildSomethingWentWrongErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
+import { filterGetOnlyUserNotInRole } from "@/repositories/role";
+
 import { getUsersInRole } from "@/repositories/role";
+import { getAllUsers } from "@/repositories/users";
 
-type GetUsersByRoleReturnType = Awaited<ReturnType<typeof getUsersInRole>>;
+type GetUsersNotInRoleReturnType = Awaited<ReturnType<typeof filterGetOnlyUserNotInRole>>;
 
-export type FetchUsersInRole = {
-    users: GetUsersByRoleReturnType;
+export type FetchUsersNotInRole = {
+    users: GetUsersNotInRoleReturnType;
 };
 
 type Params = { params: { role_id: number } };
-const successMessage = "Get users in role successfully";
-const unsuccessMessage = "Get users in role failed";
+const successMessage = "Get users not in role successfully";
+const unsuccessMessage = "Get users not in role failed";
 
 export async function GET(request: Request, { params }: Params) {
     try {
@@ -32,9 +35,18 @@ export async function GET(request: Request, { params }: Params) {
         }
 
         const usersInRole = await getUsersInRole(params.role_id);
+        const data = usersInRole.map((user) => {
+            return {
+                id: user.user.id,
+                firstName: user.user.firstName,
+                lastName: user.user.lastName,
+            };
+        });
 
-        return buildSuccessResponse<FetchUsersInRole>(successMessage, {
-            users: usersInRole,
+        const usersNotInRole = filterGetOnlyUserNotInRole(data, await getAllUsers());
+
+        return buildSuccessResponse<FetchUsersNotInRole>(successMessage, {
+            users: usersNotInRole,
         });
     } catch (error: any) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);

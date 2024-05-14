@@ -1,7 +1,7 @@
 import { db } from "@/drizzle/db";
-import { permissions, roles, userRoles, users } from "@/drizzle/schema";
+import { roles, userRoles, users } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { count, eq, ne, notInArray, sql } from "drizzle-orm";
+import { count, eq, sql } from "drizzle-orm";
 
 export const createRole = async (role: typeof roles.$inferInsert) => {
     return await db.insert(roles).values(role);
@@ -41,73 +41,58 @@ export const getRolesTotalRow = async () => {
 };
 
 export const getRoleById = async (roleId: number) => {
-    if (roleId == 8) {
-        return "You cannot view this role.";
-    }
-
-    return await db.transaction(async (transaction) => {
-        await transaction.query.userRoles.findMany({
-            with: {
-                user: {
-                    columns: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                    },
-                },
-            },
-            where: eq(userRoles.roleId, roleId),
-        });
-        return await db.transaction(async (transaction) => {
-            await transaction.query.permissions.findMany({
-                columns: {
-                    id: true,
-                    name: true,
-                },
-            });
-            return await transaction.query.roles.findFirst({
-                columns: {
-                    name: true,
-                },
+    return await db.query.roles.findFirst({
+        columns: {
+            name: true,
+        },
+        with: {
+            rolePermissions: {
+                columns: {},
                 with: {
-                    rolePermissions: {
-                        columns: {},
-                        with: {
-                            permission: {
-                                columns: {
-                                    id: true,
-                                    name: true,
-                                },
-                            },
+                    permission: {
+                        columns: {
+                            id: true,
+                            name: true,
                         },
                     },
                 },
-                where: eq(roles.id, roleId),
-            });
-        });
-    });
-};
-
-export const getUnlistedUsersByRole = async (roleId: number) => {
-    if (roleId == 8) {
-        return "You cannot view this role.";
-    }
-
-    const usersWithRole = await db.query.userRoles.findMany({
-        where: eq(userRoles.roleId, roleId),
-        columns: {
-            userId: true
-        }
-    });
-
-    const userIdsWithRole = usersWithRole.map(userRole => userRole.userId);
-
-    return await db.query.users.findMany({
-        columns: {
-            firstName: true,
-            lastName: true,
-            email: true,
+            },
         },
-        where: notInArray(users.id, userIdsWithRole)
+        where: eq(roles.id, roleId),
     });
 };
+
+export const getUsersInRole = async (roleId: number) => {
+    return await db.query.userRoles.findMany({
+        columns: {
+            id: false,
+            userId: false,
+            roleId: false,
+        },
+        with: {
+            user: {
+                columns: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                },
+            },
+        },
+        where: eq(userRoles.roleId, roleId),
+    });
+};
+
+export function filterGetOnlyUserNotInRole(
+    usersInARole: Pick<
+        typeof users.$inferSelect,
+        "id" | "firstName" | "lastName"
+    >[],
+    usersInTheSystem: Pick<
+        typeof users.$inferSelect,
+        "id" | "firstName" | "lastName"
+    >[],
+) {
+    return usersInTheSystem.filter((user) => {
+        return !usersInARole.some((userInRole) => userInRole.id === user.id);
+    });
+}

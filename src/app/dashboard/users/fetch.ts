@@ -1,6 +1,7 @@
 // add 'use server' on top of the file if u want to make api request on the server
 // instead of client side.
 // Note: adding 'use server' require proper testing to ensure nothing break
+"use server";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchUsersData } from "@/app/api/internal/users/route";
 import {
@@ -77,6 +78,30 @@ export async function fetchDeleteUserById(
         await revalidateTags<GetUsers_C_Tag>("getUsers_C");
         return await response.json();
     } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchAllUsers(): ResponseJson<FetchUsersData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const cacheTag: GetUsers_C_Tag = "getUsers_C";
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/users/all`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                next: {
+                    tags: [cacheTag],
+                },
+                cache: "force-cache",
+            },
+        );
+        return await response.json();
+    }
+    catch (error: any) {
         return fetchErrorSomethingWentWrong;
     }
 }

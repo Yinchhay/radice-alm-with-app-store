@@ -40,10 +40,10 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
     return (
         <Suspense fallback={"loading..."}>
             <div>
-                <h1>Manage Roles</h1>
-                <Table>
+                <h1 className="text-2xl">Manage Roles</h1>
+                <Table className="my-4 w-full">
                     <TableHeader>
-                        <ColumName>Name</ColumName>
+                        <ColumName className="text-start">Name</ColumName>
                         <ColumName className="flex justify-end">
                             <CreateRoleOverlay />
                         </ColumName>
@@ -58,7 +58,9 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
                     </TableBody>
                 </Table>
                 {result.data.maxPage > 1 && (
-                    <Pagination page={page} maxPage={result.data.maxPage} />
+                    <div className="float-right">
+                        <Pagination page={page} maxPage={result.data.maxPage} />
+                    </div>
                 )}
             </div>
         </Suspense>
@@ -79,7 +81,7 @@ function Role({ role }: { role: typeof roles.$inferSelect }) {
     return (
         <TableRow>
             <Cell data-test={`roleName-${role.name}`}>{role.name}</Cell>
-            <Cell className="flex gap-2">
+            <Cell className="flex justify-end gap-2">
                 <a href={`/dashboard/roles/edit/${role.id}`}>
                     <Button data-test={`editRole-${role.name}`} square={true}>
                         <IconEdit></IconEdit>

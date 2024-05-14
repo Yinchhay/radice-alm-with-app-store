@@ -23,11 +23,11 @@ export default async function ManageUsers() {
     return (
         <Suspense fallback={"loading..."}>
             <div>
-                <h1>Manage Users</h1>
-                <Table>
+                <h1 className="text-2xl">Manage Users</h1>
+                <Table className="my-4 w-full">
                     <TableHeader>
-                        <ColumName>Name</ColumName>
-                        <ColumName>Email</ColumName>
+                        <ColumName className="text-start">Name</ColumName>
+                        <ColumName className="text-start">Email</ColumName>
                         <ColumName className="flex justify-end">
                             <CreateUserOverlay />
                         </ColumName>
@@ -63,7 +63,7 @@ function User({ user }: { user: typeof users.$inferSelect }) {
                 {user.firstName} {user.lastName}
             </Cell>
             <Cell data-test={`email-${user.email}`}>{user.email}</Cell>
-            <Cell className="flex gap-2">
+            <Cell className="flex justify-end gap-2">
                 <DeleteUserOverlay user={user} />
             </Cell>
         </TableRow>
