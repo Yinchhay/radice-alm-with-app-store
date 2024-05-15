@@ -13,19 +13,29 @@ export enum ProjectRole {
 export const checkProjectRole = (
     userId: string,
     project: ProjectJoinMembers,
-) : ProjectRole => {
+): {
+    projectRole: ProjectRole;
+    canEdit: boolean;
+} => {
+    let projectRole = ProjectRole.NONE;
+    let canEdit = false;
+
     // if has project, check by membership of the project, if not found, check by ownership
-    const isMember = project.projectMembers.some(
-        (member) => member.userId === userId,
-    );
+    const isMember = project.projectMembers.some((member) => {
+        if (member.userId === userId) {
+            projectRole = ProjectRole.MEMBER;
+            canEdit = member.canEdit ?? false;
+            return true;
+        }
+    });
 
     if (isMember) {
-        return ProjectRole.MEMBER;
+        return { projectRole, canEdit };
     }
 
     if (project.userId === userId) {
-        return ProjectRole.OWNER;
+        return { projectRole: ProjectRole.OWNER, canEdit: true };
     }
 
-    return ProjectRole.NONE;
+    return { projectRole, canEdit };
 };

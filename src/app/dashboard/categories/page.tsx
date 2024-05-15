@@ -32,7 +32,7 @@ export default async function ManageCategories({
         throw new Error(result.message);
     }
 
-    const CategoryList = result.data.categories.map((category) => {
+    const CategoryLists = result.data.categories.map((category) => {
         return <Category key={category.id} category={category} />;
     });
 
@@ -51,7 +51,7 @@ export default async function ManageCategories({
                 </TableHeader>
                 <TableBody>
                     {result.data.categories.length > 0 ? (
-                        CategoryList
+                        CategoryLists
                     ) : (
                         // TODO: style here
                         <NoCategory page={page}/>

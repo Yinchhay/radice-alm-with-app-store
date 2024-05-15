@@ -55,15 +55,12 @@ export async function GET(request: NextRequest) {
                 authUser = user;
             }
 
-            const userRoleInProject = checkProjectRole(
+            const { projectRole } = checkProjectRole(
                 authUser.id,
                 fileDetail.project as ProjectJoinMembers,
             );
 
-            if (
-                userRoleInProject !== ProjectRole.MEMBER &&
-                userRoleInProject !== ProjectRole.OWNER
-            ) {
+            if (projectRole === ProjectRole.NONE) {
                 return new Response("Unauthorized to access the file!!", {
                     status: HttpStatusCode.UNAUTHORIZED_401,
                 });

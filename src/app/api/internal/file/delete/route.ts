@@ -73,15 +73,12 @@ export async function DELETE(request: NextRequest) {
 
         // check permission to access the file only if the file is in a project
         if (fileDetail.project) {
-            const userRoleInProject = checkProjectRole(
+            const { canEdit } = checkProjectRole(
                 user.id,
                 fileDetail.project as ProjectJoinMembers,
             );
 
-            if (
-                userRoleInProject !== ProjectRole.MEMBER &&
-                userRoleInProject !== ProjectRole.OWNER
-            ) {
+            if (canEdit) {
                 return buildErrorResponse(
                     unsuccessMessage,
                     generateAndFormatZodError(
