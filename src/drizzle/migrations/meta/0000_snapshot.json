@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "0cdc11b9-cb21-453d-bde3-9831773f9351",
+  "id": "468ec3e1-9ae4-4188-b2ef-223fb75766cd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "application_forms": {
@@ -779,6 +779,30 @@
         },
         "project_content": {
           "name": "project_content",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "('{}')"
+        },
+        "files": {
+          "name": "files",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "('{}')"
+        },
+        "links": {
+          "name": "links",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "('{}')"
+        },
+        "pipeline_status": {
+          "name": "pipeline_status",
           "type": "json",
           "primaryKey": false,
           "notNull": false,

@@ -316,10 +316,10 @@ export const projects = mysqlTable("projects", {
         length: 2083,
     }),
     isPublic: boolean("is_public").default(false),
-    // can be used to store 'links', 'files', 'chapters.components', 'pipline status'
-    projectContent: json("project_content").default({
-        // todo: add default type so that we can infer the type of the object
-    }),
+    projectContent: json("project_content"),
+    files: json("files"),
+    links: json("links"),
+    pipelineStatus: json("pipeline_status"),
     userId: varchar("user_id", {
         length: 255,
     })

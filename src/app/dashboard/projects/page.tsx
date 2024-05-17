@@ -12,6 +12,8 @@ import { FetchAssociatedProjectsData } from "@/app/api/internal/project/associat
 import Link from "next/link";
 import { checkProjectRole } from "@/lib/project";
 import { getAuthUser } from "@/auth/lucia";
+import { hasPermission } from "@/lib/IAM";
+import { Permissions } from "@/types/IAM";
 
 type ManageAssociatedProps = {
     searchParams?: {
@@ -45,12 +47,17 @@ export default async function ManageAssociatedProject({
     const showPagination =
         result.data.maxPage >= page && result.data.maxPage > 1;
 
+    const { canAccess: canCreateProject } = await hasPermission(
+        user.id,
+        new Set([Permissions.CREATE_OWN_PROJECTS]),
+    );
+
     return (
         <div className="w-full max-w-[1000px]">
             <Suspense fallback={"loading..."}>
                 <div className="flex flex-row justify-between">
                     <h1 className="text-2xl">Projects</h1>
-                    <CreateProjectOverlay />
+                    {canCreateProject && <CreateProjectOverlay />}
                 </div>
                 {result.data.projects.length > 0 ? (
                     <div className="my-4 w-full flex gap-4 flex-col">
@@ -70,10 +77,16 @@ export default async function ManageAssociatedProject({
 }
 
 function NoProject({ page }: { page: number }) {
+    let message = `No project found on page ${page}`;
+
+    if (page === 1) {
+        message = "You are not associated with any project.";
+    }
+
     return (
         <>
             <div className="flex flex-col items-center justify-between gap-4 my-4">
-                <h1 className="text-lg">{`No project found on page ${page}`}</h1>
+                <h1 className="text-lg">{message}</h1>
             </div>
         </>
     );
