@@ -14,6 +14,7 @@ import { checkProjectRole } from "@/lib/project";
 import { getAuthUser } from "@/auth/lucia";
 import { hasPermission } from "@/lib/IAM";
 import { Permissions } from "@/types/IAM";
+import { User } from "lucia";
 
 type ManageAssociatedProps = {
     searchParams?: {
@@ -41,7 +42,7 @@ export default async function ManageAssociatedProject({
     }
 
     const ProjectLists = result.data.projects.map((project) => {
-        return <Project key={project.id} project={project} userId={user.id} />;
+        return <Project key={project.id} project={project} user={user} />;
     });
 
     const showPagination =
@@ -93,14 +94,13 @@ function NoProject({ page }: { page: number }) {
 }
 
 function Project({
-    userId,
+    user,
     project,
 }: {
-    userId: string;
+    user: User;
     project: SuccessResponse<FetchAssociatedProjectsData>["data"]["projects"][number];
 }) {
-    const { canEdit } = checkProjectRole(userId, project);
-
+    const { canEdit } = checkProjectRole(user.id, project, user.type);
     return (
         <Card square>
             <div className="flex flex-row gap-4 relative">

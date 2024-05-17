@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
             const { projectRole } = checkProjectRole(
                 authUser.id,
                 fileDetail.project as ProjectJoinMembers,
+                authUser.type,
             );
 
             if (projectRole === ProjectRole.NONE) {

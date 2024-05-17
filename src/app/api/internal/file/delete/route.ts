@@ -18,6 +18,7 @@ import {
     ProjectJoinMembers,
     ProjectRole,
 } from "@/lib/project";
+import { UserType } from "@/types/user";
 
 const successMessage = "Delete file successfully";
 const unsuccessMessage = "Delete file failed";
@@ -76,6 +77,7 @@ export async function DELETE(request: NextRequest) {
             const { canEdit } = checkProjectRole(
                 user.id,
                 fileDetail.project as ProjectJoinMembers,
+                user.type,
             );
 
             if (canEdit) {
@@ -90,7 +92,7 @@ export async function DELETE(request: NextRequest) {
             }
         } else {
             // if the file is not in a project, check by comparing who uploaded the file
-            if (fileDetail.userId !== user.id) {
+            if (fileDetail.userId !== user.id && user.type !== UserType.SUPER_ADMIN) {
                 return buildErrorResponse(
                     unsuccessMessage,
                     generateAndFormatZodError(

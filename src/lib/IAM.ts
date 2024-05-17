@@ -42,7 +42,7 @@ export const hasPermission = cache(
                 };
             }
 
-            if (user.type === UserType.SUPERADMIN) {
+            if (user.type === UserType.SUPER_ADMIN) {
                 localDebug(
                     "Access granted because user is superadmin",
                     "hasPermission()",

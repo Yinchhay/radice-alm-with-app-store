@@ -1,22 +1,29 @@
 import { projectMembers, projects } from "@/drizzle/schema";
+import { UserType } from "@/types/user";
 
 export type ProjectJoinMembers = typeof projects.$inferSelect & {
     projectMembers: (typeof projectMembers.$inferSelect)[];
 };
 
 export enum ProjectRole {
-    OWNER = "OWNER",
-    MEMBER = "MEMBER",
-    NONE = "NONE",
+    SUPER_ADMIN = UserType.SUPER_ADMIN,
+    OWNER = "owner",
+    MEMBER = "member",
+    NONE = "none",
 }
 
 export const checkProjectRole = (
     userId: string,
     project: ProjectJoinMembers,
+    userType: string,
 ): {
     projectRole: ProjectRole;
     canEdit: boolean;
 } => {
+    if (userType === UserType.SUPER_ADMIN) {
+        return { projectRole: ProjectRole.SUPER_ADMIN , canEdit: true };
+    }
+
     let projectRole = ProjectRole.NONE;
     let canEdit = false;
 
