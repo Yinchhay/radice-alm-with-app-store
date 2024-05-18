@@ -32,13 +32,12 @@ export function CreateCategoryOverlay() {
                 <IconPlus></IconPlus>
             </Button>
             {showOverlay && (
-                <div className="font-normal">
                     <Overlay
                         onClose={() => {
                             setShowOverlay(false);
                         }}
                     >
-                        <Card className="w-[300px]">
+                        <Card className="w-[300px] font-normal">
                             <div className="flex flex-col items-center gap-2">
                                 <h1 className="text-2xl font-bold capitalize">
                                     Create Category
@@ -97,7 +96,6 @@ export function CreateCategoryOverlay() {
                             </form>
                         </Card>
                     </Overlay>
-                </div>
             )}
         </>
     );

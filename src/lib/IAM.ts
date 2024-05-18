@@ -129,7 +129,6 @@ export const routeRequiredPermissions = new Map<routeKey, Set<Permissions>>([
         "managePartners",
         new Set([
             Permissions.CREATE_PARTNERS,
-            Permissions.EDIT_PARTNERS,
             Permissions.DELETE_PARTNERS,
         ]),
     ],

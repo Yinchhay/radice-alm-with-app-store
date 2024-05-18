@@ -8,6 +8,7 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconPlus } from "@tabler/icons-react";
 import { fetchCreateUser } from "./fetch";
 import { useFormStatus } from "react-dom";
+import { generatePassword } from "@/lib/utils";
 
 export function CreateUserOverlay() {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
@@ -126,14 +127,4 @@ function CreateUserBtn() {
             {formStatus.pending ? "Creating" : "Create"}
         </Button>
     );
-}
-
-function generatePassword() {
-    const chars =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let password = "";
-    for (let i = 0; i < 8; i++) {
-        password += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return password;
 }

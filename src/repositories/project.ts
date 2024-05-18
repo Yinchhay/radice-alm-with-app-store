@@ -1,5 +1,9 @@
 import { db } from "@/drizzle/db";
-import { projectMembers, projects, users } from "@/drizzle/schema";
+import {
+    projectMembers,
+    projectPartners,
+    projects,
+} from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { eq, sql, or, inArray, count } from "drizzle-orm";
 
@@ -7,7 +11,7 @@ export const createProject = async (project: typeof projects.$inferInsert) => {
     return await db.insert(projects).values(project);
 };
 
-export const associatedProjectIds = async (
+export const memberAssociatedProjectIds = async (
     userId: string,
 ): Promise<number[]> => {
     const currentUserAssociatedProjects = await db
@@ -17,12 +21,40 @@ export const associatedProjectIds = async (
         .from(projectMembers)
         .where(eq(projectMembers.userId, userId));
 
-    return currentUserAssociatedProjects.map((p) => p.projectId);
+    const memberIds = currentUserAssociatedProjects.map((p) => p.projectId);
+
+    if (memberIds.length === 0) {
+        // because inArray require at least one array, put -1 because in production, no project id start with -1.
+        return [-1];
+    }
+
+    return memberIds;
+};
+
+export const partnerAssociatedProjectIds = async (
+    partner_id: string,
+): Promise<number[]> => {
+    const currentPartnerAssociatedProjects = await db
+        .select({
+            projectId: projectPartners.projectId,
+        })
+        .from(projectPartners)
+        .where(eq(projectPartners.partnerId, partner_id));
+
+    const partnerIds = currentPartnerAssociatedProjects.map((p) => p.projectId);
+
+    if (partnerIds.length === 0) {
+        // because inArray require at least one array, put -1 because in production, no project id start with -1.
+        return [-1];
+    }
+
+    return partnerIds;
 };
 
 // For pagination
 export const getAssociatedProjectsTotalRowByUserId = async (userId: string) => {
-    const currentUserAssociatedProjectIds = await associatedProjectIds(userId);
+    const memberIds = await memberAssociatedProjectIds(userId);
+    const partnerIds = await partnerAssociatedProjectIds(userId);
 
     const totalRows = await db
         .select({ count: count() })
@@ -32,13 +64,8 @@ export const getAssociatedProjectsTotalRowByUserId = async (userId: string) => {
                 // check if the user is the owner of the project
                 eq(projects.userId, userId),
                 // if not, check if the user is associated with the project
-                inArray(
-                    projects.id,
-                    currentUserAssociatedProjectIds.length > 0
-                        ? currentUserAssociatedProjectIds
-                        : // because inArray require at least one array, put -1 because in production, no project id start with -1.
-                          [-1],
-                ),
+                inArray(projects.id, memberIds),
+                inArray(projects.id, partnerIds),
             ),
         );
 
@@ -51,7 +78,8 @@ export const getAssociatedProjectsByUserId = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
 ) => {
-    const currentUserAssociatedProjectIds = await associatedProjectIds(userId);
+    const memberIds = await memberAssociatedProjectIds(userId);
+    const partnerIds = await partnerAssociatedProjectIds(userId);
 
     return db.query.projects.findMany({
         where: (table, { or, inArray }) =>
@@ -59,13 +87,8 @@ export const getAssociatedProjectsByUserId = async (
                 // check if the user is the owner of the project
                 eq(table.userId, userId),
                 // if not, check if the user is associated with the project
-                inArray(
-                    table.id,
-                    currentUserAssociatedProjectIds.length > 0
-                        ? currentUserAssociatedProjectIds
-                        : // because inArray require at least one array, put -1 because in production, no project id start with -1.
-                          [-1],
-                ),
+                inArray(table.id, memberIds),
+                inArray(table.id, partnerIds),
             ),
         with: {
             projectCategories: {
@@ -74,6 +97,7 @@ export const getAssociatedProjectsByUserId = async (
                 },
             },
             projectMembers: true,
+            projectPartners: true,
         },
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
@@ -87,6 +111,7 @@ export async function getOneAssociatedProject(project_id: string) {
         where: (project, { eq }) => eq(project.id, Number(project_id)),
         with: {
             projectMembers: true,
+            projectPartners: true,
         },
     });
     return project;
@@ -104,6 +129,7 @@ export async function editProjectContentById(
         where: (project, { eq }) => eq(project.id, Number(project_id)),
         with: {
             projectMembers: true,
+            projectPartners: true,
         },
     });
     return { updateSuccess: updateResult[0].affectedRows == 1, updatedProject };

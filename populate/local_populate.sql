@@ -12,7 +12,7 @@ INSERT INTO permissions (id, name, description) VALUES
 (8, 'Edit roles', 'Permission to edit roles'),
 (9, 'Delete roles', 'Permission to delete roles'),
 (10, 'Create partners', 'Permission to create partners'),
-(11, 'Edit partners', 'Permission to edit partners'),
+-- (11, 'Edit partners', 'Permission to edit partners'),
 (12, 'Delete partners', 'Permission to delete partners'),
 (13, 'Approve and reject application forms', 'Permission to approve and reject application forms'),
 (14, 'Create own projects', 'Permission to create own projects');

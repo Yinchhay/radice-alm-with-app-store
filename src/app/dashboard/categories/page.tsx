@@ -10,8 +10,10 @@ import { EditCategoryOverlay } from "./edit_category";
 import { DeleteCategoryOverlay } from "./delete_category";
 import { fetchCategories } from "./fetch";
 import { categories } from "@/drizzle/schema";
-import { ROWS_PER_PAGE } from "@/lib/pagination";
 import Pagination from "@/components/Pagination";
+import { hasPermission } from "@/lib/IAM";
+import { getAuthUser } from "@/auth/lucia";
+import { Permissions } from "@/types/IAM";
 
 type ManageCategoriesProps = {
     searchParams?: {
@@ -22,21 +24,49 @@ type ManageCategoriesProps = {
 export default async function ManageCategories({
     searchParams,
 }: ManageCategoriesProps) {
+    const user = await getAuthUser();
+
+    if (!user) {
+        throw new Error("Unauthorized to access this page");
+    }
+
     let page = Number(searchParams?.page) || 1;
     if (page < 1) {
         page = 1;
     }
 
-    const result = await fetchCategories(page, ROWS_PER_PAGE);
+    const result = await fetchCategories(page, 9);
     if (!result.success) {
         throw new Error(result.message);
     }
 
+    const [
+        createCategoryPermission,
+        editCategoryPermission,
+        deleteCategoryPermission,
+    ] = await Promise.all([
+        hasPermission(user.id, new Set([Permissions.CREATE_CATEGORIES])),
+        hasPermission(user.id, new Set([Permissions.EDIT_CATEGORIES])),
+        hasPermission(user.id, new Set([Permissions.DELETE_CATEGORIES])),
+    ]);
+
+    const canCreateCategory = createCategoryPermission.canAccess;
+    const canEditCategory = editCategoryPermission.canAccess;
+    const canDeleteCategory = deleteCategoryPermission.canAccess;
+
     const CategoryLists = result.data.categories.map((category) => {
-        return <Category key={category.id} category={category} />;
+        return (
+            <Category
+                key={category.id}
+                category={category}
+                canEditCategory={canEditCategory}
+                canDeleteCategory={canDeleteCategory}
+            />
+        );
     });
 
-    const showPagination = result.data.maxPage >= page && result.data.maxPage > 1;
+    const showPagination =
+        result.data.maxPage >= page && result.data.maxPage > 1;
 
     return (
         <Suspense fallback={"loading..."}>
@@ -46,7 +76,7 @@ export default async function ManageCategories({
                     <ColumName>Name</ColumName>
                     <ColumName>Description</ColumName>
                     <ColumName className="flex justify-end">
-                        <CreateCategoryOverlay />
+                        {canCreateCategory && <CreateCategoryOverlay />}
                     </ColumName>
                 </TableHeader>
                 <TableBody>
@@ -54,7 +84,7 @@ export default async function ManageCategories({
                         CategoryLists
                     ) : (
                         // TODO: style here
-                        <NoCategory page={page}/>
+                        <NoCategory page={page} />
                     )}
                 </TableBody>
             </Table>
@@ -67,7 +97,7 @@ export default async function ManageCategories({
     );
 }
 
-function NoCategory({ page}: { page: number }) {
+function NoCategory({ page }: { page: number }) {
     return (
         <>
             <TableRow>
@@ -77,7 +107,15 @@ function NoCategory({ page}: { page: number }) {
     );
 }
 
-function Category({ category }: { category: typeof categories.$inferSelect }) {
+function Category({
+    category,
+    canEditCategory,
+    canDeleteCategory,
+}: {
+    category: typeof categories.$inferSelect;
+    canEditCategory: boolean;
+    canDeleteCategory: boolean;
+}) {
     return (
         <TableRow className="text-center align-middle">
             <Cell data-test={`categoryName-${category.name}`}>
@@ -88,8 +126,12 @@ function Category({ category }: { category: typeof categories.$inferSelect }) {
             </Cell>
             <Cell>
                 <div className="flex gap-2 justify-end">
-                    <EditCategoryOverlay category={category} />
-                    <DeleteCategoryOverlay category={category} />
+                    {canEditCategory && (
+                        <EditCategoryOverlay category={category} />
+                    )}
+                    {canDeleteCategory && (
+                        <DeleteCategoryOverlay category={category} />
+                    )}
                 </div>
             </Cell>
         </TableRow>

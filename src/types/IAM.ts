@@ -16,7 +16,7 @@ export enum Permissions {
 
     // Create partners
     CREATE_PARTNERS = 10,
-    EDIT_PARTNERS = 11,
+    // EDIT_PARTNERS = 11,
     DELETE_PARTNERS = 12,
 
     // Manage application forms

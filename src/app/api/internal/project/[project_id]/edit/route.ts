@@ -14,11 +14,7 @@ import {
     editProjectContentById,
     getOneAssociatedProject,
 } from "@/repositories/project";
-import {
-    ProjectJoinMembers,
-    ProjectRole,
-    checkProjectRole,
-} from "@/lib/project";
+import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { editProjectContentSchema } from "../schema";
 
 const successMessage = "successMessage";
@@ -64,7 +60,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
-        const { projectRole, canEdit } = await checkProjectRole(
+        const { projectRole, canEdit } = checkProjectRole(
             user.id,
             project,
             user.type,

@@ -12,11 +12,7 @@ import { getOneAssociatedProjectSchema } from "./schema";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { getOneAssociatedProject } from "@/repositories/project";
-import {
-    ProjectJoinMembers,
-    ProjectRole,
-    checkProjectRole,
-} from "@/lib/project";
+import { ProjectRole, checkProjectRole } from "@/lib/project";
 
 const successMessage = "successMessage";
 const unsuccessMessage = "unsuccessMessage";
@@ -59,12 +55,12 @@ export async function GET(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
-        const { projectRole, canEdit } = await checkProjectRole(
+        const { projectRole, canEdit } = checkProjectRole(
             user.id,
             project,
             user.type,
         );
-        if (projectRole == ProjectRole.NONE) {
+        if (projectRole === ProjectRole.NONE) {
             return buildErrorResponse(
                 unsuccessMessage,
                 generateAndFormatZodError(

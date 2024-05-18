@@ -11,7 +11,7 @@ export const PermissionNames = new Map<number, string>([
     [Permissions.EDIT_ROLES, "Edit roles"],
     [Permissions.DELETE_ROLES, "Delete roles"],
     [Permissions.CREATE_PARTNERS, "Create partners"],
-    [Permissions.EDIT_PARTNERS, "Edit partners"],
+    // [Permissions.EDIT_PARTNERS, "Edit partners"],
     [Permissions.DELETE_PARTNERS, "Delete partners"],
     [
         Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS,
@@ -37,4 +37,14 @@ export function readBearerToken(authorizationHeader: string): string | null {
         return null;
     }
     return token ?? null;
+}
+
+export function generatePassword(): string {
+    const chars =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let password = "";
+    for (let i = 0; i < 8; i++) {
+        password += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return password;
 }

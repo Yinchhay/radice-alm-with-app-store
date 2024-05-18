@@ -3,20 +3,20 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
-import { categories } from "@/drizzle/schema";
+import { users } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { IconX } from "@tabler/icons-react";
-import { fetchDeleteCategoryById } from "./fetch";
+import { fetchDeletePartnerById } from "./fetch";
 
-export function DeleteCategoryOverlay({
-    category,
+export function DeletePartnerOverlay({
+    partner,
 }: {
-    category: typeof categories.$inferSelect;
+    partner: typeof users.$inferSelect;
 }) {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
-        useState<Awaited<ReturnType<typeof fetchDeleteCategoryById>>>();
+        useState<Awaited<ReturnType<typeof fetchDeletePartnerById>>>();
 
     useEffect(() => {
         // close the overlay after deleting successfully
@@ -29,7 +29,7 @@ export function DeleteCategoryOverlay({
         <>
             <div className="">
                 <Button
-                    data-test={`deleteCategory-${category.name}`}
+                    data-test={`deletePartner-${partner.firstName}`}
                     onClick={() => setShowOverlay(true)}
                     square={true}
                     variant="danger"
@@ -50,15 +50,15 @@ export function DeleteCategoryOverlay({
                             </h1>
                             <div className="">
                                 <p>
-                                    You are about to delete category name{" "}
-                                    <strong>{category.name}</strong>
+                                    You are about to delete partner name{" "}
+                                    <strong>{partner.firstName}</strong>
                                 </p>
                             </div>
                         </div>
                         <form
                             action={async (formData: FormData) => {
-                                const result = await fetchDeleteCategoryById(
-                                    category.id,
+                                const result = await fetchDeletePartnerById(
+                                    partner.id,
                                 );
                                 setResult(result);
                             }}
@@ -76,7 +76,7 @@ export function DeleteCategoryOverlay({
                                 >
                                     Cancel
                                 </Button>
-                                <DeleteCategoryBtn />
+                                <DeletePartnerBtn />
                             </div>
                         </form>
                     </Card>
@@ -86,11 +86,11 @@ export function DeleteCategoryOverlay({
     );
 }
 
-function DeleteCategoryBtn() {
+function DeletePartnerBtn() {
     const formStatus = useFormStatus();
     return (
         <Button
-            data-test="deleteCategoryBtn"
+            data-test="deletePartnerBtn"
             disabled={formStatus.pending}
             variant="danger"
         >

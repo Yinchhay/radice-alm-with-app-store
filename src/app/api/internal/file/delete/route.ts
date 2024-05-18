@@ -15,7 +15,6 @@ import { z } from "zod";
 import { deleteFileFormSchema } from "../schema";
 import {
     checkProjectRole,
-    ProjectJoinMembers,
     ProjectRole,
 } from "@/lib/project";
 import { UserType } from "@/types/user";
@@ -76,7 +75,7 @@ export async function DELETE(request: NextRequest) {
         if (fileDetail.project) {
             const { canEdit } = checkProjectRole(
                 user.id,
-                fileDetail.project as ProjectJoinMembers,
+                fileDetail.project,
                 user.type,
             );
 

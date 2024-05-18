@@ -5,11 +5,7 @@ import { getFileStoragePath } from "@/lib/file";
 import { getAuthUser } from "@/auth/lucia";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import { getFileByFilename } from "@/repositories/files";
-import {
-    checkProjectRole,
-    ProjectJoinMembers,
-    ProjectRole,
-} from "@/lib/project";
+import { checkProjectRole, ProjectRole } from "@/lib/project";
 
 export async function GET(request: NextRequest) {
     try {
@@ -57,7 +53,7 @@ export async function GET(request: NextRequest) {
 
             const { projectRole } = checkProjectRole(
                 authUser.id,
-                fileDetail.project as ProjectJoinMembers,
+                fileDetail.project,
                 authUser.type,
             );
 

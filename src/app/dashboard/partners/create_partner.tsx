@@ -3,25 +3,21 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Overlay from "@/components/Overlay";
 import { useEffect, useState } from "react";
-import { useFormStatus } from "react-dom";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconEdit } from "@tabler/icons-react";
-import { categories } from "@/drizzle/schema";
-import { fetchEditCategoryById } from "./fetch";
+import { IconPlus } from "@tabler/icons-react";
+import { useFormStatus } from "react-dom";
+import { fetchCreatePartner } from "./fetch";
 
-export function EditCategoryOverlay({
-    category,
-}: {
-    category: typeof categories.$inferSelect;
-}) {
+export function CreatePartnerOverlay() {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
-        useState<Awaited<ReturnType<typeof fetchEditCategoryById>>>();
+        useState<Awaited<ReturnType<typeof fetchCreatePartner>>>();
 
     useEffect(() => {
-        // close the overlay after editing successfully
+        // close the overlay after creating successfully
         if (showOverlay && result?.success) {
+            console.log("Created partner pw: ", result.data.password);
             setShowOverlay(false);
         }
     }, [result]);
@@ -29,11 +25,12 @@ export function EditCategoryOverlay({
     return (
         <>
             <Button
-                data-test={`editCategory-${category.name}`}
+                data-test="createPartner"
                 onClick={() => setShowOverlay(true)}
                 square={true}
+                variant="primary"
             >
-                <IconEdit></IconEdit>
+                <IconPlus></IconPlus>
             </Button>
             {showOverlay && (
                 <Overlay
@@ -44,42 +41,45 @@ export function EditCategoryOverlay({
                     <Card className="w-[300px] font-normal">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
-                                Edit Category
+                                Create Partner
                             </h1>
                         </div>
                         <form
                             action={async (formData: FormData) => {
-                                const result = await fetchEditCategoryById({
-                                    categoryId: category.id,
-                                    name: formData.get("name") as string,
-                                    description: formData.get(
-                                        "description",
-                                    ) as string,
+                                const result = await fetchCreatePartner({
+                                    email: formData.get("email") as string,
+                                    firstName: formData.get("firstName") as string,
+                                    lastName: formData.get("lastName") as string,
                                 });
                                 setResult(result);
                             }}
                         >
                             <div className="flex flex-col items-start my-1">
-                                <label htmlFor="name" className="font-normal">
-                                    Name
+                                <label
+                                    htmlFor="firstName"
+                                    className="font-normal"
+                                >
+                                    First name
                                 </label>
-                                <InputField
-                                    name="name"
-                                    id="name"
-                                    defaultValue={category.name}
-                                />
+                                <InputField name="firstName" id="firstName" />
                             </div>
                             <div className="flex flex-col items-start my-1">
                                 <label
-                                    htmlFor="description"
+                                    htmlFor="lastName"
                                     className="font-normal"
                                 >
-                                    Description
+                                    Last name
+                                </label>
+                                <InputField name="lastName" id="lastName" />
+                            </div>
+                            <div className="flex flex-col items-start my-1">
+                                <label htmlFor="email" className="font-normal">
+                                    Email
                                 </label>
                                 <InputField
-                                    name="description"
-                                    id="description"
-                                    defaultValue={category.description ?? ""}
+                                    type="email"
+                                    name="email"
+                                    id="email"
                                 />
                             </div>
                             {!result?.success && result?.errors && (
@@ -95,7 +95,7 @@ export function EditCategoryOverlay({
                                 >
                                     Cancel
                                 </Button>
-                                <EditCategoryBtn />
+                                <CreatePartnerBtn />
                             </div>
                         </form>
                     </Card>
@@ -105,11 +105,11 @@ export function EditCategoryOverlay({
     );
 }
 
-function EditCategoryBtn() {
+function CreatePartnerBtn() {
     const formStatus = useFormStatus();
     return (
         <Button disabled={formStatus.pending} variant="primary">
-            {formStatus.pending ? "Editing" : "Edit"}
+            {formStatus.pending ? "Creating" : "Create"}
         </Button>
     );
 }

@@ -13,10 +13,7 @@ export const getFileByFilename = async (filename: string) => {
             project: {
                 with: {
                     projectMembers: true,
-                },
-                // don't take any columns since we don't need project's attribute
-                columns: {
-                    userId: true,
+                    projectPartners: true,
                 },
             },
         },
