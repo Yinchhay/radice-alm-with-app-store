@@ -80,3 +80,31 @@ export const getAssociatedProjectsByUserId = async (
         orderBy: sql`id DESC`,
     });
 };
+
+export type OneAssociatedProject_C_Tag = `OneAssociatedProject_C_Tag`;
+export async function getOneAssociatedProject(project_id: string) {
+    const project = await db.query.projects.findFirst({
+        where: (project, { eq }) => eq(project.id, Number(project_id)),
+        with: {
+            projectMembers: true,
+        },
+    });
+    return project;
+}
+
+export async function editProjectContentById(
+    project_id: number,
+    chapters: string,
+) {
+    const updateResult = await db
+        .update(projects)
+        .set({ projectContent: chapters })
+        .where(eq(projects.id, project_id));
+    const updatedProject = await db.query.projects.findFirst({
+        where: (project, { eq }) => eq(project.id, Number(project_id)),
+        with: {
+            projectMembers: true,
+        },
+    });
+    return { updateSuccess: updateResult[0].affectedRows == 1, updatedProject };
+}

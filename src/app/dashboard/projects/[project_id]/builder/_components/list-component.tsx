@@ -10,10 +10,14 @@ export default function ListComponent({
     component,
     onSave,
     onDelete,
+    onSelected,
+    selectedComponentID,
 }: {
     component: Component;
-    onSave?: (newData: Component) => void;
-    onDelete?: (ID: string) => void;
+    onSave: (newData: Component) => void;
+    onDelete: (ID: string) => void;
+    onSelected: (ID: string) => void;
+    selectedComponentID: string;
 }) {
     const {
         attributes,
@@ -30,25 +34,33 @@ export default function ListComponent({
     };
     useEffect(() => {
         if (isDragging) {
-            setShowEdit(false);
+            onSelected("");
         }
     }, [isDragging]);
 
+    useEffect(() => {
+        if (selectedComponentID == component.id) {
+            setShowEdit(true);
+        } else {
+            setShowEdit(false);
+            handleCancel;
+        }
+    }, [selectedComponentID]);
+
     const [showEdit, setShowEdit] = useState<boolean>(false);
-    const [isHovering, setIsHovering] = useState<boolean>(false);
     const [currentComponent, setCurrentComponent] =
         useState<Component>(component);
 
     const handleCancel = () => {
-        setShowEdit(false);
+        onSelected("");
         setCurrentComponent(component); // Reset to initial state
     };
 
     const handleSave = () => {
-        setShowEdit(false);
+        onSelected("");
         component.text = currentComponent.text;
         component.rows = currentComponent.rows;
-        onSave && onSave(currentComponent); // Notify parent component of changes
+        onSave(currentComponent); // Notify parent component of changes
     };
 
     const handleRowChange = (index: number, value: string) => {
@@ -86,14 +98,12 @@ export default function ListComponent({
             rows: updatedRows,
         }));
         console.log(`row_${currentComponent.id}_${index}`);
-        setIsHovering(true);
         setTimeout(() => {
             const textArea = document.getElementById(
                 `row_${currentComponent.id}_${index}`,
             );
             if (textArea) {
                 textArea.focus();
-                setIsHovering(false); // Focus on the newly inserted row
             }
         }, 0);
     };
@@ -105,6 +115,18 @@ export default function ListComponent({
             ...prevComponent,
             rows: updatedRows,
         }));
+        // Refocus to the last row after deletion, if there's at least one row left
+        if (updatedRows.length > 0) {
+            setTimeout(() => {
+                const lastIndex = updatedRows.length - 1;
+                const textArea = document.getElementById(
+                    `row_${currentComponent.id}_${lastIndex}`,
+                );
+                if (textArea) {
+                    textArea.focus();
+                }
+            }, 0);
+        }
     };
 
     return (
@@ -114,24 +136,22 @@ export default function ListComponent({
             {...attributes}
             {...(!showEdit ? listeners : {})}
             aria-describedby=""
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
             data-no-dnd="true"
-            onBlur={() => {
-                console.log("blur");
-                if (!isHovering) handleCancel();
-            }}
-            className="bg-transparent hover:outline hover:outline-1 hover:outline-gray-400 p-4 rounded-md focus-within:outline focus-within:outline-1 focus-within:outline-gray-400"
+            className={[
+                "outline outline-1 outline-transparent hover:outline-gray-400 p-4 rounded-md",
+                selectedComponentID == component.id ? "outline-gray-400" : "",
+                isDragging ? "" : "transition-all",
+            ].join(" ")}
         >
             <div
                 onClick={() => {
                     if (!isDragging) {
-                        setShowEdit(true);
-                        console.log("show again");
+                        onSelected(component.id);
                     }
                 }}
             >
                 <ReactTextareaAutosize
+                    spellCheck={false}
                     className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
                     value={currentComponent.text}
                     onChange={(e) =>
@@ -146,6 +166,7 @@ export default function ListComponent({
                         <li key={"row" + i}>
                             <div className="flex items-center">
                                 <ReactTextareaAutosize
+                                    spellCheck={false}
                                     id={`row_${currentComponent.id}_${i}`}
                                     className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
                                     value={row}
@@ -164,8 +185,8 @@ export default function ListComponent({
                     <Button
                         variant="danger"
                         onClick={() => {
-                            setShowEdit(false);
-                            onDelete && onDelete(currentComponent.id);
+                            onSelected("");
+                            onDelete(currentComponent.id);
                         }}
                     >
                         Delete

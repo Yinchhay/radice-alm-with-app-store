@@ -1,0 +1,63 @@
+"use server";
+import { FetchEditProjectContent } from "@/app/api/internal/project/[project_id]/edit/route";
+import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
+import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import {
+    getBaseUrl,
+    getSessionCookie,
+    revalidateTags,
+} from "@/lib/server_utils";
+import { OneAssociatedProject_C_Tag } from "@/repositories/project";
+
+export async function fetchOneAssociatedProject(
+    projectId: string,
+): ResponseJson<FetchOneAssociatedProjectData> {
+    try {
+        const sessionId = await getSessionCookie();
+        // type casting to ensure that the tags are correct, if there is a typo, it will show an error
+        const cacheTag: OneAssociatedProject_C_Tag =
+            "OneAssociatedProject_C_Tag";
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                next: {
+                    tags: [cacheTag],
+                },
+                cache: "force-cache",
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+export async function fetchEditProjectContentbyId(
+    projectId: string,
+    chapters: any,
+): ResponseJson<FetchEditProjectContent> {
+    try {
+        const sessionId = await getSessionCookie();
+        // type casting to ensure that the tags are correct, if there is a typo, it will show an error
+
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}/edit`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(chapters),
+            },
+        );
+        await revalidateTags<OneAssociatedProject_C_Tag>(
+            "OneAssociatedProject_C_Tag",
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}

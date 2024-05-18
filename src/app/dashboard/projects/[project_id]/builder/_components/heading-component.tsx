@@ -12,10 +12,14 @@ export default function HeadingComponent({
     component,
     onSave,
     onDelete,
+    onSelected,
+    selectedComponentID,
 }: {
     component: Component;
-    onSave?: (newData: Component) => void;
-    onDelete?: (ID: string) => void;
+    onSave: (newData: Component) => void;
+    onDelete: (ID: string) => void;
+    onSelected: (ID: string) => void;
+    selectedComponentID: string;
 }) {
     const {
         attributes,
@@ -31,7 +35,6 @@ export default function HeadingComponent({
         transition,
     };
     const [showEdit, setShowEdit] = useState<boolean>(false);
-    const [isHovering, setIsHovering] = useState<boolean>(false);
     const textRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
@@ -41,7 +44,6 @@ export default function HeadingComponent({
     }, []);
 
     function Cancel() {
-        setShowEdit(false);
         if (textRef.current) {
             textRef.current.value = component.text ? component.text : "";
         }
@@ -49,9 +51,18 @@ export default function HeadingComponent({
 
     useEffect(() => {
         if (isDragging) {
-            setShowEdit(false);
+            onSelected("");
         }
     }, [isDragging]);
+
+    useEffect(() => {
+        if (selectedComponentID == component.id) {
+            setShowEdit(true);
+        } else {
+            setShowEdit(false);
+            Cancel();
+        }
+    }, [selectedComponentID]);
 
     return (
         <div
@@ -61,39 +72,36 @@ export default function HeadingComponent({
             {...(!showEdit ? listeners : {})}
             aria-describedby=""
             data-no-dnd="true"
-            className="hover:outline hover:outline-1 hover:outline-gray-400 p-4 rounded-md focus-within:outline focus-within:outline-1 focus-within:outline-gray-400"
+            className={[
+                "outline outline-1 outline-transparent hover:outline-gray-400 p-4 rounded-md",
+                selectedComponentID == component.id ? "outline-gray-400" : "",
+                isDragging ? "" : "transition-all",
+            ].join(" ")}
         >
             <ReactTextareaAutosize
+                spellCheck={false}
                 ref={textRef}
                 className="text-5xl font-extrabold text-center w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
-                onBlur={() => {
-                    if (!isHovering) Cancel();
-                }}
                 onClick={() => {
                     if (!isDragging) {
-                        setShowEdit(true);
+                        onSelected(component.id);
                     }
                 }}
             />
             {showEdit && (
-                <div
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
-                    className="flex gap-3 justify-end items-center"
-                >
+                <div className="flex gap-3 justify-end items-center">
                     <Button
                         variant="danger"
                         onClick={() => {
-                            setShowEdit(false);
-                            if (onDelete) {
-                                onDelete(component.id);
-                            }
+                            onSelected("");
+                            onDelete(component.id);
                         }}
                     >
                         Delete
                     </Button>
                     <Button
                         onClick={() => {
+                            onSelected("");
                             Cancel();
                         }}
                     >
@@ -101,14 +109,12 @@ export default function HeadingComponent({
                     </Button>
                     <Button
                         onClick={() => {
-                            setShowEdit(false);
-                            if (onSave) {
-                                let newData = component;
-                                if (textRef.current) {
-                                    newData.text = textRef.current.value;
-                                }
-                                onSave(newData);
+                            onSelected("");
+                            let newData = component;
+                            if (textRef.current) {
+                                newData.text = textRef.current.value;
                             }
+                            onSave(newData);
                         }}
                         variant="primary"
                     >

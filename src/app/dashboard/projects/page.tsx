@@ -144,7 +144,7 @@ function Project({
                     </Link>
                     {canEdit && (
                         <Link
-                            href={`/dashboard/projects/${project.id}`}
+                            href={`/dashboard/projects/${project.id}/builder`}
                             className="group"
                         >
                             <Button

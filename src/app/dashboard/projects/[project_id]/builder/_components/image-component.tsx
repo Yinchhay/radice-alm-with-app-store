@@ -3,20 +3,30 @@ import Image from "next/image";
 import { Component } from "@/types/content";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button";
 
 export default function ImageComponent({
     component,
     onSave,
     onDelete,
+    onSelected,
+    selectedComponentID,
 }: {
     component: Component;
-    onSave?: (newData: Component) => void;
-    onDelete?: (ID: string) => void;
+    onSave: (newData: Component) => void;
+    onDelete: (ID: string) => void;
+    onSelected: (ID: string) => void;
+    selectedComponentID: string;
 }) {
-    const { attributes, listeners, setNodeRef, transform, transition } =
-        useSortable({ id: component.id });
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: component.id });
 
     const style = {
         transform: CSS.Translate.toString(transform),
@@ -24,20 +34,36 @@ export default function ImageComponent({
     };
 
     const [showEdit, setShowEdit] = useState<boolean>(false);
-    const [isHovering, setIsHovering] = useState<boolean>(false);
     const [imageSrc, setImageSrc] = useState<string>(
         component.text ? component.text : "/placeholder.webp",
     );
     const buttonRef = useRef<HTMLButtonElement>(null);
 
     function Cancel() {
-        setShowEdit(false);
         setImageSrc(component.text ? component.text : "/placeholder.webp");
     }
+    useEffect(() => {
+        if (isDragging) {
+            onSelected("");
+        }
+    }, [isDragging]);
+
+    useEffect(() => {
+        if (selectedComponentID == component.id) {
+            setShowEdit(true);
+        } else {
+            setShowEdit(false);
+            Cancel();
+        }
+    }, [selectedComponentID]);
 
     return (
         <div
-            className="bg-transparent hover:outline hover:outline-1 hover:outline-gray-400 p-4 rounded-md focus-within:outline focus-within:outline-1 focus-within:outline-gray-400"
+            className={[
+                "outline outline-1 outline-transparent hover:outline-gray-400 p-4 rounded-md",
+                selectedComponentID == component.id ? "outline-gray-400" : "",
+                isDragging ? "" : "transition-all",
+            ].join(" ")}
             ref={setNodeRef}
             style={style}
             {...attributes}
@@ -48,14 +74,14 @@ export default function ImageComponent({
             <button
                 ref={buttonRef}
                 onClick={() => {
-                    setShowEdit(true);
-                }}
-                onBlur={() => {
-                    if (!isHovering) Cancel();
+                    if (!isDragging) {
+                        onSelected(component.id);
+                    }
                 }}
                 className="w-full"
             >
                 <Image
+                    onError={() => setImageSrc("/placeholder.webp")}
                     src={imageSrc}
                     alt={""}
                     width={100}
@@ -68,24 +94,19 @@ export default function ImageComponent({
                 />
             </button>
             {showEdit && (
-                <div
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
-                    className="flex gap-3 justify-end items-center"
-                >
+                <div className="flex gap-3 justify-end items-center">
                     <Button
                         variant="danger"
                         onClick={() => {
-                            setShowEdit(false);
-                            if (onDelete) {
-                                onDelete(component.id);
-                            }
+                            onSelected("");
+                            onDelete(component.id);
                         }}
                     >
                         Delete
                     </Button>
                     <Button
                         onClick={() => {
+                            onSelected("");
                             Cancel();
                         }}
                     >
@@ -124,12 +145,10 @@ export default function ImageComponent({
                     </label>
                     <Button
                         onClick={() => {
-                            setShowEdit(false);
-                            if (onSave) {
-                                let newData = component;
-                                newData.text = imageSrc;
-                                onSave(newData);
-                            }
+                            onSelected("");
+                            let newData = component;
+                            newData.text = imageSrc;
+                            onSave(newData);
                         }}
                         variant="primary"
                     >
