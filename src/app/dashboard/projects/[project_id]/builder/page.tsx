@@ -1,6 +1,10 @@
 import Builder from "./builder";
 
-export default function ProjectBuilderPage() {
+type Params = {
+    project_id: string;
+};
+
+export default function ProjectBuilderPage({ params }: { params: Params }) {
     return (
         <div>
             <Builder />

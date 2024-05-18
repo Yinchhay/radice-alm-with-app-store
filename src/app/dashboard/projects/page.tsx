@@ -5,12 +5,12 @@ import { fetchAssociatedProjects } from "./fetch";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import Image from "next/image";
 import Card from "@/components/Card";
-import { IconEye, IconHammer } from "@tabler/icons-react";
+import { IconEye, IconHammer, IconSettings } from "@tabler/icons-react";
 import Button from "@/components/Button";
 import { SuccessResponse } from "@/lib/response";
 import { FetchAssociatedProjectsData } from "@/app/api/internal/project/associate/route";
 import Link from "next/link";
-import { checkProjectRole } from "@/lib/project";
+import { checkProjectRole, ProjectRole } from "@/lib/project";
 import { getAuthUser } from "@/auth/lucia";
 import { hasPermission } from "@/lib/IAM";
 import { Permissions } from "@/types/IAM";
@@ -100,7 +100,15 @@ function Project({
     user: User;
     project: SuccessResponse<FetchAssociatedProjectsData>["data"]["projects"][number];
 }) {
-    const { canEdit } = checkProjectRole(user.id, project, user.type);
+    const { canEdit, projectRole } = checkProjectRole(
+        user.id,
+        project,
+        user.type,
+    );
+    const canViewSettings =
+        projectRole === ProjectRole.OWNER ||
+        projectRole === ProjectRole.SUPER_ADMIN;
+
     return (
         <Card square>
             <div className="flex flex-row gap-4 relative">
@@ -142,6 +150,24 @@ function Project({
                             />
                         </Button>
                     </Link>
+                    {canViewSettings && (
+                        <Link
+                            href={`/dashboard/projects/${project.id}/settings`}
+                            className="group"
+                        >
+                            <Button
+                                square
+                                variant="outline"
+                                className="outline-0"
+                            >
+                                <IconSettings
+                                    size={28}
+                                    className="group-hover:text-blue-500 transition-all"
+                                    stroke={1.3}
+                                />
+                            </Button>
+                        </Link>
+                    )}
                     {canEdit && (
                         <Link
                             href={`/dashboard/projects/${project.id}/builder`}

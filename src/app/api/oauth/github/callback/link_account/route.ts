@@ -9,6 +9,7 @@ import { updateUserHasLinkedGithubByUserId } from "@/repositories/users";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { OAuthProviderId } from "@/types/oauth";
+import { UserType } from "@/types/user";
 import { OAuth2RequestError } from "arctic";
 import { cookies } from "next/headers";
 
@@ -48,6 +49,15 @@ export async function GET(request: Request): Promise<Response> {
                 status: HttpStatusCode.TEMPORARY_REDIRECT_307,
                 headers: {
                     Location: `/login?type=github&error_message=${ErrorMessage.UserUnauthenticated}`,
+                },
+            });
+        }
+
+        if (user.type === UserType.PARTNER) {
+            return new Response(null, {
+                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
+                headers: {
+                    Location: "/link_oauth/github?error_message=Partner cannot link github account",
                 },
             });
         }

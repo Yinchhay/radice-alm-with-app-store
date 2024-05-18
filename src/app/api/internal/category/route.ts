@@ -9,7 +9,7 @@ import {
 import { getCategories, getCategoriesTotalRow } from "@/repositories/category";
 import { NextRequest } from "next/server";
 
-type GetCategoriesReturnType = Awaited<ReturnType<typeof getCategories>>;
+export type GetCategoriesReturnType = Awaited<ReturnType<typeof getCategories>>;
 
 export type FetchCategoriesData = {
     categories: GetCategoriesReturnType;
@@ -41,13 +41,18 @@ export async function GET(request: NextRequest) {
         let rowsPerPage: number =
             Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
             ROWS_PER_PAGE;
+        const categorySearch = request.nextUrl.searchParams.get("search") || "";
 
         // limit to max 100 rows per page
         if (rowsPerPage > 100) {
             rowsPerPage = 100;
         }
 
-        const categories = await getCategories(page, rowsPerPage);
+        const categories = await getCategories(
+            page,
+            rowsPerPage,
+            categorySearch,
+        );
         const totalRows = await getCategoriesTotalRow();
 
         return buildSuccessResponse<FetchCategoriesData>(successMessage, {

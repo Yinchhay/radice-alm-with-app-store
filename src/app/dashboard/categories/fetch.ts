@@ -19,13 +19,13 @@ import { FetchCreateCategory } from "@/app/api/internal/category/create/route";
 import { FetchEditCategory } from "@/app/api/internal/category/[category_id]/edit/route";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 
-export async function fetchCategories(page: number = 1, rowsPerPage: number = ROWS_PER_PAGE): ResponseJson<FetchCategoriesData> {
+export async function fetchCategories(page: number = 1, rowsPerPage: number = ROWS_PER_PAGE, search: string = ""): ResponseJson<FetchCategoriesData> {
     try {
         const sessionId = await getSessionCookie();
         // type casting to ensure that the tags are correct, if there is a typo, it will show an error
         const cacheTag: GetCategories_C_Tag = "getCategories_C";
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/category?page=${page}&rowsPerPage=${rowsPerPage}`,
+            `${await getBaseUrl()}/api/internal/category?page=${page}&rowsPerPage=${rowsPerPage}&search=${search}`,
             {
                 method: "GET",
                 headers: {

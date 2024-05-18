@@ -1,3 +1,4 @@
+import { MAX_FILE_SIZE } from "@/lib/file";
 import { z } from "zod";
 
 export const createFileFormSchema = z.object({
@@ -17,11 +18,6 @@ export const createFileFormSchema = z.object({
         )
         .refine(
             (files: File[]) => {
-                // limit file size to 100MB
-                const KB = 1024;
-                const MB = KB * KB;
-                const MAX_FILE_SIZE = 100 * MB;
-
                 if (Array.isArray(files)) {
                     return files.every((file) => file.size <= MAX_FILE_SIZE);
                 }

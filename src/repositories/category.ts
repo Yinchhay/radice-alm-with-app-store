@@ -30,8 +30,10 @@ export type GetCategories_C_Tag = `getCategories_C`;
 export const getCategories = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
 ) => {
     return await db.query.categories.findMany({
+        where: (table, { like }) => like(table.name, `%${search}%`),
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,

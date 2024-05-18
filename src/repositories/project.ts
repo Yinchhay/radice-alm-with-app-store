@@ -1,9 +1,5 @@
 import { db } from "@/drizzle/db";
-import {
-    projectMembers,
-    projectPartners,
-    projects,
-} from "@/drizzle/schema";
+import { projectMembers, projectPartners, projects } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { eq, sql, or, inArray, count } from "drizzle-orm";
 
@@ -106,12 +102,18 @@ export const getAssociatedProjectsByUserId = async (
 };
 
 export type OneAssociatedProject_C_Tag = `OneAssociatedProject_C_Tag`;
-export async function getOneAssociatedProject(project_id: string) {
+export async function getOneAssociatedProject(project_id: number) {
     const project = await db.query.projects.findFirst({
         where: (project, { eq }) => eq(project.id, Number(project_id)),
         with: {
+            projectCategories: {
+                with: {
+                    category: true,
+                },
+            },
             projectMembers: true,
             projectPartners: true,
+            files: true,
         },
     });
     return project;
@@ -133,4 +135,26 @@ export async function editProjectContentById(
         },
     });
     return { updateSuccess: updateResult[0].affectedRows == 1, updatedProject };
+}
+
+export async function editProjectSettingDetailById(
+    project_id: number,
+    {
+        name,
+        description,
+        logo,
+    }: {
+        name: string;
+        description: string | null | undefined  ;
+        logo: string | null;
+    },
+) {
+    return await db
+        .update(projects)
+        .set({
+            name: name,
+            description: description,
+            logoUrl: logo,
+        })
+        .where(eq(projects.id, project_id));
 }

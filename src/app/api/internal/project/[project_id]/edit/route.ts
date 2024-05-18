@@ -52,7 +52,7 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        const project = await getOneAssociatedProject(params.project_id);
+        const project = await getOneAssociatedProject(Number(params.project_id));
         if (!project) {
             return buildErrorResponse(
                 unsuccessMessage,

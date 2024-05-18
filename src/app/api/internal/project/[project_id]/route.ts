@@ -18,9 +18,9 @@ const successMessage = "successMessage";
 const unsuccessMessage = "unsuccessMessage";
 
 type Params = { params: { project_id: string } };
-export type FetchOneAssociatedProjectData = Awaited<
-    ReturnType<typeof getOneAssociatedProject>
->;
+export type FetchOneAssociatedProjectData = {
+    project: Awaited<ReturnType<typeof getOneAssociatedProject>>;
+};
 
 export async function GET(request: Request, { params }: Params) {
     try {
@@ -47,7 +47,9 @@ export async function GET(request: Request, { params }: Params) {
             );
         }
 
-        const project = await getOneAssociatedProject(params.project_id);
+        const project = await getOneAssociatedProject(
+            Number(params.project_id),
+        );
         if (!project) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -72,7 +74,9 @@ export async function GET(request: Request, { params }: Params) {
         }
         return buildSuccessResponse<FetchOneAssociatedProjectData>(
             successMessage,
-            project,
+            {
+                project: project,
+            },
         );
     } catch (error: any) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);

@@ -47,11 +47,11 @@ export default function Builder() {
             const result = await fetchOneAssociatedProject(params.project_id);
             if (result.success) {
                 console.log(result.data);
-                if (result.data) {
-                    if (result.data.projectContent) {
+                if (result.data.project) {
+                    if (result.data.project.projectContent) {
                         setDataLoaded(true);
                         setComponents(
-                            JSON.parse(result.data.projectContent as string),
+                            JSON.parse(result.data.project.projectContent as string),
                         );
                     }
                 }

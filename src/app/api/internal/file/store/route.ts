@@ -15,6 +15,7 @@ import { createFile } from "@/repositories/files";
 import { ErrorMessage } from "@/types/error";
 import { MysqlErrorCodes } from "@/types/db";
 import { getFileStoragePath, readableFileSize } from "@/lib/file";
+import { localDebug } from "@/lib/utils";
 
 const successMessage = "File uploaded successfully";
 const unsuccessMessage = "Failed to upload file";
@@ -99,6 +100,7 @@ export async function POST(request: Request) {
             );
         }
 
+        localDebug(error.message, error.stack)
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);
     }
 }

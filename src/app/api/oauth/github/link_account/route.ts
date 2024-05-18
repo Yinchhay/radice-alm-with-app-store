@@ -1,6 +1,7 @@
 import { github } from "@/auth/github";
 import { getAuthUser } from "@/auth/lucia";
 import { getBaseUrl } from "@/lib/server_utils";
+import { UserType } from "@/types/user";
 import { generateState } from "arctic";
 import { cookies } from "next/headers";
 
@@ -21,6 +22,12 @@ export async function GET(request: Request) {
         if (user.hasLinkedGithub) {
             return Response.redirect(
                 `${await getBaseUrl()}/link_oauth/github?error_message="User already linked github account`,
+            );
+        }
+
+        if (user.type === UserType.PARTNER) {
+            return Response.redirect(
+                `${await getBaseUrl()}/link_oauth/github?error_message="Partner cannot link github account"`,
             );
         }
 
