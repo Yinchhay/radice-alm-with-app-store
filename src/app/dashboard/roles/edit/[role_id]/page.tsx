@@ -1,4 +1,4 @@
-// TODO: Submit Form
+// TODO: Optimize code
 
 "use client";
 import { Suspense } from "react";
@@ -8,8 +8,13 @@ import { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import InputField from "@/components/InputField";
 import { RoleUsersOverlay } from "./users";
+import FormErrorMessages from "@/components/FormErrorMessages";
 
-import { fetchRoleById } from "../../fetch";
+import {
+    fetchRoleById,
+    fetchEditRoleById,
+    fetchUsersInRole,
+} from "../../fetch";
 
 type Params = { params: { role_id: number } };
 
@@ -59,6 +64,7 @@ export default function EditRole({ params }: Params) {
 
     useEffect(() => {
         if (roleInfo?.data.role?.name) {
+            setInitialRoleName(roleInfo?.data.role?.name);
             setCurrentRoleName(roleInfo?.data.role?.name);
         }
         if (roleInfo?.data.role?.rolePermissions) {
@@ -72,7 +78,7 @@ export default function EditRole({ params }: Params) {
         }
     }, [roleInfo]);
 
-    const initialRoleName = roleInfo?.data.role?.name;
+    const [initialRoleName, setInitialRoleName] = useState<string>();
 
     const [usersRoleChanged, setUsersRoleChanged] = useState<boolean>(false);
     const handleUsersRoleChanged = (value: boolean) => {
@@ -126,6 +132,10 @@ export default function EditRole({ params }: Params) {
     const [resetUsers, setResetUsers] = useState(false);
     const [resetToggle, setResetToggle] = useState(false);
 
+    const [newRoleUsers, setNewRoleUsers] = useState<
+        { id: string; firstName: string; lastName: string }[]
+    >([]);
+    console.log("new user role", newRoleUsers);
     const reset = () => {
         setCurrentRoleName(initialRoleName);
         setCurrentRolePermissions(initialRolePermissions);
@@ -135,9 +145,16 @@ export default function EditRole({ params }: Params) {
         setResetToggle((prev) => !prev);
     };
 
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchEditRoleById>>>();
+
     useEffect(() => {
-        console.log(currentRolePermissions);
-    }, [reset]);
+        if (result?.success) {
+            setAnyChanges(false);
+            setInitialRolePermissions(currentRolePermissions);
+            setInitialRoleName(currentRoleName);
+        }
+    }, [result]);
 
     return (
         <Suspense fallback={"loading..."}>
@@ -148,21 +165,23 @@ export default function EditRole({ params }: Params) {
                 </h2>
                 <form
                     className="flex flex-col gap-4"
-                    // action={async (formData: FormData) => {
-                    //     const result = await fetchEditRoleById({
-                    //         users: [],
-                    //         permissions: [],
-                    //         name: formData.get("name") as string,
-                    //     });
-                    //     setResult(result);
-                    // }}
+                    action={async () => {
+                        console.log(newRoleUsers);
+                        const result = await fetchEditRoleById({
+                            users: newRoleUsers,
+                            permissions: currentRolePermissions,
+                            name: currentRoleName as string,
+                            roleId: params.role_id,
+                        });
+                        setResult(result);
+                    }}
                 >
                     <div className="w-1/2">
                         <h3>Name</h3>
                         <InputField
                             name="name"
                             id="name"
-                            defaultValue={roleInfo?.data.role?.name}
+                            value={currentRoleName || ""}
                             onChange={(e) => {
                                 setCurrentRoleName(e.target.value);
                                 checkForChanges();
@@ -203,11 +222,20 @@ export default function EditRole({ params }: Params) {
                             onUpdateUsersRoleChanged={handleUsersRoleChanged}
                             reset={resetUsers}
                             onResetDone={setResetUsers} // pass setResetUsers as a prop
+                            newRoleUsers={setNewRoleUsers}
                         />
                     </div>
 
                     <div className="flex gap-3 justify-end">
+                        {result?.success ? (
+                            <div className="text-green-500">Your success message here</div>
+                        ) : (
+                            result?.errors && (
+                                <FormErrorMessages errors={result?.errors} />
+                            )
+                        )}
                         <Button
+                            className="h-fit my-auto"
                             type="reset"
                             disabled={!anyChanges}
                             onClick={reset}
@@ -225,7 +253,11 @@ export default function EditRole({ params }: Params) {
 function EditRoleBtn({ changes = true }: { changes?: boolean }) {
     const formStatus = useFormStatus();
     return (
-        <Button disabled={!(formStatus.pending || changes)} variant="primary">
+        <Button
+            disabled={!(formStatus.pending || changes)}
+            variant="primary"
+            className="h-fit my-auto"
+        >
             {formStatus.pending ? "Saving" : "Save Changes"}
         </Button>
     );

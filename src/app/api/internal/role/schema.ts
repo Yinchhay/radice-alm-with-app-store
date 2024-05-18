@@ -3,6 +3,7 @@
  * it requires us to write zod schema in separate file like this.
  */
 
+import { permissions, users } from "@/drizzle/schema";
 import { z } from "zod";
 
 export const createRoleFormSchema = z.object({
@@ -21,10 +22,29 @@ export const deleteRoleFormSchema = z.object({
         }),
 });
 
-export const editRoleFormSchema = z.object({
+export const addUserToRoleFormSchema = z.object({
+    userId: z.string().min(1, {
+        message: "A user is required",
+    }),
+});
+
+export const editRoleByIdSchema = z.object({
     name: z.string().min(1, {
         message: "Role name is required",
     }),
+    permissions: z.array(
+        z.object({
+            id: z.number(),
+            name: z.string(),
+        }),
+    ),
+    users: z.array(
+        z.object({
+            id: z.string(),
+            firstName: z.string(),
+            lastName: z.string(),
+        }),
+    ),
     roleId: z
         .number({
             required_error: "Role id is required",
@@ -32,10 +52,4 @@ export const editRoleFormSchema = z.object({
         .positive({
             message: "Role id must be positive",
         }),
-});
-
-export const addUserToRoleFormSchema = z.object({
-    userId: z.string().min(1, {
-        message: "A user is required",
-    }),
 });

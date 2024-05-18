@@ -15,7 +15,7 @@ import { FetchDeleteRole } from "@/app/api/internal/role/[role_id]/delete/route"
 import { z } from "zod";
 import {
     createRoleFormSchema,
-    editRoleFormSchema,
+    editRoleByIdSchema,
     addUserToRoleFormSchema,
 } from "@/app/api/internal/role/schema";
 import { FetchCreateRole } from "@/app/api/internal/role/create/route";
@@ -172,7 +172,7 @@ export async function fetchUsersNotInRole(
 }
 
 export async function fetchEditRoleById(
-    body: z.infer<typeof editRoleFormSchema>,
+    body: z.infer<typeof editRoleByIdSchema>,
 ): ResponseJson<FetchEditRole> {
     try {
         const sessionId = await getSessionCookie();

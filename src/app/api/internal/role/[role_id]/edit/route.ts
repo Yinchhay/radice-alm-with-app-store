@@ -14,7 +14,7 @@ import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
-import { editRoleFormSchema } from "../../schema";
+import { editRoleByIdSchema } from "../../schema";
 
 export type FetchEditRole = Record<string, never>;
 
@@ -34,10 +34,9 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editRoleFormSchema> =
-            await request.json();
+        const body: z.infer<typeof editRoleByIdSchema> = await request.json();
         body.roleId = Number(params.role_id);
-        const validationResult = editRoleFormSchema.safeParse(body);
+        const validationResult = editRoleByIdSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -46,15 +45,16 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        const editResult = await editRoleById(body.roleId, body);
-        // if no row is affected, meaning that the role didn't get edited
-        if (editResult[0].affectedRows < 1) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError("unknown", ErrorMessage.NotFound),
-                HttpStatusCode.NOT_FOUND_404,
-            );
-        }
+        const editResult = await editRoleById(body);
+
+        // Check if the edit operation was successful
+        // if (editResult.affectedRows < 1) {
+        //     return buildErrorResponse(
+        //         unsuccessMessage,
+        //         generateAndFormatZodError("unknown", ErrorMessage.NotFound),
+        //         HttpStatusCode.NOT_FOUND_404,
+        //     );
+        // }
 
         await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         return buildSuccessResponse<FetchEditRole>(successMessage, {});

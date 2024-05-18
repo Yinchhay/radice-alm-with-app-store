@@ -12,14 +12,16 @@ import { users } from "@/drizzle/schema";
 
 export function RoleUsersOverlay({
     role,
-    onUpdateUsersRoleChanged,
     reset,
+    onUpdateUsersRoleChanged,
     onResetDone,
+    newRoleUsers,
 }: {
     role: number;
-    onUpdateUsersRoleChanged: (value: boolean) => void;
     reset: boolean;
+    onUpdateUsersRoleChanged: (value: boolean) => void;
     onResetDone: (value: boolean) => void;
+    newRoleUsers: (value: { id: string; firstName: string; lastName: string; }[]) => void;
 }) {
     const [isLoading, setIsLoading] = useState(true);
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
@@ -54,6 +56,7 @@ export function RoleUsersOverlay({
     const [initialUsersInRole, setInitialUsersInRole] = useState<
         { id: string; firstName: string; lastName: string }[]
     >([]);
+
     const [currentUsersInRole, setCurrentUsersInRole] = useState<
         { id: string; firstName: string; lastName: string }[]
     >([]);
@@ -62,6 +65,7 @@ export function RoleUsersOverlay({
             const users = usersInRole.data.users.map((user) => user.user);
             setCurrentUsersInRole(users);
             setInitialUsersInRole(users);
+            newRoleUsers(users);
         }
     }, [usersInRole]);
 
@@ -82,21 +86,9 @@ export function RoleUsersOverlay({
             setInitialUsersNotInRole(users);
         }
     }, [usersNotInRole]);
+    
     const [usersRoleChanged, setUsersRoleChanged] = useState(false);
 
-    // const removeUserFromRole = (id: string) => {
-    //     const user = currentUsersInRole.find((user) => user.id === id);
-    //     setCurrentUsersInRole(
-    //         currentUsersInRole.filter((user) => user.id !== id),
-    //     );
-    //     if (user) {
-    //         setCurrentUsersNotInRole([...currentUsersNotInRole, user]);
-    //     }
-    //     setUsersRoleChanged(
-    //         initialUsersInRole !== currentUsersInRole &&
-    //             initialUsersNotInRole !== currentUsersNotInRole,
-    //     );
-    // };
     const removeUserFromRole = (id: string) => {
         const user = currentUsersInRole.find((user) => user.id === id);
         const newCurrentUsersInRole = currentUsersInRole.filter(
@@ -106,18 +98,13 @@ export function RoleUsersOverlay({
             ? [...currentUsersNotInRole, user]
             : [...currentUsersNotInRole];
 
-        setUsersRoleChanged(
-            JSON.stringify(initialUsersInRole.sort()) !==
-                JSON.stringify(newCurrentUsersInRole.sort()) &&
-                JSON.stringify(initialUsersNotInRole.sort()) !==
-                    JSON.stringify(newCurrentUsersNotInRole.sort()),
-        );
-
         setCurrentUsersInRole(newCurrentUsersInRole);
         if (user) {
             setCurrentUsersNotInRole(newCurrentUsersNotInRole);
         }
+        newRoleUsers(newCurrentUsersInRole);
     };
+
     const addUserToRole = () => {
         const usersNotInRole =
             document.querySelectorAll<HTMLInputElement>("#usersNotInRole");
@@ -134,17 +121,20 @@ export function RoleUsersOverlay({
         );
         const newCurrentUsersInRole = [...currentUsersInRole, ...users];
 
-        setUsersRoleChanged(
-            JSON.stringify(initialUsersInRole.sort()) !==
-                JSON.stringify(newCurrentUsersInRole.sort()) &&
-                JSON.stringify(initialUsersNotInRole.sort()) !==
-                    JSON.stringify(newCurrentUsersNotInRole.sort()),
-        );
-
         setCurrentUsersNotInRole(newCurrentUsersNotInRole);
         setCurrentUsersInRole(newCurrentUsersInRole);
+        newRoleUsers(newCurrentUsersInRole);
         setShowOverlay(false);
     };
+
+    useEffect(() => {
+        setUsersRoleChanged(
+            JSON.stringify(initialUsersInRole.sort()) !==
+                JSON.stringify(currentUsersInRole.sort()) &&
+                JSON.stringify(initialUsersNotInRole.sort()) !==
+                    JSON.stringify(currentUsersNotInRole.sort())
+        );
+    }, [currentUsersInRole, currentUsersNotInRole]);
 
     useEffect(() => {
         onUpdateUsersRoleChanged(usersRoleChanged);
@@ -156,7 +146,7 @@ export function RoleUsersOverlay({
             setCurrentUsersNotInRole(initialUsersNotInRole);
             setUsersRoleChanged(false);
         }
-    }, [reset]);
+    }, [reset, initialUsersInRole, initialUsersNotInRole]);
 
     return (
         <>
@@ -278,9 +268,9 @@ function User({
     return (
         <div className="flex" key={user.id}>
             <input type="checkbox" value={user.id} id="usersNotInRole" />
-            <p>
+            <label htmlFor="usersNotInRole">
                 {user.firstName} {user.lastName}
-            </p>
+            </label>
         </div>
     );
 }

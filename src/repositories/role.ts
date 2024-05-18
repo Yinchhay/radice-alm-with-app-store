@@ -1,7 +1,7 @@
 import { db } from "@/drizzle/db";
-import { roles, userRoles, users } from "@/drizzle/schema";
+import { roles, userRoles, users, rolePermissions } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { count, eq, sql } from "drizzle-orm";
+import { count, eq, sql, and, inArray } from "drizzle-orm";
 
 export const createRole = async (role: typeof roles.$inferInsert) => {
     return await db.insert(roles).values(role);
@@ -9,18 +9,6 @@ export const createRole = async (role: typeof roles.$inferInsert) => {
 
 export const deleteRoleById = async (roleId: number) => {
     return await db.delete(roles).where(eq(roles.id, roleId));
-};
-
-export const editRoleById = async (
-    roleId: number,
-    role: typeof roles.$inferInsert,
-) => {
-    return await db
-        .update(roles)
-        .set({
-            name: role.name,
-        })
-        .where(eq(roles.id, roleId));
 };
 
 export type GetRoles_C_Tag = `getRoles_C`;
@@ -96,3 +84,96 @@ export function filterGetOnlyUserNotInRole(
         return !usersInARole.some((userInRole) => userInRole.id === user.id);
     });
 }
+
+export const editRoleById = async (body: {
+    name: string;
+    users: { id: string; firstName: string; lastName: string }[];
+    roleId: number;
+    permissions: { id: number; name: string }[];
+}) => {
+    const { name, users, roleId, permissions } = body;
+
+    await db.transaction(async (trx) => {
+        // Update role name
+        await trx.update(roles).set({ name }).where(eq(roles.id, roleId));
+
+        // Get current users in the role
+        const currentUsersInRole = await trx.select({ userId: userRoles.userId })
+            .from(userRoles)
+            .where(eq(userRoles.roleId, roleId));
+
+        const currentUserIds = currentUsersInRole.map((userRole) => userRole.userId);
+        const userIds = users.map((user) => user.id);
+
+        console.log("Current User IDs in Role:", currentUserIds);
+        console.log("Provided User IDs:", userIds);
+
+        // Filter users to add and remove
+        const usersToAdd = userIds.filter((userId) => !currentUserIds.includes(userId));
+        const usersToRemove = currentUserIds.filter((userId) => !userIds.includes(userId));
+
+        console.log("Users to Add:", usersToAdd);
+        console.log("Users to Remove:", usersToRemove);
+
+        // Remove users from role
+        if (usersToRemove.length > 0) {
+            await trx.delete(userRoles).where(
+                and(
+                    eq(userRoles.roleId, roleId),
+                    inArray(userRoles.userId, usersToRemove),
+                ),
+            );
+        }
+
+        // Add users to role
+        if (usersToAdd.length > 0) {
+            await trx.insert(userRoles).values(
+                usersToAdd.map((userId) => ({ userId, roleId }))
+            );
+        }
+
+        // Get current role permissions
+        const currentRolePermissions = await trx
+            .select({ permissionId: rolePermissions.permissionId })
+            .from(rolePermissions)
+            .where(eq(rolePermissions.roleId, roleId));
+
+        const currentPermissionIds = currentRolePermissions.map(
+            (rolePermission) => rolePermission.permissionId,
+        );
+
+        console.log("Current Permission IDs:", currentPermissionIds);
+
+        // Filter permissions to add and remove
+        const permissionsToAdd = permissions.filter(
+            (permission) => !currentPermissionIds.includes(permission.id),
+        ).map(permission => permission.id);
+
+        const permissionsToRemove = currentPermissionIds.filter(
+            (permissionId) => !permissions.some((permission) => permission.id === permissionId)
+        );
+
+        console.log("Permissions to Add:", permissionsToAdd);
+        console.log("Permissions to Remove:", permissionsToRemove);
+
+        // Remove permissions from role
+        if (permissionsToRemove.length > 0) {
+            await trx.delete(rolePermissions).where(
+                and(
+                    eq(rolePermissions.roleId, roleId),
+                    inArray(rolePermissions.permissionId, permissionsToRemove),
+                ),
+            );
+        }
+
+        // Add permissions to role
+        if (permissionsToAdd.length > 0) {
+            await trx.insert(rolePermissions).values(
+                permissionsToAdd.map((permissionId) => ({
+                    roleId,
+                    permissionId,
+                })),
+            );
+        }
+    });
+};
