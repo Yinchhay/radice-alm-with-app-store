@@ -1,7 +1,8 @@
 "use client";
+import { GetCategoriesReturnType } from "@/app/api/internal/category/route";
 import { Roboto_Condensed, Roboto } from "next/font/google";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -14,16 +15,22 @@ const roboto = Roboto({
     display: "swap",
 });
 
-export default function Carousel() {
+export default function Carousel({
+    categories,
+}: {
+    categories: GetCategoriesReturnType;
+}) {
+    const [currentSlide, setCurrentSlide] = useState(0);
+
     function changeSlide(amount: number) {
-        if (currentSlide + amount == slides.length) {
+        if (currentSlide + amount == categories.length) {
             setCurrentSlide(0);
         } else if (currentSlide + amount < 0) {
-            setCurrentSlide(slides.length - 1);
+            setCurrentSlide(categories.length - 1);
         } else setCurrentSlide(currentSlide + amount);
     }
 
-    const slides = [
+    const currentSlideImages = [
         {
             name: "EdTech",
             image: "edtech.jpg",
@@ -41,7 +48,14 @@ export default function Carousel() {
             image: "servicetech.jpg",
         },
     ];
-    const [currentSlide, setCurrentSlide] = useState(0);
+
+    function getImageByCategoryName(name: string) {
+        const categoryImage = currentSlideImages.find(
+            (category) => category.name === name,
+        );
+        return categoryImage ? categoryImage.image : "placeholder.webp"; // Provide a default image if no match is found
+    }
+
     return (
         <div>
             <div className="container grid grid-cols-5 m-auto pt-24 gap-16">
@@ -71,15 +85,17 @@ export default function Carousel() {
                         </button>
                     </div>
                     <ul className="relative h-[400px]">
-                        {slides.map((tech, i) => {
+                        {categories.map((category, i) => {
                             return (
                                 <CarouselCard
                                     active={currentSlide == i}
-                                    image={tech.image}
+                                    image={getImageByCategoryName(
+                                        category.name,
+                                    )}
                                     key={i}
                                     index={i}
                                     currentSlide={currentSlide}
-                                    maxSlides={slides.length}
+                                    maxSlides={categories.length}
                                 />
                             );
                         })}
@@ -90,7 +106,9 @@ export default function Carousel() {
                             roboto_condensed.className,
                         ].join(" ")}
                     >
-                        {slides[currentSlide].name}
+                        {categories.length > 0
+                            ? categories[currentSlide].name
+                            : ""}
                     </h2>
                 </div>
                 <div className="col-span-2 relative">
@@ -109,13 +127,9 @@ export default function Carousel() {
                             " ",
                         )}
                     >
-                        Lorem Ipsum is simply dummy text of the printing and
-                        typesetting industry. Lorem Ipsum has been the
-                        industry&apos;s standard dummy text ever since the
-                        1500s, when an unknown printer took a galley of type and
-                        scrambled it to make a type specimen book. It has
-                        survived not only five centuries, but also the leap into
-                        electronic typesetting, remaining essentially unchanged.
+                        {categories.length > 0
+                            ? categories[currentSlide].description
+                            : ""}
                     </p>
                     <div className="relative mt-12">
                         <button className="py-2 px-12 bg-white text-black text-2xl font-bold">

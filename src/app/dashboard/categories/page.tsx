@@ -69,31 +69,33 @@ export default async function ManageCategories({
         result.data.maxPage >= page && result.data.maxPage > 1;
 
     return (
-        <Suspense fallback={"loading..."}>
-            <h1 className="text-2xl">Category</h1>
-            <Table className="my-4 w-full">
-                <TableHeader>
-                    <ColumName>Name</ColumName>
-                    <ColumName>Description</ColumName>
-                    <ColumName className="flex justify-end">
-                        {canCreateCategory && <CreateCategoryOverlay />}
-                    </ColumName>
-                </TableHeader>
-                <TableBody>
-                    {result.data.categories.length > 0 ? (
-                        CategoryLists
-                    ) : (
-                        // TODO: style here
-                        <NoCategory page={page} />
-                    )}
-                </TableBody>
-            </Table>
-            {showPagination && (
-                <div className="float-right">
-                    <Pagination page={page} maxPage={result.data.maxPage} />
-                </div>
-            )}
-        </Suspense>
+        <div className="w-full max-w-[800px]">
+            <Suspense fallback={"loading..."}>
+                <h1 className="text-2xl">Category</h1>
+                <Table className="my-4 w-full">
+                    <TableHeader>
+                        <ColumName>Name</ColumName>
+                        <ColumName>Description</ColumName>
+                        <ColumName className="flex justify-end">
+                            {canCreateCategory && <CreateCategoryOverlay />}
+                        </ColumName>
+                    </TableHeader>
+                    <TableBody>
+                        {result.data.categories.length > 0 ? (
+                            CategoryLists
+                        ) : (
+                            // TODO: style here
+                            <NoCategory page={page} />
+                        )}
+                    </TableBody>
+                </Table>
+                {showPagination && (
+                    <div className="float-right">
+                        <Pagination page={page} maxPage={result.data.maxPage} />
+                    </div>
+                )}
+            </Suspense>
+        </div>
     );
 }
 
@@ -117,7 +119,7 @@ function Category({
     canDeleteCategory: boolean;
 }) {
     return (
-        <TableRow className="text-center align-middle">
+        <TableRow className=" align-middle">
             <Cell data-test={`categoryName-${category.name}`}>
                 {category.name}
             </Cell>
