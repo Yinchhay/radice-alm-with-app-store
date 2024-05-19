@@ -18,7 +18,10 @@ export default function CheckList({
     checkList: CheckBoxElement[];
     atLeastOne?: boolean;
     disabled?: boolean;
-    onChange?: (updatedList: CheckBoxElement[]) => void;
+    onChange?: (
+        updatedList: CheckBoxElement[],
+        changedCheckbox: CheckBoxElement,
+    ) => void;
 }) {
     const [checkboxElements, setCheckboxElements] = useState<CheckBoxElement[]>(
         [],
@@ -29,6 +32,10 @@ export default function CheckList({
     }, [checkList]);
 
     const handleCheckboxChange = (index: number, checked: boolean) => {
+        // for return 1 item
+        const item = checkboxElements[index];
+        item.checked = checked;
+
         const newList = checkboxElements.map((item, idx) => {
             if (idx === index) {
                 return { ...item, checked };
@@ -42,7 +49,7 @@ export default function CheckList({
 
         setCheckboxElements(newList);
         if (onChange) {
-            onChange(newList);
+            onChange(newList, item);
         }
     };
 

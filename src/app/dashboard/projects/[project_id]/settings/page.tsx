@@ -4,6 +4,8 @@ import ProjectDetail from "./project_detail";
 import { checkProjectRole, ProjectRole } from "@/lib/project";
 import { revalidateTags } from "@/lib/server_utils";
 import { OneAssociatedProject_C_Tag } from "@/repositories/project";
+import { fetchAllCategories } from "./fetch";
+import { FetchAllCategories } from "@/app/api/internal/category/all/route";
 
 type Params = {
     project_id: string;
@@ -38,10 +40,24 @@ export default async function ProjectSettings({ params }: { params: Params }) {
         throw new Error("Unauthorized to access project");
     }
 
+    const allCategoriesResult = await fetchAllCategories();
+    let categories: FetchAllCategories["categories"] = [];
+    if (!allCategoriesResult.success) {
+        categories = [];
+    }
+    if (allCategoriesResult.success) {
+        categories = allCategoriesResult.data.categories;
+    }
+    const originalProjectCategories = result.data.project.projectCategories.map((projectCategory) => projectCategory.category);
+
     return (
         <div className="w-full max-w-[700px] mx-auto bg-transparent z-10 relative">
             <h1 className="text-3xl font-medium mb-4">Project Settings</h1>
-            <ProjectDetail project={result.data.project}/>
+            <ProjectDetail
+                project={result.data.project}
+                categories={categories}
+                originalProjectCategories={originalProjectCategories}
+            />
         </div>
     );
 }

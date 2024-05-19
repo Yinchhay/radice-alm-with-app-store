@@ -1,7 +1,6 @@
 "use client";
 
 import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
-import { fetchCategories } from "@/app/dashboard/categories/fetch";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import { CheckBoxElement } from "@/components/CheckList";
@@ -14,11 +13,17 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsDetail } from "./fetch";
+import { FetchAllCategories } from "@/app/api/internal/category/all/route";
+import { categories as categoriesSchema } from "@/drizzle/schema";
 
 export default function ProjectDetail({
     project,
+    categories,
+    originalProjectCategories,
 }: {
     project: FetchOneAssociatedProjectData["project"];
+    categories: FetchAllCategories["categories"];
+    originalProjectCategories: (typeof categoriesSchema.$inferSelect)[];
 }) {
     if (!project) {
         throw new Error("Project not found");
@@ -34,103 +39,99 @@ export default function ProjectDetail({
     const projectName = useRef<HTMLInputElement>(null);
     const projectDescription = useRef<HTMLInputElement>(null);
 
-    // To store checkboxes for project categories so that when user resets the form, the checkboxes will be reset to the original state of the project
-    const [projectCateCheckLists, setProjectCateCheckLists] = useState<
-        CheckBoxElement[]
-    >([]);
-    const [showSelectorOverlay, setShowSelectorOverlay] =
-        useState<boolean>(false);
+    const [showSelectorOverlay, setShowSelectorOverlay] = useState(false);
 
-    // Variable for storing fetched categories
-    const [categoriesCheckLists, setCategoriesCheckLists] = useState<
-        CheckBoxElement[]
-    >([]);
+    // convert categories to check list for selector
+    const categoriesCheckLists = arrayToCheckList(categories, "name", "id");
+    const originalCategoriesInProject = arrayToCheckList(
+        originalProjectCategories,
+        "name",
+        "id",
+    ).map((cate) => ({ ...cate, checked: true }));
 
-    // For keeping track of checked categories
+    // store previous checked categories before editing
+    const [checkedCategoriesBeforeEdit, setCheckedCategoriesBeforeEdit] =
+        useState<CheckBoxElement[]>([]);
+
+    // store current checked categories
     const [checkedCategories, setCheckedCategories] = useState<
         CheckBoxElement[]
     >([]);
 
-    // For keeping track of checked categories before user opens the category selector
-    // in case user cancels the selection, the checked categories will be reset to this
-    const [checkedCategoriesBeforeEdit, setCheckedCategoriesBeforeEdit] =
+    /**
+     * to store checklist display because when search, the list will get filtered
+     */
+    const [categoriesCheckListsDisplay, setCategoriesCheckListsDisplay] =
         useState<CheckBoxElement[]>([]);
-
-    async function openCategorySelector() {
-        setShowSelectorOverlay(true);
-
-        setCheckedCategoriesBeforeEdit(checkedCategories);
-        await getCategories("");
-    }
-
-    function getCheckedList(lists: CheckBoxElement[]) {
-        return lists.filter((cate) => cate.checked);
-    }
-
-    async function getCategories(searchText: string) {
-        const response = await fetchCategories(1, 100, searchText);
-        if (response.success) {
-            const newCheckList = arrayToCheckList(
-                response.data.categories,
-                "name",
-                "id",
-            );
-            const projectCategories = project?.projectCategories ?? [];
-
-            const updatedCheckList = newCheckList.map((checkListCate) => {
-                // check if the category is already in the project, if no, check if it is in the checked categories
-                const isChecked =
-                    projectCategories.some(
-                        (cate) =>
-                            cate.categoryId === Number(checkListCate.value),
-                    ) ||
-                    checkedCategories.some(
-                        (cate) => cate.value === checkListCate.value,
-                    );
-
-                return {
-                    ...checkListCate,
-                    checked: isChecked,
-                };
-            });
-
-            const updatedCheckedCategories = getCheckedList(updatedCheckList);
-
-            if (projectCateCheckLists.length === 0) {
-                setProjectCateCheckLists(updatedCheckedCategories);
-            }
-
-            if (checkedCategoriesBeforeEdit.length === 0) {
-                setCheckedCategoriesBeforeEdit(updatedCheckedCategories);
-            }
-
-            setCheckedCategories(updatedCheckedCategories);
-            setCategoriesCheckLists(updatedCheckList);
-        }
-    }
 
     function closeCategorySelector() {
         setShowSelectorOverlay(false);
     }
 
+    function openCategorySelector() {
+        // structured clone because if remove, checkedCategories pass by its reference
+        // causing cancel button to not work
+        setCheckedCategoriesBeforeEdit(structuredClone(checkedCategories));
+        setShowSelectorOverlay(true);
+    }
+
+    // entire list, find the new changed checkbox, update checked status
+    function updateChecked(
+        lists: CheckBoxElement[],
+        changedCheckbox: CheckBoxElement,
+        checked: boolean,
+    ) {
+        return lists.map((cate) => {
+            if (cate.value === changedCheckbox.value) {
+                return { ...cate, checked };
+            }
+            return cate;
+        });
+    }
+
+    // listToUpdate will copy checked status from listToCheck, any unchecked will remain in listToUpdate
+    function updateCheckedByTwoList(
+        listToUpdated: CheckBoxElement[],
+        listToCheck: CheckBoxElement[],
+    ) {
+        return listToUpdated.map((cate) => {
+            const checked = listToCheck.find(
+                (check) => check.value === cate.value,
+            )?.checked;
+            return { ...cate, checked: checked ?? false };
+        });
+    }
+
     function onResetClick() {
         if (!project) return;
 
-        setLogoSrc(`/api/file?filename=${project?.logoUrl}` ?? "/placeholder.webp");
+        setLogoSrc(
+            `/api/file?filename=${project?.logoUrl}` ?? "/placeholder.webp",
+        );
 
-        setCheckedCategories(projectCateCheckLists);
-        setCategoriesCheckLists([]);
         if (projectName.current) {
             projectName.current.value = project.name;
         }
         if (projectDescription.current) {
             projectDescription.current.value = project.description ?? "";
         }
+
+        const comparedList = updateCheckedByTwoList(
+            categoriesCheckLists,
+            originalCategoriesInProject,
+        );
+        setCheckedCategories(comparedList);
+        setCategoriesCheckListsDisplay(comparedList);
     }
 
     useEffect(() => {
-        getCategories("");
-    }, []);
+        const comparedList = updateCheckedByTwoList(
+            categoriesCheckLists,
+            originalCategoriesInProject,
+        );
+        setCheckedCategories(comparedList);
+        setCategoriesCheckListsDisplay(comparedList);
+    }, [categories]);
 
     return (
         <Card>
@@ -143,9 +144,9 @@ export default function ProjectDetail({
                                 projectName.current?.value ?? project.name,
                             projectDescription:
                                 projectDescription.current?.value || "",
-                            projectCategories: checkedCategories.map((cate) =>
-                                Number(cate.value),
-                            ),
+                            projectCategories: checkedCategories
+                                .filter((cate) => cate.checked)
+                                .map((cate) => Number(cate.value)),
                             logoUrl: "",
                         },
                         fileInputRef.current?.files?.[0],
@@ -232,14 +233,18 @@ export default function ProjectDetail({
                     </label>
                     <div className="col-span-3">
                         <div className="flex items-center">
-                            {checkedCategories.map((cate) => (
-                                <span
-                                    key={cate.value}
-                                    className="inline-block px-2 py-1 text-sm bg-gray-100 rounded-full mr-2 mb-2"
-                                >
-                                    {cate.name}
-                                </span>
-                            ))}
+                            {checkedCategories.map(
+                                (cate) =>
+                                    // only show checked categories
+                                    cate.checked && (
+                                        <div
+                                            key={cate.value}
+                                            className="bg-gray-200 rounded-full px-2 py-1 text-sm mr-2"
+                                        >
+                                            {cate.name}
+                                        </div>
+                                    ),
+                            )}
                             <Button
                                 square
                                 variant="outline"
@@ -260,22 +265,45 @@ export default function ProjectDetail({
                                 selectorTitle="Add categories to project"
                                 searchPlaceholder="Search categories"
                                 checkListTitle="Categories"
-                                checkList={categoriesCheckLists || []}
+                                checkList={categoriesCheckListsDisplay || []}
                                 onSearchChange={async (searchText) => {
-                                    await getCategories(searchText);
+                                    const filteredCategories =
+                                        categoriesCheckLists.filter((cate) =>
+                                            cate.name
+                                                .toLowerCase()
+                                                .includes(
+                                                    searchText.toLowerCase(),
+                                                ),
+                                        );
+                                    setCategoriesCheckListsDisplay(
+                                        filteredCategories,
+                                    );
                                 }}
-                                onCheckChange={(updatedList) => {
+                                onCheckChange={(
+                                    updatedList,
+                                    changedCheckbox,
+                                ) => {
                                     setCheckedCategories(
-                                        getCheckedList(updatedList),
+                                        updateChecked(
+                                            checkedCategories,
+                                            changedCheckbox,
+                                            changedCheckbox.checked,
+                                        ),
                                     );
                                 }}
                                 onCancel={() => {
                                     setCheckedCategories(
                                         checkedCategoriesBeforeEdit,
                                     );
+                                    setCategoriesCheckListsDisplay(
+                                        checkedCategoriesBeforeEdit,
+                                    );
                                     closeCategorySelector();
                                 }}
                                 onConfirm={() => {
+                                    setCategoriesCheckListsDisplay(
+                                        checkedCategories,
+                                    );
                                     closeCategorySelector();
                                 }}
                             />
