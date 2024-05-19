@@ -62,7 +62,6 @@ export default function Selector({
                     onChange={(e) => searchDebounced(e.target.value)}
                 />
                 <CheckList
-                    key={crypto.randomUUID()}
                     title={checkListTitle}
                     checkList={checkListState}
                     onChange={(updatedList) => {

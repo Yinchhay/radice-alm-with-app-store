@@ -36,10 +36,10 @@ export default function Carousel() {
             name: "HealthTech",
             image: "healthtech.jpg",
         },
-        // {
-        //     name: "ServiceTech",
-        //     image: "servicetech.jpg",
-        // },
+        {
+            name: "ServiceTech",
+            image: "servicetech.jpg",
+        },
     ];
     const [currentSlide, setCurrentSlide] = useState(0);
     return (
@@ -106,7 +106,7 @@ export default function Carousel() {
                     </div>
                     <p
                         className={["text-white mt-4", roboto.className].join(
-                            " "
+                            " ",
                         )}
                     >
                         Lorem Ipsum is simply dummy text of the printing and
