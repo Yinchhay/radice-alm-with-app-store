@@ -105,15 +105,9 @@ export const editRoleById = async (body: {
         const currentUserIds = currentUsersInRole.map((userRole) => userRole.userId);
         const userIds = users.map((user) => user.id);
 
-        console.log("Current User IDs in Role:", currentUserIds);
-        console.log("Provided User IDs:", userIds);
-
         // Filter users to add and remove
         const usersToAdd = userIds.filter((userId) => !currentUserIds.includes(userId));
         const usersToRemove = currentUserIds.filter((userId) => !userIds.includes(userId));
-
-        console.log("Users to Add:", usersToAdd);
-        console.log("Users to Remove:", usersToRemove);
 
         // Remove users from role
         if (usersToRemove.length > 0) {
@@ -142,8 +136,6 @@ export const editRoleById = async (body: {
             (rolePermission) => rolePermission.permissionId,
         );
 
-        console.log("Current Permission IDs:", currentPermissionIds);
-
         // Filter permissions to add and remove
         const permissionsToAdd = permissions.filter(
             (permission) => !currentPermissionIds.includes(permission.id),
@@ -152,9 +144,6 @@ export const editRoleById = async (body: {
         const permissionsToRemove = currentPermissionIds.filter(
             (permissionId) => !permissions.some((permission) => permission.id === permissionId)
         );
-
-        console.log("Permissions to Add:", permissionsToAdd);
-        console.log("Permissions to Remove:", permissionsToRemove);
 
         // Remove permissions from role
         if (permissionsToRemove.length > 0) {

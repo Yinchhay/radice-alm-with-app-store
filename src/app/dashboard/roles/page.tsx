@@ -14,6 +14,9 @@ import { roles } from "@/drizzle/schema";
 import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import Pagination from "@/components/Pagination";
 import Button from "@/components/Button";
+import { getAuthUser } from "@/auth/lucia";
+import { hasPermission } from "@/lib/IAM";
+import { Permissions } from "@/types/IAM";
 
 type ManageRolesProps = {
     searchParams?: {
@@ -22,6 +25,11 @@ type ManageRolesProps = {
 };
 
 export default async function ManageRoles({ searchParams }: ManageRolesProps) {
+    const user = await getAuthUser();
+
+    if (!user) {
+        throw new Error("Unauthorized to access this page");
+    }
     let page = Number(searchParams?.page) || 1;
     if (page < 1) {
         page = 1;
@@ -33,8 +41,26 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
         throw new Error(result.message);
     }
 
+    const [createRolePermission, editRolePermission, deleteRolePermission] =
+        await Promise.all([
+            hasPermission(user.id, new Set([Permissions.CREATE_ROLES])),
+            hasPermission(user.id, new Set([Permissions.EDIT_ROLES])),
+            hasPermission(user.id, new Set([Permissions.DELETE_ROLES])),
+        ]);
+
+    const canCreateRole = createRolePermission.canAccess;
+    const canEditRole = editRolePermission.canAccess;
+    const canDeleteRole = deleteRolePermission.canAccess;
+
     const RoleList = result.data.roles.map((role) => {
-        return <Role key={role.id} role={role} />;
+        return (
+            <Role
+                key={role.id}
+                role={role}
+                canEditRole={canEditRole}
+                canDeleteRole={canDeleteRole}
+            />
+        );
     });
 
     return (
@@ -45,7 +71,7 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
                     <TableHeader>
                         <ColumName className="text-start">Name</ColumName>
                         <ColumName className="flex justify-end">
-                            <CreateRoleOverlay />
+                            {canCreateRole && <CreateRoleOverlay />}
                         </ColumName>
                     </TableHeader>
                     <TableBody>
@@ -77,18 +103,30 @@ function NoRole() {
     );
 }
 
-function Role({ role }: { role: typeof roles.$inferSelect }) {
+function Role({
+    role,
+    canEditRole,
+    canDeleteRole,
+}: {
+    role: typeof roles.$inferSelect;
+    canEditRole: boolean;
+    canDeleteRole: boolean;
+}) {
     return (
         <TableRow>
             <Cell data-test={`roleName-${role.name}`}>{role.name}</Cell>
             <Cell className="flex justify-end gap-2">
-                <a href={`/dashboard/roles/edit/${role.id}`}>
-                    <Button data-test={`editRole-${role.name}`} square={true}>
-                        <IconEdit></IconEdit>
-                    </Button>
-                </a>
-                {/* <EditRoleOverlay role={role} /> */}
-                <DeleteRoleOverlay role={role} />
+                {canEditRole && (
+                    <a href={`/dashboard/roles/edit/${role.id}`}>
+                        <Button
+                            data-test={`editRole-${role.name}`}
+                            square={true}
+                        >
+                            <IconEdit></IconEdit>
+                        </Button>
+                    </a>
+                )}
+                {canDeleteRole && <DeleteRoleOverlay role={role} />}
             </Cell>
         </TableRow>
     );

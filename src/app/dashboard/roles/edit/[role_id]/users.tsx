@@ -13,15 +13,21 @@ import { users } from "@/drizzle/schema";
 export function RoleUsersOverlay({
     role,
     reset,
+    isSubmitted,
+    newRoleUsers,
     onUpdateUsersRoleChanged,
     onResetDone,
-    newRoleUsers,
+    doneSubmission,
 }: {
     role: number;
     reset: boolean;
+    isSubmitted: boolean;
+    newRoleUsers: (
+        value: { id: string; firstName: string; lastName: string }[],
+    ) => void;
     onUpdateUsersRoleChanged: (value: boolean) => void;
     onResetDone: (value: boolean) => void;
-    newRoleUsers: (value: { id: string; firstName: string; lastName: string; }[]) => void;
+    doneSubmission: (value: boolean) => void;
 }) {
     const [isLoading, setIsLoading] = useState(true);
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
@@ -40,10 +46,7 @@ export function RoleUsersOverlay({
         fetchUsersNotInRole(role).then((userNotInRole) =>
             setUsersNotInRole(userNotInRole),
         );
-        if (reset) {
-            onResetDone(false);
-        }
-    }, [role, reset]); // add reset to the dependency array
+    }, [role]);
 
     if (usersInRole && !usersInRole.success) {
         throw new Error(usersInRole.message);
@@ -56,18 +59,9 @@ export function RoleUsersOverlay({
     const [initialUsersInRole, setInitialUsersInRole] = useState<
         { id: string; firstName: string; lastName: string }[]
     >([]);
-
     const [currentUsersInRole, setCurrentUsersInRole] = useState<
         { id: string; firstName: string; lastName: string }[]
     >([]);
-    useEffect(() => {
-        if (usersInRole?.data?.users) {
-            const users = usersInRole.data.users.map((user) => user.user);
-            setCurrentUsersInRole(users);
-            setInitialUsersInRole(users);
-            newRoleUsers(users);
-        }
-    }, [usersInRole]);
 
     const [initialUsersNotInRole, setInitialUsersNotInRole] = useState<
         { id: string; firstName: string; lastName: string }[]
@@ -75,7 +69,14 @@ export function RoleUsersOverlay({
     const [currentUsersNotInRole, setCurrentUsersNotInRole] = useState<
         { id: string; firstName: string; lastName: string }[]
     >([]);
+
     useEffect(() => {
+        if (usersInRole?.data?.users) {
+            const users = usersInRole.data.users.map((user) => user.user);
+            setCurrentUsersInRole(users);
+            setInitialUsersInRole(users);
+            newRoleUsers(users);
+        }
         if (usersNotInRole?.data?.users) {
             const users = usersNotInRole.data.users.map((user) => ({
                 id: user.id,
@@ -85,8 +86,8 @@ export function RoleUsersOverlay({
             setCurrentUsersNotInRole(users);
             setInitialUsersNotInRole(users);
         }
-    }, [usersNotInRole]);
-    
+    }, [usersInRole, usersNotInRole]);
+
     const [usersRoleChanged, setUsersRoleChanged] = useState(false);
 
     const removeUserFromRole = (id: string) => {
@@ -132,7 +133,7 @@ export function RoleUsersOverlay({
             JSON.stringify(initialUsersInRole.sort()) !==
                 JSON.stringify(currentUsersInRole.sort()) &&
                 JSON.stringify(initialUsersNotInRole.sort()) !==
-                    JSON.stringify(currentUsersNotInRole.sort())
+                    JSON.stringify(currentUsersNotInRole.sort()),
         );
     }, [currentUsersInRole, currentUsersNotInRole]);
 
@@ -145,8 +146,16 @@ export function RoleUsersOverlay({
             setCurrentUsersInRole(initialUsersInRole);
             setCurrentUsersNotInRole(initialUsersNotInRole);
             setUsersRoleChanged(false);
+            onResetDone(false);
         }
-    }, [reset, initialUsersInRole, initialUsersNotInRole]);
+
+        if (isSubmitted) {
+            setInitialUsersInRole(currentUsersInRole);
+            setCurrentUsersNotInRole(initialUsersNotInRole);
+            setUsersRoleChanged(false);
+            doneSubmission(false);
+        }
+    }, [reset, isSubmitted]);
 
     return (
         <>

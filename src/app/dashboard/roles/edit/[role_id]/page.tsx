@@ -13,7 +13,6 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import {
     fetchRoleById,
     fetchEditRoleById,
-    fetchUsersInRole,
 } from "../../fetch";
 
 type Params = { params: { role_id: number } };
@@ -46,7 +45,7 @@ export default function EditRole({ params }: Params) {
         { id: 8, name: "Edit Roles" },
         { id: 9, name: "Delete Roles" },
         { id: 10, name: "Create Partners" },
-        { id: 11, name: "Edit Partners" },
+        // { id: 11, name: "Edit Partners" },
         { id: 12, name: "Delete Partners" },
         { id: 13, name: "Approve and Reject Application Forms" },
         { id: 14, name: "Create Own Projects" },
@@ -131,11 +130,11 @@ export default function EditRole({ params }: Params) {
 
     const [resetUsers, setResetUsers] = useState(false);
     const [resetToggle, setResetToggle] = useState(false);
+    const [userSubmission, setUserSubmission] = useState(false);
 
     const [newRoleUsers, setNewRoleUsers] = useState<
         { id: string; firstName: string; lastName: string }[]
     >([]);
-    console.log("new user role", newRoleUsers);
     const reset = () => {
         setCurrentRoleName(initialRoleName);
         setCurrentRolePermissions(initialRolePermissions);
@@ -153,6 +152,7 @@ export default function EditRole({ params }: Params) {
             setAnyChanges(false);
             setInitialRolePermissions(currentRolePermissions);
             setInitialRoleName(currentRoleName);
+            setUserSubmission(true);
         }
     }, [result]);
 
@@ -166,7 +166,6 @@ export default function EditRole({ params }: Params) {
                 <form
                     className="flex flex-col gap-4"
                     action={async () => {
-                        console.log(newRoleUsers);
                         const result = await fetchEditRoleById({
                             users: newRoleUsers,
                             permissions: currentRolePermissions,
@@ -223,25 +222,22 @@ export default function EditRole({ params }: Params) {
                             reset={resetUsers}
                             onResetDone={setResetUsers} // pass setResetUsers as a prop
                             newRoleUsers={setNewRoleUsers}
+                            isSubmitted={userSubmission}
+                            doneSubmission={setUserSubmission}
                         />
                     </div>
 
                     <div className="flex gap-3 justify-end">
                         {result?.success ? (
-                            <div className="text-green-500">Your success message here</div>
+                            <div className="text-green-500">
+                                Your success message here
+                            </div>
                         ) : (
                             result?.errors && (
                                 <FormErrorMessages errors={result?.errors} />
                             )
                         )}
-                        <Button
-                            className="h-fit my-auto"
-                            type="reset"
-                            disabled={!anyChanges}
-                            onClick={reset}
-                        >
-                            Reset
-                        </Button>
+                        <ResetBtn changes={anyChanges} reset={reset} />
                         <EditRoleBtn changes={anyChanges} />
                     </div>
                 </form>
@@ -250,11 +246,25 @@ export default function EditRole({ params }: Params) {
     );
 }
 
+function ResetBtn({ changes = true, reset }: { changes?: boolean, reset: () => void }) {
+    const formStatus = useFormStatus();
+    return (
+        <Button
+            className="h-fit my-auto"
+            type="reset"
+            disabled={formStatus.pending || !changes}
+            onClick={reset}
+        >
+            Reset
+        </Button>
+    );
+}
+
 function EditRoleBtn({ changes = true }: { changes?: boolean }) {
     const formStatus = useFormStatus();
     return (
         <Button
-            disabled={!(formStatus.pending || changes)}
+            disabled={formStatus.pending || !changes}
             variant="primary"
             className="h-fit my-auto"
         >
