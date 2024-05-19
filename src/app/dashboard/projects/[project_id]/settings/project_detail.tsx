@@ -275,8 +275,12 @@ export default function ProjectDetail({
                                                     searchText.toLowerCase(),
                                                 ),
                                         );
+                                    // since the list is filtered, we need to update the checked status
                                     setCategoriesCheckListsDisplay(
-                                        filteredCategories,
+                                        updateCheckedByTwoList(
+                                            filteredCategories,
+                                            checkedCategories,
+                                        ),
                                     );
                                 }}
                                 onCheckChange={(
@@ -312,7 +316,13 @@ export default function ProjectDetail({
                 </div>
                 <div className="flex justify-end">
                     <div className="flex gap-4">
-                        <ResetBtn onClick={onResetClick} />
+                        <Button
+                            onClick={onResetClick}
+                            variant="secondary"
+                            type="button"
+                        >
+                            Reset
+                        </Button>
                         <SaveChangesBtn />
                     </div>
                 </div>
@@ -321,20 +331,6 @@ export default function ProjectDetail({
                 )}
             </form>
         </Card>
-    );
-}
-
-function ResetBtn({ onClick }: { onClick?: () => void }) {
-    const formStatus = useFormStatus();
-    return (
-        <Button
-            onClick={onClick}
-            disabled={formStatus.pending}
-            variant="secondary"
-            type="button"
-        >
-            {formStatus.pending ? "Resetting" : "Reset"}
-        </Button>
     );
 }
 

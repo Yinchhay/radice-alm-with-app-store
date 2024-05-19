@@ -119,7 +119,7 @@ function Category({
     canDeleteCategory: boolean;
 }) {
     return (
-        <TableRow className=" align-middle">
+        <TableRow className="align-middle">
             <Cell data-test={`categoryName-${category.name}`}>
                 {category.name}
             </Cell>

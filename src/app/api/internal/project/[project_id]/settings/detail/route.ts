@@ -12,6 +12,8 @@ import { z } from "zod";
 import {
     editProjectSettingDetailById,
     getOneAssociatedProject,
+    GetProjects_C_Tag,
+    OneAssociatedProject_C_Tag,
 } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { editProjectSettingsDetail, fileImageSchema } from "../../schema";
@@ -21,6 +23,7 @@ import {
     createProjectCategory,
     deleteProjectCategory,
 } from "@/repositories/project_category";
+import { revalidateTags } from "@/lib/server_utils";
 
 const successMessage = "Successfully updated project settings detail";
 const unsuccessMessage = "Failed to update project settings detail";
@@ -160,6 +163,11 @@ export async function PATCH(request: Request, { params }: Params) {
             description: body.projectDescription,
             logo: logoUrl,
         });
+
+        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
+            "OneAssociatedProject_C_Tag",
+            "getProjects_C_Tag"
+        );
 
         return buildSuccessResponse<FetchEditProjectSettingsDetail>(
             successMessage,

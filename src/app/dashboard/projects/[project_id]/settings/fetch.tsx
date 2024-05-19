@@ -8,7 +8,7 @@ import {
     revalidateTags,
 } from "@/lib/server_utils";
 import { GetCategories_C_Tag } from "@/repositories/category";
-import { OneAssociatedProject_C_Tag } from "@/repositories/project";
+import { GetProjects_C_Tag, OneAssociatedProject_C_Tag } from "@/repositories/project";
 import { z } from "zod";
 
 export async function fetchEditProjectSettingsDetail(
@@ -39,8 +39,9 @@ export async function fetchEditProjectSettingsDetail(
             },
         );
 
-        await revalidateTags<OneAssociatedProject_C_Tag>(
+        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
             "OneAssociatedProject_C_Tag",
+            "getProjects_C_Tag"
         );
         return await response.json();
     } catch (error: any) {
