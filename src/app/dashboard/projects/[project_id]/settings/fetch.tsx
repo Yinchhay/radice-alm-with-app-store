@@ -1,5 +1,6 @@
 import {
     editProjectSettingsDetail,
+    editProjectSettingsFiles,
     editProjectSettingsMembers,
     editProjectSettingsPartners,
 } from "@/app/api/internal/project/[project_id]/schema";
@@ -16,8 +17,9 @@ import {
 } from "@/repositories/project";
 import { z } from "zod";
 import { MemberList } from "./project_member";
-import { FetchEditProjectSettingsMembers } from "@/app/api/internal/project/[project_id]/settings/add-members/route";
-import { FetchEditProjectSettingsPartners } from "@/app/api/internal/project/[project_id]/settings/add-partners/route";
+import { FetchEditProjectSettingsMembers } from "@/app/api/internal/project/[project_id]/settings/update-members/route";
+import { FetchEditProjectSettingsPartners } from "@/app/api/internal/project/[project_id]/settings/update-partners/route";
+import { FetchEditProjectSettingsFiles } from "@/app/api/internal/project/[project_id]/settings/update-files/route";
 
 export async function fetchEditProjectSettingsDetail(
     projectId: number,
@@ -65,7 +67,7 @@ export async function fetchEditProjectSettingsMembers(
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/add-members`,
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/update-members`,
             {
                 method: "PATCH",
                 headers: {
@@ -92,13 +94,53 @@ export async function fetchEditProjectSettingsPartners(
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/add-partners`,
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/update-partners`,
             {
                 method: "PATCH",
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
                 body: JSON.stringify(partnersData),
+            },
+        );
+
+        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
+            "OneAssociatedProject_C_Tag",
+            "getProjects_C_Tag",
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchEditProjectSettingsFiles(
+    projectId: number,
+    filesData: z.infer<typeof editProjectSettingsFiles>,
+): ResponseJson<FetchEditProjectSettingsFiles> {
+    try {
+        const formData = new FormData();
+        if (filesData.fileToUpload) {
+            for (const file of filesData.fileToUpload) {
+                formData.append("fileToUpload", file);
+            }
+        }
+
+        if (filesData.fileToRemove) {
+            for (const filename of filesData.fileToRemove) {
+                formData.append("fileToRemove", filename);
+            }
+        }
+
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/update-files`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: formData,
             },
         );
 

@@ -8,10 +8,18 @@ import Table from "@/components/table/Table";
 import TableBody from "@/components/table/TableBody";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
-import ToggleSwitch from "@/components/ToggleSwitch";
-import { IconX } from "@tabler/icons-react";
+import { readableFileSize } from "@/lib/file";
+import { IconPlus, IconX } from "@tabler/icons-react";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { fetchEditProjectSettingsFiles } from "./fetch";
+import FormErrorMessages from "@/components/FormErrorMessages";
 
+export type FileList = {
+    file?: File;
+    filename: string;
+    size: string;
+};
 export default function ProjectFile({
     project,
 }: {
@@ -21,36 +29,135 @@ export default function ProjectFile({
         throw new Error("Project not found");
     }
 
-    const FileLists = project.files.map((file) => {
-        return <File key={file.id} file={file} />;
-    });
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchEditProjectSettingsFiles>>>();
+    const [fileLists, setFileLists] = useState<FileList[]>(project.files);
+    const imageRef = useRef<HTMLInputElement>(null);
+
+    function handleUploadFilesClick() {
+        if (!imageRef.current) {
+            return;
+        }
+
+        imageRef.current.click();
+    }
+
+    function handleUploadFiles() {
+        if (!imageRef.current || !imageRef.current.files) {
+            return;
+        }
+
+        const files = imageRef.current.files;
+        if (!files) {
+            return;
+        }
+
+        const newFileLists: FileList[] = [];
+        for (const file of files) {
+            if (fileLists.find((f) => f.filename === file.name)) {
+                continue;
+            }
+
+            newFileLists.push({
+                file,
+                filename: file.name,
+                size: file.size.toString(),
+            });
+        }
+
+        setFileLists([...fileLists, ...newFileLists]);
+    }
+
+    function handleDeleteFile(index: number) {
+        const newFileLists = fileLists.filter((_, i) => i !== index);
+        setFileLists(newFileLists);
+    }
+
+    const FileLists = fileLists.map((file, index) => (
+        <FileRow
+            key={index}
+            file={file}
+            onDeleteClick={() => handleDeleteFile(index)}
+        />
+    ));
+
+    async function handleSubmit() {
+        if (!project) {
+            return;
+        }
+
+        const fileToRemove = project.files
+            .filter((f) => !fileLists.find((fl) => fl.filename === f.filename))
+            .map((f) => f.filename);
+
+        const fileToUpload = fileLists.map((f) => {
+            if (f.file instanceof File) {
+                return f.file;
+            }
+        }).filter((f) => f instanceof File);
+
+        const response = await fetchEditProjectSettingsFiles(project.id, {
+            fileToRemove,
+            fileToUpload,
+        });
+        setResult(response);
+    }
+
+    function onResetClick() {
+        if (!project) {
+            return;
+        }
+
+        setFileLists(project.files);
+    }
 
     return (
         <Card>
             <h1 className="text-2xl">Project files</h1>
-            <Table className="my-4 w-full">
-                <TableHeader>
-                    <ColumName>File name</ColumName>
-                    <ColumName className="flex justify-end">
-                        {/* <ProjectFileAddFileOverlay /> */}
-                    </ColumName>
-                </TableHeader>
-                <TableBody>
-                    {project?.files.length > 0 ? FileLists : <NoFile />}
-                </TableBody>
-            </Table>
-            <div className="flex justify-end">
-                <div className="flex gap-4">
-                    <Button
-                        // onClick={onResetClick}
-                        variant="secondary"
-                        type="button"
-                    >
-                        Reset
-                    </Button>
-                    <SaveChangesBtn />
+            <form action={handleSubmit}>
+                <Table className="my-4 w-full">
+                    <TableHeader>
+                        <ColumName>Filename</ColumName>
+                        <ColumName>size</ColumName>
+                        <ColumName className="flex justify-end">
+                            <input
+                                hidden
+                                className="hidden"
+                                type="file"
+                                ref={imageRef}
+                                multiple
+                                onChange={handleUploadFiles}
+                            />
+                            <Button
+                                onClick={handleUploadFilesClick}
+                                square={true}
+                                variant="primary"
+                                type="button"
+                            >
+                                <IconPlus></IconPlus>
+                            </Button>
+                        </ColumName>
+                    </TableHeader>
+                    <TableBody>
+                        {fileLists.length > 0 ? FileLists : <NoFile />}
+                    </TableBody>
+                </Table>
+                <div className="flex justify-end">
+                    <div className="flex gap-4">
+                        <Button
+                            onClick={onResetClick}
+                            variant="secondary"
+                            type="button"
+                        >
+                            Reset
+                        </Button>
+                        <SaveChangesBtn />
+                    </div>
                 </div>
-            </div>
+                {!result?.success && result?.errors && (
+                    <FormErrorMessages errors={result?.errors} />
+                )}
+            </form>
         </Card>
     );
 }
@@ -72,14 +179,34 @@ function NoFile() {
     );
 }
 
-// TODO: Update the file type
-function File({ file }: { file: any }) {
+function FileRow({
+    file,
+    onDeleteClick,
+}: {
+    file: FileList;
+    onDeleteClick: () => void;
+}) {
+    const fileSizeToString = (size: string) => {
+        // if file already converted to string skip
+        if (size.includes("B")) {
+            return size;
+        }
+
+        return readableFileSize(Number(size));
+    };
+
     return (
         <TableRow className="align-middle">
-            <Cell className="text-center">add file name later</Cell>
+            <Cell className="text-center">{file.filename}</Cell>
+            <Cell className="text-center">{fileSizeToString(file.size)}</Cell>
             <Cell>
                 <div className="flex justify-end gap-2">
-                    <Button square={true} variant="danger">
+                    <Button
+                        type="button"
+                        square={true}
+                        variant="danger"
+                        onClick={onDeleteClick}
+                    >
                         <IconX></IconX>
                     </Button>
                 </div>

@@ -1,5 +1,6 @@
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "@/lib/file";
 import { number, z } from "zod";
+import { fileAnySchema } from "../../file/schema";
 
 export const getOneAssociatedProjectSchema = z.object({
     userId: z.string().min(1, {
@@ -86,4 +87,9 @@ export const fileImageSchema = z.object({
             (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
             "Only .jpg, .jpeg, .png and .webp formats are supported.",
         ),
+});
+
+export const editProjectSettingsFiles = z.object({
+    fileToRemove: z.array(z.string()).optional(),
+    fileToUpload: fileAnySchema.optional(),
 });

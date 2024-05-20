@@ -53,7 +53,6 @@ export async function DELETE(request: NextRequest) {
         const filename = body.filename;
         const savePath = getFileStoragePath();
         const fileAbsPath = `${savePath}/${filename}`;
-
         if (!fs.existsSync(fileAbsPath)) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -79,7 +78,7 @@ export async function DELETE(request: NextRequest) {
                 user.type,
             );
 
-            if (canEdit) {
+            if (!canEdit) {
                 return buildErrorResponse(
                     unsuccessMessage,
                     generateAndFormatZodError(
@@ -113,8 +112,9 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
+        // delete the file from the storage
         await fs.promises.unlink(fileAbsPath);
-
+        
         return buildSuccessResponse<FetchDeleteFile>(successMessage, {});
     } catch (error) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);

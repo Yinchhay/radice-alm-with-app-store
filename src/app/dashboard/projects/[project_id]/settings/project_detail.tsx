@@ -184,17 +184,12 @@ export default function ProjectDetail({
                                     ),
                             )}
                             <Button
-                                square
-                                className="outline-0"
                                 onClick={openSelector}
+                                square={true}
                                 variant="primary"
                                 type="button"
                             >
-                                <IconPlus
-                                    size={28}
-                                    className="group-hover:text-blue-500 transition-all"
-                                    stroke={1.3}
-                                />
+                                <IconPlus></IconPlus>
                             </Button>
                         </div>
                         {showSelectorOverlay && (
