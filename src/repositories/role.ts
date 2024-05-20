@@ -8,7 +8,25 @@ export const createRole = async (role: typeof roles.$inferInsert) => {
 };
 
 export const deleteRoleById = async (roleId: number) => {
-    return await db.delete(roles).where(eq(roles.id, roleId));
+    return await db.transaction(async (trx) => {
+        // Delete role_permissions
+        const deleteRolePermissionsResult = await trx.delete(rolePermissions)
+            .where(eq(rolePermissions.roleId, roleId));
+        
+        // Delete user_roles
+        const deleteUserRolesResult = await trx.delete(userRoles)
+            .where(eq(userRoles.roleId, roleId));
+
+        // Delete role
+        const deleteRoleResult = await trx.delete(roles)
+            .where(eq(roles.id, roleId));
+        
+        return {
+            rolePermissionsAffectedRows: deleteRolePermissionsResult[0].affectedRows,
+            userRolesAffectedRows: deleteUserRolesResult[0].affectedRows,
+            rolesAffectedRows: deleteRoleResult[0].affectedRows,
+        };
+    });
 };
 
 export type GetRoles_C_Tag = `getRoles_C`;
@@ -63,6 +81,7 @@ export const getUsersInRole = async (roleId: number) => {
                     id: true,
                     firstName: true,
                     lastName: true,
+                    email: true,
                 },
             },
         },
@@ -73,11 +92,11 @@ export const getUsersInRole = async (roleId: number) => {
 export function filterGetOnlyUserNotInRole(
     usersInARole: Pick<
         typeof users.$inferSelect,
-        "id" | "firstName" | "lastName"
+        "id" | "firstName" | "lastName" | "email"
     >[],
     usersInTheSystem: Pick<
         typeof users.$inferSelect,
-        "id" | "firstName" | "lastName"
+        "id" | "firstName" | "lastName" | "email"
     >[],
 ) {
     return usersInTheSystem.filter((user) => {

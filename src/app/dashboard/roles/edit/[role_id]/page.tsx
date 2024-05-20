@@ -36,7 +36,6 @@ export default function EditRole({ params }: Params) {
 
     const permissions = [
         { id: 1, name: "Create Users" },
-        { id: 2, name: "Edit Users" },
         { id: 3, name: "Delete Users" },
         { id: 4, name: "Create Categories" },
         { id: 5, name: "Edit Categories" },

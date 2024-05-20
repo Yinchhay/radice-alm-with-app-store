@@ -51,7 +51,7 @@ export async function DELETE(request: Request, { params }: Params) {
 
         const deleteResult = await deleteRoleById(data.roleId);
         // if no row is affected, meaning that the role didn't get deleted
-        if (deleteResult[0].affectedRows < 1) {
+        if (deleteResult.rolesAffectedRows < 1) {
             return buildErrorResponse(
                 unsuccessMessage,
                 generateAndFormatZodError("unknown", ErrorMessage.NotFound),

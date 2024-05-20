@@ -37,6 +37,22 @@ export function RoleUsersOverlay({
     const [usersNotInRole, setUsersNotInRole] =
         useState<Awaited<ReturnType<typeof fetchUsersNotInRole>>>();
 
+    const [initialUsersInRole, setInitialUsersInRole] = useState<
+        { id: string; firstName: string; lastName: string; email: string }[]
+    >([]);
+    const [currentUsersInRole, setCurrentUsersInRole] = useState<
+        { id: string; firstName: string; lastName: string; email: string }[]
+    >([]);
+
+    const [initialUsersNotInRole, setInitialUsersNotInRole] = useState<
+        { id: string; firstName: string; lastName: string; email: string }[]
+    >([]);
+    const [currentUsersNotInRole, setCurrentUsersNotInRole] = useState<
+        { id: string; firstName: string; lastName: string; email: string }[]
+    >([]);
+    
+    const [searchTerm, setSearchTerm] = useState<string>("");
+
     useEffect(() => {
         setIsLoading(true);
         fetchUsersInRole(role).then((usersInRoleData) => {
@@ -56,20 +72,6 @@ export function RoleUsersOverlay({
         throw new Error(usersNotInRole.message);
     }
 
-    const [initialUsersInRole, setInitialUsersInRole] = useState<
-        { id: string; firstName: string; lastName: string }[]
-    >([]);
-    const [currentUsersInRole, setCurrentUsersInRole] = useState<
-        { id: string; firstName: string; lastName: string }[]
-    >([]);
-
-    const [initialUsersNotInRole, setInitialUsersNotInRole] = useState<
-        { id: string; firstName: string; lastName: string }[]
-    >([]);
-    const [currentUsersNotInRole, setCurrentUsersNotInRole] = useState<
-        { id: string; firstName: string; lastName: string }[]
-    >([]);
-
     useEffect(() => {
         if (usersInRole?.data?.users) {
             const users = usersInRole.data.users.map((user) => user.user);
@@ -82,6 +84,7 @@ export function RoleUsersOverlay({
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                email: user.email,
             }));
             setCurrentUsersNotInRole(users);
             setInitialUsersNotInRole(users);
@@ -151,11 +154,19 @@ export function RoleUsersOverlay({
 
         if (isSubmitted) {
             setInitialUsersInRole(currentUsersInRole);
-            setCurrentUsersNotInRole(initialUsersNotInRole);
+            setInitialUsersInRole(currentUsersNotInRole);
             setUsersRoleChanged(false);
             doneSubmission(false);
         }
     }, [reset, isSubmitted]);
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredUsersNotInRole = currentUsersNotInRole.filter((user) =>
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <>
@@ -208,22 +219,24 @@ export function RoleUsersOverlay({
                             setShowOverlay(false);
                         }}
                     >
-                        <Card className="w-[300px]">
+                        <Card className="w-[300px] flex flex-col gap-3">
                             <div className="flex flex-col items-center gap-2">
                                 <h1 className="text-2xl font-bold capitalize">
                                     Add Users to Role
                                 </h1>
                             </div>
 
-                            <div className="flex flex-col items-start my-1">
-                                <InputField
-                                    name="search"
-                                    id="search"
-                                    isSearch
-                                />
+                            <InputField
+                                name="search"
+                                id="search"
+                                isSearch
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                            />
 
-                                {(currentUsersNotInRole || []).length > 0 ? (
-                                    (currentUsersNotInRole || []).map(
+                            <div className="flex flex-col items-start">
+                                {(filteredUsersNotInRole || []).length > 0 ? (
+                                    (filteredUsersNotInRole || []).map(
                                         (user) => (
                                             <User key={user.id} user={user} />
                                         ),
@@ -233,7 +246,7 @@ export function RoleUsersOverlay({
                                 )}
                             </div>
 
-                            <div className="flex justify-end gap-2 my-3">
+                            <div className="flex justify-end gap-2">
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -262,21 +275,27 @@ export function RoleUsersOverlay({
 }
 
 function NoUsersInRole() {
-    return <p>No users found in role!</p>;
+    return <p>No users found in this role</p>;
 }
 
 function NoUsersNotInRole() {
-    return <p>No users found not in role!</p>;
+    return <p>No users found not in this role</p>;
 }
 
 function User({
     user,
 }: {
-    user: Pick<typeof users.$inferSelect, "id" | "firstName" | "lastName">;
+    user: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
 }) {
     return (
-        <div className="flex" key={user.id}>
+        <div className="flex gap-1" key={user.id}>
             <input type="checkbox" value={user.id} id="usersNotInRole" />
+
             <label htmlFor="usersNotInRole">
                 {user.firstName} {user.lastName}
             </label>

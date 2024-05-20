@@ -11,6 +11,7 @@ import {
     revalidateTags,
 } from "@/lib/server_utils";
 import { GetRoles_C_Tag } from "@/repositories/role";
+import { GetUserRolesAndRolePermissions_C_Tag } from "@/repositories/users";
 import { FetchDeleteRole } from "@/app/api/internal/role/[role_id]/delete/route";
 import { z } from "zod";
 import {
@@ -113,6 +114,7 @@ export async function fetchDeleteRoleById(
             },
         );
         await revalidateTags<GetRoles_C_Tag>("getRoles_C");
+        await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>("getUserRolesAndRolePermissions_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -187,6 +189,7 @@ export async function fetchEditRoleById(
             },
         );
         await revalidateTags<GetRoles_C_Tag>("getRoles_C");
+        await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>("getUserRolesAndRolePermissions_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

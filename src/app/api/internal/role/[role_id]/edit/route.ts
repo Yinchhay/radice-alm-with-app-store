@@ -9,6 +9,7 @@ import {
 } from "@/lib/response";
 import { revalidateTags } from "@/lib/server_utils";
 import { editRoleById, GetRoles_C_Tag } from "@/repositories/role";
+import { GetUserRolesAndRolePermissions_C_Tag } from "@/repositories/users";
 import { MysqlErrorCodes } from "@/types/db";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
@@ -57,6 +58,7 @@ export async function PATCH(request: Request, { params }: Params) {
         // }
 
         await revalidateTags<GetRoles_C_Tag>("getRoles_C");
+        await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>("getUserRolesAndRolePermissions_C");
         return buildSuccessResponse<FetchEditRole>(successMessage, {});
     } catch (error: any) {
         if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
