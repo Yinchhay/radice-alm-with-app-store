@@ -104,6 +104,20 @@ export const getAllUsers = async () => {
     });
 };
 
+export const getAllUsersExceptThisUser = async (userId: string) => {
+    return await db.query.users.findMany({
+        where: (table, { and, eq, not }) =>
+            and(eq(table.type, UserType.USER), not(eq(table.id, userId))),
+    });
+}
+
+export const getAllPartnersExceptThisUser = async (userId: string) => {
+    return await db.query.users.findMany({
+        where: (table, { and, eq, not }) =>
+            and(eq(table.type, UserType.PARTNER), not(eq(table.id, userId))),
+    });
+}
+
 export const getUsers = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,

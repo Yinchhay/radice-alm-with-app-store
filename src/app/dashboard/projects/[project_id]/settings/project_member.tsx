@@ -16,9 +16,11 @@ import { useSelector } from "@/app/hooks/useSelector";
 import Selector from "@/components/Selector";
 import InputField from "@/components/InputField";
 import { CheckBoxElement } from "@/components/CheckList";
-import { FormEvent, useEffect, useState } from "react";
-import { fetchEditProjectSettingsMembers, MemberToUpdate } from "./fetch";
+import { useEffect, useState } from "react";
+import { fetchEditProjectSettingsMembers } from "./fetch";
 import FormErrorMessages from "@/components/FormErrorMessages";
+import { editMemberArray } from "@/app/api/internal/project/[project_id]/schema";
+import { z } from "zod";
 
 export type MemberList = {
     member: typeof users.$inferSelect;
@@ -130,9 +132,33 @@ export default function ProjectMember({
             title: formData.get(`members[${member.member.id}].title`) as string,
             canEdit:
                 formData.get(`members[${member.member.id}].canEdit`) === "on",
-        })) satisfies MemberToUpdate[];
+        })) satisfies z.infer<typeof editMemberArray>;
 
-        const response = await fetchEditProjectSettingsMembers(project.id, membersData);
+        const membersToUpdate = membersData.filter((member) =>
+            originalProjectMembers.some(
+                (originalMember) => originalMember.id === member.userId,
+            ),
+        );
+
+        const membersToRemove = originalProjectMembers.filter(
+            (originalMember) =>
+                !membersData.some(
+                    (member) => member.userId === originalMember.id,
+                ),
+        );
+
+        const membersToAdd = membersData.filter(
+            (member) =>
+                !originalProjectMembers.some(
+                    (originalMember) => originalMember.id === member.userId,
+                ),
+        );
+
+        const response = await fetchEditProjectSettingsMembers(project.id, {
+            membersToAdd,
+            membersToDelete: membersToRemove.map((member) => member.id),
+            membersToUpdate,
+        });
         setResult(response);
     }
 
@@ -162,11 +188,7 @@ export default function ProjectMember({
                         </ColumName>
                     </TableHeader>
                     <TableBody>
-                        {membersList.length > 0 ? (
-                            MemberLists
-                        ) : (
-                            <NoMember />
-                        )}
+                        {membersList.length > 0 ? MemberLists : <NoMember />}
                     </TableBody>
                 </Table>
                 {showSelectorOverlay && (

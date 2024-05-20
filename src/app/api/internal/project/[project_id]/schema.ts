@@ -1,5 +1,5 @@
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "@/lib/file";
-import { z } from "zod";
+import { number, z } from "zod";
 
 export const getOneAssociatedProjectSchema = z.object({
     userId: z.string().min(1, {
@@ -27,29 +27,53 @@ export const editProjectSettingsDetail = z.object({
     projectName: z.string().max(50, {
         message: "Project name is too long, max 50 characters",
     }),
-    projectDescription: z.string().max(255, {
-        message: "Project description is too long, max 255 characters",
-    }).optional(),
-    logoUrl: z.string().max(2083, {
-        message: "Logo url is too long, max 2083 characters",
-    }).optional(),
+    projectDescription: z
+        .string()
+        .max(255, {
+            message: "Project description is too long, max 255 characters",
+        })
+        .optional(),
+    logoUrl: z
+        .string()
+        .max(2083, {
+            message: "Logo url is too long, max 2083 characters",
+        })
+        .optional(),
     projectCategories: z.array(z.any()).optional(),
 });
 
+export const editMemberArray = z
+    .array(
+        z.object({
+            userId: z.string().min(1, {
+                message: "User id is required",
+            }),
+            title: z
+                .string()
+                .max(50, {
+                    message: "Title is too long, max 50 characters",
+                })
+                .optional(),
+            canEdit: z.boolean({
+                required_error: "Can edit is required",
+                invalid_type_error: "Can edit must be a boolean",
+            }),
+        }),
+    )
+    .optional();
+
 export const editProjectSettingsMembers = z.object({
-    membersToUpdate: z.array(z.object({
-        userId: z.string().min(1, {
-            message: "User id is required",
-        }),
-        title: z.string().max(50, {
-            message: "Title is too long, max 50 characters",
-        }).optional(),
-        canEdit: z.boolean({
-            required_error: "Can edit is required",
-            invalid_type_error: "Can edit must be a boolean",
-        }),
-    })).optional(),
+    membersToUpdate: editMemberArray,
+    membersToDelete: z.array(z.string()).optional(),
+    membersToAdd: editMemberArray,
 });
+
+export const editPartnerArray = z.array(z.string()).optional();
+export const editProjectSettingsPartners = z.object({
+    partnersToDelete: editPartnerArray,
+    partnersToAdd: editPartnerArray,
+});
+
 // Check allow image only
 export const fileImageSchema = z.object({
     image: z

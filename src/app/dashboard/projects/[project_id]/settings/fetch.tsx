@@ -1,4 +1,8 @@
-import { editProjectSettingsDetail } from "@/app/api/internal/project/[project_id]/schema";
+import {
+    editProjectSettingsDetail,
+    editProjectSettingsMembers,
+    editProjectSettingsPartners,
+} from "@/app/api/internal/project/[project_id]/schema";
 import { FetchEditProjectSettingsDetail } from "@/app/api/internal/project/[project_id]/settings/update-detail/route";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import {
@@ -13,6 +17,7 @@ import {
 import { z } from "zod";
 import { MemberList } from "./project_member";
 import { FetchEditProjectSettingsMembers } from "@/app/api/internal/project/[project_id]/settings/add-members/route";
+import { FetchEditProjectSettingsPartners } from "@/app/api/internal/project/[project_id]/settings/add-partners/route";
 
 export async function fetchEditProjectSettingsDetail(
     projectId: number,
@@ -53,14 +58,9 @@ export async function fetchEditProjectSettingsDetail(
     }
 }
 
-export type MemberToUpdate = {
-    userId: string;
-    title: string | null | undefined;
-    canEdit: boolean;
-};
 export async function fetchEditProjectSettingsMembers(
     projectId: number,
-    membersToUpdate: MemberToUpdate[],
+    membersData: z.infer<typeof editProjectSettingsMembers>,
 ): ResponseJson<FetchEditProjectSettingsMembers> {
     try {
         const sessionId = await getSessionCookie();
@@ -71,9 +71,34 @@ export async function fetchEditProjectSettingsMembers(
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                body: JSON.stringify({
-                    membersToUpdate: membersToUpdate,
-                }),
+                body: JSON.stringify(membersData),
+            },
+        );
+
+        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
+            "OneAssociatedProject_C_Tag",
+            "getProjects_C_Tag",
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchEditProjectSettingsPartners(
+    projectId: number,
+    partnersData: z.infer<typeof editProjectSettingsPartners>,
+): ResponseJson<FetchEditProjectSettingsPartners> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/add-partners`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(partnersData),
             },
         );
 

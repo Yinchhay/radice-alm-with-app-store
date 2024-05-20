@@ -10,20 +10,20 @@ import {
 import { HttpStatusCode } from "@/types/http";
 import { z } from "zod";
 import {
-    editProjectSettingMembersById,
+    editProjectSettingPartnersById,
     getOneAssociatedProject,
     GetProjects_C_Tag,
     OneAssociatedProject_C_Tag,
 } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { revalidateTags } from "@/lib/server_utils";
-import { editProjectSettingsMembers } from "../../schema";
+import { editProjectSettingsPartners } from "../../schema";
 
-const successMessage = "Successfully updated project settings members";
-const unsuccessMessage = "Failed to update project settings members";
+const successMessage = "Successfully updated project settings partners";
+const unsuccessMessage = "Failed to update project settings partners";
 
 type Params = { params: { project_id: string } };
-export type FetchEditProjectSettingsMembers = Record<string, unknown>;
+export type FetchEditProjectSettingsPartners = Record<string, unknown>;
 
 export async function PATCH(request: Request, { params }: Params) {
     try {
@@ -37,9 +37,9 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editProjectSettingsMembers> =
+        const body: z.infer<typeof editProjectSettingsPartners> =
             await request.json();
-        const validationResult = editProjectSettingsMembers.safeParse(body);
+        const validationResult = editProjectSettingsPartners.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -73,14 +73,14 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        await editProjectSettingMembersById(Number(params.project_id), body);
+        await editProjectSettingPartnersById(Number(params.project_id), body);
 
         await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
             "OneAssociatedProject_C_Tag",
             "getProjects_C_Tag",
         );
 
-        return buildSuccessResponse<FetchEditProjectSettingsMembers>(
+        return buildSuccessResponse<FetchEditProjectSettingsPartners>(
             successMessage,
             {},
         );

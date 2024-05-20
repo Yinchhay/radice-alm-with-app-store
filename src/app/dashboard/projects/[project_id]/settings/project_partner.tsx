@@ -1,7 +1,10 @@
 "use client";
 import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
+import { editPartnerArray } from "@/app/api/internal/project/[project_id]/schema";
+import { useSelector } from "@/app/hooks/useSelector";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import { CheckBoxElement } from "@/components/CheckList";
 import Cell from "@/components/table/Cell";
 import ColumName from "@/components/table/ColumnName";
 import Table from "@/components/table/Table";
@@ -10,52 +13,185 @@ import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import { projectPartners, users } from "@/drizzle/schema";
-import { IconX } from "@tabler/icons-react";
+import { IconPlus, IconX } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { z } from "zod";
+import { fetchEditProjectSettingsPartners } from "./fetch";
+import Selector from "@/components/Selector";
+import FormErrorMessages from "@/components/FormErrorMessages";
+
+export type PartnerList = {
+    partner: typeof users.$inferSelect;
+};
 
 export default function ProjectPartner({
     project,
+    partnersInTheSystem,
+    originalProjectPartners,
 }: {
     project: FetchOneAssociatedProjectData["project"];
+    partnersInTheSystem: (typeof users.$inferSelect)[];
+    originalProjectPartners: (typeof users.$inferSelect)[];
 }) {
     if (!project) {
         throw new Error("Project not found");
     }
 
-    const PartnerLists = project.projectPartners.map((partner) => {
-        return <Partner key={partner.id} partner={partner} />;
-    });
+    const {
+        showSelectorOverlay,
+        openSelector,
+        onSearchChange,
+        onCheckChange,
+        onCancel,
+        onConfirm,
+        onReset,
+        itemsCheckListDisplay,
+        checkedItems,
+    } = useSelector(
+        partnersInTheSystem,
+        originalProjectPartners,
+        "firstName",
+        "id",
+    );
+
+    const [result, setResult] =
+        useState<
+            Awaited<ReturnType<typeof fetchEditProjectSettingsPartners>>
+        >();
+    const [partnersList, setPartnersList] = useState<PartnerList[]>([]);
+
+    function removePartnerById(id: string) {
+        const toBeRemoved = {
+            name:
+                partnersInTheSystem.find((user) => user.id === id)?.firstName ||
+                "",
+            checked: false,
+            value: id,
+        } satisfies CheckBoxElement;
+
+        onCheckChange([], toBeRemoved, true);
+    }
+
+    const PartnerLists = partnersList.map((partner) => (
+        <Partner
+            key={partner.partner.id}
+            partner={partner.partner}
+            onRemove={removePartnerById}
+        />
+    ));
+
+    function constructPartnerLists() {
+        const partnerLists: PartnerList[] = [];
+
+        checkedItems.forEach((partner) => {
+            if (partner.checked) {
+                const partnerDetail = partnersInTheSystem.find(
+                    (user) => user.id === partner.value,
+                );
+                const partnerAlreadyInProject = project?.projectPartners.find(
+                    (projectPartner) =>
+                        projectPartner.partner.id === partner.value,
+                );
+                if (partnerDetail) {
+                    partnerLists.push({
+                        partner: partnerDetail,
+                    });
+                }
+            }
+        });
+
+        return partnerLists;
+    }
+
+    function onResetClick() {
+        onReset();
+    }
+
+    async function handleFormSubmit(formData: FormData) {
+        if (!project) return;
+
+        const partnersData = partnersList.map(
+            (partner) => partner.partner.id,
+        ) satisfies z.infer<typeof editPartnerArray>;
+
+        const partnersToDelete = originalProjectPartners.filter(
+            (originalPartner) =>
+                !partnersData.some(
+                    (partnerId) => partnerId === originalPartner.id,
+                ),
+        );
+
+        const partnersToAdd = partnersData.filter(
+            (partnerId) =>
+                !originalProjectPartners.some(
+                    (originalPartner) => originalPartner.id === partnerId,
+                ),
+        );
+
+        const response = await fetchEditProjectSettingsPartners(project.id, {
+            partnersToAdd,
+            partnersToDelete: partnersToDelete.map((partner) => partner.id),
+        });
+        setResult(response);
+    }
+
+    useEffect(() => {
+        const partners = constructPartnerLists();
+        setPartnersList(partners);
+    }, [checkedItems]);
 
     return (
         <Card>
             <h1 className="text-2xl">Project partners</h1>
-            <Table className="my-4 w-full">
-                <TableHeader>
-                    <ColumName>Name</ColumName>
-                    <ColumName className="flex justify-end">
-                        {/* <ProjectPartnerAddPartnerOverlay /> */}
-                    </ColumName>
-                </TableHeader>
-                <TableBody>
-                    {project?.projectPartners.length > 0 ? (
-                        PartnerLists
-                    ) : (
-                        <NoPartner />
-                    )}
-                </TableBody>
-            </Table>
-            <div className="flex justify-end">
-                <div className="flex gap-4">
-                    <Button
-                        // onClick={onResetClick}
-                        variant="secondary"
-                        type="button"
-                    >
-                        Reset
-                    </Button>
-                    <SaveChangesBtn />
+            <form action={handleFormSubmit}>
+                <Table className="my-4 w-full">
+                    <TableHeader>
+                        <ColumName>Name</ColumName>
+                        <ColumName className="flex justify-end">
+                            <Button
+                                onClick={openSelector}
+                                square={true}
+                                variant="primary"
+                                type="button"
+                            >
+                                <IconPlus></IconPlus>
+                            </Button>
+                        </ColumName>
+                    </TableHeader>
+                    <TableBody>
+                        {partnersList.length > 0 ? PartnerLists : <NoPartner />}
+                    </TableBody>
+                </Table>
+                {showSelectorOverlay && (
+                    <Selector
+                        className="w-[420px]"
+                        selectorTitle="Add users to project"
+                        searchPlaceholder="Search users"
+                        checkListTitle="Users"
+                        checkList={itemsCheckListDisplay || []}
+                        onSearchChange={onSearchChange}
+                        onCheckChange={onCheckChange}
+                        onCancel={onCancel}
+                        onConfirm={onConfirm}
+                    />
+                )}
+                <div className="flex justify-end">
+                    <div className="flex gap-4">
+                        <Button
+                            onClick={onResetClick}
+                            variant="secondary"
+                            type="button"
+                        >
+                            Reset
+                        </Button>
+                        <SaveChangesBtn />
+                    </div>
                 </div>
-            </div>
+                {!result?.success && result?.errors && (
+                    <FormErrorMessages errors={result?.errors} />
+                )}
+            </form>
         </Card>
     );
 }
@@ -77,16 +213,26 @@ function NoPartner() {
     );
 }
 
-export type PartnerJoinUser = typeof projectPartners.$inferSelect & {
+function Partner({
+    partner,
+    onRemove,
+}: {
     partner: typeof users.$inferSelect;
-};
-function Partner({ partner }: { partner: PartnerJoinUser }) {
+    onRemove: (id: string) => void;
+}) {
     return (
         <TableRow className="align-middle">
-            <Cell className="text-center">{`${partner.partner.firstName} ${partner.partner.lastName}`}</Cell>
+            <Cell className="text-center">{`${partner.firstName} ${partner.lastName}`}</Cell>
             <Cell>
                 <div className="flex justify-end gap-2">
-                    <Button square={true} variant="danger">
+                    <Button
+                        square={true}
+                        variant="danger"
+                        type="button"
+                        onClick={() => {
+                            onRemove(partner.id);
+                        }}
+                    >
                         <IconX></IconX>
                     </Button>
                 </div>

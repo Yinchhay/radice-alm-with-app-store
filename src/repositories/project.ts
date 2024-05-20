@@ -1,3 +1,4 @@
+import { editProjectSettingsMembers, editProjectSettingsPartners } from "@/app/api/internal/project/[project_id]/schema";
 import { db } from "@/drizzle/db";
 import {
     projectCategories,
@@ -8,6 +9,7 @@ import {
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 import { eq, sql, or, inArray, count, and } from "drizzle-orm";
+import { z } from "zod";
 
 export const createProject = async (project: typeof projects.$inferInsert) => {
     return await db.insert(projects).values(project);
@@ -197,76 +199,23 @@ export async function editProjectSettingDetailById(
 
 export async function editProjectSettingMembersById(
     projectId: number,
-    membersToUpdate: {
-        userId: string;
-        title?: string | undefined;
-        canEdit: boolean;
-    }[],
+    membersData: z.infer<typeof editProjectSettingsMembers>,
 ) {
     return await db.transaction(async (tx) => {
-        let arrayOfUsers = membersToUpdate.map((member) => member.userId);
-        if (arrayOfUsers.length === 0) {
-            // because inArray require at least one array, put any value because in production,
-            arrayOfUsers = ["-1asdsada"];
-        }
-
-        const usersInDb = await tx.query.users.findMany({
-            where: (user, { inArray }) => inArray(user.id, arrayOfUsers),
-        });
-
-        const projectMembersInDb = await tx.query.projectMembers.findMany({
-            where: (projectMember, { eq }) =>
-                eq(projectMember.projectId, projectId),
-        });
-
-        /**
-         * 1. If the user is not in the projectMembersInDb, insert the user but user type must be user
-         * 2. If the user is in the projectMembersInDb, update the user
-         * 3. If project member is not in the membersToUpdate, delete the project member
-         */
-
-        // delete project member
-        for (const projectMember of projectMembersInDb) {
-            const projectMemberNotInMembersToUpdate = !membersToUpdate.find(
-                (m) => m.userId === projectMember.userId,
-            );
-            if (projectMemberNotInMembersToUpdate) {
+        if (membersData.membersToDelete) {
+            for (const memberId of membersData.membersToDelete) {
                 await tx
                     .delete(projectMembers)
                     .where(
                         and(
                             eq(projectMembers.projectId, projectId),
-                            eq(projectMembers.userId, projectMember.userId),
+                            eq(projectMembers.userId, memberId),
                         ),
                     );
             }
         }
-
-        for (const member of membersToUpdate) {
-            const user = usersInDb.find((u) => u.id === member.userId);
-
-            const projectMember = projectMembersInDb.find(
-                (pm) => pm.userId === member.userId,
-            );
-
-            if (!projectMember) {
-                if (!user) {
-                    continue;
-                }
-
-                if (user.type !== UserType.USER) {
-                    continue;
-                }
-
-                // create project member
-                await tx.insert(projectMembers).values({
-                    projectId: projectId,
-                    userId: member.userId,
-                    title: member.title || "",
-                    canEdit: member.canEdit,
-                });
-            } else {
-                // update project member
+        if (membersData.membersToUpdate) {
+            for (const member of membersData.membersToUpdate) {
                 await tx
                     .update(projectMembers)
                     .set({
@@ -279,6 +228,64 @@ export async function editProjectSettingMembersById(
                             eq(projectMembers.userId, member.userId),
                         ),
                     );
+            }
+        }
+        if (membersData.membersToAdd) {
+            for (const member of membersData.membersToAdd) {
+                const userTypeUser = await tx.query.users.findFirst({
+                    where: (table, { eq, and }) =>
+                        and(
+                            eq(table.id, member.userId),
+                            eq(table.type, UserType.USER),
+                        ),
+                });
+                if (!userTypeUser) {
+                    continue;
+                }
+                await tx.insert(projectMembers).values({
+                    projectId: projectId,
+                    userId: member.userId,
+                    title: member.title ?? "",
+                    canEdit: member.canEdit,
+                });
+            }
+        }
+    });
+}
+
+export async function editProjectSettingPartnersById(
+    projectId: number,
+    partnersData: z.infer<typeof editProjectSettingsPartners>,
+) {
+    return await db.transaction(async (tx) => {
+        if (partnersData.partnersToDelete) {
+            for (const partnerId of partnersData.partnersToDelete) {
+                await tx
+                    .delete(projectPartners)
+                    .where(
+                        and(
+                            eq(projectPartners.projectId, projectId),
+                            eq(projectPartners.partnerId, partnerId),
+                        ),
+                    );
+            }
+        }
+        if (partnersData.partnersToAdd) {
+            for (const partnerId of partnersData.partnersToAdd) {
+                const userTypePartner = await tx.query.users.findFirst({
+                    where: (table, { eq, and }) =>
+                        and(
+                            eq(table.id, partnerId),
+                            eq(table.type, UserType.PARTNER),
+                        ),
+                });
+                if (!userTypePartner) {
+                    continue;
+                }
+                await tx.insert(projectPartners).values({
+                    projectId: projectId,
+                    partnerId: partnerId,
+                });
             }
         }
     });

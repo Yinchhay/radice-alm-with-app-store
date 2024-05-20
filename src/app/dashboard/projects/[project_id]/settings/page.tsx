@@ -51,6 +51,10 @@ export default async function ProjectSettings({ params }: { params: Params }) {
         (projectMember) => projectMember.user,
     );
 
+    const originalProjectPartners = result.data.project.projectPartners.map(
+        (projectPartner) => projectPartner.partner,
+    );
+
     return (
         <div className="w-full max-w-[700px] mx-auto bg-transparent z-10 relative">
             <h1 className="text-3xl font-medium mb-4">Project Settings</h1>
@@ -65,7 +69,11 @@ export default async function ProjectSettings({ params }: { params: Params }) {
                     usersInTheSystem={result.data.allUsers}
                     originalProjectMembers={originalProjectMembers}
                 />
-                <ProjectPartner project={result.data.project} />
+                <ProjectPartner
+                    project={result.data.project}
+                    originalProjectPartners={originalProjectPartners}
+                    partnersInTheSystem={result.data.allPartners}
+                />
                 <ProjectPipeline project={result.data.project} />
                 <ProjectFile project={result.data.project} />
                 <ProjectLink project={result.data.project} />

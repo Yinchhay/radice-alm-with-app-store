@@ -14,7 +14,7 @@ import { z } from "zod";
 import { getOneAssociatedProject } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { getAllCategories } from "@/repositories/category";
-import { getAllUsers } from "@/repositories/users";
+import { getAllPartnersExceptThisUser, getAllUsers, getAllUsersExceptThisUser } from "@/repositories/users";
 
 const successMessage = "successMessage";
 const unsuccessMessage = "unsuccessMessage";
@@ -24,11 +24,13 @@ type Params = { params: { project_id: string } };
 export type GetAllCategoriesReturn = Awaited<
     ReturnType<typeof getAllCategories>
 >;
+export type GetAllPartnersReturn = Awaited<ReturnType<typeof getAllPartnersExceptThisUser>>;
 export type GetAllUsersReturn = Awaited<ReturnType<typeof getAllUsers>>;
 export type FetchOneAssociatedProjectData = {
     project: Awaited<ReturnType<typeof getOneAssociatedProject>>;
     allCategories: GetAllCategoriesReturn;
     allUsers: GetAllUsersReturn;
+    allPartners: GetAllPartnersReturn;
 };
 
 export async function GET(request: Request, { params }: Params) {
@@ -83,14 +85,16 @@ export async function GET(request: Request, { params }: Params) {
         }
 
         const allCategories = await getAllCategories();
-        const allUsers = await getAllUsers();
+        const allUsers = await getAllUsersExceptThisUser(user.id);
+        const allPartners = await getAllPartnersExceptThisUser(user.id);
 
         return buildSuccessResponse<FetchOneAssociatedProjectData>(
             successMessage,
             {
-                project: project,
-                allCategories: allCategories,
-                allUsers: allUsers,
+                project,
+                allCategories,
+                allUsers,
+                allPartners,
             },
         );
     } catch (error: any) {
