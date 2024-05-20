@@ -153,7 +153,7 @@ export async function editProjectSettingDetailById(
         logo,
     }: {
         name: string;
-        description: string | null | undefined  ;
+        description: string | null | undefined;
         logo: string | null;
     },
 ) {

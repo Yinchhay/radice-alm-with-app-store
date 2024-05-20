@@ -4,6 +4,7 @@ import { unstable_cache as cache } from "next/cache";
 import { eq, count, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
+import { UserType } from "@/types/user";
 
 /**
  * cache by next js is different from cache by react.

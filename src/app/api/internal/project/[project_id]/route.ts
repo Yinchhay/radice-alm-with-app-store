@@ -13,13 +13,19 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { getOneAssociatedProject } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
+import { getAllCategories } from "@/repositories/category";
 
 const successMessage = "successMessage";
 const unsuccessMessage = "unsuccessMessage";
 
 type Params = { params: { project_id: string } };
+
+export type GetAllCategoriesReturn = Awaited<
+    ReturnType<typeof getAllCategories>
+>;
 export type FetchOneAssociatedProjectData = {
     project: Awaited<ReturnType<typeof getOneAssociatedProject>>;
+    allCategories: GetAllCategoriesReturn;
 };
 
 export async function GET(request: Request, { params }: Params) {
@@ -72,10 +78,14 @@ export async function GET(request: Request, { params }: Params) {
                 HttpStatusCode.UNAUTHORIZED_401,
             );
         }
+
+        const allCategories = await getAllCategories();
+
         return buildSuccessResponse<FetchOneAssociatedProjectData>(
             successMessage,
             {
                 project: project,
+                allCategories: allCategories,
             },
         );
     } catch (error: any) {

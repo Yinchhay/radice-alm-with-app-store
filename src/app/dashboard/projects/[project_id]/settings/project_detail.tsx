@@ -1,20 +1,22 @@
 "use client";
 
-import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
+import {
+    FetchOneAssociatedProjectData,
+    GetAllCategoriesReturn,
+} from "@/app/api/internal/project/[project_id]/route";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
-import { CheckBoxElement } from "@/components/CheckList";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import InputField from "@/components/InputField";
 import Selector from "@/components/Selector";
-import { arrayToCheckList } from "@/lib/array_to_check_list";
 import { IconPlus } from "@tabler/icons-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsDetail } from "./fetch";
-import { FetchAllCategories } from "@/app/api/internal/category/all/route";
 import { categories as categoriesSchema } from "@/drizzle/schema";
+import { fileToUrl } from "@/lib/file";
+import { useSelector } from "@/app/hooks/useSelector";
 
 export default function ProjectDetail({
     project,
@@ -22,7 +24,7 @@ export default function ProjectDetail({
     originalProjectCategories,
 }: {
     project: FetchOneAssociatedProjectData["project"];
-    categories: FetchAllCategories["categories"];
+    categories: GetAllCategoriesReturn;
     originalProjectCategories: (typeof categoriesSchema.$inferSelect)[];
 }) {
     if (!project) {
@@ -39,68 +41,17 @@ export default function ProjectDetail({
     const projectName = useRef<HTMLInputElement>(null);
     const projectDescription = useRef<HTMLInputElement>(null);
 
-    const [showSelectorOverlay, setShowSelectorOverlay] = useState(false);
-
-    // convert categories to check list for selector
-    const categoriesCheckLists = arrayToCheckList(categories, "name", "id");
-    const originalCategoriesInProject = arrayToCheckList(
-        originalProjectCategories,
-        "name",
-        "id",
-    ).map((cate) => ({ ...cate, checked: true }));
-
-    // store previous checked categories before editing
-    const [checkedCategoriesBeforeEdit, setCheckedCategoriesBeforeEdit] =
-        useState<CheckBoxElement[]>([]);
-
-    // store current checked categories
-    const [checkedCategories, setCheckedCategories] = useState<
-        CheckBoxElement[]
-    >([]);
-
-    /**
-     * to store checklist display because when search, the list will get filtered
-     */
-    const [categoriesCheckListsDisplay, setCategoriesCheckListsDisplay] =
-        useState<CheckBoxElement[]>([]);
-
-    function closeCategorySelector() {
-        setShowSelectorOverlay(false);
-    }
-
-    function openCategorySelector() {
-        // structured clone because if remove, checkedCategories pass by its reference
-        // causing cancel button to not work
-        setCheckedCategoriesBeforeEdit(structuredClone(checkedCategories));
-        setShowSelectorOverlay(true);
-    }
-
-    // entire list, find the new changed checkbox, update checked status
-    function updateChecked(
-        lists: CheckBoxElement[],
-        changedCheckbox: CheckBoxElement,
-        checked: boolean,
-    ) {
-        return lists.map((cate) => {
-            if (cate.value === changedCheckbox.value) {
-                return { ...cate, checked };
-            }
-            return cate;
-        });
-    }
-
-    // listToUpdate will copy checked status from listToCheck, any unchecked will remain in listToUpdate
-    function updateCheckedByTwoList(
-        listToUpdated: CheckBoxElement[],
-        listToCheck: CheckBoxElement[],
-    ) {
-        return listToUpdated.map((cate) => {
-            const checked = listToCheck.find(
-                (check) => check.value === cate.value,
-            )?.checked;
-            return { ...cate, checked: checked ?? false };
-        });
-    }
+    const {
+        showSelectorOverlay,
+        openSelector,
+        onSearchChange,
+        onCheckChange,
+        onCancel,
+        onConfirm,
+        onReset: onResetCategories,
+        itemsCheckListDisplay,
+        checkedItems: checkedCategories,
+    } = useSelector(categories, originalProjectCategories, "name", "id");
 
     function onResetClick() {
         if (!project) return;
@@ -115,23 +66,8 @@ export default function ProjectDetail({
         if (projectDescription.current) {
             projectDescription.current.value = project.description ?? "";
         }
-
-        const comparedList = updateCheckedByTwoList(
-            categoriesCheckLists,
-            originalCategoriesInProject,
-        );
-        setCheckedCategories(comparedList);
-        setCategoriesCheckListsDisplay(comparedList);
+        onResetCategories();
     }
-
-    useEffect(() => {
-        const comparedList = updateCheckedByTwoList(
-            categoriesCheckLists,
-            originalCategoriesInProject,
-        );
-        setCheckedCategories(comparedList);
-        setCategoriesCheckListsDisplay(comparedList);
-    }, [categories]);
 
     return (
         <Card>
@@ -170,7 +106,10 @@ export default function ProjectDetail({
                                     fileInputRef.current.click();
                                 }
                             }}
-                            src={logoSrc}
+                            src={
+                                fileToUrl(project.logoUrl) ||
+                                "/placeholder.webp"
+                            }
                             alt={"project logo"}
                             width={128}
                             height={128}
@@ -249,7 +188,7 @@ export default function ProjectDetail({
                                 square
                                 variant="outline"
                                 className="outline-0"
-                                onClick={openCategorySelector}
+                                onClick={openSelector}
                                 type="button"
                             >
                                 <IconPlus
@@ -265,51 +204,11 @@ export default function ProjectDetail({
                                 selectorTitle="Add categories to project"
                                 searchPlaceholder="Search categories"
                                 checkListTitle="Categories"
-                                checkList={categoriesCheckListsDisplay || []}
-                                onSearchChange={async (searchText) => {
-                                    const filteredCategories =
-                                        categoriesCheckLists.filter((cate) =>
-                                            cate.name
-                                                .toLowerCase()
-                                                .includes(
-                                                    searchText.toLowerCase(),
-                                                ),
-                                        );
-                                    // since the list is filtered, we need to update the checked status
-                                    setCategoriesCheckListsDisplay(
-                                        updateCheckedByTwoList(
-                                            filteredCategories,
-                                            checkedCategories,
-                                        ),
-                                    );
-                                }}
-                                onCheckChange={(
-                                    updatedList,
-                                    changedCheckbox,
-                                ) => {
-                                    setCheckedCategories(
-                                        updateChecked(
-                                            checkedCategories,
-                                            changedCheckbox,
-                                            changedCheckbox.checked,
-                                        ),
-                                    );
-                                }}
-                                onCancel={() => {
-                                    setCheckedCategories(
-                                        checkedCategoriesBeforeEdit,
-                                    );
-                                    setCategoriesCheckListsDisplay(
-                                        checkedCategoriesBeforeEdit,
-                                    );
-                                    closeCategorySelector();
-                                }}
-                                onConfirm={() => {
-                                    setCategoriesCheckListsDisplay(
-                                        checkedCategories,
-                                    );
-                                    closeCategorySelector();
-                                }}
+                                checkList={itemsCheckListDisplay || []}
+                                onSearchChange={onSearchChange}
+                                onCheckChange={onCheckChange}
+                                onCancel={onCancel}
+                                onConfirm={onConfirm}
                             />
                         )}
                     </div>

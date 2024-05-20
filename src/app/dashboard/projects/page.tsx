@@ -15,6 +15,7 @@ import { getAuthUser } from "@/auth/lucia";
 import { hasPermission } from "@/lib/IAM";
 import { Permissions } from "@/types/IAM";
 import { User } from "lucia";
+import { fileToUrl } from "@/lib/file";
 
 type ManageAssociatedProps = {
     searchParams?: {
@@ -114,7 +115,7 @@ function Project({
             <div className="flex flex-row gap-4 relative">
                 <Image
                     className="aspect-square object-cover rounded-sm"
-                    src={project.logoUrl || "/placeholder.webp"}
+                    src={fileToUrl(project.logoUrl) || "/placeholder.webp"}
                     alt={"project logo"}
                     width={128}
                     height={128}

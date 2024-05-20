@@ -4,8 +4,6 @@ import ProjectDetail from "./project_detail";
 import { checkProjectRole, ProjectRole } from "@/lib/project";
 import { revalidateTags } from "@/lib/server_utils";
 import { OneAssociatedProject_C_Tag } from "@/repositories/project";
-import { fetchAllCategories } from "./fetch";
-import { FetchAllCategories } from "@/app/api/internal/category/all/route";
 import ProjectMember from "./project_member";
 import ProjectPartner from "./project_partner";
 import { ProjectPipeline } from "./project_pipeline";
@@ -19,7 +17,6 @@ type Params = {
 
 export default async function ProjectSettings({ params }: { params: Params }) {
     // await revalidateTags<OneAssociatedProject_C_Tag>("OneAssociatedProject_C_Tag");
-
     const user = await getAuthUser();
     if (!user) {
         throw new Error("Unauthorized to access this page");
@@ -46,15 +43,9 @@ export default async function ProjectSettings({ params }: { params: Params }) {
         throw new Error("Unauthorized to access project");
     }
 
-    const allCategoriesResult = await fetchAllCategories();
-    let categories: FetchAllCategories["categories"] = [];
-    if (!allCategoriesResult.success) {
-        categories = [];
-    }
-    if (allCategoriesResult.success) {
-        categories = allCategoriesResult.data.categories;
-    }
-    const originalProjectCategories = result.data.project.projectCategories.map((projectCategory) => projectCategory.category);
+    const originalProjectCategories = result.data.project.projectCategories.map(
+        (projectCategory) => projectCategory.category,
+    );
 
     return (
         <div className="w-full max-w-[700px] mx-auto bg-transparent z-10 relative">
@@ -62,12 +53,16 @@ export default async function ProjectSettings({ params }: { params: Params }) {
             <div className="grid gap-4">
                 <ProjectDetail
                     project={result.data.project}
-                    categories={categories}
+                    categories={
+                        result.data.allCategories.length > 0
+                            ? result.data.allCategories
+                            : []
+                    }
                     originalProjectCategories={originalProjectCategories}
                 />
                 <ProjectMember project={result.data.project} />
                 <ProjectPartner project={result.data.project} />
-                <ProjectPipeline project={result.data.project}/>
+                <ProjectPipeline project={result.data.project} />
                 <ProjectFile project={result.data.project} />
                 <ProjectLink project={result.data.project} />
                 <ProjectControl project={result.data.project} />

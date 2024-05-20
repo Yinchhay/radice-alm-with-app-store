@@ -53,3 +53,7 @@ export async function uploadFiles(
         return fetchErrorSomethingWentWrong;
     }
 }
+
+export function fileToUrl(file: string | null | undefined): string {
+    return `/api/file?filename=${file}`;
+}
