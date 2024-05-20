@@ -51,7 +51,9 @@ export default function Builder() {
                     if (result.data.project.projectContent) {
                         setDataLoaded(true);
                         setComponents(
-                            JSON.parse(result.data.project.projectContent as string),
+                            JSON.parse(
+                                result.data.project.projectContent as string,
+                            ),
                         );
                     }
                 }
@@ -177,7 +179,7 @@ export default function Builder() {
                 onAddList={addList}
                 onAddParagraph={addParagraph}
             />
-            <div className="w-full max-w-[700px] mx-auto bg-transparent z-10 relative">
+            <div className="w-full max-w-[920px] mx-auto bg-transparent z-10 relative">
                 <DndContext
                     sensors={sensors}
                     onDragEnd={(e) => {

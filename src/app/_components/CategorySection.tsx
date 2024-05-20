@@ -6,6 +6,7 @@ import {
     getProjectsByCategory,
     getProjectsByCategoryReturnType,
 } from "../fetch";
+import Link from "next/link";
 
 export default function CategorySection({
     variant = "light",
@@ -67,9 +68,12 @@ export default function CategorySection({
                                                 }
                                             </p>
                                             <div className="relative mt-8">
-                                                <button className="py-2 px-12 bg-black text-white text-2xl font-bold">
+                                                <Link
+                                                    href={`/project/${projects[selectedProject].id}`}
+                                                    className="py-2 px-12 bg-black text-white text-2xl font-bold inline-block relative z-10"
+                                                >
                                                     VIEW
-                                                </button>
+                                                </Link>
                                                 <div className="select-none absolute top-1 left-1 py-2 px-12 bg-transparent border-black border text-transparent text-2xl font-bold">
                                                     VIEW
                                                 </div>
@@ -237,9 +241,12 @@ export default function CategorySection({
                                                 }
                                             </p>
                                             <div className="relative mt-8">
-                                                <button className="py-2 px-12 bg-white text-black text-2xl font-bold">
+                                                <Link
+                                                    href={`/project/${projects[selectedProject].id}`}
+                                                    className="py-2 px-12 bg-white text-black text-2xl font-bold inline-block  relative z-10"
+                                                >
                                                     VIEW
-                                                </button>
+                                                </Link>
                                                 <div className="select-none absolute top-1 left-1 py-2 px-12 bg-transparent border-white border text-transparent text-2xl font-bold">
                                                     VIEW
                                                 </div>

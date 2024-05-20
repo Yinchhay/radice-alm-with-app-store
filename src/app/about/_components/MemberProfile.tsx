@@ -3,7 +3,7 @@ import Image from "next/image";
 export interface MemberProfileType {
     firstName: string;
     lastName: string;
-    profileURL: string;
+    profileUrl: string;
     email: string;
     description: string;
 }
@@ -22,8 +22,8 @@ export default function MemberProfile({
                     <div className="w-[180px] h-[220px] relative">
                         <Image
                             src={
-                                member.profileURL
-                                    ? member.profileURL
+                                member.profileUrl
+                                    ? member.profileUrl
                                     : "/wrath.jpg"
                             }
                             fill
@@ -45,7 +45,7 @@ export default function MemberProfile({
                 <div className="flex flex-col items-center w-[400px]">
                     <div className="w-[180px] h-[220px] relative">
                         <Image
-                            src={member.profileURL}
+                            src={member.profileUrl}
                             fill
                             className="object-cover"
                             alt=""

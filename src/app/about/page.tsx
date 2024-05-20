@@ -10,7 +10,7 @@ export default async function page() {
         {
             firstName: "Neil IAN",
             lastName: "UY",
-            profileURL: "/neil.jpg",
+            profileUrl: "/neil.jpg",
             email: "nuy@paragoniu.edu.kh",
             description:
                 "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University, Dumaguete City, Philippines.",
@@ -18,7 +18,7 @@ export default async function page() {
         {
             firstName: "Ratana",
             lastName: "Soth",
-            profileURL: "/ratana.jpg",
+            profileUrl: "/ratana.jpg",
             email: "rsoth@paragoniu.edu.kh",
             description:
                 "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University, Dumaguete City, Philippines. ",
