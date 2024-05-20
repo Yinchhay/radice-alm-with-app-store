@@ -10,6 +10,7 @@ import CategorySection from "./_components/CategorySection";
 import { categories } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import { getCategories } from "./fetch";
+import Footer from "@/components/Footer";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -37,7 +38,7 @@ export default async function Home() {
                     className="absolute left-0 mt-[50px]"
                 />
             </div>
-            <div className="container m-auto">
+            {/* <div className="container mx-auto overflow-hidden max-w-[80vw]">
                 <div className={roboto.className}>
                     <div
                         className="absolute top-[100px] font-bold text-[300px] text-transparent select-none"
@@ -59,7 +60,7 @@ export default async function Home() {
                         <RandomText originalText={"RADICE"} />
                     </div>
                 </div>
-            </div>
+            </div> */}
             <div className="h-[690px] container m-auto grid grid-cols-2">
                 <div className="w-[560px] flex flex-col justify-end h-full pb-16">
                     <div className={roboto_condensed.className}>
@@ -71,11 +72,10 @@ export default async function Home() {
                     </div>
                     <div className={roboto.className}>
                         <p className="text mt-4">
-                            Radice is a company that helps other companies bring
-                            their ideas to life through research and
-                            development. Radice is passionate about innovation
-                            and creativity, and strives to deliver high-quality
-                            results
+                            At Radice, innovation is our heartbeat. We are a hub
+                            of creativity and discovery, where ideas take flight
+                            and possibilities are endless. Join us in shaping
+                            the future. Welcome to Radice.
                         </p>
                     </div>
                     <div className={roboto_flex.className}>
@@ -116,7 +116,7 @@ export default async function Home() {
                     </div>
                 </div> */}
             </div>
-            <div className="relative bg-black py-4">
+            <div className="relative bg-black pt-4 pb-8">
                 <div
                     className="absolute top-[-48px] bg-black w-12 h-12"
                     style={{
@@ -126,8 +126,15 @@ export default async function Home() {
                 <Carousel categories={categories} />
             </div>
             {categories.map((category, i) => {
-                return <CategorySection variant="light" category={category} />;
+                return (
+                    <CategorySection
+                        variant={i % 2 === 0 ? "light" : "dark"}
+                        category={category}
+                        key={`category-section-${i}`}
+                    />
+                );
             })}
+            <Footer />
         </div>
     );
 }

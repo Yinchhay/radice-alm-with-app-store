@@ -18,11 +18,24 @@ export async function getProjectsByCategory(categoryId: number) {
                 with: {
                     category: true,
                 },
-                where: (table, { eq }) => eq(table.categoryId, categoryId),
             },
             // projectMembers: true,
             // projectPartners: true,
         },
-        where: (table, { eq }) => eq(table.isPublic, false),
+        where: (table, { eq, exists, and }) =>
+            and(
+                eq(table.isPublic, false),
+                exists(
+                    db
+                        .select()
+                        .from(projectCategories)
+                        .where(
+                            and(
+                                eq(projectCategories.categoryId, categoryId),
+                                eq(projectCategories.projectId, table.id),
+                            ),
+                        ),
+                ),
+            ),
     });
 }

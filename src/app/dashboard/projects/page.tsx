@@ -114,7 +114,10 @@ function Project({
             <div className="flex flex-row gap-4 relative">
                 <Image
                     className="aspect-square object-cover rounded-sm"
-                    src={project.logoUrl || "/placeholder.webp"}
+                    src={
+                        `/api/file?filename=${project.logoUrl}` ||
+                        "/placeholder.webp"
+                    }
                     alt={"project logo"}
                     width={128}
                     height={128}
