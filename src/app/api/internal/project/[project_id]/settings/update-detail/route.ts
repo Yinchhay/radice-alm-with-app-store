@@ -19,11 +19,8 @@ import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { editProjectSettingsDetail, fileImageSchema } from "../../schema";
 import { uploadFiles } from "@/lib/file";
 import { lucia } from "@/auth/lucia";
-import {
-    createProjectCategory,
-    deleteProjectCategory,
-} from "@/repositories/project_category";
 import { revalidateTags } from "@/lib/server_utils";
+import { findItemsToBeCreated, findItemsToBeDeleted } from "@/lib/filter";
 
 const successMessage = "Successfully updated project settings detail";
 const unsuccessMessage = "Failed to update project settings detail";
@@ -64,7 +61,7 @@ export async function PATCH(request: Request, { params }: Params) {
             const authorizationHeader = request.headers.get("Authorization");
             const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
             const response = await uploadFiles(files, sessionId ?? "");
-            
+
             if (!response.success) {
                 return buildErrorResponse(
                     unsuccessMessage,
@@ -83,11 +80,11 @@ export async function PATCH(request: Request, { params }: Params) {
             projectName: formData.get("projectName") as string,
             projectDescription: formData.get("projectDescription") as string,
             userId: user.id,
-            projectId: params.project_id,
             logoUrl,
+            // ids of categories to be added or removed
             projectCategories: projectCategories
                 ? JSON.parse(projectCategories as string)
-                : [],
+                : ([] as number[]),
         };
         const validationResult = editProjectSettingsDetail.safeParse(body);
         if (!validationResult.success) {
@@ -129,44 +126,29 @@ export async function PATCH(request: Request, { params }: Params) {
         }
 
         // start update category
-        if (
-            body.projectCategories &&
-            body.projectCategories &&
-            body.projectCategories.length > 0
-        ) {
-            const toBeCreatedCategories = body.projectCategories.filter(
-                (categoryId) =>
-                    !project.projectCategories.find(
-                        (projectCategory) =>
-                            projectCategory.categoryId === categoryId,
-                    ),
-            );
+        const categoriesToBeAdded = findItemsToBeCreated(
+            body.projectCategories as number[],
+            project.projectCategories,
+            "categoryId",
+        ) as number[];
 
-            const toBeDeletedCategories = project.projectCategories.filter(
-                (projectCategory) =>
-                    !body.projectCategories?.includes(
-                        projectCategory.categoryId,
-                    ),
-            );
+        const projectCategoriesToBeDeleted = findItemsToBeDeleted(
+            body.projectCategories as number[],
+            project.projectCategories,
+            "categoryId",
+        ).map((projectCategory) => projectCategory.id);
 
-            for (const categoryId of toBeCreatedCategories) {
-                await createProjectCategory(project.id, categoryId);
-            }
-
-            for (const projectCategory of toBeDeletedCategories) {
-                await deleteProjectCategory(projectCategory.id);
-            }
-        }
-
-        await editProjectSettingDetailById(Number(body.projectId), {
+        await editProjectSettingDetailById(Number(params.project_id), {
             name: body.projectName,
             description: body.projectDescription,
             logo: logoUrl,
+            categoriesToBeAdded,
+            projectCategoriesToBeDeleted,
         });
 
         await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
             "OneAssociatedProject_C_Tag",
-            "getProjects_C_Tag"
+            "getProjects_C_Tag",
         );
 
         return buildSuccessResponse<FetchEditProjectSettingsDetail>(
@@ -174,7 +156,6 @@ export async function PATCH(request: Request, { params }: Params) {
             {},
         );
     } catch (error: any) {
-        console.log(error);
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);
     }
 }

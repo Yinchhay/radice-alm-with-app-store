@@ -2,7 +2,6 @@
 
 import {
     FetchOneAssociatedProjectData,
-    GetAllCategoriesReturn,
 } from "@/app/api/internal/project/[project_id]/route";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
@@ -24,7 +23,7 @@ export default function ProjectDetail({
     originalProjectCategories,
 }: {
     project: FetchOneAssociatedProjectData["project"];
-    categories: GetAllCategoriesReturn;
+    categories: (typeof categoriesSchema.$inferSelect)[];
     originalProjectCategories: (typeof categoriesSchema.$inferSelect)[];
 }) {
     if (!project) {
@@ -74,8 +73,8 @@ export default function ProjectDetail({
             <form
                 action={async (formData: FormData) => {
                     const result = await fetchEditProjectSettingsDetail(
+                        project.id,
                         {
-                            projectId: project.id.toString(),
                             projectName:
                                 projectName.current?.value ?? project.name,
                             projectDescription:
@@ -186,9 +185,9 @@ export default function ProjectDetail({
                             )}
                             <Button
                                 square
-                                variant="outline"
                                 className="outline-0"
                                 onClick={openSelector}
+                                variant="primary"
                                 type="button"
                             >
                                 <IconPlus

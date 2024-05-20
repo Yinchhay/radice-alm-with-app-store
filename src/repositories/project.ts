@@ -1,7 +1,13 @@
 import { db } from "@/drizzle/db";
-import { projectMembers, projectPartners, projects } from "@/drizzle/schema";
+import {
+    projectCategories,
+    projectMembers,
+    projectPartners,
+    projects,
+} from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { eq, sql, or, inArray, count } from "drizzle-orm";
+import { UserType } from "@/types/user";
+import { eq, sql, or, inArray, count, and } from "drizzle-orm";
 
 export const createProject = async (project: typeof projects.$inferInsert) => {
     return await db.insert(projects).values(project);
@@ -151,18 +157,129 @@ export async function editProjectSettingDetailById(
         name,
         description,
         logo,
+        categoriesToBeAdded,
+        projectCategoriesToBeDeleted,
     }: {
         name: string;
         description: string | null | undefined;
         logo: string | null;
+        categoriesToBeAdded: number[];
+        projectCategoriesToBeDeleted: number[];
     },
 ) {
-    return await db
-        .update(projects)
-        .set({
-            name: name,
-            description: description,
-            logoUrl: logo,
-        })
-        .where(eq(projects.id, project_id));
+    return await db.transaction(async (tx) => {
+        // create categories
+        for (const categoryId of categoriesToBeAdded) {
+            await tx.insert(projectCategories).values({
+                projectId: project_id,
+                categoryId: categoryId,
+            });
+        }
+
+        // delete categories
+        for (const projectCategoriesId of projectCategoriesToBeDeleted) {
+            await tx
+                .delete(projectCategories)
+                .where(eq(projectCategories.id, projectCategoriesId));
+        }
+
+        // update project details
+        return await tx
+            .update(projects)
+            .set({
+                name: name,
+                description: description,
+                logoUrl: logo,
+            })
+            .where(eq(projects.id, project_id));
+    });
+}
+
+export async function editProjectSettingMembersById(
+    projectId: number,
+    membersToUpdate: {
+        userId: string;
+        title?: string | undefined;
+        canEdit: boolean;
+    }[],
+) {
+    return await db.transaction(async (tx) => {
+        let arrayOfUsers = membersToUpdate.map((member) => member.userId);
+        if (arrayOfUsers.length === 0) {
+            // because inArray require at least one array, put any value because in production,
+            arrayOfUsers = ["-1asdsada"];
+        }
+
+        const usersInDb = await tx.query.users.findMany({
+            where: (user, { inArray }) => inArray(user.id, arrayOfUsers),
+        });
+
+        const projectMembersInDb = await tx.query.projectMembers.findMany({
+            where: (projectMember, { eq }) =>
+                eq(projectMember.projectId, projectId),
+        });
+
+        /**
+         * 1. If the user is not in the projectMembersInDb, insert the user but user type must be user
+         * 2. If the user is in the projectMembersInDb, update the user
+         * 3. If project member is not in the membersToUpdate, delete the project member
+         */
+
+        // delete project member
+        for (const projectMember of projectMembersInDb) {
+            const projectMemberNotInMembersToUpdate = !membersToUpdate.find(
+                (m) => m.userId === projectMember.userId,
+            );
+            if (projectMemberNotInMembersToUpdate) {
+                await tx
+                    .delete(projectMembers)
+                    .where(
+                        and(
+                            eq(projectMembers.projectId, projectId),
+                            eq(projectMembers.userId, projectMember.userId),
+                        ),
+                    );
+            }
+        }
+
+        for (const member of membersToUpdate) {
+            const user = usersInDb.find((u) => u.id === member.userId);
+
+            const projectMember = projectMembersInDb.find(
+                (pm) => pm.userId === member.userId,
+            );
+
+            if (!projectMember) {
+                if (!user) {
+                    continue;
+                }
+
+                if (user.type !== UserType.USER) {
+                    continue;
+                }
+
+                // create project member
+                await tx.insert(projectMembers).values({
+                    projectId: projectId,
+                    userId: member.userId,
+                    title: member.title || "",
+                    canEdit: member.canEdit,
+                });
+            } else {
+                // update project member
+                await tx
+                    .update(projectMembers)
+                    .set({
+                        title: member.title,
+                        canEdit: member.canEdit,
+                    })
+                    .where(
+                        and(
+                            eq(projectMembers.projectId, projectId),
+                            eq(projectMembers.userId, member.userId),
+                        ),
+                    );
+            }
+        }
+    });
 }

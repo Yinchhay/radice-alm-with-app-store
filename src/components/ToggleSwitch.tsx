@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ToggleSwitch({
     defaultState = false,
@@ -11,10 +11,12 @@ export default function ToggleSwitch({
     onChange?: (state: boolean) => void;
 }) {
     const [toggleOn, setToggleOn] = useState<boolean>(defaultState);
+
     switch (variant) {
         case "secondary":
             return (
                 <button
+                    type="button"
                     className={[
                         "rounded-full w-[50px] h-[24px] flex items-center relative",
                         toggleOn ? "bg-blue-500" : "bg-gray-400",
@@ -39,6 +41,7 @@ export default function ToggleSwitch({
         default:
             return (
                 <button
+                    type="button"
                     className={[
                         "rounded-full w-[50px] h-[24px] outline outline-1 outline-gray-300 flex items-center relative",
                         toggleOn ? "bg-blue-500" : "bg-gray-200",

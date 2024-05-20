@@ -47,20 +47,24 @@ export default async function ProjectSettings({ params }: { params: Params }) {
         (projectCategory) => projectCategory.category,
     );
 
+    const originalProjectMembers = result.data.project.projectMembers.map(
+        (projectMember) => projectMember.user,
+    );
+
     return (
         <div className="w-full max-w-[700px] mx-auto bg-transparent z-10 relative">
             <h1 className="text-3xl font-medium mb-4">Project Settings</h1>
             <div className="grid gap-4">
                 <ProjectDetail
                     project={result.data.project}
-                    categories={
-                        result.data.allCategories.length > 0
-                            ? result.data.allCategories
-                            : []
-                    }
+                    categories={result.data.allCategories}
                     originalProjectCategories={originalProjectCategories}
                 />
-                <ProjectMember project={result.data.project} />
+                <ProjectMember
+                    project={result.data.project}
+                    usersInTheSystem={result.data.allUsers}
+                    originalProjectMembers={originalProjectMembers}
+                />
                 <ProjectPartner project={result.data.project} />
                 <ProjectPipeline project={result.data.project} />
                 <ProjectFile project={result.data.project} />

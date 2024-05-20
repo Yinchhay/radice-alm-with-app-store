@@ -8,30 +8,24 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import { HttpStatusCode } from "@/types/http";
-import { getOneAssociatedProjectSchema } from "./schema";
-import { NextRequest } from "next/server";
 import { z } from "zod";
-import { getOneAssociatedProject } from "@/repositories/project";
+import {
+    editProjectSettingMembersById,
+    getOneAssociatedProject,
+    GetProjects_C_Tag,
+    OneAssociatedProject_C_Tag,
+} from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
-import { getAllCategories } from "@/repositories/category";
-import { getAllUsers } from "@/repositories/users";
+import { revalidateTags } from "@/lib/server_utils";
+import { editProjectSettingsMembers } from "../../schema";
 
-const successMessage = "successMessage";
-const unsuccessMessage = "unsuccessMessage";
+const successMessage = "Successfully updated project settings members";
+const unsuccessMessage = "Failed to update project settings members";
 
 type Params = { params: { project_id: string } };
+export type FetchEditProjectSettingsMembers = Record<string, unknown>;
 
-export type GetAllCategoriesReturn = Awaited<
-    ReturnType<typeof getAllCategories>
->;
-export type GetAllUsersReturn = Awaited<ReturnType<typeof getAllUsers>>;
-export type FetchOneAssociatedProjectData = {
-    project: Awaited<ReturnType<typeof getOneAssociatedProject>>;
-    allCategories: GetAllCategoriesReturn;
-    allUsers: GetAllUsersReturn;
-};
-
-export async function GET(request: Request, { params }: Params) {
+export async function PATCH(request: Request, { params }: Params) {
     try {
         const requiredPermission = new Set([]);
         const { errorNoBearerToken, errorNoPermission, user } =
@@ -43,11 +37,9 @@ export async function GET(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof getOneAssociatedProjectSchema> = {
-            userId: user.id,
-            projectId: params.project_id,
-        };
-        const validationResult = getOneAssociatedProjectSchema.safeParse(body);
+        const body: z.infer<typeof editProjectSettingsMembers> =
+            await request.json();
+        const validationResult = editProjectSettingsMembers.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -66,34 +58,37 @@ export async function GET(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
-        const { projectRole, canEdit } = checkProjectRole(
-            user.id,
-            project,
-            user.type,
-        );
-        if (projectRole === ProjectRole.NONE) {
+        const { projectRole } = checkProjectRole(user.id, project, user.type);
+        if (
+            projectRole !== ProjectRole.OWNER &&
+            projectRole !== ProjectRole.SUPER_ADMIN
+        ) {
             return buildErrorResponse(
                 unsuccessMessage,
                 generateAndFormatZodError(
                     "unknown",
-                    "Unauthorized to access project",
+                    "Unauthorized to edit project",
                 ),
                 HttpStatusCode.UNAUTHORIZED_401,
             );
         }
 
-        const allCategories = await getAllCategories();
-        const allUsers = await getAllUsers();
+        await editProjectSettingMembersById(
+            Number(params.project_id),
+            body.membersToUpdate ?? [],
+        );
 
-        return buildSuccessResponse<FetchOneAssociatedProjectData>(
+        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
+            "OneAssociatedProject_C_Tag",
+            "getProjects_C_Tag",
+        );
+
+        return buildSuccessResponse<FetchEditProjectSettingsMembers>(
             successMessage,
-            {
-                project: project,
-                allCategories: allCategories,
-                allUsers: allUsers,
-            },
+            {},
         );
     } catch (error: any) {
+        console.error(error);
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);
     }
 }

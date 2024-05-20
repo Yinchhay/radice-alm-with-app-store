@@ -77,14 +77,18 @@ export function useSelector<T>(
     function onCheckChange(
         updatedList: CheckBoxElement[],
         changedCheckbox: CheckBoxElement,
+        updateDisplayCheckList: boolean = false,
     ) {
-        setCheckedItems(
-            updateChecked(
-                checkedItems,
-                changedCheckbox,
-                changedCheckbox.checked,
-            ),
+        const updateCheckedItems = updateChecked(
+            checkedItems,
+            changedCheckbox,
+            changedCheckbox.checked,
         );
+        setCheckedItems(updateCheckedItems);
+
+        if (updateDisplayCheckList) {
+            setItemsCheckListDisplay(updateCheckedItems);
+        }
     }
 
     function onCancel() {

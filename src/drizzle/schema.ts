@@ -317,7 +317,6 @@ export const projects = mysqlTable("projects", {
     }),
     isPublic: boolean("is_public").default(false),
     projectContent: json("project_content"),
-    files: json("files"),
     links: json("links"),
     pipelineStatus: json("pipeline_status"),
     userId: varchar("user_id", {

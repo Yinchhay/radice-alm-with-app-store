@@ -99,7 +99,9 @@ export const deleteUserById = async (userId: string) => {
 export type GetUsers_C_Tag = `getUsers_C`;
 
 export const getAllUsers = async () => {
-    return await db.query.users.findMany();
+    return await db.query.users.findMany({
+        where: (table, { eq }) => eq(table.type, UserType.USER),
+    });
 };
 
 export const getUsers = async (

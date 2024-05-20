@@ -9,56 +9,195 @@ import TableBody from "@/components/table/TableBody";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
 import ToggleSwitch from "@/components/ToggleSwitch";
-import { projectMembers, users } from "@/drizzle/schema";
-import { ProjectMemberAddMemberOverlay } from "./project_member_add_member";
+import { users } from "@/drizzle/schema";
 import { useFormStatus } from "react-dom";
-import { IconX } from "@tabler/icons-react";
+import { IconPlus, IconX } from "@tabler/icons-react";
+import { useSelector } from "@/app/hooks/useSelector";
+import Selector from "@/components/Selector";
+import InputField from "@/components/InputField";
+import { CheckBoxElement } from "@/components/CheckList";
+import { FormEvent, useEffect, useState } from "react";
+import { fetchEditProjectSettingsMembers, MemberToUpdate } from "./fetch";
+import FormErrorMessages from "@/components/FormErrorMessages";
+
+export type MemberList = {
+    member: typeof users.$inferSelect;
+    title: string;
+    canEdit: boolean;
+};
 
 export default function ProjectMember({
     project,
+    usersInTheSystem,
+    originalProjectMembers,
 }: {
     project: FetchOneAssociatedProjectData["project"];
+    usersInTheSystem: (typeof users.$inferSelect)[];
+    originalProjectMembers: (typeof users.$inferSelect)[];
 }) {
     if (!project) {
         throw new Error("Project not found");
     }
 
-    const MemberLists = project.projectMembers.map((member) => {
-        return <Member key={member.id} member={member} />;
-    });
+    const {
+        showSelectorOverlay,
+        openSelector,
+        onSearchChange,
+        onCheckChange,
+        onCancel,
+        onConfirm,
+        onReset,
+        itemsCheckListDisplay,
+        checkedItems,
+    } = useSelector(
+        usersInTheSystem,
+        originalProjectMembers,
+        "firstName",
+        "id",
+    );
+
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchEditProjectSettingsMembers>>>();
+    const [membersList, setMembersList] = useState<MemberList[]>([]);
+
+    function onCanEditChange(id: string, canEdit: boolean) {
+        setMembersList((prevMembersList) =>
+            prevMembersList.map((member) => {
+                if (member.member.id === id) {
+                    return { ...member, canEdit };
+                }
+                return member;
+            }),
+        );
+    }
+
+    function removeMemberById(id: string) {
+        const toBeRemoved = {
+            name:
+                usersInTheSystem.find((user) => user.id === id)?.firstName ||
+                "",
+            checked: false,
+            value: id,
+        } satisfies CheckBoxElement;
+
+        onCheckChange([], toBeRemoved, true);
+    }
+
+    const MemberLists = membersList.map((member) => (
+        <Member
+            key={member.member.id}
+            member={member.member}
+            title={member.title}
+            canEdit={member.canEdit}
+            onRemove={removeMemberById}
+            onCanEditChange={onCanEditChange}
+        />
+    ));
+
+    function constructMemberLists() {
+        const memberLists: MemberList[] = [];
+
+        checkedItems.forEach((member) => {
+            if (member.checked) {
+                const memberDetail = usersInTheSystem.find(
+                    (user) => user.id === member.value,
+                );
+                const memberAlreadyInProject = project?.projectMembers.find(
+                    (projectMember) => projectMember.user.id === member.value,
+                );
+                if (memberDetail) {
+                    memberLists.push({
+                        member: memberDetail,
+                        title: memberAlreadyInProject?.title || "",
+                        canEdit: memberAlreadyInProject?.canEdit || false,
+                    });
+                }
+            }
+        });
+
+        return memberLists;
+    }
+
+    function onResetClick() {
+        onReset();
+    }
+
+    async function handleFormSubmit(formData: FormData) {
+        if (!project) return;
+
+        const membersData = membersList.map((member, index) => ({
+            userId: member.member.id,
+            title: formData.get(`members[${member.member.id}].title`) as string,
+            canEdit:
+                formData.get(`members[${member.member.id}].canEdit`) === "on",
+        })) satisfies MemberToUpdate[];
+
+        const response = await fetchEditProjectSettingsMembers(project.id, membersData);
+        setResult(response);
+    }
+
+    useEffect(() => {
+        const members = constructMemberLists();
+        setMembersList(members);
+    }, [checkedItems]);
 
     return (
         <Card>
             <h1 className="text-2xl">Project members</h1>
-            <Table className="my-4 w-full">
-                <TableHeader>
-                    <ColumName>Name</ColumName>
-                    <ColumName>Title</ColumName>
-                    <ColumName>Can Edit</ColumName>
-                    <ColumName className="flex justify-end">
-                        <ProjectMemberAddMemberOverlay />
-                    </ColumName>
-                </TableHeader>
-                <TableBody>
-                    {project?.projectMembers.length > 0 ? (
-                        MemberLists
-                    ) : (
-                        <NoMember />
-                    )}
-                </TableBody>
-            </Table>
-            <div className="flex justify-end">
-                <div className="flex gap-4">
-                    <Button
-                        // onClick={onResetClick}
-                        variant="secondary"
-                        type="button"
-                    >
-                        Reset
-                    </Button>
-                    <SaveChangesBtn />
+            <form action={handleFormSubmit}>
+                <Table className="my-4 w-full">
+                    <TableHeader>
+                        <ColumName>Name</ColumName>
+                        <ColumName>Title</ColumName>
+                        <ColumName>Can Edit</ColumName>
+                        <ColumName className="flex justify-end">
+                            <Button
+                                onClick={openSelector}
+                                square={true}
+                                variant="primary"
+                                type="button"
+                            >
+                                <IconPlus></IconPlus>
+                            </Button>
+                        </ColumName>
+                    </TableHeader>
+                    <TableBody>
+                        {membersList.length > 0 ? (
+                            MemberLists
+                        ) : (
+                            <NoMember />
+                        )}
+                    </TableBody>
+                </Table>
+                {showSelectorOverlay && (
+                    <Selector
+                        className="w-[420px]"
+                        selectorTitle="Add users to project"
+                        searchPlaceholder="Search users"
+                        checkListTitle="Users"
+                        checkList={itemsCheckListDisplay || []}
+                        onSearchChange={onSearchChange}
+                        onCheckChange={onCheckChange}
+                        onCancel={onCancel}
+                        onConfirm={onConfirm}
+                    />
+                )}
+                <div className="flex justify-end">
+                    <div className="flex gap-4">
+                        <Button
+                            onClick={onResetClick}
+                            variant="secondary"
+                            type="button"
+                        >
+                            Reset
+                        </Button>
+                        <SaveChangesBtn />
+                    </div>
                 </div>
-            </div>
+                {!result?.success && result?.errors && (
+                    <FormErrorMessages errors={result?.errors} />
+                )}
+            </form>
         </Card>
     );
 }
@@ -80,22 +219,59 @@ function NoMember() {
     );
 }
 
-export type MemberJoinUser = typeof projectMembers.$inferSelect & {
-    user: typeof users.$inferSelect;
-};
-function Member({ member }: { member: MemberJoinUser }) {
+function Member({
+    member,
+    title,
+    canEdit,
+    onRemove,
+    onCanEditChange,
+}: {
+    member: typeof users.$inferSelect;
+    title: string;
+    canEdit: boolean;
+    onRemove: (id: string) => void;
+    onCanEditChange: (id: string, canEdit: boolean) => void;
+}) {
+    const [canEditState, setCanEditState] = useState(canEdit);
+
     return (
         <TableRow className="align-middle">
-            <Cell className="text-center">{`${member.user.firstName} ${member.user.lastName}`}</Cell>
-            <Cell className="text-center">{member.title}</Cell>
+            <Cell className="text-center">{`${member.firstName} ${member.lastName}`}</Cell>
+            <Cell className="text-center">
+                <InputField
+                    defaultValue={title}
+                    name={`members[${member.id}].title`}
+                />
+            </Cell>
             <Cell className="text-center">
                 <div className="flex items-center justify-center">
-                    <ToggleSwitch />
+                    <ToggleSwitch
+                        defaultState={canEditState}
+                        onChange={(checked) => {
+                            // onCanEditChange(member.id, checked);
+                            setCanEditState(checked);
+                        }}
+                    />
                 </div>
+                <InputField
+                    readOnly
+                    hidden
+                    className="hidden"
+                    type="checkbox"
+                    checked={canEditState}
+                    name={`members[${member.id}].canEdit`}
+                />
             </Cell>
             <Cell>
                 <div className="flex justify-end gap-2">
-                    <Button square={true} variant="danger">
+                    <Button
+                        square={true}
+                        variant="danger"
+                        type="button"
+                        onClick={() => {
+                            onRemove(member.id);
+                        }}
+                    >
                         <IconX></IconX>
                     </Button>
                 </div>

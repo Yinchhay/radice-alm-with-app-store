@@ -30,15 +30,26 @@ export const editProjectSettingsDetail = z.object({
     projectDescription: z.string().max(255, {
         message: "Project description is too long, max 255 characters",
     }).optional(),
-    projectId: z.string().min(1, {
-        message: "Project id is required",
-    }),
     logoUrl: z.string().max(2083, {
         message: "Logo url is too long, max 2083 characters",
     }).optional(),
     projectCategories: z.array(z.any()).optional(),
 });
 
+export const editProjectSettingsMembers = z.object({
+    membersToUpdate: z.array(z.object({
+        userId: z.string().min(1, {
+            message: "User id is required",
+        }),
+        title: z.string().max(50, {
+            message: "Title is too long, max 50 characters",
+        }).optional(),
+        canEdit: z.boolean({
+            required_error: "Can edit is required",
+            invalid_type_error: "Can edit must be a boolean",
+        }),
+    })).optional(),
+});
 // Check allow image only
 export const fileImageSchema = z.object({
     image: z
