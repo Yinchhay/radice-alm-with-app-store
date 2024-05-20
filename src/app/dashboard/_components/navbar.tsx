@@ -20,7 +20,9 @@ export default function Navbar({
                 <button onClick={onClick} className="p-2 hover:bg-gray-800">
                     <IconMenu2 size={28} className="text-gray-200" />
                 </button>
-                <h1 className="text-white text-lg font-bold">Radice</h1>
+                <Link href={"/"} className="text-white text-lg font-bold">
+                    Radice
+                </Link>
             </div>
             <Link
                 href={"/dashboard/account"}

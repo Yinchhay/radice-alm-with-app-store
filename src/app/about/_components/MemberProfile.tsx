@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export interface MemberProfileType {
     firstName: string;
@@ -18,7 +19,10 @@ export default function MemberProfile({
     switch (variant) {
         case "light":
             return (
-                <div className="flex flex-col items-center w-[400px]">
+                <Link
+                    href={`/member/${member.id}`}
+                    className="flex flex-col items-center w-[400px]"
+                >
                     <div className="w-[180px] h-[220px] relative">
                         <Image
                             src={
@@ -38,7 +42,7 @@ export default function MemberProfile({
                     <p className="text-sm text-center text-gray-800">
                         {member.description}
                     </p>
-                </div>
+                </Link>
             );
         case "dark":
             return (

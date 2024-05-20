@@ -5,6 +5,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button";
+import { getSessionCookie } from "@/lib/server_utils";
+import { fileToUrl } from "@/lib/file";
 
 export default function ImageComponent({
     component,
@@ -34,6 +36,7 @@ export default function ImageComponent({
     };
 
     const [showEdit, setShowEdit] = useState<boolean>(false);
+    const [fileList, setFileList] = useState<FileList>();
     const [imageSrc, setImageSrc] = useState<string>(
         component.text ? component.text : "/placeholder.webp",
     );
@@ -56,6 +59,24 @@ export default function ImageComponent({
             Cancel();
         }
     }, [selectedComponentID]);
+
+    async function changeImage() {
+        if (fileList) {
+            const sessionId = await getSessionCookie();
+            let formData = new FormData();
+            formData.append("files", fileList[0]);
+            const response = await fetch(`/api/internal/file/store`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: formData,
+            });
+            const data = await response.json();
+            console.log(data.data.filenames[0]);
+            setImageSrc(fileToUrl(data.data.filenames[0]));
+        }
+    }
 
     return (
         <div
@@ -136,6 +157,7 @@ export default function ImageComponent({
                                         "File type:",
                                         e.target.files[0].type,
                                     );
+                                    setFileList(e.target.files);
                                     setImageSrc(
                                         URL.createObjectURL(e.target.files[0]),
                                     );
@@ -144,10 +166,11 @@ export default function ImageComponent({
                         />
                     </label>
                     <Button
-                        onClick={() => {
-                            onSelected("");
+                        onClick={async () => {
                             let newData = component;
+                            await changeImage();
                             newData.text = imageSrc;
+                            onSelected("");
                             onSave(newData);
                         }}
                         variant="primary"
