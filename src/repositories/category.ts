@@ -40,6 +40,10 @@ export const getCategories = async (
     });
 };
 
+export const getAllCategories = async () => {
+    return await db.query.categories.findMany();
+};
+
 export const getCategoriesTotalRow = async () => {
     const totalRows = await db.select({ count: count() }).from(categories);
     return totalRows[0].count;

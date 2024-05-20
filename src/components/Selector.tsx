@@ -32,7 +32,7 @@ export default function Selector({
     checkListTitle: string;
     checkList: CheckBoxElement[];
     onSearchChange?: (searchText: string) => void;
-    onCheckChange?: (updatedList: CheckBoxElement[]) => void;
+    onCheckChange?: (updatedList: CheckBoxElement[], changedCheckbox: CheckBoxElement) => void;
     onConfirm?: () => void;
     onCancel?: () => void;
 }) {
@@ -64,10 +64,10 @@ export default function Selector({
                 <CheckList
                     title={checkListTitle}
                     checkList={checkListState}
-                    onChange={(updatedList) => {
+                    onChange={(updatedList, changedCheckbox) => {
                         setCheckListState(updatedList);
                         if (onCheckChange) {
-                            onCheckChange(updatedList);
+                            onCheckChange(updatedList, changedCheckbox);
                         }
                     }}
                 />

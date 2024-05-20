@@ -111,8 +111,16 @@ export async function getOneAssociatedProject(project_id: number) {
                     category: true,
                 },
             },
-            projectMembers: true,
-            projectPartners: true,
+            projectMembers: {
+                with: {
+                    user: true,
+                },
+            },
+            projectPartners: {
+                with: {
+                    partner: true,
+                },
+            },
             files: true,
         },
     });
