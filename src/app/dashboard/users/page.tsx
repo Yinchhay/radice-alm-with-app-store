@@ -9,15 +9,33 @@ import { CreateUserOverlay } from "./create_user";
 import { DeleteUserOverlay } from "./delete_user";
 import { fetchUsers } from "./fetch";
 import { users } from "@/drizzle/schema";
+import { getAuthUser } from "@/auth/lucia";
+import { hasPermission } from "@/lib/IAM";
+import { Permissions } from "@/types/IAM";
 
 export default async function ManageUsers() {
+    const user = await getAuthUser();
+
+    if (!user) {
+        throw new Error("Unauthorized to access this page");
+    }
+    
     const result = await fetchUsers();
     if (!result.success) {
         throw new Error(result.message);
     }
 
+    const [createUserPermission, deleteUserPermission] =
+        await Promise.all([
+            hasPermission(user.id, new Set([Permissions.CREATE_USERS])),
+            hasPermission(user.id, new Set([Permissions.DELETE_USERS])),
+        ]);
+
+    const canCreateUser = createUserPermission.canAccess;
+    const canDeleteUser = deleteUserPermission.canAccess;
+
     const UserList = result.data.users.map((user) => {
-        return <User key={user.id} user={user} />;
+        return <User key={user.id} user={user} canDeleteUser={canDeleteUser} />;
     });
 
     return (
@@ -29,7 +47,7 @@ export default async function ManageUsers() {
                         <ColumName className="text-start">Name</ColumName>
                         <ColumName className="text-start">Email</ColumName>
                         <ColumName className="flex justify-end">
-                            <CreateUserOverlay />
+                            {canCreateUser && <CreateUserOverlay />}
                         </ColumName>
                     </TableHeader>
                     <TableBody>
@@ -56,7 +74,7 @@ function NoUser() {
     );
 }
 
-function User({ user }: { user: typeof users.$inferSelect }) {
+function User({ user, canDeleteUser }: { user: typeof users.$inferSelect, canDeleteUser: boolean; }) {
     return (
         <TableRow>
             <Cell data-test={`userName-${user.firstName}${user.lastName}`}>
@@ -64,7 +82,7 @@ function User({ user }: { user: typeof users.$inferSelect }) {
             </Cell>
             <Cell data-test={`email-${user.email}`}>{user.email}</Cell>
             <Cell className="flex justify-end gap-2">
-                <DeleteUserOverlay user={user} />
+                {canDeleteUser && <DeleteUserOverlay user={user} />}
             </Cell>
         </TableRow>
     );
