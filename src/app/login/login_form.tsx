@@ -12,9 +12,10 @@ export default function LoginForm() {
         useState<Awaited<ReturnType<typeof fetchLoginCredential>>>();
 
     return (
-        <>
-            <h1>Sign in</h1>
+        <div className="w-[400px]">
+            <h1 className="text-4xl font-bold text-center mb-4">Login</h1>
             <form
+                className="grid gap-4"
                 action={async (formData: FormData) => {
                     const result = await fetchLoginCredential({
                         email: formData.get("email") as string,
@@ -28,25 +29,27 @@ export default function LoginForm() {
                     setResult(result);
                 }}
             >
-                <label htmlFor="email">Email</label>
-                <InputField name="email" id="email" />
-                <br />
-                <label htmlFor="password">Password</label>
-                <InputField type="password" name="password" id="password" />
-                <br />
+                <div>
+                    <label htmlFor="email">Email</label>
+                    <InputField name="email" id="email" />
+                </div>
+                <div>
+                    <label htmlFor="password">Password</label>
+                    <InputField type="password" name="password" id="password" />
+                </div>
                 {!result?.success && result?.errors && (
                     <FormErrorMessages errors={result?.errors} />
                 )}
                 <Btn />
             </form>
-        </>
+        </div>
     );
 }
 
 function Btn() {
     const formStatus = useFormStatus();
     return (
-        <Button disabled={formStatus.pending}>
+        <Button disabled={formStatus.pending} variant="primary">
             {formStatus.pending ? "Logging in" : "Log in"}
         </Button>
     );

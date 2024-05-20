@@ -4,6 +4,8 @@ import { getAuthUser } from "@/auth/lucia";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/Button";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 // static metadata
 export const metadata: Metadata = {
@@ -18,11 +20,17 @@ export default async function Page() {
     }
 
     return (
-        <>
-            <LoginForm />
-            <Link href="/api/oauth/github/login">
-                <Button className="mt-4">Sign in with GitHub</Button>
-            </Link>
-        </>
+        <div>
+            <Navbar />
+            <div className="container mx-auto min-h-[60vh] grid justify-center mt-16">
+                <div>
+                    <LoginForm />
+                    <Link href="/api/oauth/github/login">
+                        <Button className="mt-4">Sign in with GitHub</Button>
+                    </Link>
+                </div>
+            </div>
+            <Footer />
+        </div>
     );
 }

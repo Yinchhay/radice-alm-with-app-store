@@ -1,19 +1,24 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import MemberProfile, { MemberProfileType } from "./_components/MemberProfile";
+import { getMembers } from "./fetch";
 
-export default function page() {
+export default async function page() {
+    const members = await getMembers();
+
     const advisors: MemberProfileType[] = [
         {
-            name: "Neil IAN UY",
-            image: "/neil.jpg",
+            firstName: "Neil IAN",
+            lastName: "UY",
+            profileURL: "/neil.jpg",
             email: "nuy@paragoniu.edu.kh",
             description:
                 "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University, Dumaguete City, Philippines.",
         },
         {
-            name: "Ratana Soth",
-            image: "/ratana.jpg",
+            firstName: "Ratana",
+            lastName: "Soth",
+            profileURL: "/ratana.jpg",
             email: "rsoth@paragoniu.edu.kh",
             description:
                 "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University, Dumaguete City, Philippines. ",
@@ -23,7 +28,7 @@ export default function page() {
     return (
         <div>
             <Navbar />
-            <div className="container mx-auto py-8">
+            <div className="container mx-auto py-12">
                 <h1 className="text-center font-bold text-5xl pb-8">
                     Who We Are
                 </h1>
@@ -44,14 +49,26 @@ export default function page() {
                     generations to come.
                 </p>
             </div>
-            <div className="bg-black text-white py-8">
+            <div className="bg-black text-white py-12">
                 <h1 className="text-center font-bold text-5xl pb-8">
                     Our Advisors
                 </h1>
-                <div className="flex justify-center gap-8">
+                <div className="flex justify-center gap-8 mt-4">
                     {advisors.map((adivsor, i) => {
                         return (
                             <MemberProfile member={adivsor} variant="dark" />
+                        );
+                    })}
+                </div>
+            </div>
+            <div className="container mx-auto py-12">
+                <h1 className="text-center font-bold text-5xl pb-8">
+                    Our Members
+                </h1>
+                <div className="flex justify-center gap-8 mt-4">
+                    {members.map((member, i) => {
+                        return (
+                            <MemberProfile member={member} variant="light" />
                         );
                     })}
                 </div>

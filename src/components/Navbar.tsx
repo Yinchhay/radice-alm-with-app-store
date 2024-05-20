@@ -20,7 +20,9 @@ export default function Navbar() {
         <nav>
             <div className="container m-auto flex justify-between py-4 items-center">
                 <div className={roboto_condensed.className}>
-                    <h1 className="uppercase text-5xl font-bold">Radice</h1>
+                    <Link href={"/"} className="uppercase text-5xl font-bold">
+                        Radice
+                    </Link>
                 </div>
                 <div className={roboto_mono.className}>
                     <ul className="flex gap-16">
