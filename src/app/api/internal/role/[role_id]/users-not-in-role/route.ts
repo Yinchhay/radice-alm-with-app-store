@@ -40,6 +40,7 @@ export async function GET(request: Request, { params }: Params) {
                 id: user.user.id,
                 firstName: user.user.firstName,
                 lastName: user.user.lastName,
+                email: user.user.email,
             };
         });
 
