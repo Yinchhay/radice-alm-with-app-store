@@ -17,6 +17,7 @@ import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { deleteUserFormSchema } from "../../schema";
+import { GetProjects_C_Tag, OneAssociatedProject_C_Tag } from "@/repositories/project";
 
 // update type if we were to return any data back to the response
 export type FetchDeleteUser = Record<string, never>;
@@ -59,7 +60,7 @@ export async function DELETE(request: Request, { params }: Params) {
             );
         }
 
-        await revalidateTags<GetUsers_C_Tag>("getUsers_C");
+        await revalidateTags<GetUsers_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag>("getUsers_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchDeleteUser>(successMessage, {});
     } catch (error: any) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);

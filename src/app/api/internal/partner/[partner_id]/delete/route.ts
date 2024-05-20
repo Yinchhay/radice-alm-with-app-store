@@ -14,6 +14,10 @@ import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { deletePartnerFormSchema } from "../../schema";
+import {
+    GetProjects_C_Tag,
+    OneAssociatedProject_C_Tag,
+} from "@/repositories/project";
 
 // update type if we were to return any data back to the response
 export type FetchDeletePartner = Record<string, never>;
@@ -56,7 +60,9 @@ export async function DELETE(request: Request, { params }: Params) {
             );
         }
 
-        await revalidateTags<GetPartners_C_Tag>("getPartners_C");
+        await revalidateTags<
+            GetPartners_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag
+        >("getPartners_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchDeletePartner>(successMessage, {});
     } catch (error: any) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);

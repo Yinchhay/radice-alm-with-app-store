@@ -17,6 +17,7 @@ import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { deleteCategoryFormSchema } from "../../schema";
+import { GetProjects_C_Tag, OneAssociatedProject_C_Tag } from "@/repositories/project";
 
 // update type if we were to return any data back to the response
 export type FetchDeleteCategory = Record<string, never>;
@@ -59,7 +60,7 @@ export async function DELETE(request: Request, { params }: Params) {
             );
         }
 
-        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
+        await revalidateTags<GetCategories_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag>("getCategories_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchDeleteCategory>(successMessage, {});
     } catch (error: any) {
         return buildSomethingWentWrongErrorResponse(unsuccessMessage);

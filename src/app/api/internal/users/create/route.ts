@@ -15,6 +15,7 @@ import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { createUserFormSchema } from "../schema";
+import { GetProjects_C_Tag, OneAssociatedProject_C_Tag } from "@/repositories/project";
 
 export type FetchCreateUser = Record<string, never>;
 
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
             throw new Error(ErrorMessage.SomethingWentWrong);
         }
 
-        await revalidateTags<GetUsers_C_Tag>("getUsers_C");
+        await revalidateTags<GetUsers_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag>("getUsers_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchCreateUser>(successMessage, {});
     } catch (error: any) {
         if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {

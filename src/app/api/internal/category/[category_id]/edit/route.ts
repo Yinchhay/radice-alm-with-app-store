@@ -15,6 +15,10 @@ import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { editCategoryFormSchema } from "../../schema";
+import {
+    GetProjects_C_Tag,
+    OneAssociatedProject_C_Tag,
+} from "@/repositories/project";
 
 export type FetchEditCategory = Record<string, never>;
 
@@ -56,7 +60,9 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        await revalidateTags<GetCategories_C_Tag>("getCategories_C");
+        await revalidateTags<
+            GetCategories_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag
+        >("getCategories_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchEditCategory>(successMessage, {});
     } catch (error: any) {
         if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
