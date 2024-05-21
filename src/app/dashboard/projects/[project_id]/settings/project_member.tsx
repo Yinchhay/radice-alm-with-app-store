@@ -12,7 +12,7 @@ import ToggleSwitch from "@/components/ToggleSwitch";
 import { users } from "@/drizzle/schema";
 import { useFormStatus } from "react-dom";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { useSelector } from "@/app/hooks/useSelector";
+import { useSelector } from "../../../../../hooks/useSelector";
 import Selector from "@/components/Selector";
 import InputField from "@/components/InputField";
 import { CheckBoxElement } from "@/components/CheckList";

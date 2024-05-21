@@ -24,7 +24,7 @@ export async function getProjectsByCategory(categoryId: number) {
         },
         where: (table, { eq, exists, and }) =>
             and(
-                eq(table.isPublic, false),
+                eq(table.isPublic, true),
                 exists(
                     db
                         .select()

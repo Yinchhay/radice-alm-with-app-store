@@ -17,7 +17,7 @@ export default async function MemberPublicProfilePage({
         <div>
             <Navbar />
             {member && (
-                <div className="container mx-auto py-8 grid grid-cols-2 gap-8">
+                <div className="container min-h-[70vh] mx-auto py-8 grid grid-cols-2 gap-8">
                     <div>
                         <div className="w-[180px] h-[220px] relative">
                             <Image
@@ -40,7 +40,7 @@ export default async function MemberPublicProfilePage({
                                 "Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam enim officia veritatis delectus eius illo. Veritatis, illo non excepturi, illum magni at  earum temporibus voluptate quaerat fugit autem quo. Recusandae."}
                         </p>
                     </div>
-                    <div className="grid gap-4">
+                    <div className="flex flex-col gap-4">
                         {projects.map((project, i) => {
                             return (
                                 <Card square>

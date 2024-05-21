@@ -1,4 +1,7 @@
-import { editProjectSettingsMembers, editProjectSettingsPartners } from "@/app/api/internal/project/[project_id]/schema";
+import {
+    editProjectSettingsMembers,
+    editProjectSettingsPartners,
+} from "@/app/api/internal/project/[project_id]/schema";
 import { db } from "@/drizzle/db";
 import {
     projectCategories,
@@ -289,4 +292,14 @@ export async function editProjectSettingPartnersById(
             }
         }
     });
+}
+
+export async function updateProjectPublicStatus(
+    projectId: number,
+    isPublic: boolean,
+) {
+    return await db
+        .update(projects)
+        .set({ isPublic: isPublic })
+        .where(eq(projects.id, projectId));
 }

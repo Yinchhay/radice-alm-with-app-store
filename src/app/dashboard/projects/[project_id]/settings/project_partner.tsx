@@ -1,7 +1,7 @@
 "use client";
 import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
 import { editPartnerArray } from "@/app/api/internal/project/[project_id]/schema";
-import { useSelector } from "@/app/hooks/useSelector";
+import { useSelector } from "../../../../../hooks/useSelector";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import { CheckBoxElement } from "@/components/CheckList";

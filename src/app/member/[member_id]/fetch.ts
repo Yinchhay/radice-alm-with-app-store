@@ -27,6 +27,6 @@ export async function getPublicProjectByUserId(userId: string) {
             user: true,
         },
         where: (table, { eq, and }) =>
-            and(eq(table.isPublic, false), eq(table.userId, userId)),
+            and(eq(table.isPublic, true), eq(table.userId, userId)),
     });
 }

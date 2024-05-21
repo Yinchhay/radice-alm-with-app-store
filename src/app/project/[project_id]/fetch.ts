@@ -6,7 +6,7 @@ import { db } from "@/drizzle/db";
 export async function getProjectByIdForPublic(project_id: number) {
     return await db.query.projects.findFirst({
         where: (table, { eq, and }) =>
-            and(eq(table.isPublic, false), eq(table.id, project_id)),
+            and(eq(table.isPublic, true), eq(table.id, project_id)),
         with: {
             projectCategories: {
                 with: {

@@ -15,7 +15,7 @@ import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsDetail } from "./fetch";
 import { categories as categoriesSchema } from "@/drizzle/schema";
 import { fileToUrl } from "@/lib/file";
-import { useSelector } from "@/app/hooks/useSelector";
+import { useSelector } from "../../../../../hooks/useSelector";
 
 export default function ProjectDetail({
     project,
