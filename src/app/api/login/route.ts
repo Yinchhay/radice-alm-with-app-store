@@ -2,7 +2,7 @@ import { z } from "zod";
 import { loginCredentialSchema } from "./schema";
 import {
     buildErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
@@ -82,6 +82,6 @@ export async function POST(request: Request, response: Response) {
             sessionId: session.id,
         });
     } catch (error: any) {
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

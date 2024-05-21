@@ -73,8 +73,8 @@ export default function ImageComponent({
                 body: formData,
             });
             const data = await response.json();
-            console.log(data.data.filenames[0]);
-            setImageSrc(fileToUrl(data.data.filenames[0]));
+            console.log(fileToUrl(data.data.filenames[0]));
+            return fileToUrl(data.data.filenames[0]);
         }
     }
 
@@ -168,9 +168,17 @@ export default function ImageComponent({
                     <Button
                         onClick={async () => {
                             let newData = component;
-                            await changeImage();
-                            newData.text = imageSrc;
+                            let newImg = await changeImage(); 
+                            
                             onSelected("");
+                            if(newImg) {
+                                newData.text = newImg
+                                setImageSrc(newImg)
+                            }
+                            else {
+                                newData.text = "/placeholder.webp"
+                                setImageSrc("/placeholder.webp")
+                            }
                             onSave(newData);
                         }}
                         variant="primary"

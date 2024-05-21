@@ -3,7 +3,7 @@ import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import {
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { getUsers, getUsersTotalRow } from "@/repositories/users";
@@ -51,6 +51,6 @@ export async function GET(request: NextRequest) {
             maxPage: getPaginationMaxPage(totalRows, rowsPerPage),
         });
     } catch (error: any) {
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

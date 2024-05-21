@@ -4,7 +4,7 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { revalidateTags } from "@/lib/server_utils";
@@ -65,6 +65,6 @@ export async function DELETE(request: Request, { params }: Params) {
         >("getPartners_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchDeletePartner>(successMessage, {});
     } catch (error: any) {
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

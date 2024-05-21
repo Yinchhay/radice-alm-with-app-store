@@ -4,12 +4,12 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { revalidateTags } from "@/lib/server_utils";
 import { editCategoryById, GetCategories_C_Tag } from "@/repositories/category";
-import { MysqlErrorCodes } from "@/types/db";
+
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
@@ -65,18 +65,6 @@ export async function PATCH(request: Request, { params }: Params) {
         >("getCategories_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchEditCategory>(successMessage, {});
     } catch (error: any) {
-        if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError(
-                    "name",
-                    // remember try to make message clear, in this case only name has unique constraint
-                    "Category name already exists",
-                ),
-                HttpStatusCode.CONFLICT_409,
-            );
-        }
-
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

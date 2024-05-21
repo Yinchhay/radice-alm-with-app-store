@@ -2,7 +2,7 @@ import { checkBearerAndPermission, routeRequiredPermissions } from "@/lib/IAM";
 import {
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { getPartners } from "@/repositories/partner";
@@ -37,6 +37,6 @@ export async function GET(request: NextRequest) {
             partners: partners,
         });
     } catch (error: any) {
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

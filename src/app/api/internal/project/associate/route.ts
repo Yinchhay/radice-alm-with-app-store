@@ -4,7 +4,7 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import {
@@ -85,6 +85,6 @@ export async function GET(request: NextRequest) {
             },
         );
     } catch (error: any) {
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

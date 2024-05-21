@@ -4,12 +4,12 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { revalidateTags } from "@/lib/server_utils";
 import { createProject, GetProjects_C_Tag } from "@/repositories/project";
-import { MysqlErrorCodes } from "@/types/db";
+
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
@@ -55,18 +55,6 @@ export async function POST(request: Request) {
         await revalidateTags<GetProjects_C_Tag>("getProjects_C_Tag");
         return buildSuccessResponse<FetchCreateProject>(successMessage, {});
     } catch (error: any) {
-        if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError(
-                    "name",
-                    // remember try to make message clear, in this case only name has unique constraint
-                    "Project name already exists",
-                ),
-                HttpStatusCode.CONFLICT_409,
-            );
-        }
-
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

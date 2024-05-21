@@ -3,7 +3,7 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { HttpStatusCode } from "@/types/http";
@@ -13,7 +13,7 @@ import { createFileFormSchema } from "../schema";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { createFile } from "@/repositories/files";
 import { ErrorMessage } from "@/types/error";
-import { MysqlErrorCodes } from "@/types/db";
+
 import { getFileStoragePath, readableFileSize } from "@/lib/file";
 import { localDebug } from "@/lib/utils";
 
@@ -88,19 +88,6 @@ export async function POST(request: Request) {
             filenames: filenames,
         });
     } catch (error: any) {
-        if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError(
-                    "filename",
-                    // remember try to make message clear, in this case only file name has unique constraint
-                    "File name already exists",
-                ),
-                HttpStatusCode.CONFLICT_409,
-            );
-        }
-
-        localDebug(error.message, error.stack)
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

@@ -4,7 +4,7 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { revalidateTags } from "@/lib/server_utils";
@@ -62,6 +62,6 @@ export async function DELETE(request: Request, { params }: Params) {
         await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         return buildSuccessResponse<FetchDeleteRole>(successMessage, {});
     } catch (error: any) {
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

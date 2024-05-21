@@ -1,6 +1,6 @@
 import {
     buildErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 
@@ -40,6 +40,6 @@ export async function POST() {
         );
         return buildSuccessResponse<FetchLogoutUser>(successMessage, {});
     } catch (error) {
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

@@ -4,11 +4,11 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { createPartner, GetPartners_C_Tag } from "@/repositories/partner";
-import { MysqlErrorCodes } from "@/types/db";
+
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
@@ -68,18 +68,6 @@ export async function POST(request: Request) {
             password: body.password,
         });
     } catch (error: any) {
-        if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError(
-                    "email",
-                    // remember try to make message clear, in this case only email has unique constraint
-                    "Partner email already exists",
-                ),
-                HttpStatusCode.CONFLICT_409,
-            );
-        }
-
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

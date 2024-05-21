@@ -4,7 +4,7 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { HttpStatusCode } from "@/types/http";
@@ -86,6 +86,6 @@ export async function PATCH(request: Request, { params }: Params) {
         );
     } catch (error: any) {
         console.error(error);
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

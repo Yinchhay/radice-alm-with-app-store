@@ -5,17 +5,15 @@ import fs from "fs";
 import { deleteFileByFilename, getFileByFilename } from "@/repositories/files";
 import {
     buildErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
-import { getAuthUser } from "@/auth/lucia";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import { z } from "zod";
 import { deleteFileFormSchema } from "../schema";
 import {
     checkProjectRole,
-    ProjectRole,
 } from "@/lib/project";
 import { UserType } from "@/types/user";
 
@@ -116,7 +114,7 @@ export async function DELETE(request: NextRequest) {
         await fs.promises.unlink(fileAbsPath);
         
         return buildSuccessResponse<FetchDeleteFile>(successMessage, {});
-    } catch (error) {
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+    } catch (error: any) {
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

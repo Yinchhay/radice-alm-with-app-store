@@ -4,7 +4,7 @@ import {
     buildErrorResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
-    buildSomethingWentWrongErrorResponse,
+    checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
 import { HttpStatusCode } from "@/types/http";
@@ -99,28 +99,26 @@ export async function PATCH(request: Request, { params }: Params) {
             }
         }
         if (body.fileToUpload) {
-            for (const file of body.fileToUpload) {
-                const response = await uploadFiles(
-                    body.fileToUpload,
-                    sessionId ?? "",
-                    Number(params.project_id),
-                );
+            const response = await uploadFiles(
+                body.fileToUpload,
+                sessionId ?? "",
+                Number(params.project_id),
+            );
 
-                if (!response.success) {
-                    // {errors : {undefined: "Expected object, received string"}}
-                    // could be any key value pair, not just undefined
-                    const errorMessage =
-                        response.errors[
-                            Object.keys(
-                                response.errors,
-                            )[0] as keyof typeof response.errors
-                        ];
-                    return buildErrorResponse(
-                        unsuccessMessage,
-                        generateAndFormatZodError("unknown", errorMessage),
-                        HttpStatusCode.BAD_REQUEST_400,
-                    );
-                }
+            if (!response.success) {
+                // {errors : {undefined: "Expected object, received string"}}
+                // could be any key value pair, not just undefined
+                const errorMessage =
+                    response.errors[
+                        Object.keys(
+                            response.errors,
+                        )[0] as keyof typeof response.errors
+                    ];
+                return buildErrorResponse(
+                    unsuccessMessage,
+                    generateAndFormatZodError("unknown", errorMessage),
+                    HttpStatusCode.BAD_REQUEST_400,
+                );
             }
         }
 
@@ -135,6 +133,6 @@ export async function PATCH(request: Request, { params }: Params) {
         );
     } catch (error: any) {
         console.error(error);
-        return buildSomethingWentWrongErrorResponse(unsuccessMessage);
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

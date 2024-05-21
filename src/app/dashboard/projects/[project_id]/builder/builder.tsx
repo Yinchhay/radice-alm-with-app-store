@@ -55,6 +55,8 @@ export default function Builder() {
                                 result.data.project.projectContent as string,
                             ),
                         );
+                    } else {
+                        setDataLoaded(true);
                     }
                 }
             } else {

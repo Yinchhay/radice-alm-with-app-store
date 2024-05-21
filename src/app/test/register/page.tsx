@@ -1,7 +1,7 @@
 import { lucia } from "@/auth/lucia";
 import { localDebug } from "@/lib/utils";
 import { createUser, getUserByEmail } from "@/repositories/users";
-import { MysqlErrorCodes } from "@/types/db";
+
 import bcrypt from "bcrypt";
 import { generateId } from "lucia";
 import { cookies } from "next/headers";
@@ -92,12 +92,6 @@ async function signup(formData: FormData): Promise<ActionResult> {
         return redirect("/");
     } catch (error: any) {
         localDebug(error.message, "signUpAction");
-
-        if (error.code === MysqlErrorCodes.ER_DUP_ENTRY) {
-            return {
-                error: "Email already exists",
-            };
-        }
 
         return {
             error: "Unknown error",

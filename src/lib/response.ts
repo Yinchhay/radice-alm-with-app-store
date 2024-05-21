@@ -1,6 +1,8 @@
 import { HttpStatusCode } from "@/types/http";
 import { generateAndFormatZodError, T_ZodErrorFormatted } from "./form";
 import { ErrorMessage } from "@/types/error";
+import { MysqlErrorCodes } from "@/types/db";
+import { mysqlErDupEntryExtractValue } from "./error";
 
 export type SuccessResponse<T> = {
     data: T;
@@ -53,7 +55,10 @@ export const fetchErrorSomethingWentWrong: ErrorResponse<{}> = {
 export const buildNoBearerTokenErrorResponse = () => {
     return buildErrorResponse(
         "Unauthorized, authorization token is missing or invalid",
-        generateAndFormatZodError("unknown", ErrorMessage.NoPermissionToPerformThisAction),
+        generateAndFormatZodError(
+            "unknown",
+            ErrorMessage.NoPermissionToPerformThisAction,
+        ),
         HttpStatusCode.UNAUTHORIZED_401,
     );
 };
@@ -69,9 +74,39 @@ export const buildNoPermissionErrorResponse = () => {
     );
 };
 
-export const buildSomethingWentWrongErrorResponse = (message: string) => {
+export const checkErrorForResponse = (
+    error: any,
+): {
+    message: string;
+    code: HttpStatusCode;
+} => {
+    switch (error.code) {
+        case MysqlErrorCodes.ER_DUP_ENTRY:
+            return {
+                message: `${mysqlErDupEntryExtractValue(error)} already exists!`,
+                code: HttpStatusCode.CONFLICT_409,
+            };
+        case MysqlErrorCodes.ER_ROW_IS_REFERENCED_2:
+            return {
+                message:
+                    "Cannot delete this record because it is being referenced by another record.",
+                code: HttpStatusCode.CONFLICT_409,
+            };
+        default:
+            return {
+                message: ErrorMessage.SomethingWentWrong,
+                code: HttpStatusCode.INTERNAL_SERVER_ERROR_500,
+            };
+    }
+};
+
+export const checkAndBuildErrorResponse = (message: string, error: any) => {
+    const { message: errorMessage, code: httpStatusCode } =
+        checkErrorForResponse(error);
+
     return buildErrorResponse(
         message,
-        generateAndFormatZodError("unknown", ErrorMessage.SomethingWentWrong),
+        generateAndFormatZodError("unknown", errorMessage),
+        httpStatusCode,
     );
 };
