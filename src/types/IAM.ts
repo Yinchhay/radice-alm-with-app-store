@@ -1,7 +1,7 @@
 export enum Permissions {
     // Manage users
     CREATE_USERS = 1,
-    EDIT_USERS = 2,
+    // EDIT_USERS = 2,
     DELETE_USERS = 3,
 
     // Manage categories

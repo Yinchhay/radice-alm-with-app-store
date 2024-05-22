@@ -144,7 +144,6 @@ export const routeRequiredPermissions = new Map<routeKey, Set<Permissions>>([
         "manageUsers",
         new Set([
             Permissions.CREATE_USERS,
-            Permissions.EDIT_USERS,
             Permissions.DELETE_USERS,
         ]),
     ],
