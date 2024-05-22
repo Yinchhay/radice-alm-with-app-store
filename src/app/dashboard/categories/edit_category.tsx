@@ -9,12 +9,14 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconEdit } from "@tabler/icons-react";
 import { categories } from "@/drizzle/schema";
 import { fetchEditCategoryById } from "./fetch";
+import { usePathname } from "next/navigation";
 
 export function EditCategoryOverlay({
     category,
 }: {
     category: typeof categories.$inferSelect;
 }) {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchEditCategoryById>>>();
@@ -49,13 +51,16 @@ export function EditCategoryOverlay({
                         </div>
                         <form
                             action={async (formData: FormData) => {
-                                const result = await fetchEditCategoryById({
-                                    categoryId: category.id,
-                                    name: formData.get("name") as string,
-                                    description: formData.get(
-                                        "description",
-                                    ) as string,
-                                });
+                                const result = await fetchEditCategoryById(
+                                    {
+                                        categoryId: category.id,
+                                        name: formData.get("name") as string,
+                                        description: formData.get(
+                                            "description",
+                                        ) as string,
+                                    },
+                                    pathname,
+                                );
                                 setResult(result);
                             }}
                         >

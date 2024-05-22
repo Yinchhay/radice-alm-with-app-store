@@ -1,4 +1,4 @@
-import { formatZodError, generateAndFormatZodError } from "@/lib/form";
+import { formatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
     buildErrorResponse,
@@ -7,9 +7,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { revalidateTags } from "@/lib/server_utils";
-import { createProject, GetProjects_C_Tag } from "@/repositories/project";
-
+import { createProject } from "@/repositories/project";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
@@ -52,7 +50,6 @@ export async function POST(request: Request) {
             throw new Error(ErrorMessage.SomethingWentWrong);
         }
 
-        await revalidateTags<GetProjects_C_Tag>("getProjects_C_Tag");
         return buildSuccessResponse<FetchCreateProject>(successMessage, {});
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);

@@ -7,17 +7,12 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { revalidateTags } from "@/lib/server_utils";
-import { deletePartnerById, GetPartners_C_Tag } from "@/repositories/partner";
+import { deletePartnerById } from "@/repositories/partner";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { deletePartnerFormSchema } from "../../schema";
-import {
-    GetProjects_C_Tag,
-    OneAssociatedProject_C_Tag,
-} from "@/repositories/project";
 
 // update type if we were to return any data back to the response
 export type FetchDeletePartner = Record<string, never>;
@@ -60,9 +55,6 @@ export async function DELETE(request: Request, { params }: Params) {
             );
         }
 
-        await revalidateTags<
-            GetPartners_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag
-        >("getPartners_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchDeletePartner>(successMessage, {});
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);

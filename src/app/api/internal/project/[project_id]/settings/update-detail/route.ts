@@ -12,14 +12,11 @@ import { z } from "zod";
 import {
     editProjectSettingDetailById,
     getOneAssociatedProject,
-    GetProjects_C_Tag,
-    OneAssociatedProject_C_Tag,
 } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { editProjectSettingsDetail, fileImageSchema } from "../../schema";
 import { uploadFiles } from "@/lib/file";
 import { lucia } from "@/auth/lucia";
-import { revalidateTags } from "@/lib/server_utils";
 import { findItemsToBeCreated, findItemsToBeDeleted } from "@/lib/filter";
 
 const successMessage = "Successfully updated project settings detail";
@@ -145,11 +142,6 @@ export async function PATCH(request: Request, { params }: Params) {
             categoriesToBeAdded,
             projectCategoriesToBeDeleted,
         });
-
-        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
-            "OneAssociatedProject_C_Tag",
-            "getProjects_C_Tag",
-        );
 
         return buildSuccessResponse<FetchEditProjectSettingsDetail>(
             successMessage,

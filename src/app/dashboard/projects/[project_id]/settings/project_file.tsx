@@ -10,10 +10,11 @@ import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
 import { readableFileSize } from "@/lib/file";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsFiles } from "./fetch";
 import FormErrorMessages from "@/components/FormErrorMessages";
+import { usePathname } from "next/navigation";
 
 export type FileList = {
     file?: File;
@@ -29,6 +30,7 @@ export default function ProjectFile({
         throw new Error("Project not found");
     }
 
+    const pathname = usePathname();
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchEditProjectSettingsFiles>>>();
     const [fileLists, setFileLists] = useState<FileList[]>(project.files);
@@ -86,20 +88,32 @@ export default function ProjectFile({
             return;
         }
 
+        const formData = new FormData();
         const fileToRemove = project.files
             .filter((f) => !fileLists.find((fl) => fl.filename === f.filename))
-            .map((f) => f.filename);
+            .map((f) => {
+                formData.append("fileToRemove", f.filename);
+                return f.filename;
+            });
 
-        const fileToUpload = fileLists.map((f) => {
-            if (f.file instanceof File) {
-                return f.file;
-            }
-        }).filter((f) => f instanceof File);
+        const fileToUpload = fileLists
+            .map((f) => {
+                if (f.file instanceof File) {
+                    return f.file;
+                }
+            })
+            .filter((f) => {
+                if (f instanceof File) {
+                    formData.append("fileToUpload", f);
+                    return true;
+                }
+            });
 
-        const response = await fetchEditProjectSettingsFiles(project.id, {
-            fileToRemove,
-            fileToUpload,
-        });
+        const response = await fetchEditProjectSettingsFiles(
+            project.id,
+            formData,
+            pathname,
+        );
         setResult(response);
     }
 
@@ -110,6 +124,10 @@ export default function ProjectFile({
 
         setFileLists(project.files);
     }
+
+    useEffect(() => {
+        setFileLists(project.files);
+    }, [project.files])
 
     return (
         <Card>

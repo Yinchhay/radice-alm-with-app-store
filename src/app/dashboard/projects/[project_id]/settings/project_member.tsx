@@ -21,6 +21,7 @@ import { fetchEditProjectSettingsMembers } from "./fetch";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { editMemberArray } from "@/app/api/internal/project/[project_id]/schema";
 import { z } from "zod";
+import { usePathname } from "next/navigation";
 
 export type MemberList = {
     member: typeof users.$inferSelect;
@@ -41,6 +42,7 @@ export default function ProjectMember({
         throw new Error("Project not found");
     }
 
+    const pathname = usePathname();
     const {
         showSelectorOverlay,
         openSelector,
@@ -158,7 +160,7 @@ export default function ProjectMember({
             membersToAdd,
             membersToDelete: membersToRemove.map((member) => member.id),
             membersToUpdate,
-        });
+        }, pathname);
         setResult(response);
     }
 

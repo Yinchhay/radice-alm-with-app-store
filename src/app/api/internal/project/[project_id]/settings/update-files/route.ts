@@ -9,13 +9,8 @@ import {
 } from "@/lib/response";
 import { HttpStatusCode } from "@/types/http";
 import { z } from "zod";
-import {
-    getOneAssociatedProject,
-    GetProjects_C_Tag,
-    OneAssociatedProject_C_Tag,
-} from "@/repositories/project";
+import { getOneAssociatedProject } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
-import { revalidateTags } from "@/lib/server_utils";
 import { editProjectSettingsFiles } from "../../schema";
 import { lucia } from "@/auth/lucia";
 import { deleteFile, uploadFiles } from "@/lib/file";
@@ -121,11 +116,6 @@ export async function PATCH(request: Request, { params }: Params) {
                 );
             }
         }
-
-        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
-            "OneAssociatedProject_C_Tag",
-            "getProjects_C_Tag",
-        );
 
         return buildSuccessResponse<FetchEditProjectSettingsFiles>(
             successMessage,

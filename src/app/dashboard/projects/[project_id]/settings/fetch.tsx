@@ -1,3 +1,4 @@
+"use server";
 import {
     editProjectSettingsDetail,
     editProjectSettingsFiles,
@@ -6,31 +7,27 @@ import {
 } from "@/app/api/internal/project/[project_id]/schema";
 import { FetchEditProjectSettingsDetail } from "@/app/api/internal/project/[project_id]/settings/update-detail/route";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
-import {
-    getBaseUrl,
-    getSessionCookie,
-    revalidateTags,
-} from "@/lib/server_utils";
-import {
-    GetProjects_C_Tag,
-    OneAssociatedProject_C_Tag,
-} from "@/repositories/project";
+import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { z } from "zod";
-import { MemberList } from "./project_member";
 import { FetchEditProjectSettingsMembers } from "@/app/api/internal/project/[project_id]/settings/update-members/route";
 import { FetchEditProjectSettingsPartners } from "@/app/api/internal/project/[project_id]/settings/update-partners/route";
 import { FetchEditProjectSettingsFiles } from "@/app/api/internal/project/[project_id]/settings/update-files/route";
+import { revalidatePath } from "next/cache";
 
 export async function fetchEditProjectSettingsDetail(
     projectId: number,
     body: Omit<z.infer<typeof editProjectSettingsDetail>, "userId">,
-    logo?: File,
+    pathname: string,
+    formData: FormData,
 ): ResponseJson<FetchEditProjectSettingsDetail> {
     try {
-        const formData = new FormData();
-        if (logo) {
-            formData.append("projectLogo", logo);
+        // by default, projectLogo is already in the formData if it exists
+        console.log("formData", formData.get("projectLogo"));
+        const logo = formData.get("projectLogo");
+        if (logo instanceof File && logo.size === 0) {
+            formData.delete("projectLogo");
         }
+
         formData.append("projectName", body.projectName);
         formData.append("projectDescription", body.projectDescription ?? "");
         formData.append(
@@ -50,10 +47,7 @@ export async function fetchEditProjectSettingsDetail(
             },
         );
 
-        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
-            "OneAssociatedProject_C_Tag",
-            "getProjects_C_Tag",
-        );
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -63,6 +57,7 @@ export async function fetchEditProjectSettingsDetail(
 export async function fetchEditProjectSettingsMembers(
     projectId: number,
     membersData: z.infer<typeof editProjectSettingsMembers>,
+    pathname: string,
 ): ResponseJson<FetchEditProjectSettingsMembers> {
     try {
         const sessionId = await getSessionCookie();
@@ -77,10 +72,7 @@ export async function fetchEditProjectSettingsMembers(
             },
         );
 
-        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
-            "OneAssociatedProject_C_Tag",
-            "getProjects_C_Tag",
-        );
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -90,6 +82,7 @@ export async function fetchEditProjectSettingsMembers(
 export async function fetchEditProjectSettingsPartners(
     projectId: number,
     partnersData: z.infer<typeof editProjectSettingsPartners>,
+    pathname: string,
 ): ResponseJson<FetchEditProjectSettingsPartners> {
     try {
         const sessionId = await getSessionCookie();
@@ -104,10 +97,7 @@ export async function fetchEditProjectSettingsPartners(
             },
         );
 
-        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
-            "OneAssociatedProject_C_Tag",
-            "getProjects_C_Tag",
-        );
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -116,21 +106,14 @@ export async function fetchEditProjectSettingsPartners(
 
 export async function fetchEditProjectSettingsFiles(
     projectId: number,
-    filesData: z.infer<typeof editProjectSettingsFiles>,
+    formData: FormData,
+    pathname: string,
 ): ResponseJson<FetchEditProjectSettingsFiles> {
     try {
-        const formData = new FormData();
-        if (filesData.fileToUpload) {
-            for (const file of filesData.fileToUpload) {
-                formData.append("fileToUpload", file);
-            }
-        }
-
-        if (filesData.fileToRemove) {
-            for (const filename of filesData.fileToRemove) {
-                formData.append("fileToRemove", filename);
-            }
-        }
+        // assuming formData is appended
+        // it requires: 
+        // - fileToRemove: formData.getAll("fileToRemove") as string[]
+        // - fileToUpload: formData.getAll("fileToUpload") as File[]
 
         const sessionId = await getSessionCookie();
         const response = await fetch(
@@ -144,10 +127,7 @@ export async function fetchEditProjectSettingsFiles(
             },
         );
 
-        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
-            "OneAssociatedProject_C_Tag",
-            "getProjects_C_Tag",
-        );
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

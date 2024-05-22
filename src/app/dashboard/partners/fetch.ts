@@ -1,21 +1,16 @@
+"use server"
 import { FetchDeletePartner } from "@/app/api/internal/partner/[partner_id]/delete/route";
 import { FetchCreatePartner } from "@/app/api/internal/partner/create/route";
 import { FetchPartnersData } from "@/app/api/internal/partner/route";
 import { createPartnerFormSchema } from "@/app/api/internal/partner/schema";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
-import {
-    getBaseUrl,
-    getSessionCookie,
-    revalidateTags,
-} from "@/lib/server_utils";
-import { GetPartners_C_Tag } from "@/repositories/partner";
+import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 export async function fetchPartners(): ResponseJson<FetchPartnersData> {
     try {
         const sessionId = await getSessionCookie();
-        // even tho we don't cache, we tag it anyway incase we want to cache or we want to update ui without having to refresh the page
-        const cacheTag: GetPartners_C_Tag = "getPartners_C";
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/partner`,
             {
@@ -23,12 +18,10 @@ export async function fetchPartners(): ResponseJson<FetchPartnersData> {
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                next: {
-                    tags: [cacheTag],
-                },
                 cache: "no-cache",
             },
         );
+
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -37,6 +30,7 @@ export async function fetchPartners(): ResponseJson<FetchPartnersData> {
 
 export async function fetchCreatePartner(
     body: Omit<z.infer<typeof createPartnerFormSchema>, "password">,
+    pathname: string,
 ): ResponseJson<FetchCreatePartner> {
     try {
         const sessionId = await getSessionCookie();
@@ -50,7 +44,8 @@ export async function fetchCreatePartner(
                 body: JSON.stringify(body),
             },
         );
-        await revalidateTags<GetPartners_C_Tag>("getPartners_C");
+
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -59,6 +54,7 @@ export async function fetchCreatePartner(
 
 export async function fetchDeletePartnerById(
     partnerId: string,
+    pathname: string,
 ): ResponseJson<FetchDeletePartner> {
     try {
         const sessionId = await getSessionCookie();
@@ -71,7 +67,8 @@ export async function fetchDeletePartnerById(
                 },
             },
         );
-        await revalidateTags<GetPartners_C_Tag>("getPartners_C");
+
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

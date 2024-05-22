@@ -20,6 +20,7 @@ import { z } from "zod";
 import { fetchEditProjectSettingsPartners } from "./fetch";
 import Selector from "@/components/Selector";
 import FormErrorMessages from "@/components/FormErrorMessages";
+import { usePathname } from "next/navigation";
 
 export type PartnerList = {
     partner: typeof users.$inferSelect;
@@ -38,6 +39,7 @@ export default function ProjectPartner({
         throw new Error("Project not found");
     }
 
+    const pathname = usePathname();
     const {
         showSelectorOverlay,
         openSelector,
@@ -129,10 +131,14 @@ export default function ProjectPartner({
                 ),
         );
 
-        const response = await fetchEditProjectSettingsPartners(project.id, {
-            partnersToAdd,
-            partnersToDelete: partnersToDelete.map((partner) => partner.id),
-        });
+        const response = await fetchEditProjectSettingsPartners(
+            project.id,
+            {
+                partnersToAdd,
+                partnersToDelete: partnersToDelete.map((partner) => partner.id),
+            },
+            pathname,
+        );
         setResult(response);
     }
 

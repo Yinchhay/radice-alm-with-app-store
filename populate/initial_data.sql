@@ -1,7 +1,7 @@
 -- Further change to the id must also update the `src/types/IAM.ts` file
 INSERT INTO permissions (id, name, description) VALUES 
 (1, 'Create users', 'Permission to create users'),
-(2, 'Edit users', 'Permission to edit users'),
+-- (2, 'Edit users', 'Permission to edit users'),
 (3, 'Delete users', 'Permission to delete users'),
 (4, 'Create categories', 'Permission to create categories'),
 (5, 'Edit categories', 'Permission to edit categories'),

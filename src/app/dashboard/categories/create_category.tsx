@@ -8,8 +8,11 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconPlus } from "@tabler/icons-react";
 import { fetchCreateCategory } from "./fetch";
 import { useFormStatus } from "react-dom";
+import { usePathname } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export function CreateCategoryOverlay() {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateCategory>>>();
@@ -50,7 +53,7 @@ export function CreateCategoryOverlay() {
                                         description: formData.get(
                                             "description",
                                         ) as string,
-                                    });
+                                    }, pathname);
                                     setResult(result);
                                 }}
                             >

@@ -8,12 +8,14 @@ import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { IconX } from "@tabler/icons-react";
 import { fetchDeletePartnerById } from "./fetch";
+import { usePathname } from "next/navigation";
 
 export function DeletePartnerOverlay({
     partner,
 }: {
     partner: typeof users.$inferSelect;
 }) {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeletePartnerById>>>();
@@ -59,6 +61,7 @@ export function DeletePartnerOverlay({
                             action={async (formData: FormData) => {
                                 const result = await fetchDeletePartnerById(
                                     partner.id,
+                                    pathname,
                                 );
                                 setResult(result);
                             }}

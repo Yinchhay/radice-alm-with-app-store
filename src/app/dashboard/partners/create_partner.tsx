@@ -8,8 +8,10 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconPlus } from "@tabler/icons-react";
 import { useFormStatus } from "react-dom";
 import { fetchCreatePartner } from "./fetch";
+import { usePathname } from "next/navigation";
 
 export function CreatePartnerOverlay() {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreatePartner>>>();
@@ -50,7 +52,7 @@ export function CreatePartnerOverlay() {
                                     email: formData.get("email") as string,
                                     firstName: formData.get("firstName") as string,
                                     lastName: formData.get("lastName") as string,
-                                });
+                                }, pathname);
                                 setResult(result);
                             }}
                         >

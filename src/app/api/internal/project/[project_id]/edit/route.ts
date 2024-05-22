@@ -8,13 +8,12 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import { HttpStatusCode } from "@/types/http";
-import { NextRequest } from "next/server";
 import { z } from "zod";
 import {
     editProjectContentById,
     getOneAssociatedProject,
 } from "@/repositories/project";
-import { ProjectRole, checkProjectRole } from "@/lib/project";
+import { checkProjectRole } from "@/lib/project";
 import { editProjectContentSchema } from "../schema";
 
 const successMessage = "successMessage";
@@ -52,7 +51,9 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        const project = await getOneAssociatedProject(Number(params.project_id));
+        const project = await getOneAssociatedProject(
+            Number(params.project_id),
+        );
         if (!project) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -60,11 +61,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
-        const { projectRole, canEdit } = checkProjectRole(
-            user.id,
-            project,
-            user.type,
-        );
+        const { canEdit } = checkProjectRole(user.id, project, user.type);
         if (!canEdit) {
             return buildErrorResponse(
                 unsuccessMessage,

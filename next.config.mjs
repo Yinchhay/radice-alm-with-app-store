@@ -13,6 +13,8 @@ const nextConfig = {
         // TODO: remove this when all type errors are fixed
         // ignoreBuildErrors: true,
     },
+    // If using Dockerfile, uncomment this
+    // output: "standalone",
 };
 
 export default nextConfig;

@@ -1,4 +1,4 @@
-import { formatZodError, generateAndFormatZodError } from "@/lib/form";
+import { formatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
     buildErrorResponse,
@@ -7,7 +7,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { createPartner, GetPartners_C_Tag } from "@/repositories/partner";
+import { createPartner } from "@/repositories/partner";
 
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
@@ -15,8 +15,6 @@ import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { createPartnerFormSchema } from "../schema";
 import { generatePassword } from "@/lib/utils";
-import { revalidateTags } from "@/lib/server_utils";
-import { GetProjects_C_Tag, OneAssociatedProject_C_Tag } from "@/repositories/project";
 
 export type FetchCreatePartner = {
     email: string;
@@ -60,9 +58,6 @@ export async function POST(request: Request) {
             // TODO: send email to partner's email in production
         }
 
-        await revalidateTags<
-            GetPartners_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag
-        >("getPartners_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchCreatePartner>(successMessage, {
             email: body.email,
             password: body.password,

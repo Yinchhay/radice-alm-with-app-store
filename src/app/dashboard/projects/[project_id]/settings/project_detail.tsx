@@ -16,6 +16,7 @@ import { fetchEditProjectSettingsDetail } from "./fetch";
 import { categories as categoriesSchema } from "@/drizzle/schema";
 import { fileToUrl } from "@/lib/file";
 import { useSelector } from "../../../../../hooks/useSelector";
+import { usePathname } from "next/navigation";
 
 export default function ProjectDetail({
     project,
@@ -29,6 +30,7 @@ export default function ProjectDetail({
     if (!project) {
         throw new Error("Project not found");
     }
+    const pathname = usePathname();
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchEditProjectSettingsDetail>>>();
 
@@ -84,7 +86,8 @@ export default function ProjectDetail({
                                 .map((cate) => Number(cate.value)),
                             logoUrl: "",
                         },
-                        fileInputRef.current?.files?.[0],
+                        pathname,
+                        formData,
                     );
                     setResult(result);
                 }}

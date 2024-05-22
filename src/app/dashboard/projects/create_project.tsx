@@ -8,8 +8,10 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconPlus } from "@tabler/icons-react";
 import { fetchCreateProject } from "./fetch";
 import { useFormStatus } from "react-dom";
+import { usePathname } from "next/navigation";
 
 export function CreateProjectOverlay() {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateProject>>>();
@@ -47,7 +49,7 @@ export function CreateProjectOverlay() {
                             action={async (formData: FormData) => {
                                 const result = await fetchCreateProject({
                                     name: formData.get("name") as string,
-                                });
+                                }, pathname);
                                 setResult(result);
                             }}
                         >

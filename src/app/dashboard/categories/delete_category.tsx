@@ -8,12 +8,14 @@ import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { IconX } from "@tabler/icons-react";
 import { fetchDeleteCategoryById } from "./fetch";
+import { usePathname } from "next/navigation";
 
 export function DeleteCategoryOverlay({
     category,
 }: {
     category: typeof categories.$inferSelect;
 }) {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteCategoryById>>>();
@@ -59,6 +61,7 @@ export function DeleteCategoryOverlay({
                             action={async (formData: FormData) => {
                                 const result = await fetchDeleteCategoryById(
                                     category.id,
+                                    pathname,
                                 );
                                 setResult(result);
                             }}

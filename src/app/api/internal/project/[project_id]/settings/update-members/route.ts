@@ -12,11 +12,8 @@ import { z } from "zod";
 import {
     editProjectSettingMembersById,
     getOneAssociatedProject,
-    GetProjects_C_Tag,
-    OneAssociatedProject_C_Tag,
 } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
-import { revalidateTags } from "@/lib/server_utils";
 import { editProjectSettingsMembers } from "../../schema";
 
 const successMessage = "Successfully updated project settings members";
@@ -74,11 +71,6 @@ export async function PATCH(request: Request, { params }: Params) {
         }
 
         await editProjectSettingMembersById(Number(params.project_id), body);
-
-        await revalidateTags<OneAssociatedProject_C_Tag | GetProjects_C_Tag>(
-            "OneAssociatedProject_C_Tag",
-            "getProjects_C_Tag",
-        );
 
         return buildSuccessResponse<FetchEditProjectSettingsMembers>(
             successMessage,

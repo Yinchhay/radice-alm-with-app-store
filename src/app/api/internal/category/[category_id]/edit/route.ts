@@ -7,18 +7,13 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { revalidateTags } from "@/lib/server_utils";
-import { editCategoryById, GetCategories_C_Tag } from "@/repositories/category";
+import { editCategoryById } from "@/repositories/category";
 
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { editCategoryFormSchema } from "../../schema";
-import {
-    GetProjects_C_Tag,
-    OneAssociatedProject_C_Tag,
-} from "@/repositories/project";
 
 export type FetchEditCategory = Record<string, never>;
 
@@ -60,9 +55,6 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        await revalidateTags<
-            GetCategories_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag
-        >("getCategories_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchEditCategory>(successMessage, {});
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);

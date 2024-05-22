@@ -48,7 +48,9 @@ export type ResponseJson<T, E = unknown> = Promise<
 export const fetchErrorSomethingWentWrong: ErrorResponse<{}> = {
     success: false,
     message: ErrorMessage.SomethingWentWrong,
-    errors: {},
+    errors: {
+        unknown: ErrorMessage.SomethingWentWrong,
+    },
 };
 
 // Frequently used error responses

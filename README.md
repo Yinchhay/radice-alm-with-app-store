@@ -22,6 +22,14 @@ pnpm dev
 bun dev
 ```
 
+## Using Docker for Deployment
+
+1. [Install Docker](https://docs.docker.com/get-docker/) on your machine.
+1. Build your container: `docker build -t radi-docker .`.
+1. Run your container: `docker run -p 3000:3000 radi-docker`.
+
+You can view your images created with `docker images`.
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Database commands
