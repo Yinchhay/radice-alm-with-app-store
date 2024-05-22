@@ -9,11 +9,9 @@ import Button from "@/components/Button";
 import InputField from "@/components/InputField";
 import { RoleUsersOverlay } from "./users";
 import FormErrorMessages from "@/components/FormErrorMessages";
+import { PermissionNames } from "@/lib/utils";
 
-import {
-    fetchRoleById,
-    fetchEditRoleById,
-} from "../../fetch";
+import { fetchRoleById, fetchEditRoleById } from "../../fetch";
 
 type Params = { params: { role_id: number } };
 
@@ -26,7 +24,7 @@ export default function EditRole({ params }: Params) {
     useEffect(() => {
         fetchRoleById(Number(params.role_id)).then((roleInfo) => {
             setRoleInfo(roleInfo);
-            setIsLoading(false); // Set loading to false after fetch completes
+            setIsLoading(false);
         });
     }, [Number(params.role_id)]);
 
@@ -34,24 +32,10 @@ export default function EditRole({ params }: Params) {
         throw new Error(roleInfo.message);
     }
 
-    const permissions = [
-        { id: 1, name: "Create Users" },
-        { id: 2, name: "Edit Users" },
-        { id: 3, name: "Delete Users" },
-        { id: 4, name: "Create Categories" },
-        { id: 5, name: "Edit Categories" },
-        { id: 6, name: "Delete Categories" },
-        { id: 7, name: "Create Roles" },
-        { id: 8, name: "Edit Roles" },
-        { id: 9, name: "Delete Roles" },
-        { id: 10, name: "Create Partners" },
-        // { id: 11, name: "Edit Partners" },
-        { id: 12, name: "Delete Partners" },
-        { id: 13, name: "Approve and Reject Application Forms" },
-        { id: 14, name: "Create Own Projects" },
-        { id: 15, name: "Change project status" },
-        { id: 16, name: "Delete project" },
-    ];
+    const permissions = [...PermissionNames.entries()].map(([id, name]) => ({
+        id: Number(id),
+        name,
+    }));
 
     const [currentRoleName, setCurrentRoleName] = useState<string>();
     const [currentRolePermissions, setCurrentRolePermissions] = useState<
@@ -84,15 +68,6 @@ export default function EditRole({ params }: Params) {
         setUsersRoleChanged(value);
         checkForChanges();
     };
-
-    const permissionStates = permissions.map((permission) => ({
-        id: permission.id,
-        name: permission.name,
-        defaultState: roleInfo?.data.role?.rolePermissions.some(
-            (rolePermission) =>
-                rolePermission.permission.name === permission.name,
-        ),
-    }));
 
     const handlePermissionToggle = (
         newState: boolean,
@@ -193,14 +168,16 @@ export default function EditRole({ params }: Params) {
                         {isLoading ? (
                             <p>Loading permissions...</p>
                         ) : (
-                            permissionStates.map((permission) => (
+                            permissions.map((permission) => (
                                 <div
                                     className="flex justify-between bg-gray-500 p-2 gap-5 my-1 rounded-md text-white"
                                     key={permission.id}
                                 >
                                     <p>{permission.name}</p>
                                     <RolePermissionToggleSwitch
-                                        defaultState={permission.defaultState}
+                                        defaultState={currentRolePermissions.some(
+                                            (p) => p.id === permission.id,
+                                        )}
                                         onChange={(newState) =>
                                             handlePermissionToggle(
                                                 newState,
@@ -246,7 +223,13 @@ export default function EditRole({ params }: Params) {
     );
 }
 
-function ResetBtn({ changes = true, reset }: { changes?: boolean, reset: () => void }) {
+function ResetBtn({
+    changes = true,
+    reset,
+}: {
+    changes?: boolean;
+    reset: () => void;
+}) {
     const formStatus = useFormStatus();
     return (
         <Button

@@ -2,7 +2,7 @@ import { Permissions } from "@/types/IAM";
 
 export const PermissionNames = new Map<number, string>([
     [Permissions.CREATE_USERS, "Create users"],
-    [Permissions.EDIT_USERS, "Edit users"],
+    // [Permissions.EDIT_USERS, "Edit users"],
     [Permissions.DELETE_USERS, "Delete users"],
     [Permissions.CREATE_CATEGORIES, "Create categories"],
     [Permissions.EDIT_CATEGORIES, "Edit categories"],
