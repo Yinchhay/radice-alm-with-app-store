@@ -6,7 +6,6 @@ import { redirect } from "next/navigation";
 
 const requiredPermissions = new Set([
     Permissions.CREATE_USERS,
-    Permissions.EDIT_USERS,
     Permissions.DELETE_USERS,
 ]);
 

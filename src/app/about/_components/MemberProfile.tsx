@@ -13,7 +13,7 @@ export default function MemberProfile({
     member,
     variant,
 }: {
-    member: MemberProfileType;
+    member: any;
     variant: string;
 }) {
     switch (variant) {
