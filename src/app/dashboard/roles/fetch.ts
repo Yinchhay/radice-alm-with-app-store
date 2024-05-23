@@ -24,6 +24,7 @@ import { FetchEditRole } from "@/app/api/internal/role/[role_id]/edit/route";
 import { FetchUsersInRole } from "@/app/api/internal/role/[role_id]/users/route";
 import { FetchUsersNotInRole } from "@/app/api/internal/role/[role_id]/users-not-in-role/route";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
+import { revalidatePath } from "next/cache";
 
 export async function fetchRoles(
     page: number = 1,
@@ -79,6 +80,7 @@ export async function fetchRoleById(
 
 export async function fetchCreateRole(
     body: z.infer<typeof createRoleFormSchema>,
+    pathname: string,
 ): ResponseJson<FetchCreateRole> {
     try {
         const sessionId = await getSessionCookie();
@@ -92,7 +94,7 @@ export async function fetchCreateRole(
                 body: JSON.stringify(body),
             },
         );
-        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -101,6 +103,7 @@ export async function fetchCreateRole(
 
 export async function fetchDeleteRoleById(
     roleId: number,
+    pathname: string,
 ): ResponseJson<FetchDeleteRole> {
     try {
         const sessionId = await getSessionCookie();
@@ -113,7 +116,7 @@ export async function fetchDeleteRoleById(
                 },
             },
         );
-        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
+        revalidatePath(pathname);
         await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>("getUserRolesAndRolePermissions_C");
         return await response.json();
     } catch (error: any) {
@@ -175,6 +178,7 @@ export async function fetchUsersNotInRole(
 
 export async function fetchEditRoleById(
     body: z.infer<typeof editRoleByIdSchema>,
+    pathname: string,
 ): ResponseJson<FetchEditRole> {
     try {
         const sessionId = await getSessionCookie();
@@ -188,30 +192,8 @@ export async function fetchEditRoleById(
                 body: JSON.stringify(body),
             },
         );
-        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
+        revalidatePath(pathname);
         await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>("getUserRolesAndRolePermissions_C");
-        return await response.json();
-    } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
-    }
-}
-
-export async function fetchAddUserToRole(
-    body: z.infer<typeof addUserToRoleFormSchema>,
-): ResponseJson<FetchRoleData> {
-    try {
-        const sessionId = await getSessionCookie();
-        const response = await fetch(
-            `${await getBaseUrl()}/api/internal/role/user/add`,
-            {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${sessionId}`,
-                },
-                body: JSON.stringify(body),
-            },
-        );
-        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

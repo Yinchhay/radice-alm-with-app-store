@@ -1,9 +1,8 @@
-// TODO: Optimize code
-
 "use client";
 import { Suspense } from "react";
 import { useFormStatus } from "react-dom";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import Button from "@/components/Button";
 import InputField from "@/components/InputField";
@@ -16,6 +15,7 @@ import { fetchRoleById, fetchEditRoleById } from "../../fetch";
 type Params = { params: { role_id: number } };
 
 export default function EditRole({ params }: Params) {
+    const pathname = usePathname();
     const [roleInfo, setRoleInfo] =
         useState<Awaited<ReturnType<typeof fetchRoleById>>>();
 
@@ -146,7 +146,7 @@ export default function EditRole({ params }: Params) {
                             permissions: currentRolePermissions,
                             name: currentRoleName as string,
                             roleId: params.role_id,
-                        });
+                        }, pathname);
                         setResult(result);
                     }}
                 >

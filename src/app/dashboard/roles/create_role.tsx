@@ -2,14 +2,18 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Overlay from "@/components/Overlay";
-import { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconPlus } from "@tabler/icons-react";
-import { fetchCreateRole } from "./fetch";
+
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useFormStatus } from "react-dom";
 
+import { fetchCreateRole } from "./fetch";
+
 export function CreateRoleOverlay() {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateRole>>>();
@@ -48,7 +52,7 @@ export function CreateRoleOverlay() {
                                 action={async (formData: FormData) => {
                                     const result = await fetchCreateRole({
                                         name: formData.get("name") as string,
-                                    });
+                                    }, pathname);
                                     setResult(result);
                                 }}
                             >

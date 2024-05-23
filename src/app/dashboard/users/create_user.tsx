@@ -2,15 +2,19 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Overlay from "@/components/Overlay";
-import { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconPlus } from "@tabler/icons-react";
-import { fetchCreateUser } from "./fetch";
-import { useFormStatus } from "react-dom";
 import { generatePassword } from "@/lib/utils";
 
+import { useEffect, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { usePathname } from "next/navigation";
+
+import { fetchCreateUser } from "./fetch";
+
 export function CreateUserOverlay() {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateUser>>>();
@@ -59,7 +63,7 @@ export function CreateUserOverlay() {
                                         ) as string,
                                         email: formData.get("email") as string,
                                         password: generatedPassword,
-                                    });
+                                    }, pathname);
                                     console.log(generatedPassword)
                                     setResult(result);
                                 }}

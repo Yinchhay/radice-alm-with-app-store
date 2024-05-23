@@ -4,9 +4,12 @@ import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
 import { roles } from "@/drizzle/schema";
+import { IconX } from "@tabler/icons-react";
+
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { IconX } from "@tabler/icons-react";
+import { usePathname } from "next/navigation";
+
 import { fetchDeleteRoleById } from "./fetch";
 
 export function DeleteRoleOverlay({
@@ -14,6 +17,7 @@ export function DeleteRoleOverlay({
 }: {
     role: typeof roles.$inferSelect;
 }) {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteRoleById>>>();
@@ -59,6 +63,7 @@ export function DeleteRoleOverlay({
                             action={async (formData: FormData) => {
                                 const result = await fetchDeleteRoleById(
                                     role.id,
+                                    pathname
                                 );
                                 setResult(result);
                             }}

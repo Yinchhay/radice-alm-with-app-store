@@ -4,9 +4,12 @@ import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
 import { users } from "@/drizzle/schema";
+import { IconX } from "@tabler/icons-react";
+
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { IconX } from "@tabler/icons-react";
+import { usePathname } from "next/navigation";
+
 import { fetchDeleteUserById } from "./fetch";
 
 export function DeleteUserOverlay({
@@ -14,6 +17,7 @@ export function DeleteUserOverlay({
 }: {
     user: typeof users.$inferSelect;
 }) {
+    const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteUserById>>>();
@@ -61,6 +65,7 @@ export function DeleteUserOverlay({
                             action={async () => {
                                 const result = await fetchDeleteUserById(
                                     user.id,
+                                    pathname
                                 );
                                 setResult(result);
                             }}

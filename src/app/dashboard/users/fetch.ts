@@ -14,6 +14,7 @@ import { FetchDeleteUser } from "@/app/api/internal/users/[user_id]/delete/route
 import { z } from "zod";
 import { createUserFormSchema } from "@/app/api/internal/users/schema";
 import { FetchCreateUser } from "@/app/api/internal/users/create/route";
+import { revalidatePath } from "next/cache";
 
 export async function fetchUsers(): ResponseJson<FetchUsersData> {
     try {
@@ -41,6 +42,7 @@ export async function fetchUsers(): ResponseJson<FetchUsersData> {
 
 export async function fetchCreateUser(
     body: z.infer<typeof createUserFormSchema>,
+    pathname: string,
 ): ResponseJson<FetchCreateUser> {
     try {
         const sessionId = await getSessionCookie();
@@ -54,7 +56,7 @@ export async function fetchCreateUser(
                 body: JSON.stringify(body),
             },
         );
-        await revalidateTags<GetUsers_C_Tag>("getUsers_C");
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
@@ -63,6 +65,7 @@ export async function fetchCreateUser(
 
 export async function fetchDeleteUserById(
     userId: string,
+    pathname: string,
 ): ResponseJson<FetchDeleteUser> {
     try {
         const sessionId = await getSessionCookie();
@@ -75,7 +78,7 @@ export async function fetchDeleteUserById(
                 },
             },
         );
-        await revalidateTags<GetUsers_C_Tag>("getUsers_C");
+        revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
