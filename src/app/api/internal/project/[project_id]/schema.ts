@@ -93,3 +93,21 @@ export const editProjectSettingsFiles = z.object({
     fileToRemove: z.array(z.string()).optional(),
     fileToUpload: fileAnySchema.optional(),
 });
+
+export const editProjectSettingsLinks = z.object({
+    links: z.array(
+        z.object({
+            title: z.string().min(1, {
+                message: "Title is required",
+            }),
+            link: z
+                .string()
+                .min(1, {
+                    message: "Link is required",
+                })
+                .url({
+                    message: "Invalid URL",
+                }),
+        }),
+    ),
+});

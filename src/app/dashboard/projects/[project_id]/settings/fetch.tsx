@@ -13,6 +13,8 @@ import { FetchEditProjectSettingsMembers } from "@/app/api/internal/project/[pro
 import { FetchEditProjectSettingsPartners } from "@/app/api/internal/project/[project_id]/settings/update-partners/route";
 import { FetchEditProjectSettingsFiles } from "@/app/api/internal/project/[project_id]/settings/update-files/route";
 import { revalidatePath } from "next/cache";
+import { ProjectLink } from "@/drizzle/schema";
+import { FetchEditProjectSettingsLinks } from "@/app/api/internal/project/[project_id]/settings/update-links/route";
 
 export async function fetchEditProjectSettingsDetail(
     projectId: number,
@@ -111,7 +113,7 @@ export async function fetchEditProjectSettingsFiles(
 ): ResponseJson<FetchEditProjectSettingsFiles> {
     try {
         // assuming formData is appended
-        // it requires: 
+        // it requires:
         // - fileToRemove: formData.getAll("fileToRemove") as string[]
         // - fileToUpload: formData.getAll("fileToUpload") as File[]
 
@@ -124,6 +126,33 @@ export async function fetchEditProjectSettingsFiles(
                     Authorization: `Bearer ${sessionId}`,
                 },
                 body: formData,
+            },
+        );
+
+        revalidatePath(pathname);
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchEditProjectSettingsLinks(
+    projectId: number,
+    links: ProjectLink[],
+    pathname: string,
+): ResponseJson<FetchEditProjectSettingsLinks> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/update-links`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify({
+                    links,
+                }),
             },
         );
 

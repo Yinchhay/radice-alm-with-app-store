@@ -10,17 +10,17 @@ import {
 import { HttpStatusCode } from "@/types/http";
 import { z } from "zod";
 import {
-    editProjectSettingMembersById,
+    updateProjectLinks,
     getOneAssociatedProject,
 } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
-import { editProjectSettingsMembers } from "../../schema";
+import { editProjectSettingsLinks } from "../../schema";
 
-const successMessage = "Successfully updated project settings members";
-const unsuccessMessage = "Failed to update project settings members";
+const successMessage = "Successfully updated project settings links";
+const unsuccessMessage = "Failed to update project settings links";
 
 type Params = { params: { project_id: string } };
-export type FetchEditProjectSettingsMembers = Record<string, unknown>;
+export type FetchEditProjectSettingsLinks = Record<string, unknown>;
 
 export async function PATCH(request: Request, { params }: Params) {
     try {
@@ -34,9 +34,9 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editProjectSettingsMembers> =
+        const body: z.infer<typeof editProjectSettingsLinks> =
             await request.json();
-        const validationResult = editProjectSettingsMembers.safeParse(body);
+        const validationResult = editProjectSettingsLinks.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -70,9 +70,9 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        await editProjectSettingMembersById(Number(params.project_id), body);
+        await updateProjectLinks(Number(params.project_id), body.links);
 
-        return buildSuccessResponse<FetchEditProjectSettingsMembers>(
+        return buildSuccessResponse<FetchEditProjectSettingsLinks>(
             successMessage,
             {},
         );

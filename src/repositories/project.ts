@@ -5,6 +5,7 @@ import {
 import { db } from "@/drizzle/db";
 import {
     projectCategories,
+    ProjectLink,
     projectMembers,
     projectPartners,
     projects,
@@ -301,5 +302,15 @@ export async function updateProjectPublicStatus(
     return await db
         .update(projects)
         .set({ isPublic: isPublic })
+        .where(eq(projects.id, projectId));
+}
+
+export async function updateProjectLinks(
+    projectId: number,
+    links: ProjectLink[],
+) {
+    return await db
+        .update(projects)
+        .set({ links: links })
         .where(eq(projects.id, projectId));
 }

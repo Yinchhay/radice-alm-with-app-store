@@ -302,6 +302,10 @@ export const categoriesRelations = relations(categories, ({ many }) => ({
     projectCategories: many(projectCategories),
 }));
 
+export type ProjectLink = {
+    link: string;
+    title: string;
+};
 export const projects = mysqlTable("projects", {
     id: int("id").primaryKey().autoincrement(),
     name: varchar("name", {
@@ -317,7 +321,7 @@ export const projects = mysqlTable("projects", {
     }),
     isPublic: boolean("is_public").default(false),
     projectContent: json("project_content"),
-    links: json("links"),
+    links: json("links").$type<ProjectLink[]>(),
     pipelineStatus: json("pipeline_status"),
     userId: varchar("user_id", {
         length: 255,

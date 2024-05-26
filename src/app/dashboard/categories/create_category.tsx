@@ -9,7 +9,6 @@ import { IconPlus } from "@tabler/icons-react";
 import { fetchCreateCategory } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 export function CreateCategoryOverlay() {
     const pathname = usePathname();
