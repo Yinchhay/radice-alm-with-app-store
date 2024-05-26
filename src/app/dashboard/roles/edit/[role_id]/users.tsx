@@ -154,7 +154,7 @@ export function RoleUsersOverlay({
 
         if (isSubmitted) {
             setInitialUsersInRole(currentUsersInRole);
-            setInitialUsersInRole(currentUsersNotInRole);
+            setInitialUsersNotInRole(currentUsersNotInRole);
             setUsersRoleChanged(false);
             doneSubmission(false);
         }
