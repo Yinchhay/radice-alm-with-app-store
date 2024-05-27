@@ -8,7 +8,17 @@ import { revalidateTag } from "next/cache";
 import { lucia } from "@/auth/lucia";
 
 export async function getBaseUrl(): Promise<string> {
-    const protocol = headers().get("x-forwarded-proto") || "http";
+    // For the protocol, we will check based on env HTTP_PROTOCOL, if not check by x-forwarded-proto, if not check by NODE_ENV (production or not), if not default to http
+    let protocol = process.env.HTTP_PROTOCOL;
+
+    if (!protocol) {
+        protocol =
+            headers().get("x-forwarded-proto") ||
+            process.env.NODE_ENV === "production"
+                ? "https"
+                : "http";
+    }
+
     return `${protocol}://${headers().get("x-forwarded-host")}` || "";
 }
 

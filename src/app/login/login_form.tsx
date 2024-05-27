@@ -31,11 +31,11 @@ export default function LoginForm() {
             >
                 <div>
                     <label htmlFor="email">Email</label>
-                    <InputField name="email" id="email" />
+                    <InputField name="email" id="email" required/>
                 </div>
                 <div>
                     <label htmlFor="password">Password</label>
-                    <InputField type="password" name="password" id="password" />
+                    <InputField type="password" name="password" id="password" required/>
                 </div>
                 {!result?.success && result?.errors && (
                     <FormErrorMessages errors={result?.errors} />

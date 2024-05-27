@@ -10,6 +10,21 @@ import { getSessionCookie } from "@/lib/server_utils";
 
 const adapter = new DrizzleMySQLAdapter(db, sessions, users);
 
+// Important: set secure cookie to true when using HTTPS
+// In production, if protocol doesn't match, we might not be able to get cookie which mean we cannot get session
+// Example: assume we host built app on digital ocean. assume our website is http://example.com, if we use secure cooke = true, we cannot get session
+function secureCookie(): boolean {
+    const protocol = process.env.HTTP_PROTOCOL;
+
+    if (protocol) {
+        return protocol === "https";
+    }
+
+    // Be sure that in prod the protocol is https because this is the fallback for secure cookie
+    // which check if it's in production, if it is, we expect protocol to be https
+    return process.env.NODE_ENV === "production";
+}
+
 export const lucia = new Lucia(adapter, {
     sessionCookie: {
         // this sets cookies with super long expiration
@@ -17,7 +32,7 @@ export const lucia = new Lucia(adapter, {
         expires: false, // session cookies have very long lifespan (2 years)
         attributes: {
             // set to `true` when using HTTPS
-            secure: process.env.NODE_ENV === "production",
+            secure: secureCookie(),
         },
     },
     sessionExpiresIn: new TimeSpan(2, "w"),

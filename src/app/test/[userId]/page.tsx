@@ -6,6 +6,7 @@ import { GetUserById_C_Tag, getUserById_C } from "@/repositories/users";
 import { Button } from "./btn";
 import { Metadata } from "next";
 import { getBaseUrl, revalidateTags } from "@/lib/server_utils";
+import { getAuthUser } from "@/auth/lucia";
 
 // dynamic metadata
 export async function generateMetadata({
@@ -25,6 +26,7 @@ export default async function TestPage({
     params: { userId: string };
 }) {
     const user = await getUserById_C(params.userId);
+    const authUser = await getAuthUser();
 
     async function revalidateUserById() {
         "use server";
@@ -38,6 +40,7 @@ export default async function TestPage({
         <div>
             <h1>Server url {getBaseUrl()}</h1>
             <h1>User name: {user?.firstName}</h1>
+            <h1>Auth user: {authUser?.firstName}</h1>
             <h1>Test Page</h1>
             <p>
                 This is a test page. You can edit this page by opening{" dd"}
