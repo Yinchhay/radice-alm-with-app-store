@@ -8,9 +8,9 @@ import Button from "@/components/Button";
 import InputField from "@/components/InputField";
 import { RoleUsersOverlay } from "./users";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { PermissionNames } from "@/lib/utils";
 
 import { fetchRoleById, fetchEditRoleById } from "../../fetch";
+import { PermissionNames } from "@/lib/client_IAM";
 
 type Params = { params: { role_id: number } };
 

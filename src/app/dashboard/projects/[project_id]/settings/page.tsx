@@ -2,8 +2,6 @@ import { getAuthUser } from "@/auth/lucia";
 import { fetchOneAssociatedProject } from "../builder/fetch";
 import ProjectDetail from "./project_detail";
 import { checkProjectRole, ProjectRole } from "@/lib/project";
-import { revalidateTags } from "@/lib/server_utils";
-import { OneAssociatedProject_C_Tag } from "@/repositories/project";
 import ProjectMember from "./project_member";
 import ProjectPartner from "./project_partner";
 import { ProjectPipeline } from "./project_pipeline";
@@ -16,7 +14,6 @@ type Params = {
 };
 
 export default async function ProjectSettings({ params }: { params: Params }) {
-    // await revalidateTags<OneAssociatedProject_C_Tag>("OneAssociatedProject_C_Tag");
     const user = await getAuthUser();
     if (!user) {
         throw new Error("Unauthorized to access this page");

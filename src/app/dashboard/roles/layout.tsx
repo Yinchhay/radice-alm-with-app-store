@@ -1,5 +1,5 @@
 import { getAuthUser } from "@/auth/lucia";
-import { hasPermission, routeRequiredPermissions } from "@/lib/IAM";
+import { hasPermission, RouteRequiredPermissions } from "@/lib/IAM";
 import { ErrorMessage } from "@/types/error";
 import { redirect } from "next/navigation";
 
@@ -15,7 +15,7 @@ export default async function ManageRolesLayout({
 
     const userPermission = await hasPermission(
         user.id,
-        routeRequiredPermissions.get("manageRoles")!,
+        RouteRequiredPermissions.get("manageRoles")!,
     );
     if (!userPermission.canAccess) {
         throw new Error(ErrorMessage.NoPermissionToThisPage);

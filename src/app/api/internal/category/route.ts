@@ -1,4 +1,4 @@
-import { checkBearerAndPermission, routeRequiredPermissions } from "@/lib/IAM";
+import { checkBearerAndPermission, RouteRequiredPermissions } from "@/lib/IAM";
 import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import {
     buildNoBearerTokenErrorResponse,
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(
                 request,
-                routeRequiredPermissions.get("manageCategories")!,
+                RouteRequiredPermissions.get("manageCategories")!,
             );
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();

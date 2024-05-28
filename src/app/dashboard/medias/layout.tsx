@@ -3,7 +3,7 @@ import { hasPermission, RouteRequiredPermissions } from "@/lib/IAM";
 import { ErrorMessage } from "@/types/error";
 import { redirect } from "next/navigation";
 
-export default async function ManageAllProjectsLayout({
+export default async function ManageMediasLayout({
     children,
 }: {
     children: React.ReactNode;
@@ -15,7 +15,7 @@ export default async function ManageAllProjectsLayout({
 
     const userPermission = await hasPermission(
         user.id,
-        RouteRequiredPermissions.get("manageAllProjects")!,
+        RouteRequiredPermissions.get("manageMedias")!,
     );
     if (!userPermission.canAccess) {
         throw new Error(ErrorMessage.NoPermissionToThisPage);

@@ -1,3 +1,10 @@
+/**
+ * Adding/Updating permissions should also check these variables, functions:
+ * /src/lib/IAM.ts:
+ *  - RouteRequiredPermissions
+ * /src/lib/client_IAM.ts:
+ *  - PermissionNames
+ */
 export enum Permissions {
     // Manage users
     CREATE_USERS = 1,
@@ -28,4 +35,9 @@ export enum Permissions {
     // Manage all projects
     CHANGE_PROJECT_STATUS = 15,
     DELETE_PROJECTS = 16,
+
+    // Manage media
+    CREATE_MEDIA = 17,
+    EDIT_MEDIA = 18,
+    DELETE_MEDIA = 19,
 }

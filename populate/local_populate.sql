@@ -18,6 +18,10 @@ INSERT INTO permissions (id, name, description) VALUES
 (14, 'Create own projects', 'Permission to create own projects');
 (15, 'Change project status', 'Permission to change project status'),
 (16, 'Delete project', "Permission to delete other user's project without having to be the owner");
+(17, 'Create media', 'Permission to create media'),
+(18, 'Edit media', 'Permission to edit media'),
+(19, 'Delete media', 'Permission to delete media'),
+
 
 -- roles
 INSERT INTO roles (name, description) VALUES ('admin', 'Admin role');

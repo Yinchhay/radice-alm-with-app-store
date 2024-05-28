@@ -1,5 +1,5 @@
 import { getAuthUser } from "@/auth/lucia";
-import { hasPermission, routeRequiredPermissions } from "@/lib/IAM";
+import { hasPermission, RouteRequiredPermissions } from "@/lib/IAM";
 import { ErrorMessage } from "@/types/error";
 import { redirect } from "next/navigation";
 
@@ -15,7 +15,7 @@ export default async function ManageCategoriesLayout({
 
     const userPermission = await hasPermission(
         user.id,
-        routeRequiredPermissions.get("manageCategories")!,
+        RouteRequiredPermissions.get("manageCategories")!,
     );
     if (!userPermission.canAccess) {
         throw new Error(ErrorMessage.NoPermissionToThisPage);

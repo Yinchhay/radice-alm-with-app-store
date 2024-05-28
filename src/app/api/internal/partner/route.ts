@@ -1,4 +1,4 @@
-import { checkBearerAndPermission, routeRequiredPermissions } from "@/lib/IAM";
+import { checkBearerAndPermission, RouteRequiredPermissions } from "@/lib/IAM";
 import {
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(
                 request,
-                routeRequiredPermissions.get("managePartners")!,
+                RouteRequiredPermissions.get("managePartners")!,
             );
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();

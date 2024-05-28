@@ -3,6 +3,8 @@ import Navbar from "@/components/Navbar";
 import MemberProfile, { MemberProfileType } from "./_components/MemberProfile";
 import { getMembers } from "./fetch";
 
+export const dynamic = "force-dynamic"
+
 export default async function page() {
     const members = await getMembers();
 

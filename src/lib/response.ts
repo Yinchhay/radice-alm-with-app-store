@@ -3,6 +3,7 @@ import { generateAndFormatZodError, T_ZodErrorFormatted } from "./form";
 import { ErrorMessage } from "@/types/error";
 import { MysqlErrorCodes } from "@/types/db";
 import { mysqlErDupEntryExtractValue } from "./error";
+import { localDebug } from "./utils";
 
 export type SuccessResponse<T> = {
     data: T;
@@ -105,6 +106,8 @@ export const checkErrorForResponse = (
 export const checkAndBuildErrorResponse = (message: string, error: any) => {
     const { message: errorMessage, code: httpStatusCode } =
         checkErrorForResponse(error);
+
+    localDebug(error, "checkAndBuildErrorResponse (come from api)");
 
     return buildErrorResponse(
         message,

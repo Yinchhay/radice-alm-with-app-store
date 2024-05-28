@@ -1,10 +1,10 @@
-import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
-import { localDebug } from "./utils";
-import { Permissions } from "@/types/IAM";
-import { cache } from "react";
 import { lucia } from "@/auth/lucia";
 import { User } from "lucia";
+import { Permissions } from "@/types/IAM";
+import { cache } from "react";
+import { localDebug } from "./utils";
 import { UserType } from "@/types/user";
+import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
 
 /**
  * This function take a user id and a set of required permissions and return a boolean and a message
@@ -19,19 +19,29 @@ export const hasPermission = cache(
     async (
         userId: string,
         requiredPermissions: Set<Permissions>,
+        {
+            checkAllRequiredPermissions = false,
+        }: {
+            checkAllRequiredPermissions?: boolean;
+        } = {},
     ): Promise<{
         canAccess: boolean;
         message: string;
+        userPermissions: Set<Permissions>;
     }> => {
-        try {
-            if (requiredPermissions.size === 0) {
-                return {
-                    canAccess: false,
-                    message:
-                        "Required permission is required to check user has permission or not",
-                };
-            }
+        let userPermissions: Set<Permissions> = new Set();
+        let canAccess = false;
 
+        if (requiredPermissions.size === 0) {
+            return {
+                canAccess: false,
+                message:
+                    "Required permission is required to check user has permission or not",
+                userPermissions,
+            };
+        }
+
+        try {
             const user = await getUserRolesAndRolePermissions_C(userId);
 
             if (!user) {
@@ -39,6 +49,7 @@ export const hasPermission = cache(
                 return {
                     canAccess: false,
                     message: "User not found.",
+                    userPermissions,
                 };
             }
 
@@ -50,6 +61,7 @@ export const hasPermission = cache(
                 return {
                     canAccess: true,
                     message: "Access granted because user is superadmin",
+                    userPermissions: allPermissionsToSet(),
                 };
             }
 
@@ -59,21 +71,40 @@ export const hasPermission = cache(
                 }
 
                 for (const rolePermission of userRole.role.rolePermissions) {
+                    if (!rolePermission.permission.isActive) {
+                        continue;
+                    }
+
                     if (requiredPermissions.has(rolePermission.permissionId)) {
-                        if (!rolePermission.permission.isActive) {
-                            continue;
+                        userPermissions.add(rolePermission.permissionId);
+
+                        if (!checkAllRequiredPermissions) {
+                            localDebug(
+                                `User has ${rolePermission.permission.name} permission.`,
+                                "hasPermission()",
+                            );
+                            return {
+                                canAccess: true,
+                                message: `The user has and uses ${rolePermission.permission.name} permission.`,
+                                userPermissions,
+                            };
                         }
 
-                        localDebug(
-                            `User has ${rolePermission.permission.name} permission.`,
-                            "hasPermission()",
-                        );
-                        return {
-                            canAccess: true,
-                            message: `The user has and uses ${rolePermission.permission.name} permission.`,
-                        };
+                        canAccess = true;
                     }
                 }
+            }
+
+            if (canAccess) {
+                localDebug(
+                    "User has the required permission.",
+                    "hasPermission()",
+                );
+                return {
+                    canAccess: true,
+                    message: "The user has the required permission.",
+                    userPermissions,
+                };
             }
         } catch (error: any) {
             localDebug(error.message, "hasPermission()");
@@ -86,68 +117,10 @@ export const hasPermission = cache(
         return {
             canAccess: false,
             message: "The user does not have the required permission.",
+            userPermissions,
         };
     },
 );
-
-/**
- * I believe since this is often used for internal users,
- * the data structure for this should be Map so that it will improve performance
- * which is better than using object. And the reason I create the routeRequiredPermissions
- * here because exporting in page.tsx is not allow in production, and I need route required
- * permissions for e2e test
- * - YatoRizzGod
- */
-type routeKey =
-    | "manageAllProjects"
-    | "manageApplicationForms"
-    | "manageCategories"
-    | "managePartners"
-    | "manageRoles"
-    | "manageUsers";
-export const routeRequiredPermissions = new Map<routeKey, Set<Permissions>>([
-    [
-        "manageAllProjects",
-        new Set([
-            Permissions.CHANGE_PROJECT_STATUS,
-            Permissions.DELETE_PROJECTS,
-        ]),
-    ],
-    [
-        "manageApplicationForms",
-        new Set([Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS]),
-    ],
-    [
-        "manageCategories",
-        new Set([
-            Permissions.CREATE_CATEGORIES,
-            Permissions.EDIT_CATEGORIES,
-            Permissions.DELETE_CATEGORIES,
-        ]),
-    ],
-    [
-        "managePartners",
-        new Set([
-            Permissions.CREATE_PARTNERS,
-            Permissions.DELETE_PARTNERS,
-        ]),
-    ],
-    [
-        "manageRoles",
-        new Set([
-            Permissions.CREATE_ROLES,
-            Permissions.EDIT_ROLES,
-            Permissions.DELETE_ROLES,
-        ]),
-    ],
-    [
-        "manageUsers",
-        new Set([
-            Permissions.CREATE_USERS,
-            Permissions.DELETE_USERS,
-        ]),
-    ],
-]);
 
 export const checkBearerAndPermission = async (
     request: Request,
@@ -209,3 +182,99 @@ export const checkBearerAndPermission = async (
         user: user,
     };
 };
+
+
+/**
+ * I believe since this is often used for internal users,
+ * the data structure for this should be Map so that it will improve performance
+ * which is better than using object. And the reason I create the RouteRequiredPermissions
+ * here because exporting in page.tsx is not allow in production, and I need route required
+ * permissions for e2e test
+ * - YatoRizzGod
+ */
+type RouteKey =
+    | "manageAllProjects"
+    | "manageApplicationForms"
+    | "manageCategories"
+    | "managePartners"
+    | "manageRoles"
+    | "manageUsers"
+    | "manageMedias";
+export const RouteRequiredPermissions = new Map<RouteKey, Set<Permissions>>([
+    [
+        "manageAllProjects",
+        new Set([
+            Permissions.CHANGE_PROJECT_STATUS,
+            Permissions.DELETE_PROJECTS,
+        ]),
+    ],
+    [
+        "manageApplicationForms",
+        new Set([Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS]),
+    ],
+    [
+        "manageCategories",
+        new Set([
+            Permissions.CREATE_CATEGORIES,
+            Permissions.EDIT_CATEGORIES,
+            Permissions.DELETE_CATEGORIES,
+        ]),
+    ],
+    [
+        "managePartners",
+        new Set([Permissions.CREATE_PARTNERS, Permissions.DELETE_PARTNERS]),
+    ],
+    [
+        "manageRoles",
+        new Set([
+            Permissions.CREATE_ROLES,
+            Permissions.EDIT_ROLES,
+            Permissions.DELETE_ROLES,
+        ]),
+    ],
+    [
+        "manageUsers",
+        new Set([Permissions.CREATE_USERS, Permissions.DELETE_USERS]),
+    ],
+    [
+        "manageMedias",
+        new Set([
+            Permissions.CREATE_MEDIA,
+            Permissions.EDIT_MEDIA,
+            Permissions.DELETE_MEDIA,
+        ]),
+    ],
+]);
+
+export function userCanAccessRoute(
+    routeRequiredPermissionKey: RouteKey,
+    permissions: Set<Permissions>,
+): boolean {
+    const requiredPermissions = RouteRequiredPermissions.get(
+        routeRequiredPermissionKey,
+    );
+    if (!requiredPermissions) {
+        return false;
+    }
+
+    for (const permission of requiredPermissions) {
+        if (!permissions.has(permission)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function allPermissionsToSet(): Set<Permissions> {
+    const allPermissions = new Set<Permissions>();
+    Object.values(Permissions).forEach((value) => {
+        if (typeof value === "number") {
+            allPermissions.add(value);
+        }
+    });
+
+    return allPermissions;
+}
+
+export const AllPermissionsInTheSystem = allPermissionsToSet();
