@@ -11,6 +11,7 @@ import { categories } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import { getCategories } from "./fetch";
 import Footer from "@/components/Footer";
+import TechButton from "@/components/TechButton";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -80,14 +81,7 @@ export default async function Home() {
                     </div>
                     <div className={roboto_flex.className}>
                         <div className="flex relative mt-12 items-center">
-                            <div>
-                                <button className="py-2 px-12 bg-black text-white text-2xl font-bold">
-                                    R & D
-                                </button>
-                                <div className="select-none absolute top-1 left-1 py-2 px-12 bg-transparent border-black border text-transparent text-2xl font-bold">
-                                    R & D
-                                </div>
-                            </div>
+                            <TechButton variant="dark" text="R & D" />
                             <div className="ml-6 relative">
                                 <div className="w-24 text-sm h-[36px] leading-[1.25]">
                                     <RandomText originalText={"RESEARCH &"} />

@@ -7,6 +7,7 @@ import {
     getProjectsByCategoryReturnType,
 } from "../fetch";
 import Link from "next/link";
+import TechButton from "@/components/TechButton";
 
 export default function CategorySection({
     variant = "light",
@@ -61,23 +62,17 @@ export default function CategorySection({
                                             <h2 className="font-bold text-2xl mt-2">
                                                 {projects[selectedProject].name}
                                             </h2>
-                                            <p className="mt-2 h-[80px]">
+                                            <p className="mt-2 mb-12 line-clamp-3">
                                                 {
                                                     projects[selectedProject]
                                                         .description
                                                 }
                                             </p>
-                                            <div className="relative mt-8">
-                                                <Link
-                                                    href={`/project/${projects[selectedProject].id}`}
-                                                    className="py-2 px-12 bg-black text-white text-2xl font-bold inline-block relative z-10"
-                                                >
-                                                    VIEW
-                                                </Link>
-                                                <div className="select-none absolute top-1 left-1 py-2 px-12 bg-transparent border-black border text-transparent text-2xl font-bold">
-                                                    VIEW
-                                                </div>
-                                            </div>
+                                            <TechButton
+                                                variant="dark"
+                                                link={`/project/${projects[selectedProject].id}`}
+                                                text="VIEW"
+                                            />
                                         </div>
                                         <div></div>
                                         <div className="flex">
@@ -231,26 +226,20 @@ export default function CategorySection({
                                                 className="aspect-square object-cover border border-gray-800"
                                                 alt=""
                                             />
-                                            <h2 className="font-bold text-2xl mt-2">
+                                            <h2 className="font-bold text-2xl mt-2 truncate text-ellipsis">
                                                 {projects[selectedProject].name}
                                             </h2>
-                                            <p className="mt-2 h-[80px]">
+                                            <p className="mt-2 mb-12 line-clamp-3">
                                                 {
                                                     projects[selectedProject]
                                                         .description
                                                 }
                                             </p>
-                                            <div className="relative mt-8">
-                                                <Link
-                                                    href={`/project/${projects[selectedProject].id}`}
-                                                    className="py-2 px-12 bg-white text-black text-2xl font-bold inline-block  relative z-10"
-                                                >
-                                                    VIEW
-                                                </Link>
-                                                <div className="select-none absolute top-1 left-1 py-2 px-12 bg-transparent border-white border text-transparent text-2xl font-bold">
-                                                    VIEW
-                                                </div>
-                                            </div>
+                                            <TechButton
+                                                variant="light"
+                                                link={`/project/${projects[selectedProject].id}`}
+                                                text="VIEW"
+                                            />
                                         </div>
                                     </div>
                                 </div>

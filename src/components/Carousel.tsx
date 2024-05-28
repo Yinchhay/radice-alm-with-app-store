@@ -3,6 +3,7 @@ import { GetCategoriesReturnType } from "@/app/api/internal/category/route";
 import { Roboto_Condensed, Roboto } from "next/font/google";
 import Image from "next/image";
 import { useState } from "react";
+import TechButton from "./TechButton";
 
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -131,14 +132,14 @@ export default function Carousel({
                             ? categories[currentSlide].description
                             : ""}
                     </p>
-                    <div className="relative mt-12">
-                        <button className="py-2 px-12 bg-white text-black text-2xl font-bold">
-                            VIEW
-                        </button>
-                        <div className="select-none absolute top-1 left-1 py-2 px-12 bg-transparent border-white border text-transparent text-2xl font-bold">
-                            VIEW
-                        </div>
-                    </div>
+                    <TechButton
+                        variant="light"
+                        className="mt-12"
+                        text="VIEW"
+                        onClick={() => {
+                            console.log("click");
+                        }}
+                    />
                 </div>
             </div>
         </div>
