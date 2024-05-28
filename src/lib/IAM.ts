@@ -246,6 +246,7 @@ export const RouteRequiredPermissions = new Map<RouteKey, Set<Permissions>>([
     ],
 ]);
 
+// If one of the required permissions is met, the user can access the route
 export function userCanAccessRoute(
     routeRequiredPermissionKey: RouteKey,
     permissions: Set<Permissions>,
@@ -258,12 +259,12 @@ export function userCanAccessRoute(
     }
 
     for (const permission of requiredPermissions) {
-        if (!permissions.has(permission)) {
-            return false;
+        if (permissions.has(permission)) {
+            return true;
         }
     }
 
-    return true;
+    return false;
 }
 
 function allPermissionsToSet(): Set<Permissions> {
