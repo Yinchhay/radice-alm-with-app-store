@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FetchAssociatedProjectsData } from "../api/internal/project/associate/route";
 import {
@@ -8,6 +7,7 @@ import {
 } from "../fetch";
 import Link from "next/link";
 import TechButton from "@/components/TechButton";
+import ImageWithFallback from "@/components/ImageWithFallback";
 
 export default function CategorySection({
     variant = "light",
@@ -49,11 +49,9 @@ export default function CategorySection({
                                 <div>
                                     <div className="grid grid-cols-3">
                                         <div className="mt-8">
-                                            <Image
-                                                src={
-                                                    `/api/file?filename=${projects[selectedProject].logoUrl}` ||
-                                                    "/placeholder.webp"
-                                                }
+                                            <ImageWithFallback
+                                                fallbackSrc="/placeholder.webp"
+                                                src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
                                                 width={120}
                                                 height={120}
                                                 className="aspect-square object-cover border border-gray-200"
@@ -103,7 +101,8 @@ export default function CategorySection({
                                                                             " ",
                                                                         )}
                                                                     >
-                                                                        <Image
+                                                                        <ImageWithFallback
+                                                                            fallbackSrc="/placeholder.webp"
                                                                             src={
                                                                                 `/api/file?filename=${project.logoUrl}` ||
                                                                                 "/placeholder.webp"
@@ -184,11 +183,9 @@ export default function CategorySection({
                                                                             " ",
                                                                         )}
                                                                     >
-                                                                        <Image
-                                                                            src={
-                                                                                `/api/file?filename=${project.logoUrl}` ||
-                                                                                "/placeholder.webp"
-                                                                            }
+                                                                        <ImageWithFallback
+                                                                            fallbackSrc="/placeholder.webp"
+                                                                            src={`/api/file?filename=${project.logoUrl}`}
                                                                             width={
                                                                                 80
                                                                             }
@@ -216,11 +213,9 @@ export default function CategorySection({
                                         </div>
                                         <div></div>
                                         <div className="mt-8">
-                                            <Image
-                                                src={
-                                                    `/api/file?filename=${projects[selectedProject].logoUrl}` ||
-                                                    "/placeholder.webp"
-                                                }
+                                            <ImageWithFallback
+                                                fallbackSrc="/placeholder.webp"
+                                                src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
                                                 width={120}
                                                 height={120}
                                                 className="aspect-square object-cover border border-gray-800"
