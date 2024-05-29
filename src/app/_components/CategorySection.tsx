@@ -50,7 +50,6 @@ export default function CategorySection({
                                     <div className="grid grid-cols-3">
                                         <div className="mt-8">
                                             <ImageWithFallback
-                                                fallbackSrc="/placeholder.webp"
                                                 src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
                                                 width={120}
                                                 height={120}
@@ -102,7 +101,6 @@ export default function CategorySection({
                                                                         )}
                                                                     >
                                                                         <ImageWithFallback
-                                                                            fallbackSrc="/placeholder.webp"
                                                                             src={
                                                                                 `/api/file?filename=${project.logoUrl}` ||
                                                                                 "/placeholder.webp"
@@ -184,7 +182,6 @@ export default function CategorySection({
                                                                         )}
                                                                     >
                                                                         <ImageWithFallback
-                                                                            fallbackSrc="/placeholder.webp"
                                                                             src={`/api/file?filename=${project.logoUrl}`}
                                                                             width={
                                                                                 80
@@ -214,7 +211,6 @@ export default function CategorySection({
                                         <div></div>
                                         <div className="mt-8">
                                             <ImageWithFallback
-                                                fallbackSrc="/placeholder.webp"
                                                 src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
                                                 width={120}
                                                 height={120}
