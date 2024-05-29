@@ -14,6 +14,9 @@ import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { editCategoryFormSchema } from "../../schema";
+import { lucia } from "@/auth/lucia";
+import { uploadFiles } from "@/lib/file";
+import { fileImageSchema } from "../../../project/[project_id]/schema";
 
 export type FetchEditCategory = Record<string, never>;
 
@@ -33,9 +36,51 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editCategoryFormSchema> =
-            await request.json();
-        body.categoryId = Number(params.category_id);
+        const formData = await request.formData();
+        // check if user sent a categoryLogo
+        let logo;
+        if (formData.has("categoryLogo")) {
+            const file = formData.get("categoryLogo") as File;
+            // validate file for its type, size
+            const validationResult = fileImageSchema.safeParse({
+                image: file,
+            });
+            if (!validationResult.success) {
+                return buildErrorResponse(
+                    unsuccessMessage,
+                    formatZodError(validationResult.error),
+                    HttpStatusCode.BAD_REQUEST_400,
+                );
+            }
+            const files = [file];
+            const authorizationHeader = request.headers.get("Authorization");
+            const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+            const response = await uploadFiles(files, sessionId ?? "");
+
+            if (!response.success) {
+                return buildErrorResponse(
+                    unsuccessMessage,
+                    generateAndFormatZodError(
+                        "unknown",
+                        "Failed to upload image",
+                    ),
+                    HttpStatusCode.BAD_REQUEST_400,
+                );
+            }
+            logo = response.data.filenames[0];
+        }
+
+        if (!logo) {
+            logo = formData.get("currentCategoryLogo") as string;
+        }
+
+        const body: z.infer<typeof editCategoryFormSchema> = {
+            name: formData.get("name") as string,
+            shortName: formData.get("shortName") as string,
+            description: formData.get("description") as string,
+            logo,
+            categoryId: Number(params.category_id),
+        };
         const validationResult = editCategoryFormSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(

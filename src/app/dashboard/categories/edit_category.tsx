@@ -2,7 +2,7 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Overlay from "@/components/Overlay";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
@@ -10,6 +10,8 @@ import { IconEdit } from "@tabler/icons-react";
 import { categories } from "@/drizzle/schema";
 import { fetchEditCategoryById } from "./fetch";
 import { usePathname } from "next/navigation";
+import ImageWithFallback from "@/components/ImageWithFallback";
+import { fileToUrl } from "@/lib/file";
 
 export function EditCategoryOverlay({
     category,
@@ -20,6 +22,8 @@ export function EditCategoryOverlay({
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchEditCategoryById>>>();
+    const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(category.logo));
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         // close the overlay after editing successfully
@@ -50,21 +54,62 @@ export function EditCategoryOverlay({
                             </h1>
                         </div>
                         <form
+                            className="flex flex-col gap-2"
                             action={async (formData: FormData) => {
                                 const result = await fetchEditCategoryById(
                                     {
                                         categoryId: category.id,
                                         name: formData.get("name") as string,
+                                        shortName: formData.get(
+                                            "shortName",
+                                        ) as string,
                                         description: formData.get(
                                             "description",
                                         ) as string,
+                                        currentCategoryLogo: category.logo as string,
                                     },
+                                    formData,
                                     pathname,
                                 );
                                 setResult(result);
                             }}
                         >
-                            <div className="flex flex-col items-start my-1">
+                            <div className="flex flex-col items-start">
+                                <label
+                                    htmlFor="categoryLogo"
+                                    className="font-normal"
+                                >
+                                    Logo
+                                </label>
+                                <ImageWithFallback
+                                    className="aspect-square object-cover rounded-sm hover:cursor-pointer"
+                                    onClick={() => {
+                                        if (fileInputRef.current) {
+                                            fileInputRef.current.click();
+                                        }
+                                    }}
+                                    src={logoSrc}
+                                    alt={"category logo"}
+                                    width={128}
+                                    height={128}
+                                />
+                                <InputField
+                                    ref={fileInputRef}
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setLogoSrc(
+                                                URL.createObjectURL(file),
+                                            );
+                                        }
+                                    }}
+                                    hidden
+                                    type="file"
+                                    name="categoryLogo"
+                                    id="categoryLogo"
+                                />
+                            </div>
+                            <div className="flex flex-col items-start">
                                 <label htmlFor="name" className="font-normal">
                                     Name
                                 </label>
@@ -74,7 +119,20 @@ export function EditCategoryOverlay({
                                     defaultValue={category.name}
                                 />
                             </div>
-                            <div className="flex flex-col items-start my-1">
+                            <div className="flex flex-col items-start">
+                                <label
+                                    htmlFor="shortName"
+                                    className="font-normal"
+                                >
+                                    Short name
+                                </label>
+                                <InputField
+                                    name="shortName"
+                                    id="shortName"
+                                    defaultValue={category.shortName}
+                                />
+                            </div>
+                            <div className="flex flex-col items-start">
                                 <label
                                     htmlFor="description"
                                     className="font-normal"

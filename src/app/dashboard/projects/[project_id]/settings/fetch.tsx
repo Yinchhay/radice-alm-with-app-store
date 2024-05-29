@@ -24,7 +24,6 @@ export async function fetchEditProjectSettingsDetail(
 ): ResponseJson<FetchEditProjectSettingsDetail> {
     try {
         // by default, projectLogo is already in the formData if it exists
-        console.log("formData", formData.get("projectLogo"));
         const logo = formData.get("projectLogo");
         if (logo instanceof File && logo.size === 0) {
             formData.delete("projectLogo");

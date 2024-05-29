@@ -1,5 +1,5 @@
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "@/lib/file";
-import { number, z } from "zod";
+import { z } from "zod";
 import { fileAnySchema } from "../../file/schema";
 
 export const getOneAssociatedProjectSchema = z.object({

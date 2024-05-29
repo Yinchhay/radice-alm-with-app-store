@@ -14,6 +14,8 @@ import Pagination from "@/components/Pagination";
 import { hasPermission } from "@/lib/IAM";
 import { getAuthUser } from "@/auth/lucia";
 import { Permissions } from "@/types/IAM";
+import ImageWithFallback from "@/components/ImageWithFallback";
+import { fileToUrl } from "@/lib/file";
 
 type ManageCategoriesProps = {
     searchParams?: {
@@ -69,12 +71,14 @@ export default async function ManageCategories({
         result.data.maxPage >= page && result.data.maxPage > 1;
 
     return (
-        <div className="w-full max-w-[800px]">
+        <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
                 <h1 className="text-2xl">Category</h1>
                 <Table className="my-4 w-full">
                     <TableHeader>
+                        <ColumName>Logo</ColumName>
                         <ColumName>Name</ColumName>
+                        <ColumName>Short name</ColumName>
                         <ColumName>Description</ColumName>
                         <ColumName className="flex justify-end">
                             {canCreateCategory && <CreateCategoryOverlay />}
@@ -120,8 +124,20 @@ function Category({
 }) {
     return (
         <TableRow className="align-middle">
+            <Cell data-test={`categoryLogo-${category.logo}`}>
+                <ImageWithFallback
+                    src={fileToUrl(category.logo)}
+                    alt="category logo"
+                    className="aspect-square object-cover rounded-sm"
+                    width={128}
+                    height={128}
+                />
+            </Cell>
             <Cell data-test={`categoryName-${category.name}`}>
                 {category.name}
+            </Cell>
+            <Cell data-test={`categoryShortName-${category.shortName}`}>
+                {category.shortName}
             </Cell>
             <Cell data-test={`categoryDescription-${category.description}`}>
                 {category.description}

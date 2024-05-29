@@ -22,6 +22,8 @@ export const editCategoryById = async (
         .set({
             name: category.name,
             description: category.description,
+            shortName: category.shortName,
+            logo: category.logo,
         })
         .where(eq(categories.id, categoryId));
 };

@@ -41,9 +41,20 @@ export async function fetchCategories(
 
 export async function fetchCreateCategory(
     body: z.infer<typeof createCategoryFormSchema>,
+    formData: FormData,
     pathname: string,
 ): ResponseJson<FetchCreateCategory> {
     try {
+        // by default, categoryLogo is already in the formData if it exists
+        const logo = formData.get("categoryLogo");
+        if (logo instanceof File && logo.size === 0) {
+            formData.delete("categoryLogo");
+        }
+
+        formData.append("name", body.name);
+        formData.append("shortName", body.shortName);
+        formData.append("description", body.description);
+
         const sessionId = await getSessionCookie();
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/category/create`,
@@ -52,7 +63,7 @@ export async function fetchCreateCategory(
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                body: JSON.stringify(body),
+                body: formData,
             },
         );
 
@@ -88,9 +99,21 @@ export async function fetchDeleteCategoryById(
 
 export async function fetchEditCategoryById(
     body: z.infer<typeof editCategoryFormSchema>,
+    formData: FormData,
     pathname: string,
 ): ResponseJson<FetchEditCategory> {
     try {
+        // by default, categoryLogo is already in the formData if it exists
+        const logo = formData.get("categoryLogo");
+        if (logo instanceof File && logo.size === 0) {
+            formData.delete("categoryLogo");
+        }
+
+        formData.append("name", body.name);
+        formData.append("shortName", body.shortName);
+        formData.append("description", body.description);
+        formData.append("currentCategoryLogo", body.currentCategoryLogo as string);
+
         const sessionId = await getSessionCookie();
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/category/${body.categoryId}/edit`,
@@ -99,7 +122,7 @@ export async function fetchEditCategoryById(
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                body: JSON.stringify(body),
+                body: formData,
             },
         );
 

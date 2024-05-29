@@ -1,15 +1,12 @@
 "use client";
 
-import {
-    FetchOneAssociatedProjectData,
-} from "@/app/api/internal/project/[project_id]/route";
+import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import InputField from "@/components/InputField";
 import Selector from "@/components/Selector";
 import { IconPlus } from "@tabler/icons-react";
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsDetail } from "./fetch";
@@ -17,6 +14,7 @@ import { categories as categoriesSchema } from "@/drizzle/schema";
 import { fileToUrl } from "@/lib/file";
 import { useSelector } from "../../../../../hooks/useSelector";
 import { usePathname } from "next/navigation";
+import ImageWithFallback from "@/components/ImageWithFallback";
 
 export default function ProjectDetail({
     project,
@@ -35,9 +33,7 @@ export default function ProjectDetail({
         useState<Awaited<ReturnType<typeof fetchEditProjectSettingsDetail>>>();
 
     // Variables for resetting the form
-    const [logoSrc, setLogoSrc] = useState<string>(
-        `/api/file?filename=${project?.logoUrl}` ?? "/placeholder.webp",
-    );
+    const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(project.logoUrl));
     const fileInputRef = useRef<HTMLInputElement>(null);
     const projectName = useRef<HTMLInputElement>(null);
     const projectDescription = useRef<HTMLInputElement>(null);
@@ -57,9 +53,7 @@ export default function ProjectDetail({
     function onResetClick() {
         if (!project) return;
 
-        setLogoSrc(
-            `/api/file?filename=${project?.logoUrl}` ?? "/placeholder.webp",
-        );
+        setLogoSrc(fileToUrl(project.logoUrl));
 
         if (projectName.current) {
             projectName.current.value = project.name;
@@ -101,17 +95,14 @@ export default function ProjectDetail({
                         Project Logo:
                     </label>
                     <div className="col-span-3">
-                        <Image
+                        <ImageWithFallback
                             className="aspect-square object-cover rounded-sm hover:cursor-pointer"
                             onClick={() => {
                                 if (fileInputRef.current) {
                                     fileInputRef.current.click();
                                 }
                             }}
-                            src={
-                                fileToUrl(project.logoUrl) ||
-                                "/placeholder.webp"
-                            }
+                            src={logoSrc}
                             alt={"project logo"}
                             width={128}
                             height={128}

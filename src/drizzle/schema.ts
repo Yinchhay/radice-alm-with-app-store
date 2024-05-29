@@ -289,8 +289,16 @@ export const categories = mysqlTable("categories", {
     })
         .notNull()
         .unique(),
+    shortName: varchar("short_name", {
+        length: 50,
+    })
+        .notNull()
+        .unique(),
     description: varchar("description", {
         length: 255,
+    }),
+    logo: varchar("logo", {
+        length: 2083,
     }),
     // in case we want to disable some categories
     isActive: boolean("is_active").default(true),

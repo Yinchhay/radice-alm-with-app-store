@@ -2,8 +2,6 @@ import { Suspense } from "react";
 import { CreateProjectOverlay } from "./create_project";
 import Pagination from "@/components/Pagination";
 import { fetchAssociatedProjects } from "./fetch";
-import { ROWS_PER_PAGE } from "@/lib/pagination";
-import Image from "next/image";
 import Card from "@/components/Card";
 import { IconEye, IconHammer, IconSettings } from "@tabler/icons-react";
 import Button from "@/components/Button";
@@ -16,6 +14,7 @@ import { hasPermission } from "@/lib/IAM";
 import { Permissions } from "@/types/IAM";
 import { User } from "lucia";
 import { fileToUrl } from "@/lib/file";
+import ImageWithFallback from "@/components/ImageWithFallback";
 
 type ManageAssociatedProps = {
     searchParams?: {
@@ -39,6 +38,7 @@ export default async function ManageAssociatedProject({
 
     const result = await fetchAssociatedProjects(page, 4);
     if (!result.success) {
+        console.error(result.message);
         throw new Error(result.message);
     }
 
@@ -113,9 +113,9 @@ function Project({
     return (
         <Card square>
             <div className="flex flex-row gap-4 relative">
-                <Image
+                <ImageWithFallback
                     className="aspect-square object-cover rounded-sm"
-                    src={fileToUrl(project.logoUrl) || "/placeholder.webp"}
+                    src={fileToUrl(project.logoUrl)}
                     alt={"project logo"}
                     width={128}
                     height={128}
