@@ -141,7 +141,7 @@ export default function CategorySection({
             return (
                 <>
                     {projects.length > 0 && (
-                        <div className="bg-black py-16 text-white">
+                        <div className="bg-black py-16 text-white h-[">
                             <div className="container mx-auto">
                                 <div className="grid grid-cols-3">
                                     <div></div>

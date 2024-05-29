@@ -18,13 +18,13 @@ const TechButton = forwardRef<HTMLButtonElement, ButtonProps>(
                                 href={link}
                                 className="relative group inline-block"
                             >
-                                <div className="bg-black grid place-items-center text-white text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all">
+                                <div className="bg-black grid place-items-center text-white text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all group-active:text-2xl group-active:duration-75">
                                     {text}
                                 </div>
-                                <div className="transition-all border-t border-l border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group"></div>
-                                <div className="transition-all border-b border-l border-black w-6 h-6 bg-transparent absolute bottom-[-0.5rem] left-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:left-[-0.25rem]"></div>
-                                <div className="transition-all border-t border-r border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] right-[-0.5rem] group-hover:top-[-0.25rem] group-hover:right-[-0.25rem]"></div>
-                                <div className="transition-all border-b border-r border-black w-6 h-6 bg-transparent absolute bottom-[-0.5rem] right-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:right-[-0.25rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-t border-l border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group-active:top-[-0.5rem] group-active:left-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-b border-l border-black w-6 h-6 bg-transparent absolute bottom-[-0.5rem] left-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:left-[-0.25rem] group-active:bottom-[-0.5rem] group-active:left-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-t border-r border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] right-[-0.5rem] group-hover:top-[-0.25rem] group-hover:right-[-0.25rem] group-active:top-[-0.5rem] group-active:right-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-b border-r border-black w-6 h-6 bg-transparent absolute bottom-[-0.5rem] right-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:right-[-0.25rem] group-active:bottom-[-0.5rem] group-active:right-[-0.5rem]"></div>
                             </Link>
                         </div>
                     );
@@ -32,13 +32,13 @@ const TechButton = forwardRef<HTMLButtonElement, ButtonProps>(
                     return (
                         <div className={["flex mx-[8px]", className].join(" ")}>
                             <Link href={link} className="relative group">
-                                <div className="bg-white grid place-items-center text-black text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all">
+                                <div className="bg-white grid place-items-center text-black text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all group-active:text-2xl group-active:duration-75">
                                     {text}
                                 </div>
-                                <div className="transition-all border-t border-l border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group"></div>
-                                <div className="transition-all border-b border-l border-white w-6 h-6 bg-transparent absolute bottom-[-0.5rem] left-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:left-[-0.25rem]"></div>
-                                <div className="transition-all border-t border-r border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] right-[-0.5rem] group-hover:top-[-0.25rem] group-hover:right-[-0.25rem]"></div>
-                                <div className="transition-all border-b border-r border-white w-6 h-6 bg-transparent absolute bottom-[-0.5rem] right-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:right-[-0.25rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-t border-l border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group-active:top-[-0.5rem] group-active:left-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-b border-l border-white w-6 h-6 bg-transparent absolute bottom-[-0.5rem] left-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:left-[-0.25rem] group-active:bottom-[-0.5rem] group-active:left-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-t border-r border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] right-[-0.5rem] group-hover:top-[-0.25rem] group-hover:right-[-0.25rem] group-active:top-[-0.5rem] group-active:right-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-b border-r border-white w-6 h-6 bg-transparent absolute bottom-[-0.5rem] right-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:right-[-0.25rem] group-active:bottom-[-0.5rem] group-active:right-[-0.5rem]"></div>
                             </Link>
                         </div>
                     );
@@ -53,32 +53,32 @@ const TechButton = forwardRef<HTMLButtonElement, ButtonProps>(
                                 ref={ref}
                                 {...props}
                             >
-                                <div className="bg-black grid place-items-center text-white text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all">
+                                <div className="bg-black grid place-items-center text-white text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all group-active:text-2xl group-active:duration-75">
                                     {text}
                                 </div>
-                                <div className="transition-all border-t border-l border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group"></div>
-                                <div className="transition-all border-b border-l border-black w-6 h-6 bg-transparent absolute bottom-[-0.5rem] left-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:left-[-0.25rem]"></div>
-                                <div className="transition-all border-t border-r border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] right-[-0.5rem] group-hover:top-[-0.25rem] group-hover:right-[-0.25rem]"></div>
-                                <div className="transition-all border-b border-r border-black w-6 h-6 bg-transparent absolute bottom-[-0.5rem] right-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:right-[-0.25rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-t border-l border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group-active:top-[-0.5rem] group-active:left-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-b border-l border-black w-6 h-6 bg-transparent absolute bottom-[-0.5rem] left-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:left-[-0.25rem] group-active:bottom-[-0.5rem] group-active:left-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-t border-r border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] right-[-0.5rem] group-hover:top-[-0.25rem] group-hover:right-[-0.25rem] group-active:top-[-0.5rem] group-active:right-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-b border-r border-black w-6 h-6 bg-transparent absolute bottom-[-0.5rem] right-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:right-[-0.25rem] group-active:bottom-[-0.5rem] group-active:right-[-0.5rem]"></div>
                             </button>
                         </div>
                     );
                 case "light":
                     return (
                         <div className={["flex mx-[8px]", className].join(" ")}>
-                            <div className="relative group">
-                                <button
-                                    ref={ref}
-                                    {...props}
-                                    className="bg-white text-black text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all"
-                                >
+                            <button
+                                className="relative group inline-block"
+                                ref={ref}
+                                {...props}
+                            >
+                                <div className="bg-white grid place-items-center text-black text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all group-active:text-2xl group-active:duration-75">
                                     {text}
-                                </button>
-                                <div className="transition-all border-t border-l border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group"></div>
-                                <div className="transition-all border-b border-l border-white w-6 h-6 bg-transparent absolute bottom-[-0.5rem] left-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:left-[-0.25rem]"></div>
-                                <div className="transition-all border-t border-r border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] right-[-0.5rem] group-hover:top-[-0.25rem] group-hover:right-[-0.25rem]"></div>
-                                <div className="transition-all border-b border-r border-white w-6 h-6 bg-transparent absolute bottom-[-0.5rem] right-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:right-[-0.25rem]"></div>
-                            </div>
+                                </div>
+                                <div className="duration-200 group-active:duration-75 border-t border-l border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group-active:top-[-0.5rem] group-active:left-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-b border-l border-white w-6 h-6 bg-transparent absolute bottom-[-0.5rem] left-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:left-[-0.25rem] group-active:bottom-[-0.5rem] group-active:left-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-t border-r border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] right-[-0.5rem] group-hover:top-[-0.25rem] group-hover:right-[-0.25rem] group-active:top-[-0.5rem] group-active:right-[-0.5rem]"></div>
+                                <div className="duration-200 group-active:duration-75 border-b border-r border-white w-6 h-6 bg-transparent absolute bottom-[-0.5rem] right-[-0.5rem] group-hover:bottom-[-0.25rem] group-hover:right-[-0.25rem] group-active:bottom-[-0.5rem] group-active:right-[-0.5rem]"></div>
+                            </button>
                         </div>
                     );
             }
