@@ -12,6 +12,10 @@ export default function ToggleSwitch({
 }) {
     const [toggleOn, setToggleOn] = useState<boolean>(defaultState);
 
+    useEffect(() => {
+        setToggleOn(defaultState);
+    }, [defaultState]);
+
     switch (variant) {
         case "secondary":
             return (

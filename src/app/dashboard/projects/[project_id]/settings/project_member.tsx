@@ -64,6 +64,7 @@ export default function ProjectMember({
         useState<Awaited<ReturnType<typeof fetchEditProjectSettingsMembers>>>();
     const [membersList, setMembersList] = useState<MemberList[]>([]);
 
+    // update the memberList to enforce switch to reset
     function onCanEditChange(id: string, canEdit: boolean) {
         setMembersList((prevMembersList) =>
             prevMembersList.map((member) => {
@@ -156,11 +157,15 @@ export default function ProjectMember({
                 ),
         );
 
-        const response = await fetchEditProjectSettingsMembers(project.id, {
-            membersToAdd,
-            membersToDelete: membersToRemove.map((member) => member.id),
-            membersToUpdate,
-        }, pathname);
+        const response = await fetchEditProjectSettingsMembers(
+            project.id,
+            {
+                membersToAdd,
+                membersToDelete: membersToRemove.map((member) => member.id),
+                membersToUpdate,
+            },
+            pathname,
+        );
         setResult(response);
     }
 
@@ -258,6 +263,10 @@ function Member({
 }) {
     const [canEditState, setCanEditState] = useState(canEdit);
 
+    useEffect(() => {
+        setCanEditState(canEdit);
+    }, [canEdit]);
+
     return (
         <TableRow className="align-middle">
             <Cell className="text-center">{`${member.firstName} ${member.lastName}`}</Cell>
@@ -272,8 +281,7 @@ function Member({
                     <ToggleSwitch
                         defaultState={canEditState}
                         onChange={(checked) => {
-                            // onCanEditChange(member.id, checked);
-                            setCanEditState(checked);
+                            onCanEditChange(member.id, checked);
                         }}
                     />
                 </div>
