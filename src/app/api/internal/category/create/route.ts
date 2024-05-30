@@ -56,12 +56,15 @@ export async function POST(request: Request) {
             const response = await uploadFiles(files, sessionId ?? "");
 
             if (!response.success) {
+                const errorMessage =
+                    response.errors[
+                        Object.keys(
+                            response.errors,
+                        )[0] as keyof typeof response.errors
+                    ];
                 return buildErrorResponse(
                     unsuccessMessage,
-                    generateAndFormatZodError(
-                        "unknown",
-                        "Failed to upload image",
-                    ),
+                    generateAndFormatZodError("unknown", errorMessage),
                     HttpStatusCode.BAD_REQUEST_400,
                 );
             }
@@ -73,7 +76,7 @@ export async function POST(request: Request) {
             shortName: formData.get("shortName") as string,
             description: formData.get("description") as string,
             logo,
-        }
+        };
         const validationResult = createCategoryFormSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(

@@ -123,6 +123,7 @@ export default function ProjectFile({
         }
 
         setFileLists(project.files);
+        setResult(undefined);
     }
 
     useEffect(() => {

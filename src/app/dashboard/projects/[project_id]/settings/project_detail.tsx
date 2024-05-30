@@ -62,6 +62,7 @@ export default function ProjectDetail({
             projectDescription.current.value = project.description ?? "";
         }
         onResetCategories();
+        setResult(undefined);
     }
 
     return (
@@ -119,6 +120,7 @@ export default function ProjectDetail({
                             type="file"
                             name="projectLogo"
                             id="projectLogo"
+                            accept="image/*"
                         />
                     </div>
                 </div>

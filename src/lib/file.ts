@@ -61,9 +61,6 @@ export async function uploadFiles(
             },
         );
 
-        if (!response.ok) {
-            throw new Error("Failed to upload file");
-        }
         return await response.json();
     } catch (error) {
         return fetchErrorSomethingWentWrong;
@@ -86,9 +83,6 @@ export async function deleteFile(
             },
         );
 
-        if (!response.ok) {
-            throw new Error("Failed to delete file");
-        }
         return await response.json();
     } catch (error) {
         return fetchErrorSomethingWentWrong;

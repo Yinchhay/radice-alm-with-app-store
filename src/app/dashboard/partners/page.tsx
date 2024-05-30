@@ -44,26 +44,28 @@ export default async function ManagePartners() {
     });
 
     return (
-        <Suspense fallback={"loading..."}>
-            <h1 className="text-2xl">Partner</h1>
-            <Table className="my-4 w-full">
-                <TableHeader>
-                    <ColumName>Name</ColumName>
-                    <ColumName>Email</ColumName>
-                    <ColumName className="flex justify-end">
-                        {canCreatePartner && <CreatePartnerOverlay />}
-                    </ColumName>
-                </TableHeader>
-                <TableBody>
-                    {result.data.partners.length > 0 ? (
-                        PartnerLists
-                    ) : (
-                        // TODO: style here
-                        <NoPartner />
-                    )}
-                </TableBody>
-            </Table>
-        </Suspense>
+        <div className="w-full max-w-[1000px] mx-auto">
+            <Suspense fallback={"loading..."}>
+                <h1 className="text-2xl">Partner</h1>
+                <Table className="my-4 w-full">
+                    <TableHeader>
+                        <ColumName>Name</ColumName>
+                        <ColumName>Email</ColumName>
+                        <ColumName className="flex justify-end">
+                            {canCreatePartner && <CreatePartnerOverlay />}
+                        </ColumName>
+                    </TableHeader>
+                    <TableBody>
+                        {result.data.partners.length > 0 ? (
+                            PartnerLists
+                        ) : (
+                            // TODO: style here
+                            <NoPartner />
+                        )}
+                    </TableBody>
+                </Table>
+            </Suspense>
+        </div>
     );
 }
 

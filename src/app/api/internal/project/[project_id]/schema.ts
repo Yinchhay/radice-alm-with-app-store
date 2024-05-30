@@ -76,17 +76,18 @@ export const editProjectSettingsPartners = z.object({
 });
 
 // Check allow image only
+export const imageOnlyValidation = z
+    .any()
+    .refine(
+        (file) => file?.size <= MAX_FILE_SIZE,
+        `Max image size is ${MAX_FILE_SIZE}MB.`,
+    )
+    .refine(
+        (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
+        "Only .jpg, .jpeg, .png and .webp formats are supported.",
+    );
 export const fileImageSchema = z.object({
-    image: z
-        .any()
-        .refine(
-            (file) => file?.size <= MAX_FILE_SIZE,
-            `Max image size is ${MAX_FILE_SIZE}MB.`,
-        )
-        .refine(
-            (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-            "Only .jpg, .jpeg, .png and .webp formats are supported.",
-        ),
+    image: imageOnlyValidation,
 });
 
 export const editProjectSettingsFiles = z.object({

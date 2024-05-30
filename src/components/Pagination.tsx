@@ -6,7 +6,8 @@ import {
 } from "@tabler/icons-react";
 import Button from "./Button";
 import { useEffect, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export type PaginationProps = {
     page: number;
@@ -21,7 +22,7 @@ export default function Pagination({ page, maxPage }: PaginationProps) {
     }
 
     const searchParams = useSearchParams();
-    const pathname = usePathname();
+    const router = useRouter();
 
     useEffect(() => {
         if (searchParams.get("page") == currentPage.toString()) {
@@ -30,7 +31,7 @@ export default function Pagination({ page, maxPage }: PaginationProps) {
 
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set("page", currentPage.toString());
-        window.location.href = `${pathname}?${newSearchParams.toString()}`;
+        router.push(`?${newSearchParams.toString()}`);
     }, [currentPage]);
 
     return (

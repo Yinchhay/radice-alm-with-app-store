@@ -123,7 +123,7 @@ function Category({
     canDeleteCategory: boolean;
 }) {
     return (
-        <TableRow className="align-middle">
+        <TableRow className="">
             <Cell data-test={`categoryLogo-${category.logo}`}>
                 <ImageWithFallback
                     src={fileToUrl(category.logo)}

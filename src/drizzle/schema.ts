@@ -460,3 +460,22 @@ export const projectPartnersRelations = relations(
         }),
     }),
 );
+
+export type MediaFile = {
+    filename: string;
+};
+export const medias = mysqlTable("medias", {
+    id: int("id").primaryKey().autoincrement(),
+    title: varchar("title", {
+        length: 255,
+    })
+        .notNull()
+        .unique(),
+    description: varchar("description", {
+        length: 2083,
+    }),
+    date: datetime("date").notNull(),
+    files: json("files").$type<MediaFile[]>().notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});

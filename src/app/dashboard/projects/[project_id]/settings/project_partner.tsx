@@ -108,6 +108,7 @@ export default function ProjectPartner({
 
     function onResetClick() {
         onReset();
+        setResult(undefined);
     }
 
     async function handleFormSubmit(formData: FormData) {

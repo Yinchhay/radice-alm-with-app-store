@@ -4,7 +4,7 @@
  */
 
 import { cookies, headers } from "next/headers";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { lucia } from "@/auth/lucia";
 
 export async function getProtocol(): Promise<string> {
@@ -40,6 +40,10 @@ export async function revalidateTags<T>(...tags: T[]): Promise<void> {
     for (const tag of tags) {
         revalidateTag(tag as string);
     }
+}
+
+export async function clientRevalidatePath(path: string): Promise<void> {
+    return revalidatePath(path);
 }
 
 export async function getSessionCookie(): Promise<string | null> {

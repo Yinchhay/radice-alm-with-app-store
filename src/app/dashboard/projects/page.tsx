@@ -55,7 +55,7 @@ export default async function ManageAssociatedProject({
     );
 
     return (
-        <div className="w-full max-w-[1000px]">
+        <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
                 <div className="flex flex-row justify-between">
                     <h1 className="text-2xl">Projects</h1>

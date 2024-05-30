@@ -125,6 +125,7 @@ export default function ProjectMember({
 
     function onResetClick() {
         onReset();
+        setResult(undefined);
     }
 
     async function handleFormSubmit(formData: FormData) {

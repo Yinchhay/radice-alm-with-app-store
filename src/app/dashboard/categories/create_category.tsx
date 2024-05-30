@@ -9,7 +9,6 @@ import { IconPlus } from "@tabler/icons-react";
 import { fetchCreateCategory } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
-import { fileToUrl } from "@/lib/file";
 import ImageWithFallback from "@/components/ImageWithFallback";
 
 export function CreateCategoryOverlay() {
@@ -97,6 +96,7 @@ export function CreateCategoryOverlay() {
                                             );
                                         }
                                     }}
+                                    accept="image/*"
                                     hidden
                                     type="file"
                                     name="categoryLogo"

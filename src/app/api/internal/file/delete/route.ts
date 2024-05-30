@@ -9,13 +9,12 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
-import { checkBearerAndPermission } from "@/lib/IAM";
+import { checkBearerAndPermission, hasPermission } from "@/lib/IAM";
 import { z } from "zod";
 import { deleteFileFormSchema } from "../schema";
-import {
-    checkProjectRole,
-} from "@/lib/project";
+import { checkProjectRole } from "@/lib/project";
 import { UserType } from "@/types/user";
+import { Permissions } from "@/types/IAM";
 
 const successMessage = "Delete file successfully";
 const unsuccessMessage = "Delete file failed";
@@ -51,20 +50,22 @@ export async function DELETE(request: NextRequest) {
         const filename = body.filename;
         const savePath = getFileStoragePath();
         const fileAbsPath = `${savePath}/${filename}`;
-        if (!fs.existsSync(fileAbsPath)) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError("unknown", "File not found!"),
-                HttpStatusCode.NOT_FOUND_404,
-            );
-        }
 
         const fileDetail = await getFileByFilename(filename);
         if (!fileDetail) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError("unknown", "File not found!!"),
-                HttpStatusCode.NOT_FOUND_404,
+            return buildSuccessResponse<FetchDeleteFile>(
+                "File not found in database",
+                {},
+            );
+        }
+
+        if (!fs.existsSync(fileAbsPath)) {
+            // event though the file is in the database, but it's not in the storage, consider removing it from the database
+            const deleteResult = await deleteFileByFilename(filename);
+            // intentionally return success response here.
+            return buildSuccessResponse<FetchDeleteFile>(
+                "File not found in storage",
+                {},
             );
         }
 
@@ -88,7 +89,18 @@ export async function DELETE(request: NextRequest) {
             }
         } else {
             // if the file is not in a project, check by comparing who uploaded the file
-            if (fileDetail.userId !== user.id && user.type !== UserType.SUPER_ADMIN) {
+            // only owner, super admin or person with permission delete media can delete the file
+
+            const userPermission = await hasPermission(
+                user.id,
+                new Set([Permissions.DELETE_MEDIA]),
+            );
+
+            if (
+                fileDetail.userId !== user.id &&
+                user.type !== UserType.SUPER_ADMIN &&
+                !userPermission.canAccess
+            ) {
                 return buildErrorResponse(
                     unsuccessMessage,
                     generateAndFormatZodError(
@@ -112,7 +124,7 @@ export async function DELETE(request: NextRequest) {
 
         // delete the file from the storage
         await fs.promises.unlink(fileAbsPath);
-        
+
         return buildSuccessResponse<FetchDeleteFile>(successMessage, {});
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);
