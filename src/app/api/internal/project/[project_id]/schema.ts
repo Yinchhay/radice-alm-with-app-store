@@ -3,39 +3,41 @@ import { z } from "zod";
 import { fileAnySchema } from "../../file/schema";
 
 export const getOneAssociatedProjectSchema = z.object({
-    userId: z.string().min(1, {
+    userId: z.string().trim().min(1, {
         message: "User id is required",
     }),
-    projectId: z.string().min(1, {
+    projectId: z.string().trim().min(1, {
         message: "Project id is required",
     }),
 });
 
 export const editProjectContentSchema = z.object({
-    userId: z.string().min(1, {
+    userId: z.string().trim().min(1, {
         message: "User id is required",
     }),
-    projectId: z.string().min(1, {
+    projectId: z.string().trim().min(1, {
         message: "Project id is required",
     }),
-    chapters: z.string(),
+    chapters: z.string().trim(),
 });
 
 export const editProjectSettingsDetail = z.object({
-    userId: z.string().min(1, {
+    userId: z.string().trim().min(1, {
         message: "User id is required",
     }),
-    projectName: z.string().max(50, {
+    projectName: z.string().trim().max(50, {
         message: "Project name is too long, max 50 characters",
     }),
     projectDescription: z
         .string()
+        .trim()
         .max(255, {
             message: "Project description is too long, max 255 characters",
         })
         .optional(),
     logoUrl: z
         .string()
+        .trim()
         .max(2083, {
             message: "Logo url is too long, max 2083 characters",
         })
@@ -46,11 +48,12 @@ export const editProjectSettingsDetail = z.object({
 export const editMemberArray = z
     .array(
         z.object({
-            userId: z.string().min(1, {
+            userId: z.string().trim().min(1, {
                 message: "User id is required",
             }),
             title: z
                 .string()
+                .trim()
                 .max(50, {
                     message: "Title is too long, max 50 characters",
                 })
@@ -65,11 +68,11 @@ export const editMemberArray = z
 
 export const editProjectSettingsMembers = z.object({
     membersToUpdate: editMemberArray,
-    membersToDelete: z.array(z.string()).optional(),
+    membersToDelete: z.array(z.string().trim()).optional(),
     membersToAdd: editMemberArray,
 });
 
-export const editPartnerArray = z.array(z.string()).optional();
+export const editPartnerArray = z.array(z.string().trim()).optional();
 export const editProjectSettingsPartners = z.object({
     partnersToDelete: editPartnerArray,
     partnersToAdd: editPartnerArray,
@@ -91,18 +94,19 @@ export const fileImageSchema = z.object({
 });
 
 export const editProjectSettingsFiles = z.object({
-    fileToRemove: z.array(z.string()).optional(),
+    fileToRemove: z.array(z.string().trim()).optional(),
     fileToUpload: fileAnySchema.optional(),
 });
 
 export const editProjectSettingsLinks = z.object({
     links: z.array(
         z.object({
-            title: z.string().min(1, {
+            title: z.string().trim().min(1, {
                 message: "Title is required",
             }),
             link: z
                 .string()
+                .trim()
                 .min(1, {
                     message: "Link is required",
                 })

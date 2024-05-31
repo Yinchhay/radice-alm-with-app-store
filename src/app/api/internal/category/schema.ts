@@ -8,6 +8,7 @@ import { z } from "zod";
 export const createCategoryFormSchema = z.object({
     name: z
         .string()
+        .trim()
         .min(1, {
             message: "Category name is required",
         })
@@ -17,6 +18,7 @@ export const createCategoryFormSchema = z.object({
         }),
     shortName: z
         .string()
+        .trim()
         .min(1, {
             message: "Category short name is required",
         })
@@ -24,11 +26,12 @@ export const createCategoryFormSchema = z.object({
             message:
                 "Category short name must be less than or equal to 50 characters",
         }),
-    description: z.string().max(255, {
+    description: z.string().trim().max(255, {
         message: "Description must be less than or equal to 255 characters",
     }),
     logo: z
         .string()
+        .trim()
         .max(2083, {
             message: "Logo is too long, max 2083 characters",
         })
@@ -48,6 +51,7 @@ export const deleteCategoryFormSchema = z.object({
 export const editCategoryFormSchema = z.object({
     name: z
         .string()
+        .trim()
         .min(1, {
             message: "Category name is required",
         })
@@ -57,6 +61,7 @@ export const editCategoryFormSchema = z.object({
         }),
     shortName: z
         .string()
+        .trim()
         .min(1, {
             message: "Category short name is required",
         })
@@ -64,7 +69,7 @@ export const editCategoryFormSchema = z.object({
             message:
                 "Category short name must be less than or equal to 50 characters",
         }),
-    description: z.string().max(255, {
+    description: z.string().trim().max(255, {
         message: "Description must be less than or equal to 255 characters",
     }),
     categoryId: z
@@ -74,9 +79,10 @@ export const editCategoryFormSchema = z.object({
         .positive({
             message: "Category id must be positive",
         }),
-    currentCategoryLogo: z.string().optional(),
+    currentCategoryLogo: z.string().trim().optional(),
     logo: z
         .string()
+        .trim()
         .max(2083, {
             message: "Logo is too long, max 2083 characters",
         })

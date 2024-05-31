@@ -6,22 +6,22 @@
 import { z } from "zod";
 
 export const createUserFormSchema = z.object({
-    firstName: z.string().min(1, {
+    firstName: z.string().trim().min(1, {
         message: "First name is required",
     }),
-    lastName: z.string().min(1, {
+    lastName: z.string().trim().min(1, {
         message: "Last name is required",
     }),
-    email: z.string().min(1, {
+    email: z.string().trim().min(1, {
         message: "Email is required",
     }),
-    password: z.string().min(1, {
+    password: z.string().trim().min(1, {
         message: "Error generating password",
     }),
 });
 
 export const deleteUserFormSchema = z.object({
-    userId: z.string().min(1, {
+    userId: z.string().trim().min(1, {
         message: "Error User ID",
     }),
 });

@@ -7,7 +7,7 @@ import { permissions, users } from "@/drizzle/schema";
 import { z } from "zod";
 
 export const createRoleFormSchema = z.object({
-    name: z.string().min(1, {
+    name: z.string().trim().min(1, {
         message: "Role name is required",
     }),
 });
@@ -23,26 +23,26 @@ export const deleteRoleFormSchema = z.object({
 });
 
 export const addUserToRoleFormSchema = z.object({
-    userId: z.string().min(1, {
+    userId: z.string().trim().min(1, {
         message: "A user is required",
     }),
 });
 
 export const editRoleByIdSchema = z.object({
-    name: z.string().min(1, {
+    name: z.string().trim().min(1, {
         message: "Role name is required",
     }),
     permissions: z.array(
         z.object({
             id: z.number(),
-            name: z.string(),
+            name: z.string().trim(),
         }),
     ),
     users: z.array(
         z.object({
-            id: z.string(),
-            firstName: z.string(),
-            lastName: z.string(),
+            id: z.string().trim(),
+            firstName: z.string().trim(),
+            lastName: z.string().trim(),
         }),
     ),
     roleId: z

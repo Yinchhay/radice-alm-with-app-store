@@ -4,13 +4,14 @@ import { imageOnlyValidation } from "../project/[project_id]/schema";
 export const createMediaSchema = z.object({
     title: z
         .string()
+        .trim()
         .min(1, {
             message: "Media title is required",
         })
         .max(255, {
             message: "Media title must be less than or equal to 255 characters",
         }),
-    description: z.string().max(2083, {
+    description: z.string().trim().max(2083, {
         message: "Description must be less than or equal to 2083 characters",
     }),
     date: z.coerce.date(),
@@ -30,13 +31,14 @@ export const deleteMediaSchema = z.object({
 export const editMediaSchema = z.object({
     title: z
         .string()
+        .trim()
         .min(1, {
             message: "Media title is required",
         })
         .max(255, {
             message: "Media title must be less than or equal to 255 characters",
         }),
-    description: z.string().max(2083, {
+    description: z.string().trim().max(2083, {
         message: "Description must be less than or equal to 2083 characters",
     }),
     date: z.coerce.date(),

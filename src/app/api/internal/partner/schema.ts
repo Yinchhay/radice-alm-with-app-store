@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createPartnerFormSchema = z.object({
     firstName: z
         .string()
+        .trim()
         .min(1, {
             message: "First name is required",
         })
@@ -11,6 +12,7 @@ export const createPartnerFormSchema = z.object({
         }),
     lastName: z
         .string()
+        .trim()
         .min(1, {
             message: "Last name is required",
         })
@@ -19,6 +21,7 @@ export const createPartnerFormSchema = z.object({
         }),
     email: z
         .string()
+        .trim()
         .min(1, {
             message: "Email is required",
         })
@@ -30,6 +33,7 @@ export const createPartnerFormSchema = z.object({
         }),
     password: z
         .string()
+        .trim()
         .min(1, {
             message: "Password is required",
         })
@@ -39,7 +43,7 @@ export const createPartnerFormSchema = z.object({
 });
 
 export const deletePartnerFormSchema = z.object({
-    partnerId: z.string().min(1, {
+    partnerId: z.string().trim().min(1, {
         message: "Partner id is required",
     }),
 });
