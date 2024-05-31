@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { categories } from "@/drizzle/schema";
+import { categories, projectCategories, projects } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { count, eq, sql } from "drizzle-orm";
 
@@ -49,4 +49,22 @@ export const getAllCategories = async () => {
 export const getCategoriesTotalRow = async () => {
     const totalRows = await db.select({ count: count() }).from(categories);
     return totalRows[0].count;
+};
+
+export const getPublicCategoriesWhereItHasProjects = async () => {
+    return db
+        .selectDistinct({
+            id: categories.id,
+            name: categories.name,
+            description: categories.description,
+            shortName: categories.shortName,
+            logo: categories.logo,
+        })
+        .from(categories)
+        .innerJoin(
+            projectCategories,
+            eq(categories.id, projectCategories.categoryId),
+        )
+        .innerJoin(projects, eq(projectCategories.projectId, projects.id))
+        .where(eq(projects.isPublic, true));
 };
