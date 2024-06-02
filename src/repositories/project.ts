@@ -8,6 +8,7 @@ import {
     ProjectLink,
     projectMembers,
     projectPartners,
+    ProjectPipelineStatus,
     projects,
 } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
@@ -312,5 +313,17 @@ export async function updateProjectLinks(
     return await db
         .update(projects)
         .set({ links: links })
+        .where(eq(projects.id, projectId));
+}
+
+export async function updateProjectPipelineStatus(
+    projectId: number,
+    pipelines: ProjectPipelineStatus,
+) {
+    return await db
+        .update(projects)
+        .set({
+            pipelineStatus: pipelines,
+        })
         .where(eq(projects.id, projectId));
 }

@@ -116,3 +116,61 @@ export const editProjectSettingsLinks = z.object({
         }),
     ),
 });
+
+export const projectPipeLineStatusType = z.object({
+    requirements: z.boolean({
+        required_error: "Requirements is required",
+        invalid_type_error: "Requirements must be a boolean",
+    }),
+    definition: z.boolean({
+        required_error: "Definition is required",
+        invalid_type_error: "Definition must be a boolean",
+    }),
+    analysis: z.boolean({
+        required_error: "Analysis is required",
+        invalid_type_error: "Analysis must be a boolean",
+    }),
+    approved: z.boolean({
+        required_error: "Approved is required",
+        invalid_type_error: "Approved must be a boolean",
+    }),
+    chartered: z.boolean({
+        required_error: "Chartered is required",
+        invalid_type_error: "Chartered must be a boolean",
+    }),
+    design: z.boolean({
+        required_error: "Design is required",
+        invalid_type_error: "Design must be a boolean",
+    }),
+    development: z.boolean({
+        required_error: "Development is required",
+        invalid_type_error: "Development must be a boolean",
+    }),
+    build: z.boolean({
+        required_error: "Build is required",
+        invalid_type_error: "Build must be a boolean",
+    }),
+    test: z.boolean({
+        required_error: "Test is required",
+        invalid_type_error: "Test must be a boolean",
+    }),
+    release: z.boolean({
+        required_error: "Release is required",
+        invalid_type_error: "Release must be a boolean",
+    }),
+    live: z.boolean({
+        required_error: "Live is required",
+        invalid_type_error: "Live must be a boolean",
+    }),
+    retiring: z.boolean({
+        required_error: "Retiring is required",
+        invalid_type_error: "Retiring must be a boolean",
+    }),
+    retired: z.boolean({
+        required_error: "Retired is required",
+        invalid_type_error: "Retired must be a boolean",
+    }),
+});
+export const editProjectSettingsPipelines = z.object({
+    pipelineStatus: projectPipeLineStatusType,
+});

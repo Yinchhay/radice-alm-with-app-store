@@ -13,6 +13,8 @@ import {
     json,
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
+import { z } from "zod";
+import { projectPipeLineStatusType } from "@/app/api/internal/project/[project_id]/schema";
 
 export const users = mysqlTable("users", {
     id: varchar("id", {
@@ -314,6 +316,7 @@ export type ProjectLink = {
     link: string;
     title: string;
 };
+export type ProjectPipelineStatus = z.infer<typeof projectPipeLineStatusType>;
 export const projects = mysqlTable("projects", {
     id: int("id").primaryKey().autoincrement(),
     name: varchar("name", {
@@ -330,7 +333,7 @@ export const projects = mysqlTable("projects", {
     isPublic: boolean("is_public").default(false),
     projectContent: json("project_content"),
     links: json("links").$type<ProjectLink[]>(),
-    pipelineStatus: json("pipeline_status"),
+    pipelineStatus: json("pipeline_status").$type<ProjectPipelineStatus>(),
     userId: varchar("user_id", {
         length: 255,
     })

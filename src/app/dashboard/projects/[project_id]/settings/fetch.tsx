@@ -13,8 +13,9 @@ import { FetchEditProjectSettingsMembers } from "@/app/api/internal/project/[pro
 import { FetchEditProjectSettingsPartners } from "@/app/api/internal/project/[project_id]/settings/update-partners/route";
 import { FetchEditProjectSettingsFiles } from "@/app/api/internal/project/[project_id]/settings/update-files/route";
 import { revalidatePath } from "next/cache";
-import { ProjectLink } from "@/drizzle/schema";
+import { ProjectLink, ProjectPipelineStatus } from "@/drizzle/schema";
 import { FetchEditProjectSettingsLinks } from "@/app/api/internal/project/[project_id]/settings/update-links/route";
+import { FetchEditProjectSettingsPipelines } from "@/app/api/internal/project/[project_id]/settings/update-pipeline/route";
 
 export async function fetchEditProjectSettingsDetail(
     projectId: number,
@@ -151,6 +152,33 @@ export async function fetchEditProjectSettingsLinks(
                 },
                 body: JSON.stringify({
                     links,
+                }),
+            },
+        );
+
+        revalidatePath(pathname);
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchEditProjectSettingsPipeline(
+    projectId: number,
+    pipelines: ProjectPipelineStatus,
+    pathname: string,
+): ResponseJson<FetchEditProjectSettingsPipelines> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/update-pipeline`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify({
+                    pipelineStatus: pipelines,
                 }),
             },
         );

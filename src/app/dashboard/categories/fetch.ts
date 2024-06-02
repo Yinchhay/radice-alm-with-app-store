@@ -15,6 +15,7 @@ import { FetchCreateCategory } from "@/app/api/internal/category/create/route";
 import { FetchEditCategory } from "@/app/api/internal/category/[category_id]/edit/route";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function fetchCategories(
     page: number = 1,
@@ -32,7 +33,7 @@ export async function fetchCategories(
                 },
             },
         );
-
+        
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;
