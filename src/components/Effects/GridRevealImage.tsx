@@ -2,7 +2,31 @@
 import { v4 as uuidv4 } from "uuid";
 
 import ImageWithFallback from "../ImageWithFallback";
-import { useEffect, useRef, useState } from "react";
+function getRandomBinary(): number {
+    return Math.floor(Math.random() * 2);
+}
+
+function getRandomAlphabet(): string {
+    const uppercaseAlphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lowercaseAlphabets = "abcdefghijklmnopqrstuvwxyz";
+
+    // Generate a random number between 0 and 2
+    const randomType = Math.floor(Math.random() * 3);
+
+    if (randomType === 0) {
+        // Return a random uppercase letter (1/3 probability)
+        const randomIndex = Math.floor(
+            Math.random() * uppercaseAlphabets.length,
+        );
+        return uppercaseAlphabets[randomIndex];
+    } else {
+        // Return a random lowercase letter (2/3 probability)
+        const randomIndex = Math.floor(
+            Math.random() * lowercaseAlphabets.length,
+        );
+        return lowercaseAlphabets[randomIndex];
+    }
+}
 
 export default function GridRevealImage({
     src,
@@ -12,7 +36,9 @@ export default function GridRevealImage({
     alt = "",
     rows = 10,
     cols = 10,
-    revealSpeed = 10, // Default reveal speed in milliseconds
+    cellFadeSpeed = 200,
+    revealSpeed = 5,
+    variant = "hacker",
 }: {
     src: string;
     width: number;
@@ -21,36 +47,10 @@ export default function GridRevealImage({
     alt?: string;
     rows?: number;
     cols?: number;
-    revealSpeed?: number; // New prop for reveal speed
+    cellFadeSpeed?: number;
+    revealSpeed?: number;
+    variant?: "hacker" | "light" | "dark";
 }) {
-    const [currentCell, setCurrentCell] = useState(0);
-    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    useEffect(() => {
-        let cell = 0;
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-        }
-
-        if (currentCell < rows * cols && intervalRef.current) {
-            intervalRef.current = setInterval(() => {
-                cell++;
-                setCurrentCell(cell);
-                if (currentCell >= rows * cols) {
-                    if (intervalRef.current) {
-                        clearInterval(intervalRef.current);
-                    }
-                }
-            }, revealSpeed);
-        }
-
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-        };
-    }, [src]);
-
     return (
         <div className="relative">
             <ImageWithFallback
@@ -64,7 +64,7 @@ export default function GridRevealImage({
                 className={[
                     `w-[${width}px]`,
                     `h-[${height}px]`,
-                    "absolute top-0 left-0 z-10 grid",
+                    "absolute top-0 left-0 z-10 grid select-none pointer-events-none",
                 ].join(" ")}
                 style={{
                     gridTemplateRows: `repeat(${rows}, 1fr)`,
@@ -75,10 +75,23 @@ export default function GridRevealImage({
                     <div
                         key={uuidv4()}
                         className={[
-                            "bg-white transition-all opacity-100",
-                            i <= currentCell ? "opacity-0" : "",
+                            "transition-colors text-sm text-center",
+                            variant == "hacker"
+                                ? "bg-black text-green-500"
+                                : "",
+                            variant == "light" || variant == "dark"
+                                ? "bg-black text-white"
+                                : "",
                         ].join(" ")}
-                    ></div>
+                        style={{
+                            animationName: "fadeOut",
+                            animationDuration: `${cellFadeSpeed}ms`,
+                            animationDelay: `${i * revealSpeed}ms`,
+                            animationFillMode: "forwards",
+                        }}
+                    >
+                        {getRandomBinary()}
+                    </div>
                 ))}
             </div>
         </div>

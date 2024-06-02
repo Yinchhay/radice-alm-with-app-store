@@ -6,22 +6,25 @@ export default function CategoryProjectLogo({
     variant = "light",
 }: {
     src: string;
-    variant?: string;
+    variant?: "light" | "dark";
 }) {
     return (
         <div className="relative">
             <GridRevealImage
+                variant={variant}
                 src={src}
                 width={120}
                 height={120}
-                className="aspect-square object-cover border border-gray-200 relative z-10"
-            />
-            <div
+                rows={5}
+                cols={5}
+                revealSpeed={8}
                 className={[
-                    "w-[120px] h-[120px] absolute top-2 left-2 border  bg-transparent",
-                    variant == "light" ? "border-black" : "border-white",
+                    "aspect-square object-cover border relative z-10",
+                    variant == "light"
+                        ? "border-gray-200"
+                        : "border-gray-100/25",
                 ].join(" ")}
-            ></div>
+            />
         </div>
     );
 }

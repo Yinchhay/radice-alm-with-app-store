@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-.cut-corner-tl {
-    clip-path: polygon(25% 0%, 100% 0%, 100% 100%, 0 100%, 0 25%);
+@keyframes fadeOut {
+    from {
+        opacity: 100;
+    }
+    to {
+        opacity: 0;
+    }
 }
