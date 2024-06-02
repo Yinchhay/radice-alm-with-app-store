@@ -6,11 +6,12 @@ export default function CategoryProjectLogo({
     variant = "light",
 }: {
     src: string;
-    variant?: "light" | "dark";
+    variant?: "light" | "dark" | "hacker";
 }) {
     return (
         <div className="relative">
             <GridRevealImage
+                isAlphabet={false}
                 variant={variant}
                 src={src}
                 width={120}

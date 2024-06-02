@@ -39,6 +39,7 @@ export default function GridRevealImage({
     cellFadeSpeed = 200,
     revealSpeed = 5,
     variant = "hacker",
+    isAlphabet = true,
 }: {
     src: string;
     width: number;
@@ -50,6 +51,7 @@ export default function GridRevealImage({
     cellFadeSpeed?: number;
     revealSpeed?: number;
     variant?: "hacker" | "light" | "dark";
+    isAlphabet?: boolean;
 }) {
     return (
         <div className="relative">
@@ -64,7 +66,7 @@ export default function GridRevealImage({
                 className={[
                     `w-[${width}px]`,
                     `h-[${height}px]`,
-                    "absolute top-0 left-0 z-10 grid select-none pointer-events-none",
+                    "absolute top-0 left-0 z-10 grid select-none pointer-events-none grid-flow-col",
                 ].join(" ")}
                 style={{
                     gridTemplateRows: `repeat(${rows}, 1fr)`,
@@ -90,7 +92,7 @@ export default function GridRevealImage({
                             animationFillMode: "forwards",
                         }}
                     >
-                        {getRandomBinary()}
+                        {isAlphabet ? getRandomAlphabet() : getRandomBinary()}
                     </div>
                 ))}
             </div>
