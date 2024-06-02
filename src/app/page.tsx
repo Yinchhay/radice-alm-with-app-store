@@ -2,16 +2,16 @@ import Image from "next/image";
 import { Roboto_Condensed, Roboto_Flex, Roboto } from "next/font/google";
 import GlitchText from "@/components/GlitchText";
 import Navbar from "@/components/Navbar";
-import RandomText from "@/components/RandomText";
+import RandomText from "@/components/Effects/RandomText";
 import { useEffect } from "react";
 import Eye from "@/components/Eye";
 import Carousel from "@/components/Carousel";
 import CategorySection from "./_components/CategorySection";
 import { categories } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
-import { getCategories } from "./fetch";
 import Footer from "@/components/Footer";
 import TechButton from "@/components/TechButton";
+import { fetchPublicCategories } from "./fetch";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -24,11 +24,16 @@ const roboto = Roboto({
     display: "swap",
 });
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
-    const categories = await getCategories();
+    const result = await fetchPublicCategories();
 
+    if (!result.success) {
+        return;
+    }
+
+    const categories = result.data.categories;
     return (
         <div>
             <Navbar />

@@ -1,3 +1,4 @@
+import { categories } from "@/drizzle/schema";
 import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
@@ -8,6 +9,9 @@ import { NextRequest } from "next/server";
 export type GetPublicCategoriesReturnType = Awaited<
     ReturnType<typeof getPublicCategoriesWhereItHasProjects>
 >;
+
+export type PublicCategory =
+    GetPublicCategoriesReturnType extends Array<infer Item> ? Item : never;
 
 export type FetchPublicCategoriesData = {
     categories: GetPublicCategoriesReturnType;

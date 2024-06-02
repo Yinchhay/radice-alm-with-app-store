@@ -4,6 +4,7 @@ import { Roboto_Condensed, Roboto } from "next/font/google";
 import Image from "next/image";
 import { useState } from "react";
 import TechButton from "./TechButton";
+import { GetPublicCategoriesReturnType } from "@/app/api/public/categories/route";
 
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -19,7 +20,7 @@ const roboto = Roboto({
 export default function Carousel({
     categories,
 }: {
-    categories: GetCategoriesReturnType;
+    categories: GetPublicCategoriesReturnType;
 }) {
     const [currentSlide, setCurrentSlide] = useState(0);
 

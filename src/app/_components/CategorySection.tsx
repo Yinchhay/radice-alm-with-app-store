@@ -8,20 +8,17 @@ import {
 import Link from "next/link";
 import TechButton from "@/components/TechButton";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import CategoryProjectLogo from "./CategoryProjectLogo";
+import SpecialEffectText from "../../components/Effects/SpecialEffectText";
+import SpecialEffectSentence from "../../components/Effects/SpecialEffectSentence";
+import { PublicCategory } from "../api/public/categories/route";
 
 export default function CategorySection({
     variant = "light",
     category,
 }: {
     variant: string;
-    category: {
-        id: number;
-        name: string;
-        isActive: boolean | null;
-        description: string | null;
-        createdAt: Date | null;
-        updatedAt: Date | null;
-    };
+    category: PublicCategory;
 }) {
     const [selectedProject, setSelectedProject] = useState<number>(0);
     const [projects, setProjects] = useState<getProjectsByCategoryReturnType>(
@@ -32,7 +29,6 @@ export default function CategorySection({
         async function loadProjects() {
             const results = await getProjectsByCategory(category.id);
             setProjects(results);
-            console.log(results);
         }
         loadProjects();
     }, []);
@@ -41,29 +37,42 @@ export default function CategorySection({
             return (
                 <>
                     {projects.length > 0 && (
-                        <div className="bg-white py-16">
+                        <div className="bg-white py-16 min-h-[620px]">
                             <div className="container mx-auto">
                                 <h1 className="text-5xl font-bold">
-                                    {category.name}
+                                    {category.shortName}
                                 </h1>
                                 <div>
                                     <div className="grid grid-cols-3">
                                         <div className="mt-8">
-                                            <ImageWithFallback
+                                            <CategoryProjectLogo
+                                                variant="light"
                                                 src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
-                                                width={120}
-                                                height={120}
-                                                className="aspect-square object-cover border border-gray-200"
-                                                alt=""
                                             />
-                                            <h2 className="font-bold text-2xl mt-2">
-                                                {projects[selectedProject].name}
+                                            <h2 className="font-bold text-4xl mt-8 truncate text-ellipsis">
+                                                <SpecialEffectText
+                                                    delay={50}
+                                                    shuffleSpeed={15}
+                                                    randomAmount={1}
+                                                    originalText={
+                                                        projects[
+                                                            selectedProject
+                                                        ].name
+                                                    }
+                                                />
                                             </h2>
-                                            <p className="mt-2 mb-12 line-clamp-3">
-                                                {
-                                                    projects[selectedProject]
-                                                        .description
-                                                }
+                                            <p className="mt-2 mb-12 line-clamp-4">
+                                                <SpecialEffectSentence
+                                                    delay={50}
+                                                    shuffleSpeed={25}
+                                                    randomAmount={12}
+                                                    originalText={
+                                                        projects[
+                                                            selectedProject
+                                                        ].description ||
+                                                        "This project does not have a description."
+                                                    }
+                                                />
                                             </p>
                                             <TechButton
                                                 variant="dark"
@@ -112,11 +121,11 @@ export default function CategorySection({
                                                                                 80
                                                                             }
                                                                             className={[
-                                                                                "aspect-square object-cover transition-all border border-gray-200",
+                                                                                "aspect-square object-cover duration-200 border border-gray-200",
                                                                                 selectedProject ==
                                                                                 i
                                                                                     ? "scale-[85%]"
-                                                                                    : "",
+                                                                                    : "hover:scale-[90%]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
@@ -141,13 +150,13 @@ export default function CategorySection({
             return (
                 <>
                     {projects.length > 0 && (
-                        <div className="bg-black py-16 text-white h-[">
+                        <div className="bg-black py-16 text-white min-h-[620px]">
                             <div className="container mx-auto">
                                 <div className="grid grid-cols-3">
                                     <div></div>
                                     <div></div>
                                     <h1 className="text-5xl font-bold">
-                                        {category.name}
+                                        {category.shortName}
                                     </h1>
                                 </div>
 
@@ -210,21 +219,34 @@ export default function CategorySection({
                                         </div>
                                         <div></div>
                                         <div className="mt-8">
-                                            <ImageWithFallback
+                                            <CategoryProjectLogo
+                                                variant="dark"
                                                 src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
-                                                width={120}
-                                                height={120}
-                                                className="aspect-square object-cover border border-gray-800"
-                                                alt=""
                                             />
-                                            <h2 className="font-bold text-2xl mt-2 truncate text-ellipsis">
-                                                {projects[selectedProject].name}
+                                            <h2 className="font-bold text-4xl mt-8 truncate text-ellipsis">
+                                                <SpecialEffectText
+                                                    delay={50}
+                                                    shuffleSpeed={15}
+                                                    randomAmount={1}
+                                                    originalText={
+                                                        projects[
+                                                            selectedProject
+                                                        ].name
+                                                    }
+                                                />
                                             </h2>
-                                            <p className="mt-2 mb-12 line-clamp-3">
-                                                {
-                                                    projects[selectedProject]
-                                                        .description
-                                                }
+                                            <p className="mt-2 mb-12 line-clamp-4">
+                                                <SpecialEffectSentence
+                                                    delay={50}
+                                                    shuffleSpeed={25}
+                                                    randomAmount={12}
+                                                    originalText={
+                                                        projects[
+                                                            selectedProject
+                                                        ].description ||
+                                                        "This project does not have a description."
+                                                    }
+                                                />
                                             </p>
                                             <TechButton
                                                 variant="light"
