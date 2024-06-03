@@ -1,33 +1,27 @@
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
 import * as schema from "./schema";
-import connection from "./connection";
-
-// export const db = drizzle(connection(), {
-//     schema,
-//     mode: "default",
-// });
+import mysqlPool from "./connection";
 
 declare global {
     var db: typeof dbInstance | undefined;
 }
 
-let dbInstance = drizzle(connection(), {
-    schema,
-    mode: "default",
-});
+let dbInstance: MySql2Database<typeof schema>;
 
+// Reuse the same connection in development to avoid creating multiple connections causing too many connections error
 if (process.env.NODE_ENV === "production") {
-    dbInstance = drizzle(connection(), {
+    dbInstance = drizzle(mysqlPool, {
         schema,
         mode: "default",
     });
 } else {
     if (!global.db) {
-        global.db = drizzle(connection(), {
+        global.db = drizzle(mysqlPool, {
             schema,
             mode: "default",
         });
     }
+
     dbInstance = global.db;
 }
 
