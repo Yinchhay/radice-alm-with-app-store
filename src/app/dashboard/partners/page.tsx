@@ -6,12 +6,12 @@ import TableBody from "@/components/table/TableBody";
 import TableRow from "@/components/table/TableRow";
 import Cell from "@/components/table/Cell";
 import { CreatePartnerOverlay } from "./create_partner";
-import { users } from "@/drizzle/schema";
 import { hasPermission } from "@/lib/IAM";
 import { getAuthUser } from "@/auth/lucia";
 import { Permissions } from "@/types/IAM";
 import { fetchPartners } from "./fetch";
 import { DeletePartnerOverlay } from "./delete_partner";
+import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 
 export default async function ManagePartners() {
     const user = await getAuthUser();
@@ -83,7 +83,7 @@ function Partner({
     partner,
     canDeletePartner,
 }: {
-    partner: typeof users.$inferSelect;
+    partner: UserWithoutPassword;
     canDeletePartner: boolean;
 }) {
     return (

@@ -23,8 +23,10 @@ import { editMemberArray } from "@/app/api/internal/project/[project_id]/schema"
 import { z } from "zod";
 import { usePathname } from "next/navigation";
 
+export type UserWithoutPassword = Omit<typeof users.$inferSelect, 'password'>
+
 export type MemberList = {
-    member: typeof users.$inferSelect;
+    member: UserWithoutPassword;
     title: string;
     canEdit: boolean;
 };
@@ -35,8 +37,8 @@ export default function ProjectMember({
     originalProjectMembers,
 }: {
     project: FetchOneAssociatedProjectData["project"];
-    usersInTheSystem: (typeof users.$inferSelect)[];
-    originalProjectMembers: (typeof users.$inferSelect)[];
+    usersInTheSystem: (UserWithoutPassword)[];
+    originalProjectMembers: (UserWithoutPassword)[];
 }) {
     if (!project) {
         throw new Error("Project not found");
@@ -256,7 +258,7 @@ function Member({
     onRemove,
     onCanEditChange,
 }: {
-    member: typeof users.$inferSelect;
+    member: UserWithoutPassword;
     title: string;
     canEdit: boolean;
     onRemove: (id: string) => void;

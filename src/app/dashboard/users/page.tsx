@@ -12,6 +12,7 @@ import { users } from "@/drizzle/schema";
 import { getAuthUser } from "@/auth/lucia";
 import { hasPermission } from "@/lib/IAM";
 import { Permissions } from "@/types/IAM";
+import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 
 export default async function ManageUsers() {
     const user = await getAuthUser();
@@ -74,7 +75,7 @@ function NoUser() {
     );
 }
 
-function User({ user, canDeleteUser }: { user: typeof users.$inferSelect, canDeleteUser: boolean; }) {
+function User({ user, canDeleteUser }: { user: UserWithoutPassword, canDeleteUser: boolean; }) {
     return (
         <TableRow>
             <Cell data-test={`userName-${user.firstName}${user.lastName}`}>

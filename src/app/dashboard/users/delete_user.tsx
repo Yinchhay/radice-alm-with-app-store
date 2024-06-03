@@ -3,19 +3,17 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
-import { users } from "@/drizzle/schema";
 import { IconX } from "@tabler/icons-react";
-
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
-
 import { fetchDeleteUserById } from "./fetch";
+import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 
 export function DeleteUserOverlay({
     user,
 }: {
-    user: typeof users.$inferSelect;
+    user: UserWithoutPassword;
 }) {
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);

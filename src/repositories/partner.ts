@@ -18,6 +18,9 @@ export const createPartner = async (user: typeof users.$inferInsert) => {
 export type GetPartners_C_Tag = `getPartners_C`;
 export const getPartners = async (search: string = "") => {
     return await db.query.users.findMany({
+        columns: {
+            password: false,
+        },
         where: (table) => and(eq(table.type, UserType.PARTNER), like(table.email, `%${search}%`)),
         orderBy: sql`id DESC`,
     });

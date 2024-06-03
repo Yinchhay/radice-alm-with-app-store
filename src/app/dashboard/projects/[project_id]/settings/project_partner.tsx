@@ -21,9 +21,10 @@ import { fetchEditProjectSettingsPartners } from "./fetch";
 import Selector from "@/components/Selector";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { usePathname } from "next/navigation";
+import { UserWithoutPassword } from "./project_member";
 
 export type PartnerList = {
-    partner: typeof users.$inferSelect;
+    partner: UserWithoutPassword;
 };
 
 export default function ProjectPartner({
@@ -32,8 +33,8 @@ export default function ProjectPartner({
     originalProjectPartners,
 }: {
     project: FetchOneAssociatedProjectData["project"];
-    partnersInTheSystem: (typeof users.$inferSelect)[];
-    originalProjectPartners: (typeof users.$inferSelect)[];
+    partnersInTheSystem: (UserWithoutPassword)[];
+    originalProjectPartners: (UserWithoutPassword)[];
 }) {
     if (!project) {
         throw new Error("Project not found");
@@ -224,7 +225,7 @@ function Partner({
     partner,
     onRemove,
 }: {
-    partner: typeof users.$inferSelect;
+    partner: UserWithoutPassword;
     onRemove: (id: string) => void;
 }) {
     return (

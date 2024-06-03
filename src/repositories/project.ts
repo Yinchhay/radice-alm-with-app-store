@@ -126,12 +126,20 @@ export async function getOneAssociatedProject(project_id: number) {
             },
             projectMembers: {
                 with: {
-                    user: true,
+                    user: {
+                        columns: {
+                            password: false,
+                        },
+                    },
                 },
             },
             projectPartners: {
                 with: {
-                    partner: true,
+                    partner: {
+                        columns: {
+                            password: false,
+                        },
+                    },
                 },
             },
             files: true,

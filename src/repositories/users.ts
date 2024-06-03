@@ -22,6 +22,9 @@ export const getUserById_C = async (userId: string) => {
         async (userId: string) => {
             return (
                 (await db.query.users.findFirst({
+                    columns: {
+                        password: false,
+                    },
                     where: (user, { eq }) => eq(user.id, userId),
                 })) || null
             );
@@ -37,6 +40,7 @@ export const getUserById_C = async (userId: string) => {
  * not everywhere is required to use cache, for example this function
  * is used in the login page, and we don't want to cache the user
  */
+// for login, so no need to hide password
 export const getUserByEmail = async (email: string) => {
     return await db.query.users.findFirst({
         where: (user, { eq }) => eq(user.email, email),
@@ -61,6 +65,9 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
     return await cache(
         async (userId: string) => {
             return await db.query.users.findFirst({
+                columns: {
+                    password: false,
+                },
                 where: (table, { eq }) => eq(table.id, userId),
                 with: {
                     userRoles: {
@@ -106,6 +113,9 @@ export const getAllUsers = async () => {
 
 export const getAllUsersExceptThisUser = async (userId: string) => {
     return await db.query.users.findMany({
+        columns: {
+            password: false,
+        },
         where: (table, { and, eq, not }) =>
             and(eq(table.type, UserType.USER), not(eq(table.id, userId)), eq(table.hasLinkedGithub, 
             // TODO: on production, this should be true 
@@ -115,6 +125,9 @@ export const getAllUsersExceptThisUser = async (userId: string) => {
 
 export const getAllPartnersExceptThisUser = async (userId: string) => {
     return await db.query.users.findMany({
+        columns: {
+            password: false,
+        },
         where: (table, { and, eq, not }) =>
             and(eq(table.type, UserType.PARTNER), not(eq(table.id, userId))),
     });
@@ -128,6 +141,9 @@ export const getUsers = async (
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,
+        columns: {
+            password: false,
+        },
     });
 };
 
