@@ -1,4 +1,4 @@
-import GridRevealImage from "@/components/Effects/GridRevealImage";
+import GridRevealImage from "@/components/effects/GridRevealImage";
 import ImageWithFallback from "@/components/ImageWithFallback";
 
 export default function CategoryProjectLogo({
@@ -11,7 +11,7 @@ export default function CategoryProjectLogo({
     return (
         <div className="relative">
             <GridRevealImage
-                isAlphabet={false}
+                isAlphabet={true}
                 variant={variant}
                 src={src}
                 width={120}

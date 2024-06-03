@@ -1,7 +1,7 @@
 "use client";
 import { v4 as uuidv4 } from "uuid";
-
 import ImageWithFallback from "../ImageWithFallback";
+
 function getRandomBinary(): number {
     return Math.floor(Math.random() * 2);
 }
@@ -53,22 +53,39 @@ export default function GridRevealImage({
     variant?: "hacker" | "light" | "dark";
     isAlphabet?: boolean;
 }) {
+    const getCellStyles = (i: number) => ({
+        animationName: "fadeOut",
+        animationDuration: `${cellFadeSpeed}ms`,
+        animationDelay: `${i * revealSpeed}ms`,
+        animationFillMode: "forwards",
+    });
+
+    const getVariantClasses = () => {
+        switch (variant) {
+            case "hacker":
+                return "bg-black text-green-500";
+            case "light":
+            case "dark":
+                return "bg-black text-white";
+            default:
+                return "";
+        }
+    };
+
     return (
-        <div className="relative">
+        <div className={`relative w-[${width}px] h-[${height}px]`}>
             <ImageWithFallback
                 src={src}
                 width={width}
                 height={height}
-                className={className}
                 alt={alt}
+                className={className}
             />
             <div
-                className={[
-                    `w-[${width}px]`,
-                    `h-[${height}px]`,
-                    "absolute top-0 left-0 z-10 grid select-none pointer-events-none grid-flow-col",
-                ].join(" ")}
+                className="absolute top-0 left-0 z-10 grid select-none pointer-events-none grid-flow-col"
                 style={{
+                    width,
+                    height,
                     gridTemplateRows: `repeat(${rows}, 1fr)`,
                     gridTemplateColumns: `repeat(${cols}, 1fr)`,
                 }}
@@ -76,21 +93,8 @@ export default function GridRevealImage({
                 {Array.from({ length: rows * cols }).map((_, i) => (
                     <div
                         key={uuidv4()}
-                        className={[
-                            "transition-colors text-sm text-center",
-                            variant == "hacker"
-                                ? "bg-black text-green-500"
-                                : "",
-                            variant == "light" || variant == "dark"
-                                ? "bg-black text-white"
-                                : "",
-                        ].join(" ")}
-                        style={{
-                            animationName: "fadeOut",
-                            animationDuration: `${cellFadeSpeed}ms`,
-                            animationDelay: `${i * revealSpeed}ms`,
-                            animationFillMode: "forwards",
-                        }}
+                        className={`transition-colors text-sm text-center ${getVariantClasses()}`}
+                        style={getCellStyles(i)}
                     >
                         {isAlphabet ? getRandomAlphabet() : getRandomBinary()}
                     </div>
