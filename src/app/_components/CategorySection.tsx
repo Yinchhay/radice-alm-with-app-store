@@ -1,17 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FetchAssociatedProjectsData } from "../api/internal/project/associate/route";
-import {
-    getProjectsByCategory,
-    getProjectsByCategoryReturnType,
-} from "../fetch";
-import Link from "next/link";
+import { fetchPublicProjectsByCategory } from "../fetch";
 import TechButton from "@/components/TechButton";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import CategoryProjectLogo from "./CategoryProjectLogo";
 import SpecialEffectText from "../../components/Effects/SpecialEffectText";
 import SpecialEffectSentence from "../../components/Effects/SpecialEffectSentence";
 import { PublicCategory } from "../api/public/categories/route";
+import { GetPublicProjectsByCategoryReturnType } from "../api/public/categories/[category_id]/projects/route";
 
 export default function CategorySection({
     variant = "light",
@@ -21,22 +17,24 @@ export default function CategorySection({
     category: PublicCategory;
 }) {
     const [selectedProject, setSelectedProject] = useState<number>(0);
-    const [projects, setProjects] = useState<getProjectsByCategoryReturnType>(
-        [],
-    );
+    const [projects, setProjects] =
+        useState<GetPublicProjectsByCategoryReturnType>();
 
     useEffect(() => {
         async function loadProjects() {
-            const results = await getProjectsByCategory(category.id);
-            setProjects(results);
+            const results = await fetchPublicProjectsByCategory(category.id);
+            if (results.success) {
+                setProjects(results.data.projects);
+            }
         }
         loadProjects();
     }, []);
+
     switch (variant) {
         case "light":
             return (
                 <>
-                    {projects.length > 0 && (
+                    {projects && projects.length > 0 && (
                         <div className="bg-white py-16 min-h-[620px]">
                             <div className="container mx-auto">
                                 <h1 className="text-5xl font-bold">
@@ -149,7 +147,7 @@ export default function CategorySection({
         case "dark":
             return (
                 <>
-                    {projects.length > 0 && (
+                    {projects && projects.length > 0 && (
                         <div className="bg-black py-16 text-white min-h-[620px]">
                             <div className="container mx-auto">
                                 <div className="grid grid-cols-3">

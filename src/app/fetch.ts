@@ -6,6 +6,7 @@ import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { eq, sql, or, inArray, count, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { FetchPublicCategoriesData } from "./api/public/categories/route";
+import { FetchPublicProjectsCategoriesData } from "./api/public/categories/[category_id]/projects/route";
 
 // export async function getCategories() {
 //     const categories = await db.query.categories.findMany();
@@ -14,14 +15,11 @@ import { FetchPublicCategoriesData } from "./api/public/categories/route";
 
 export async function fetchPublicCategories(): ResponseJson<FetchPublicCategoriesData> {
     try {
-        const sessionId = await getSessionCookie();
         const response = await fetch(
             `${await getBaseUrl()}/api/public/categories`,
             {
                 method: "GET",
-                headers: {
-                    Authorization: `Bearer ${sessionId}`,
-                },
+                cache: "no-cache",
             },
         );
         return await response.json();
@@ -30,34 +28,17 @@ export async function fetchPublicCategories(): ResponseJson<FetchPublicCategorie
     }
 }
 
-export type getProjectsByCategoryReturnType = Awaited<
-    ReturnType<typeof getProjectsByCategory>
->;
-export async function getProjectsByCategory(categoryId: number) {
-    return await db.query.projects.findMany({
-        with: {
-            projectCategories: {
-                with: {
-                    category: true,
-                },
+export async function fetchPublicProjectsByCategory(categoryId: number): ResponseJson<FetchPublicProjectsCategoriesData> {
+    try {
+        const response = await fetch(
+            `${await getBaseUrl()}/api/public/categories/${categoryId}/projects`,
+            {
+                method: "GET",
+                cache: "no-cache",
             },
-            // projectMembers: true,
-            // projectPartners: true,
-        },
-        where: (table, { eq, exists, and }) =>
-            and(
-                eq(table.isPublic, true),
-                exists(
-                    db
-                        .select()
-                        .from(projectCategories)
-                        .where(
-                            and(
-                                eq(projectCategories.categoryId, categoryId),
-                                eq(projectCategories.projectId, table.id),
-                            ),
-                        ),
-                ),
-            ),
-    });
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
 }

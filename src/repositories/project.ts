@@ -327,3 +327,30 @@ export async function updateProjectPipelineStatus(
         })
         .where(eq(projects.id, projectId));
 }
+
+export async function getPublicProjectsByCategory(categoryId: number) {
+    return await db.query.projects.findMany({
+        with: {
+            projectCategories: {
+                with: {
+                    category: true,
+                },
+            },
+        },
+        where: (table, { eq, exists, and }) =>
+            and(
+                eq(table.isPublic, true),
+                exists(
+                    db
+                        .select()
+                        .from(projectCategories)
+                        .where(
+                            and(
+                                eq(projectCategories.categoryId, categoryId),
+                                eq(projectCategories.projectId, table.id),
+                            ),
+                        ),
+                ),
+            ),
+    });
+}
