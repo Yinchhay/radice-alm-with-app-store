@@ -2,8 +2,16 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import MemberProfile, { MemberProfileType } from "./_components/MemberProfile";
 import { getMembers } from "./fetch";
+import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
+
+const roboto_condensed = Roboto_Condensed({
+    weight: ["400", "700"],
+    subsets: ["latin"],
+    display: "swap",
+});
+const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
 
 export default async function page() {
     const members = await getMembers();
@@ -13,6 +21,7 @@ export default async function page() {
             firstName: "Neil IAN",
             lastName: "UY",
             profileUrl: "/neil.jpg",
+            title: "Consultant",
             email: "nuy@paragoniu.edu.kh",
             description:
                 "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University, Dumaguete City, Philippines.",
@@ -22,6 +31,7 @@ export default async function page() {
             lastName: "Soth",
             profileUrl: "/ratana.jpg",
             email: "rsoth@paragoniu.edu.kh",
+            title: "Director",
             description:
                 "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University, Dumaguete City, Philippines. ",
         },
@@ -31,7 +41,9 @@ export default async function page() {
         <div>
             <Navbar />
             <div className="container mx-auto py-12">
-                <h1 className="text-center font-bold text-5xl pb-8">
+                <h1
+                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                >
                     Who We Are
                 </h1>
                 <p className="text-center mx-auto max-w-[800px]">
@@ -52,19 +64,27 @@ export default async function page() {
                 </p>
             </div>
             <div className="bg-black text-white py-12">
-                <h1 className="text-center font-bold text-5xl pb-8">
-                    Our Advisors
+                <h1
+                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                >
+                    Co-Founders
                 </h1>
                 <div className="flex justify-center gap-8 mt-4">
                     {advisors.map((adivsor, i) => {
                         return (
-                            <MemberProfile member={adivsor} variant="dark" />
+                            <MemberProfile
+                                member={adivsor}
+                                variant="dark"
+                                useTitle
+                            />
                         );
                     })}
                 </div>
             </div>
             <div className="container mx-auto py-12">
-                <h1 className="text-center font-bold text-5xl pb-8">
+                <h1
+                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                >
                     Our Members
                 </h1>
                 <div className="flex justify-center gap-8 mt-4">

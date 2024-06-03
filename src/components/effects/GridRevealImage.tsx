@@ -1,6 +1,7 @@
 "use client";
 import { v4 as uuidv4 } from "uuid";
 import ImageWithFallback from "../ImageWithFallback";
+import { useEffect, useState } from "react";
 
 function getRandomBinary(): number {
     return Math.floor(Math.random() * 2);
@@ -40,6 +41,8 @@ export default function GridRevealImage({
     revealSpeed = 5,
     variant = "hacker",
     isAlphabet = true,
+    canReveal = false,
+    fill = false,
 }: {
     src: string;
     width: number;
@@ -52,13 +55,18 @@ export default function GridRevealImage({
     revealSpeed?: number;
     variant?: "hacker" | "light" | "dark";
     isAlphabet?: boolean;
+    canReveal?: boolean;
+    fill?: boolean;
 }) {
-    const getCellStyles = (i: number) => ({
-        animationName: "fadeOut",
-        animationDuration: `${cellFadeSpeed}ms`,
-        animationDelay: `${i * revealSpeed}ms`,
-        animationFillMode: "forwards",
-    });
+    const [canPlay, setCanPlay] = useState("paused");
+
+    useEffect(() => {
+        if (canReveal) {
+            setCanPlay("running");
+        } else {
+            setCanPlay("paused");
+        }
+    }, [canReveal]);
 
     const getVariantClasses = () => {
         switch (variant) {
@@ -75,9 +83,10 @@ export default function GridRevealImage({
     return (
         <div className={`relative w-[${width}px] h-[${height}px]`}>
             <ImageWithFallback
+                fill={fill}
                 src={src}
-                width={width}
-                height={height}
+                width={fill ? undefined : width}
+                height={fill ? undefined : height}
                 alt={alt}
                 className={className}
             />
@@ -94,7 +103,13 @@ export default function GridRevealImage({
                     <div
                         key={uuidv4()}
                         className={`transition-colors text-sm text-center ${getVariantClasses()}`}
-                        style={getCellStyles(i)}
+                        style={{
+                            animationPlayState: canPlay,
+                            animationName: "fadeOut",
+                            animationDuration: `${cellFadeSpeed}ms`,
+                            animationDelay: `${i * revealSpeed}ms`,
+                            animationFillMode: "forwards",
+                        }}
                     >
                         {isAlphabet ? getRandomAlphabet() : getRandomBinary()}
                     </div>

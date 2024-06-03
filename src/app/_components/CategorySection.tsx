@@ -8,6 +8,13 @@ import SpecialEffectText from "../../components/effects/SpecialEffectText";
 import SpecialEffectSentence from "../../components/effects/SpecialEffectSentence";
 import { PublicCategory } from "../api/public/categories/route";
 import { GetPublicProjectsByCategoryReturnType } from "../api/public/categories/[category_id]/projects/route";
+import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
+const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
+const roboto_condensed = Roboto_Condensed({
+    weight: ["400", "700"],
+    subsets: ["latin"],
+    display: "swap",
+});
 
 export default function CategorySection({
     variant = "light",
@@ -37,17 +44,27 @@ export default function CategorySection({
                     {projects && projects.length > 0 && (
                         <div className="bg-white py-16 min-h-[620px]">
                             <div className="container mx-auto">
-                                <h1 className="text-5xl font-bold">
+                                <h1
+                                    className={[
+                                        "text-6xl font-bold",
+                                        roboto_condensed.className,
+                                    ].join(" ")}
+                                >
                                     {category.shortName}
                                 </h1>
                                 <div>
-                                    <div className="grid grid-cols-3 mt-8">
-                                        <div>
+                                    <div className="flex justify-between mt-8">
+                                        <div className="w-[600px]">
                                             <CategoryProjectLogo
                                                 variant="light"
                                                 src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
                                             />
-                                            <h2 className="font-bold text-4xl mt-8 break-words max-w-[600px]">
+                                            <h2
+                                                className={[
+                                                    "font-bold text-4xl mt-8 break-words max-w-[600px]",
+                                                    roboto_condensed.className,
+                                                ].join(" ")}
+                                            >
                                                 <SpecialEffectText
                                                     delay={50}
                                                     shuffleSpeed={15}
@@ -78,11 +95,15 @@ export default function CategorySection({
                                                 text="VIEW"
                                             />
                                         </div>
-                                        <div></div>
-                                        <div className="flex">
-                                            <div>
+                                        <div className="w-[600px]">
+                                            <div className="w-[480px]">
                                                 <div className="ml-2 flex mb-2">
-                                                    <h3 className="border-b-[3px] border-black pb-[2px] uppercase">
+                                                    <h3
+                                                        className={[
+                                                            "border-b-[3px] border-black pb-[2px] uppercase",
+                                                            roboto_flex.className,
+                                                        ].join(" ")}
+                                                    >
                                                         {category.name}
                                                     </h3>
                                                 </div>
@@ -123,7 +144,7 @@ export default function CategorySection({
                                                                         )}
                                                                         alt=""
                                                                     />{" "}
-                                                                    <div className="w-[80px] h-[80px] absolute top-2 left-2">
+                                                                    <div className="w-[80px] h-[80px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
                                                                         <div
                                                                             className={[
                                                                                 "duration-150 group-active:duration-75 border-t border-l border-black w-5 h-5 bg-transparent absolute",
@@ -189,18 +210,18 @@ export default function CategorySection({
                     {projects && projects.length > 0 && (
                         <div className="bg-black py-16 text-white min-h-[620px]">
                             <div className="container mx-auto">
-                                <div className="grid grid-cols-3">
-                                    <div></div>
-                                    <div></div>
-                                    <h1 className="text-5xl font-bold">
-                                        {category.shortName}
-                                    </h1>
+                                <div className="flex justify-end">
+                                    <div className="w-[600px]">
+                                        <h1 className="text-5xl font-bold">
+                                            {category.shortName}
+                                        </h1>
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <div className="grid grid-cols-3 mt-8">
-                                        <div className="flex">
-                                            <div>
+                                    <div className="flex justify-between mt-8">
+                                        <div className="w-[600px]">
+                                            <div className="w-[480px]">
                                                 <div className="ml-2 flex mb-2">
                                                     <h3 className="border-b-[3px] border-white pb-[2px] uppercase">
                                                         {category.name}
@@ -296,8 +317,7 @@ export default function CategorySection({
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div></div>
-                                        <div>
+                                        <div className="w-[600px]">
                                             <CategoryProjectLogo
                                                 variant="dark"
                                                 src={`/api/file?filename=${projects[selectedProject].logoUrl}`}

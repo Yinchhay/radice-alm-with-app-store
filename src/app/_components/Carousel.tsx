@@ -5,14 +5,9 @@ import { useState } from "react";
 import TechButton from "../../components/TechButton";
 import { GetPublicCategoriesReturnType } from "@/app/api/public/categories/route";
 import ImageWithFallback from "@/components/ImageWithFallback";
-import { fileToUrl, getFileStoragePath } from "@/lib/file";
+import { fileToUrl } from "@/lib/file";
 
 const roboto_condensed = Roboto_Condensed({
-    weight: ["400", "700"],
-    subsets: ["latin"],
-    display: "swap",
-});
-const roboto = Roboto({
     weight: ["400", "700"],
     subsets: ["latin"],
     display: "swap",
@@ -33,39 +28,13 @@ export default function Carousel({
         } else setCurrentSlide(currentSlide + amount);
     }
 
-    const currentSlideImages = [
-        {
-            name: "EdTech",
-            image: "edtech.jpg",
-        },
-        {
-            name: "FinTech",
-            image: "fintech.jpg",
-        },
-        {
-            name: "HealthTech",
-            image: "healthtech.jpg",
-        },
-        {
-            name: "ServiceTech",
-            image: "servicetech.jpg",
-        },
-    ];
-
-    function getImageByCategoryName(name: string) {
-        const categoryImage = currentSlideImages.find(
-            (category) => category.name === name,
-        );
-        return categoryImage ? categoryImage.image : "placeholder.webp"; // Provide a default image if no match is found
-    }
-
     return (
         <div>
-            <div className="container grid grid-cols-5 m-auto pt-24 gap-16">
+            <div className="container grid grid-cols-5 m-auto pt-24 gap-10">
                 <div className="relative col-span-3">
                     <div className="absolute w-full h-[400px] flex items-center justify-between z-20">
                         <button
-                            className="ml-4 text-white -scale-100 hover:-scale-75 transition-all p-4"
+                            className="ml-4 text-white -scale-100 hover:-scale-75 duration-200 p-4"
                             onClick={() => changeSlide(-1)}
                         >
                             <Image
@@ -76,7 +45,7 @@ export default function Carousel({
                             />
                         </button>
                         <button
-                            className="ml-4 text-white hover:scale-75 transition-all p-4"
+                            className="ml-4 text-white hover:scale-75 duration-200 p-4"
                             onClick={() => changeSlide(1)}
                         >
                             <Image
@@ -101,15 +70,25 @@ export default function Carousel({
                             );
                         })}
                     </ul>
-                    <h2 className="text-white text-6xl font-bold leading-[0.90] translate-y-[100%] animate-reveal text-center mt-8">
+                    <h2
+                        className={[
+                            "text-white text-6xl font-bold leading-[0.90] translate-y-[100%] animate-reveal text-center mt-8",
+                            roboto_condensed.className,
+                        ].join(" ")}
+                    >
                         {categories.length > 0
                             ? categories[currentSlide].shortName
                             : ""}
                     </h2>
                 </div>
-                <div className="col-span-2 relative">
+                <div className="col-span-2 relative ">
                     <div className="overflow-hidden">
-                        <h2 className="uppercase text-white text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal">
+                        <h2
+                            className={[
+                                "w-[580px] uppercase text-white text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal",
+                                roboto_condensed.className,
+                            ].join(" ")}
+                        >
                             Research & Development
                         </h2>
                     </div>

@@ -1,3 +1,4 @@
+import { Roboto_Flex } from "next/font/google";
 import Link from "next/link";
 import { forwardRef } from "react";
 
@@ -7,13 +8,21 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     variant: "dark" | "light";
 };
 
+const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
+
 const TechButton = forwardRef<HTMLButtonElement, ButtonProps>(
     ({ text, link, variant, className, ...props }, ref) => {
         if (link) {
             switch (variant) {
                 case "dark":
                     return (
-                        <div className={["flex mx-[8px]", className].join(" ")}>
+                        <div
+                            className={[
+                                "flex mx-[8px]",
+                                className,
+                                roboto_flex.className,
+                            ].join(" ")}
+                        >
                             <Link
                                 href={link}
                                 className="relative group inline-block"
