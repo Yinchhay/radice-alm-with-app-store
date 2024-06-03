@@ -362,3 +362,59 @@ export async function getPublicProjectsByCategory(categoryId: number) {
             ),
     });
 }
+
+export async function getPublicProjectsByUserId(userId: string) {
+    return await db.query.projects.findMany({
+        with: {
+            projectCategories: {
+                with: {
+                    category: true,
+                },
+            },
+            user: {
+                columns: {
+                    password: false,
+                },
+            },
+        },
+        where: (table, { eq, and }) =>
+            and(eq(table.isPublic, true), eq(table.userId, userId)),
+    });
+}
+
+export async function getProjectByIdForPublic(project_id: number) {
+    return await db.query.projects.findFirst({
+        where: (table, { eq, and }) =>
+            and(eq(table.isPublic, true), eq(table.id, project_id)),
+        with: {
+            projectCategories: {
+                with: {
+                    category: true,
+                },
+            },
+            projectMembers: {
+                with: {
+                    user: {
+                        columns: {
+                            password: false,
+                        },
+                    },
+                },
+            },
+            projectPartners: {
+                with: {
+                    partner: {
+                        columns: {
+                            password: false,
+                        },
+                    },
+                },
+            },
+            user: {
+                columns: {
+                    password: false,
+                },
+            },
+        },
+    });
+}

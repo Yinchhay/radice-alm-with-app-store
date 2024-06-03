@@ -7,36 +7,6 @@ import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 
 /**
- * cache by next js is different from cache by react.
- * next js cache is a server side cache, even when the page is refreshed
- * the cache will still be there, unless the cache is invalidated by the user.
- * on the other hand, react cache is a client side cache, when the page is refreshed
- * the cache will be invalidated.
- * Note: cache will memoized the arguments, so if the arguments are the same,
- * the cache will return the same value
- */
-export type GetUserById_C_Tag = `getUserById_C:${string}`;
-export const getUserById_C = async (userId: string) => {
-    // dynamically cache user by their userId
-    return await cache(
-        async (userId: string) => {
-            return (
-                (await db.query.users.findFirst({
-                    columns: {
-                        password: false,
-                    },
-                    where: (user, { eq }) => eq(user.id, userId),
-                })) || null
-            );
-        },
-        [],
-        {
-            tags: [`getUserById_C:${userId}`],
-        },
-    )(userId);
-};
-
-/**
  * not everywhere is required to use cache, for example this function
  * is used in the login page, and we don't want to cache the user
  */
@@ -105,9 +75,38 @@ export const deleteUserById = async (userId: string) => {
 
 export type GetUsers_C_Tag = `getUsers_C`;
 
-export const getAllUsers = async () => {
+export const getAllUsers = async (hasLinkedGithub: boolean = true) => {
+    if (process.env.NODE_ENV !== "development") {
+        hasLinkedGithub = true;
+    }
+
     return await db.query.users.findMany({
-        where: (table, { eq }) => eq(table.type, UserType.USER),
+        columns: {
+            password: false,
+        },
+        where: (table, { eq, and }) =>
+            and(
+                eq(table.type, UserType.USER),
+                eq(table.hasLinkedGithub, hasLinkedGithub),
+            ),
+    });
+};
+
+export const getUserById = async (userId: string, hasLinkedGithub: boolean = true) => {
+    if (process.env.NODE_ENV !== "development") {
+        hasLinkedGithub = true;
+    }
+
+    return await db.query.users.findFirst({
+        columns: {
+            password: false,
+        },
+        where: (table, { eq, and }) =>
+            and(
+                eq(table.id, userId),
+                eq(table.type, UserType.USER),
+                eq(table.hasLinkedGithub, hasLinkedGithub),
+            ),
     });
 };
 
@@ -117,11 +116,17 @@ export const getAllUsersExceptThisUser = async (userId: string) => {
             password: false,
         },
         where: (table, { and, eq, not }) =>
-            and(eq(table.type, UserType.USER), not(eq(table.id, userId)), eq(table.hasLinkedGithub, 
-            // TODO: on production, this should be true 
-            false)),
+            and(
+                eq(table.type, UserType.USER),
+                not(eq(table.id, userId)),
+                eq(
+                    table.hasLinkedGithub,
+                    // TODO: on production, this should be true
+                    false,
+                ),
+            ),
     });
-}
+};
 
 export const getAllPartnersExceptThisUser = async (userId: string) => {
     return await db.query.users.findMany({
@@ -131,7 +136,7 @@ export const getAllPartnersExceptThisUser = async (userId: string) => {
         where: (table, { and, eq, not }) =>
             and(eq(table.type, UserType.PARTNER), not(eq(table.id, userId))),
     });
-}
+};
 
 export const getUsers = async (
     page: number = 1,
