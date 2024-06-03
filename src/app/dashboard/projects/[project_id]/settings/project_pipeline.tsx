@@ -12,7 +12,7 @@ import { fetchEditProjectSettingsPipeline } from "./fetch";
 import { usePathname } from "next/navigation";
 
 /**
- * Any change to the pipeline type please change in 
+ * Any change to the pipeline type please change in
  * projectPipeLineStatusType in src\app\api\internal\project\[project_id]\schema.ts
  */
 export function ProjectPipeline({
@@ -103,7 +103,7 @@ export function ProjectPipeline({
 
     async function onSubmit(formData: FormData) {
         if (!project) return;
-
+        
         const projectPipelineStatus = checkListToObject(
             pipelineStatusCheckList,
         ) as ProjectPipelineStatus;
@@ -124,6 +124,9 @@ export function ProjectPipeline({
                     <CheckList
                         title={"Status"}
                         checkList={pipelineStatusCheckList}
+                        onChange={(updatedList, changedCheckBox) => {
+                            setPipelineStatusCheckList(updatedList);
+                        }}
                     />
                 </div>
                 <div className="flex justify-end">

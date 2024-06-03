@@ -9,17 +9,24 @@ export const connectionConfig: ConnectionOptions = {
     password: process.env.DB_PASSWORD ?? "",
 };
 
-export const connection = () => {
-    return mysql.createPool(connectionConfig);
-};
+export const mysqlPool = mysql.createPool(connectionConfig);
 
-// connection().getConnection().then((conn) => {
-//     console.log("Database connected");
+mysqlPool
+    .getConnection()
+    .then((connection) => {
+        // console.log(
+        //     `Connection to MySQL established successfully, threadId: ${connection.threadId}`,
+        // );
+        connection.release();
+    })
+    .catch((error) => {
+        console.error("Error connecting to MySQL", error);
+        mysqlPool.end();
+        console.error("MySQL connection pool closed due to error");
+    });
 
-//     // return the connection to the pool, so it can be used by other parts of the app
-//     conn.release();
-// }).catch((err) => {
-//     console.error("Database connection error", err);
+// mysqlPool.on("release", (connection) => {
+//     console.log(`Connection ${connection.threadId}} released`);
 // });
 
-export default connection;
+export default mysqlPool;
