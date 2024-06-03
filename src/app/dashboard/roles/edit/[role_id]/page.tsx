@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation";
 
 import Button from "@/components/Button";
 import InputField from "@/components/InputField";
-import { RoleUsersOverlay } from "./users";
 import FormErrorMessages from "@/components/FormErrorMessages";
+import ToggleSwitch from "@/components/ToggleSwitch";
+import { RoleUsersOverlay } from "./users";
 
 import { fetchRoleById, fetchEditRoleById } from "../../fetch";
 import { PermissionNames } from "@/lib/client_IAM";
@@ -141,12 +142,15 @@ export default function EditRole({ params }: Params) {
                 <form
                     className="flex flex-col gap-4"
                     action={async () => {
-                        const result = await fetchEditRoleById({
-                            users: newRoleUsers,
-                            permissions: currentRolePermissions,
-                            name: currentRoleName as string,
-                            roleId: params.role_id,
-                        }, pathname);
+                        const result = await fetchEditRoleById(
+                            {
+                                users: newRoleUsers,
+                                permissions: currentRolePermissions,
+                                name: currentRoleName as string,
+                                roleId: params.role_id,
+                            },
+                            pathname,
+                        );
                         setResult(result);
                     }}
                 >
@@ -174,7 +178,8 @@ export default function EditRole({ params }: Params) {
                                     key={permission.id}
                                 >
                                     <p>{permission.name}</p>
-                                    <RolePermissionToggleSwitch
+
+                                    <ToggleSwitch
                                         defaultState={currentRolePermissions.some(
                                             (p) => p.id === permission.id,
                                         )}
@@ -184,8 +189,6 @@ export default function EditRole({ params }: Params) {
                                                 permission,
                                             )
                                         }
-                                        permission={permission}
-                                        resetToggle={resetToggle}
                                     />
                                 </div>
                             ))
@@ -265,52 +268,6 @@ const BackButton = () => {
             onClick={goBack}
         >
             Back
-        </button>
-    );
-};
-
-const RolePermissionToggleSwitch = ({
-    defaultState = false,
-    onChange,
-    permission,
-    resetToggle,
-}: {
-    defaultState?: boolean;
-    onChange?: (
-        state: boolean,
-        permission: { id: number; name: string },
-    ) => void;
-    permission: { id: number; name: string };
-    resetToggle: boolean;
-}) => {
-    const [toggleOn, setToggleOn] = useState<boolean>(defaultState);
-
-    useEffect(() => {
-        setToggleOn(defaultState);
-    }, [defaultState, resetToggle]);
-
-    return (
-        <button
-            type="button"
-            className={[
-                "rounded-full w-[50px] h-[24px] flex items-center relative",
-                toggleOn ? "bg-blue-500" : "bg-gray-400",
-            ].join(" ")}
-            onClick={() => {
-                setToggleOn(!toggleOn);
-                if (onChange) {
-                    onChange(!toggleOn, permission);
-                }
-            }}
-        >
-            <div
-                className={[
-                    "rounded-full w-[18px] h-[18px] bg-white transition-all absolute outline outline-1",
-                    toggleOn
-                        ? "left-[28px] outline-transparent"
-                        : "left-[4px] outline-gray-300",
-                ].join(" ")}
-            ></div>
         </button>
     );
 };
