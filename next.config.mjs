@@ -13,6 +13,11 @@ const nextConfig = {
         // TODO: remove this when all type errors are fixed
         // ignoreBuildErrors: true,
     },
+    logging: {
+        fetches: {
+            fullUrl: true,
+        }
+    }
     // If using Dockerfile, uncomment this
     // output: "standalone",
 };
