@@ -3,32 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 import ImageWithFallback from "../ImageWithFallback";
 import { useEffect, useState } from "react";
 
-function getRandomBinary(): number {
-    return Math.floor(Math.random() * 2);
-}
-
-function getRandomAlphabet(): string {
-    const uppercaseAlphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const lowercaseAlphabets = "abcdefghijklmnopqrstuvwxyz";
-
-    // Generate a random number between 0 and 2
-    const randomType = Math.floor(Math.random() * 3);
-
-    if (randomType === 0) {
-        // Return a random uppercase letter (1/3 probability)
-        const randomIndex = Math.floor(
-            Math.random() * uppercaseAlphabets.length,
-        );
-        return uppercaseAlphabets[randomIndex];
-    } else {
-        // Return a random lowercase letter (2/3 probability)
-        const randomIndex = Math.floor(
-            Math.random() * lowercaseAlphabets.length,
-        );
-        return lowercaseAlphabets[randomIndex];
-    }
-}
-
 export default function GridRevealImage({
     src,
     width,
@@ -38,7 +12,7 @@ export default function GridRevealImage({
     rows = 10,
     cols = 10,
     cellFadeSpeed = 200,
-    revealSpeed = 5,
+    revealDelay = 5,
     variant = "hacker",
     isAlphabet = true,
     canReveal = false,
@@ -52,21 +26,47 @@ export default function GridRevealImage({
     rows?: number;
     cols?: number;
     cellFadeSpeed?: number;
-    revealSpeed?: number;
+    revealDelay?: number;
     variant?: "hacker" | "light" | "dark";
     isAlphabet?: boolean;
     canReveal?: boolean;
     fill?: boolean;
 }) {
-    const [canPlay, setCanPlay] = useState("paused");
+    const [randomContent, setRandomContent] = useState<string[]>([]);
+
+    function getRandomBinary(): number {
+        return Math.floor(Math.random() * 2);
+    }
+
+    function getRandomAlphabet(): string {
+        const uppercaseAlphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lowercaseAlphabets = "abcdefghijklmnopqrstuvwxyz";
+
+        // Generate a random number between 0 and 2
+        const randomType = Math.floor(Math.random() * 3);
+
+        if (randomType === 0) {
+            // Return a random uppercase letter (1/3 probability)
+            const randomIndex = Math.floor(
+                Math.random() * uppercaseAlphabets.length,
+            );
+            return uppercaseAlphabets[randomIndex];
+        } else {
+            // Return a random lowercase letter (2/3 probability)
+            const randomIndex = Math.floor(
+                Math.random() * lowercaseAlphabets.length,
+            );
+            return lowercaseAlphabets[randomIndex];
+        }
+    }
 
     useEffect(() => {
-        if (canReveal) {
-            setCanPlay("running");
-        } else {
-            setCanPlay("paused");
-        }
-    }, [canReveal]);
+        // Generate random content on the client side
+        const content = Array.from({ length: rows * cols }).map(() =>
+            isAlphabet ? getRandomAlphabet() : getRandomBinary().toString(),
+        );
+        setRandomContent(content);
+    }, [isAlphabet, rows, cols, src]);
 
     const getVariantClasses = () => {
         switch (variant) {
@@ -79,6 +79,14 @@ export default function GridRevealImage({
                 return "";
         }
     };
+
+    function getPlayState(canReveal: boolean) {
+        if (canReveal) {
+            return "running";
+        } else {
+            return "paused";
+        }
+    }
 
     return (
         <div className={`relative w-[${width}px] h-[${height}px]`}>
@@ -99,19 +107,19 @@ export default function GridRevealImage({
                     gridTemplateColumns: `repeat(${cols}, 1fr)`,
                 }}
             >
-                {Array.from({ length: rows * cols }).map((_, i) => (
+                {randomContent.map((content, i) => (
                     <div
                         key={uuidv4()}
                         className={`transition-colors text-sm text-center ${getVariantClasses()}`}
                         style={{
-                            animationPlayState: canPlay,
+                            animationPlayState: getPlayState(canReveal),
                             animationName: "fadeOut",
                             animationDuration: `${cellFadeSpeed}ms`,
-                            animationDelay: `${i * revealSpeed}ms`,
+                            animationDelay: `${i * revealDelay}ms`,
                             animationFillMode: "forwards",
                         }}
                     >
-                        {isAlphabet ? getRandomAlphabet() : getRandomBinary()}
+                        {content}
                     </div>
                 ))}
             </div>

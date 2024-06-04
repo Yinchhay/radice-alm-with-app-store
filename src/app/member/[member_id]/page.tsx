@@ -5,6 +5,8 @@ import Image from "next/image";
 import { fileToUrl } from "@/lib/file";
 import Link from "next/link";
 import Card from "@/components/Card";
+import Chip from "@/components/Chip";
+import ChipsHolder from "@/components/ChipsHolder";
 
 export default async function MemberPublicProfilePage({
     params,
@@ -64,24 +66,23 @@ export default async function MemberPublicProfilePage({
                                                 {project.name}
                                             </h1>
                                             <p>{project.description}</p>
-                                            <div className="flex flex-row gap-2 mt-2">
+                                            <ChipsHolder className="mt-2">
                                                 {project.projectCategories.map(
                                                     (categoryJoin) => (
-                                                        <span
+                                                        <Chip
                                                             key={
                                                                 categoryJoin.id
                                                             }
-                                                            className="text-sm bg-gray-200 py-1 px-3 rounded-full"
                                                         >
                                                             {
                                                                 categoryJoin
                                                                     .category
-                                                                    .name
+                                                                    .shortName
                                                             }
-                                                        </span>
+                                                        </Chip>
                                                     ),
                                                 )}
-                                            </div>
+                                            </ChipsHolder>
                                         </div>
                                     </Link>
                                 </Card>

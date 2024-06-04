@@ -22,14 +22,14 @@ export default function CategoryProjectLogo({
             <div className="relative">
                 <GridRevealImage
                     canReveal={canReveal}
-                    isAlphabet={true}
+                    isAlphabet={false}
                     variant={variant}
                     src={src}
                     width={120}
                     height={120}
                     rows={5}
                     cols={5}
-                    revealSpeed={8}
+                    revealDelay={12}
                     className={[
                         "aspect-square object-cover border relative z-10",
                         variant == "light"

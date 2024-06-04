@@ -6,6 +6,7 @@ import TechButton from "../../components/TechButton";
 import { GetPublicCategoriesReturnType } from "@/app/api/public/categories/route";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fileToUrl } from "@/lib/file";
+import SpecialEffectSentence from "@/components/effects/SpecialEffectSentence";
 
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -93,9 +94,15 @@ export default function Carousel({
                         </h2>
                     </div>
                     <p className="text-white mt-4">
-                        {categories.length > 0
-                            ? categories[currentSlide].description
-                            : ""}
+                        <SpecialEffectSentence
+                            delay={50}
+                            shuffleSpeed={20}
+                            randomAmount={8}
+                            originalText={
+                                categories[currentSlide].description ||
+                                "This category does not have a description."
+                            }
+                        />
                     </p>
                     <TechButton
                         variant="light"

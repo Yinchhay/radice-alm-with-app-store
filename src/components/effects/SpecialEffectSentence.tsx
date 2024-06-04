@@ -7,12 +7,14 @@ export default function SpecialEffectSentence({
     shuffleSpeed = 35,
     delay = 750,
     randomAmount = 3,
+    canStart = true,
 }: {
     originalText: string;
     className?: string;
     shuffleSpeed?: number;
     delay?: number;
     randomAmount?: number;
+    canStart?: boolean;
 }) {
     const alphabets = "abcdefghijklmnopqrstuvwxyz";
     const [first, setFirst] = useState(false);
@@ -41,15 +43,15 @@ export default function SpecialEffectSentence({
             clearTimeout(timeoutRef.current);
         }
 
-        if (text.length === 0) {
+        if (text.length === 0 && canStart) {
             randomizeText();
         }
 
-        if (!first) {
+        if (!first && canStart) {
             timeoutRef.current = setTimeout(() => setFirst(true), delay);
         }
 
-        if (text !== originalText && first) {
+        if (text !== originalText && first && canStart) {
             timeoutRef.current = setTimeout(() => {
                 randomizeText();
                 setCount(count + 1);
@@ -66,10 +68,10 @@ export default function SpecialEffectSentence({
                 clearTimeout(timeoutRef.current);
             }
         };
-    }, [text, first, count, originalText]);
+    }, [text, first, count, originalText, canStart]);
 
     useEffect(() => {
-        setText("");
+        randomizeText();
         setFirst(false);
         setCount(0);
     }, [originalText]);

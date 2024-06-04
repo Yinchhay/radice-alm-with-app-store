@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import MemberProfile, { MemberProfileType } from "./_components/MemberProfile";
 import { getMembers } from "./fetch";
 import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
+import SpecialEffectSentence from "@/components/effects/SpecialEffectSentence";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,6 @@ const roboto_condensed = Roboto_Condensed({
     subsets: ["latin"],
     display: "swap",
 });
-const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
 
 export default async function page() {
     const members = await getMembers();
@@ -81,7 +81,7 @@ export default async function page() {
                     })}
                 </div>
             </div>
-            <div className="container mx-auto py-12">
+            <div className="mx-auto py-12 max-w-[1200px]">
                 <h1
                     className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
                 >

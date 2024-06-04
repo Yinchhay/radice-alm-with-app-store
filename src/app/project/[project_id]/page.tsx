@@ -5,6 +5,9 @@ import Image from "next/image";
 import { fileToUrl } from "@/lib/file";
 import { Component } from "@/types/content";
 import MemberProfile from "@/app/about/_components/MemberProfile";
+import ImageWithFallback from "@/components/ImageWithFallback";
+import ChipsHolder from "@/components/ChipsHolder";
+import Chip from "@/components/Chip";
 
 export default async function ProjectPage({
     params,
@@ -24,14 +27,11 @@ export default async function ProjectPage({
                 <div className="py-16 container mx-auto w-full max-w-[920px]">
                     <div className="col-span-3 grid gap-4 p-4">
                         <div className="flex gap-8 items-center">
-                            <Image
-                                className="border border-gray-300"
+                            <ImageWithFallback
+                                className="border border-gray-300 object-cover aspect-square"
                                 width={80}
                                 height={80}
-                                src={
-                                    fileToUrl(project.logoUrl) ||
-                                    "/placeholder.webp"
-                                }
+                                src={fileToUrl(project.logoUrl)}
                                 alt=""
                             />
                             <h1 className="text-5xl font-bold">
@@ -39,16 +39,13 @@ export default async function ProjectPage({
                             </h1>
                         </div>
                         <p>{project.description}</p>
-                        <div className="flex flex-row gap-2 mb-4">
+                        <ChipsHolder className="mb-4">
                             {project.projectCategories.map((categoryJoin) => (
-                                <span
-                                    key={categoryJoin.id}
-                                    className="text-sm bg-gray-200 py-1 px-3 rounded-full"
-                                >
-                                    {categoryJoin.category.name}
-                                </span>
+                                <Chip key={categoryJoin.id}>
+                                    {categoryJoin.category.shortName}
+                                </Chip>
                             ))}
-                        </div>
+                        </ChipsHolder>
                         {content && (
                             <div className="grid gap-8 border-t border-gray-300 py-8">
                                 {content.map((component, i) => {
