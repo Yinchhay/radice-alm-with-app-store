@@ -77,7 +77,6 @@ export async function PATCH(request: Request, { params }: Params) {
             {},
         );
     } catch (error: any) {
-        console.error(error);
         return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

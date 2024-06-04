@@ -14,18 +14,25 @@ import { z } from "zod";
 import { getOneAssociatedProject } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { getAllCategories } from "@/repositories/category";
-import { getAllPartnersExceptThisUser, getAllUsersExceptThisUser } from "@/repositories/users";
+import {
+    getAllPartnersExceptThisUser,
+    getAllUsersExceptThisUser,
+} from "@/repositories/users";
 
-const successMessage = "successMessage";
-const unsuccessMessage = "unsuccessMessage";
+const successMessage = "Successfully get a internal project by id";
+const unsuccessMessage = "Failed to get a internal project by id";
 
 type Params = { params: { project_id: string } };
 
 export type GetAllCategoriesReturn = Awaited<
     ReturnType<typeof getAllCategories>
 >;
-export type GetAllPartnersReturn = Awaited<ReturnType<typeof getAllPartnersExceptThisUser>>;
-export type GetAllUsersReturn = Awaited<ReturnType<typeof getAllUsersExceptThisUser>>;
+export type GetAllPartnersReturn = Awaited<
+    ReturnType<typeof getAllPartnersExceptThisUser>
+>;
+export type GetAllUsersReturn = Awaited<
+    ReturnType<typeof getAllUsersExceptThisUser>
+>;
 export type FetchOneAssociatedProjectData = {
     project: Awaited<ReturnType<typeof getOneAssociatedProject>>;
     allCategories: GetAllCategoriesReturn;

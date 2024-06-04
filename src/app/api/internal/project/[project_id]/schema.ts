@@ -174,3 +174,22 @@ export const projectPipeLineStatusType = z.object({
 export const editProjectSettingsPipelines = z.object({
     pipelineStatus: projectPipeLineStatusType,
 });
+
+export const transferProjectOwnershipSchema = z.object({
+    email: z
+        .string()
+        .trim()
+        .min(1, {
+            message: "Transfer to user email is required",
+        })
+        .email({
+            message: "Invalid email format",
+        }),
+});
+
+export const updateProjectPublicStatusSchema = z.object({
+    status: z.boolean({
+        required_error: "Status is required",
+        invalid_type_error: "Status must be a boolean",
+    }),
+});

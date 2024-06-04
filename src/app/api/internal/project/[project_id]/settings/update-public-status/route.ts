@@ -10,17 +10,17 @@ import {
 import { HttpStatusCode } from "@/types/http";
 import { z } from "zod";
 import {
-    updateProjectPipelineStatus,
+    updateProjectPublicStatus,
     getOneAssociatedProject,
 } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
-import { editProjectSettingsPipelines } from "../../schema";
+import { updateProjectPublicStatusSchema } from "../../schema";
 
-const successMessage = "Successfully updated project settings pipelines";
-const unsuccessMessage = "Failed to update project settings pipelines";
+const successMessage = "Successfully updated project settings publicStatus";
+const unsuccessMessage = "Failed to update project settings publicStatus";
 
 type Params = { params: { project_id: string } };
-export type FetchEditProjectSettingsPipelines = Record<string, unknown>;
+export type FetchUpdateProjectSettingsPublicStatus = Record<string, unknown>;
 
 export async function PATCH(request: Request, { params }: Params) {
     try {
@@ -34,9 +34,10 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editProjectSettingsPipelines> =
+        const body: z.infer<typeof updateProjectPublicStatusSchema> =
             await request.json();
-        const validationResult = editProjectSettingsPipelines.safeParse(body);
+        const validationResult =
+            updateProjectPublicStatusSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -70,9 +71,9 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        await updateProjectPipelineStatus(Number(params.project_id), body.pipelineStatus);
+        await updateProjectPublicStatus(Number(params.project_id), body.status);
 
-        return buildSuccessResponse<FetchEditProjectSettingsPipelines>(
+        return buildSuccessResponse<FetchUpdateProjectSettingsPublicStatus>(
             successMessage,
             {},
         );

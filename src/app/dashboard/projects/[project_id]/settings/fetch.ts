@@ -4,6 +4,8 @@ import {
     editProjectSettingsFiles,
     editProjectSettingsMembers,
     editProjectSettingsPartners,
+    transferProjectOwnershipSchema,
+    updateProjectPublicStatusSchema,
 } from "@/app/api/internal/project/[project_id]/schema";
 import { FetchEditProjectSettingsDetail } from "@/app/api/internal/project/[project_id]/settings/update-detail/route";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
@@ -180,6 +182,56 @@ export async function fetchEditProjectSettingsPipeline(
                 body: JSON.stringify({
                     pipelineStatus: pipelines,
                 }),
+            },
+        );
+
+        revalidatePath(pathname);
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchTransferProjectOwnerShip(
+    projectId: number,
+    body: z.infer<typeof transferProjectOwnershipSchema>,
+    pathname: string,
+): ResponseJson<FetchEditProjectSettingsPipelines> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/transfer-ownership`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+
+        revalidatePath(pathname);
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchUpdateProjectPublicStatus(
+    projectId: number,
+    body: z.infer<typeof updateProjectPublicStatusSchema>,
+    pathname: string,
+): ResponseJson<FetchEditProjectSettingsPipelines> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/update-public-status`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
             },
         );
 

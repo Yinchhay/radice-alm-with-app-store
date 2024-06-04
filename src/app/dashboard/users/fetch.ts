@@ -9,7 +9,6 @@ import {
     getSessionCookie,
     revalidateTags,
 } from "@/lib/server_utils";
-import { GetUsers_C_Tag } from "@/repositories/users";
 import { FetchDeleteUser } from "@/app/api/internal/users/[user_id]/delete/route";
 import { z } from "zod";
 import { createUserFormSchema } from "@/app/api/internal/users/schema";
@@ -19,8 +18,6 @@ import { revalidatePath } from "next/cache";
 export async function fetchUsers(): ResponseJson<FetchUsersData> {
     try {
         const sessionId = await getSessionCookie();
-        // type casting to ensure that the tags are correct, if there is a typo, it will show an error
-        const cacheTag: GetUsers_C_Tag = "getUsers_C";
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/users`,
             {
@@ -28,10 +25,6 @@ export async function fetchUsers(): ResponseJson<FetchUsersData> {
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                next: {
-                    tags: [cacheTag],
-                },
-                cache: "force-cache",
             },
         );
         return await response.json();
@@ -88,7 +81,6 @@ export async function fetchDeleteUserById(
 export async function fetchAllUsers(): ResponseJson<FetchUsersData> {
     try {
         const sessionId = await getSessionCookie();
-        const cacheTag: GetUsers_C_Tag = "getUsers_C";
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/users/all`,
             {
@@ -96,10 +88,6 @@ export async function fetchAllUsers(): ResponseJson<FetchUsersData> {
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                next: {
-                    tags: [cacheTag],
-                },
-                cache: "force-cache",
             },
         );
         return await response.json();
