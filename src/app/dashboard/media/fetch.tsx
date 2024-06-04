@@ -10,7 +10,7 @@ import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-export async function fetchMedias(
+export async function fetchMedia(
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
     search: string = "",

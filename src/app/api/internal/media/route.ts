@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(
                 request,
-                RouteRequiredPermissions.get("manageMedias")!,
+                RouteRequiredPermissions.get("manageMedia")!,
             );
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();

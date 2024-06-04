@@ -1,12 +1,12 @@
-import { medias } from "@/drizzle/schema";
+import { media } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { count, eq, sql } from "drizzle-orm";
 import { editMediaSchema } from "@/app/api/internal/media/schema";
 import { z } from "zod";
 
-export const createMedia = async (media: typeof medias.$inferInsert) => {
-    return await db.insert(medias).values(media);
+export const createMedia = async (mediaValue: typeof media.$inferInsert) => {
+    return await db.insert(media).values(mediaValue);
 };
 
 export const getMedias = async (
@@ -14,7 +14,7 @@ export const getMedias = async (
     rowsPerPage: number = ROWS_PER_PAGE,
     search: string = "",
 ) => {
-    return await db.query.medias.findMany({
+    return await db.query.media.findMany({
         where: (table, { like }) => like(table.title, `%${search}%`),
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
@@ -23,30 +23,30 @@ export const getMedias = async (
 };
 
 export const getMediasTotalRow = async () => {
-    const totalRows = await db.select({ count: count() }).from(medias);
+    const totalRows = await db.select({ count: count() }).from(media);
     return totalRows[0].count;
 };
 
 export const getMediaById = async (mediaId: number) => {
-    return await db.query.medias.findFirst({
-        where: eq(medias.id, mediaId),
+    return await db.query.media.findFirst({
+        where: eq(media.id, mediaId),
     });
 };
 
 export const deleteMediaById = async (mediaId: number) => {
-    return await db.delete(medias).where(eq(medias.id, mediaId));
+    return await db.delete(media).where(eq(media.id, mediaId));
 };
 
 export const editMediaById = async (
     mediaId: number,
-    media: z.infer<typeof editMediaSchema>,
+    mediaValue: z.infer<typeof editMediaSchema>,
 ) => {
     return await db
-        .update(medias)
+        .update(media)
         .set({
-            title: media.title,
-            description: media.description,
-            date: media.date,
+            title: mediaValue.title,
+            description: mediaValue.description,
+            date: mediaValue.date,
         })
-        .where(eq(medias.id, mediaId));
+        .where(eq(media.id, mediaId));
 };

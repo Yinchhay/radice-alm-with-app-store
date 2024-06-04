@@ -199,7 +199,7 @@ type RouteKey =
     | "managePartners"
     | "manageRoles"
     | "manageUsers"
-    | "manageMedias";
+    | "manageMedia";
 export const RouteRequiredPermissions = new Map<RouteKey, Set<Permissions>>([
     [
         "manageAllProjects",
@@ -237,7 +237,7 @@ export const RouteRequiredPermissions = new Map<RouteKey, Set<Permissions>>([
         new Set([Permissions.CREATE_USERS, Permissions.DELETE_USERS]),
     ],
     [
-        "manageMedias",
+        "manageMedia",
         new Set([
             Permissions.CREATE_MEDIA,
             Permissions.EDIT_MEDIA,

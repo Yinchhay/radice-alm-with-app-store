@@ -467,7 +467,7 @@ export const projectPartnersRelations = relations(
 export type MediaFile = {
     filename: string;
 };
-export const medias = mysqlTable("medias", {
+export const media = mysqlTable("media", {
     id: int("id").primaryKey().autoincrement(),
     title: varchar("title", {
         length: 255,

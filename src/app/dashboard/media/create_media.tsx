@@ -6,7 +6,6 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconPlus, IconUpload, IconX } from "@tabler/icons-react";
-// import { fetchCreateMedia } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";

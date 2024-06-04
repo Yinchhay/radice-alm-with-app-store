@@ -3,7 +3,7 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
-import { medias } from "@/drizzle/schema";
+import { media } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { IconX } from "@tabler/icons-react";
@@ -11,9 +11,9 @@ import { fetchDeleteMediaById } from "./fetch";
 import { usePathname } from "next/navigation";
 
 export function DeleteMediaOverlay({
-    media,
+    mediaOne,
 }: {
-    media: typeof medias.$inferSelect;
+    mediaOne: typeof media.$inferSelect;
 }) {
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
@@ -57,14 +57,14 @@ export function DeleteMediaOverlay({
                             <div className="">
                                 <p>
                                     You are about to delete media name{" "}
-                                    <strong>{media.title}</strong>
+                                    <strong>{mediaOne.title}</strong>
                                 </p>
                             </div>
                         </div>
                         <form
                             action={async (formData: FormData) => {
                                 const result = await fetchDeleteMediaById(
-                                    media.id,
+                                    mediaOne.id,
                                     pathname,
                                 );
                                 setResult(result);

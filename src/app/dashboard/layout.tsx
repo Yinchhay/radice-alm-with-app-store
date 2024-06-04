@@ -18,7 +18,7 @@ export type CanAccessRoutes = {
     manageCategories: boolean;
     manageAllProjects: boolean;
     manageApplicationForms: boolean;
-    manageMedias: boolean;
+    manageMedia: boolean;
 };
 
 export default async function DashboardManageLayout({
@@ -42,7 +42,7 @@ export default async function DashboardManageLayout({
         },
     );
 
-    const canAccessRoutes = cache(() => {
+    const canAccessRoutes = cache((): CanAccessRoutes => {
         return {
             manageUsers: userCanAccessRoute("manageUsers", userPermissions),
             manageRoles: userCanAccessRoute("manageRoles", userPermissions),
@@ -62,7 +62,7 @@ export default async function DashboardManageLayout({
                 "manageApplicationForms",
                 userPermissions,
             ),
-            manageMedias: userCanAccessRoute("manageMedias", userPermissions),
+            manageMedia: userCanAccessRoute("manageMedia", userPermissions),
         };
     });
 

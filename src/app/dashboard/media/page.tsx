@@ -6,21 +6,19 @@ import { hasPermission } from "@/lib/IAM";
 import { Permissions } from "@/types/IAM";
 import { Suspense } from "react";
 import { CreateMediaOverlay } from "./create_media";
-import { fetchMedias } from "./fetch";
-import { medias } from "@/drizzle/schema";
+import { fetchMedia } from "./fetch";
+import { media } from "@/drizzle/schema";
 import Pagination from "@/components/Pagination";
 import { DeleteMediaOverlay } from "./delete_media";
 import { EditMediaOverlay } from "./edit_media";
 
-type ManageMediasProps = {
+type ManageMediaProps = {
     searchParams?: {
         page?: string;
     };
 };
 
-export default async function ManageMedias({
-    searchParams,
-}: ManageMediasProps) {
+export default async function ManageMedia({ searchParams }: ManageMediaProps) {
     const user = await getAuthUser();
 
     if (!user) {
@@ -32,7 +30,7 @@ export default async function ManageMedias({
         page = 1;
     }
 
-    const result = await fetchMedias(page, 9);
+    const result = await fetchMedia(page, 9);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -48,11 +46,11 @@ export default async function ManageMedias({
     const canEditMedia = editMediaPermission.canAccess;
     const canDeleteMedia = deleteMediaPermission.canAccess;
 
-    const MediaLists = result.data.medias.map((media) => {
+    const MediaLists = result.data.medias.map((mediaOne) => {
         return (
             <Media
-                key={media.id}
-                media={media}
+                key={mediaOne.id}
+                mediaOne={mediaOne}
                 canEditMedia={canEditMedia}
                 canDeleteMedia={canDeleteMedia}
             />
@@ -66,7 +64,7 @@ export default async function ManageMedias({
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
                 <div className="flex flex-row justify-between">
-                    <h1 className="text-2xl">Medias</h1>
+                    <h1 className="text-2xl">Media</h1>
                     {canCreateMedia && <CreateMediaOverlay />}
                 </div>
                 {result.data.medias.length > 0 ? (
@@ -99,15 +97,15 @@ function NoMedia({ page }: { page: number }) {
 }
 
 function Media({
-    media,
+    mediaOne,
     canEditMedia,
     canDeleteMedia,
 }: {
-    media: typeof medias.$inferSelect;
+    mediaOne: typeof media.$inferSelect;
     canEditMedia: boolean;
     canDeleteMedia: boolean;
 }) {
-    const image = media.files[0].filename;
+    const image = mediaOne.files[0].filename;
 
     function dateToString(date: Date) {
         return new Date(date).toLocaleDateString("en-US", {
@@ -129,14 +127,14 @@ function Media({
                 />
                 <div className="flex pr-8">
                     <div className="flex flex-col">
-                        <h1 className="text-xl">{media.title}</h1>
-                        <p className="text-sm">{dateToString(media.date)}</p>
-                        <p className="text-sm">{media.description}</p>
+                        <h1 className="text-xl">{mediaOne.title}</h1>
+                        <p className="text-sm">{dateToString(mediaOne.date)}</p>
+                        <p className="text-sm">{mediaOne.description}</p>
                     </div>
                 </div>
                 <div className="absolute bottom-0 right-0 flex gap-2">
-                    {canEditMedia && <EditMediaOverlay media={media} />}
-                    {canDeleteMedia && <DeleteMediaOverlay media={media} />}
+                    {canEditMedia && <EditMediaOverlay mediaOne={mediaOne} />}
+                    {canDeleteMedia && <DeleteMediaOverlay mediaOne={mediaOne} />}
                 </div>
             </div>
         </Card>

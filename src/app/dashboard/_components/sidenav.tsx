@@ -77,10 +77,10 @@ export default function SideNav({
                         <h2>Manage Users</h2>
                     </NavItem>
                 )}
-                {canAccessRoutes.manageMedias && (
-                    <NavItem link="/dashboard/medias">
+                {canAccessRoutes.manageMedia && (
+                    <NavItem link="/dashboard/media">
                         <IconUsers size={28} />
-                        <h2>Manage Medias</h2>
+                        <h2>Manage Media</h2>
                     </NavItem>
                 )}
             </NavGroup>

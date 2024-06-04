@@ -15,7 +15,7 @@ export default async function ManageMediasLayout({
 
     const userPermission = await hasPermission(
         user.id,
-        RouteRequiredPermissions.get("manageMedias")!,
+        RouteRequiredPermissions.get("manageMedia")!,
     );
     if (!userPermission.canAccess) {
         throw new Error(ErrorMessage.NoPermissionToThisPage);

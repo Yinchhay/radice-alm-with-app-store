@@ -7,14 +7,14 @@ import { useFormStatus } from "react-dom";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconEdit } from "@tabler/icons-react";
-import { medias } from "@/drizzle/schema";
+import { media } from "@/drizzle/schema";
 import { fetchEditMediaById } from "./fetch";
 import { usePathname } from "next/navigation";
 
 export function EditMediaOverlay({
-    media,
+    mediaOne,
 }: {
-    media: typeof medias.$inferSelect;
+    mediaOne: typeof media.$inferSelect;
 }) {
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
@@ -24,7 +24,7 @@ export function EditMediaOverlay({
     async function onSubmit(formData: FormData) {
         const result = await fetchEditMediaById(
             {
-                mediaId: media.id,
+                mediaId: mediaOne.id,
                 title: formData.get("title") as string,
                 date: formData.get("date") as unknown as Date,
                 description: formData.get("description") as string,
@@ -77,7 +77,7 @@ export function EditMediaOverlay({
                                 <InputField
                                     name="title"
                                     id="title"
-                                    defaultValue={media.title}
+                                    defaultValue={mediaOne.title}
                                 />
                             </div>
                             <div className="flex flex-col items-start">
@@ -90,7 +90,7 @@ export function EditMediaOverlay({
                                 <InputField
                                     name="description"
                                     id="description"
-                                    defaultValue={media.description ?? ""}
+                                    defaultValue={mediaOne.description ?? ""}
                                 />
                             </div>
                             <div className="flex flex-col items-start">
@@ -101,7 +101,7 @@ export function EditMediaOverlay({
                                     type="date"
                                     name="date"
                                     id="date"
-                                    defaultValue={new Date(media.date).toISOString().split("T")[0]}
+                                    defaultValue={new Date(mediaOne.date).toISOString().split("T")[0]}
                                 />
                             </div>
                             {!result?.success && result?.errors && (
