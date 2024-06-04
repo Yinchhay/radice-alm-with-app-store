@@ -18,7 +18,6 @@ import { CreateRoleOverlay } from "./create_role";
 import { DeleteRoleOverlay } from "./delete_role";
 import { fetchRoles } from "./fetch";
 
-
 type ManageRolesProps = {
     searchParams?: {
         page?: string;
@@ -65,32 +64,37 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
     });
 
     return (
-        <Suspense fallback={"loading..."}>
-            <div>
-                <h1 className="text-2xl">Manage Roles</h1>
-                <Table className="my-4 w-full">
-                    <TableHeader>
-                        <ColumName className="text-start">Name</ColumName>
-                        <ColumName className="flex justify-end">
-                            {canCreateRole && <CreateRoleOverlay />}
-                        </ColumName>
-                    </TableHeader>
-                    <TableBody>
-                        {result.data.roles.length > 0 ? (
-                            RoleList
-                        ) : (
-                            // TODO: style here
-                            <NoRole />
-                        )}
-                    </TableBody>
-                </Table>
-                {result.data.maxPage > 1 && (
-                    <div className="float-right">
-                        <Pagination page={page} maxPage={result.data.maxPage} />
-                    </div>
-                )}
-            </div>
-        </Suspense>
+        <div className="w-full max-w-[1000px] mx-auto">
+            <Suspense fallback={"loading..."}>
+                <div>
+                    <h1 className="text-2xl">Manage Roles</h1>
+                    <Table className="my-4 w-full">
+                        <TableHeader>
+                            <ColumName className="text-start">Name</ColumName>
+                            <ColumName className="flex justify-end">
+                                {canCreateRole && <CreateRoleOverlay />}
+                            </ColumName>
+                        </TableHeader>
+                        <TableBody>
+                            {result.data.roles.length > 0 ? (
+                                RoleList
+                            ) : (
+                                // TODO: style here
+                                <NoRole />
+                            )}
+                        </TableBody>
+                    </Table>
+                    {result.data.maxPage > 1 && (
+                        <div className="float-right">
+                            <Pagination
+                                page={page}
+                                maxPage={result.data.maxPage}
+                            />
+                        </div>
+                    )}
+                </div>
+            </Suspense>
+        </div>
     );
 }
 

@@ -10,7 +10,6 @@ import {
     getSessionCookie,
     revalidateTags,
 } from "@/lib/server_utils";
-import { GetRoles_C_Tag } from "@/repositories/role";
 import { GetUserRolesAndRolePermissions_C_Tag } from "@/repositories/users";
 import { FetchDeleteRole } from "@/app/api/internal/role/[role_id]/delete/route";
 import { z } from "zod";
@@ -32,8 +31,6 @@ export async function fetchRoles(
 ): ResponseJson<FetchRolesData> {
     try {
         const sessionId = await getSessionCookie();
-        // type casting to ensure that the tags are correct, if there is a typo, it will show an error
-        const cacheTag: GetRoles_C_Tag = "getRoles_C";
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/role?page=${page}&rowsPerPage=${rowsPerPage}`,
             {
@@ -41,10 +38,6 @@ export async function fetchRoles(
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                next: {
-                    tags: [cacheTag],
-                },
-                cache: "force-cache",
             },
         );
         return await response.json();
@@ -58,7 +51,6 @@ export async function fetchRoleById(
 ): ResponseJson<FetchRoleData> {
     try {
         const sessionId = await getSessionCookie();
-        const cacheTag: GetRoles_C_Tag = "getRoles_C";
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/role/${roleId}`,
             {
@@ -66,10 +58,6 @@ export async function fetchRoleById(
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                next: {
-                    tags: [cacheTag],
-                },
-                cache: "force-cache",
             },
         );
         return await response.json();
@@ -129,8 +117,6 @@ export async function fetchUsersInRole(
 ): ResponseJson<FetchUsersInRole> {
     try {
         const sessionId = await getSessionCookie();
-        // type casting to ensure that the tags are correct, if there is a typo, it will show an error
-        const cacheTag: GetRoles_C_Tag = "getRoles_C";
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/role/${roleId}/users`,
             {
@@ -138,10 +124,6 @@ export async function fetchUsersInRole(
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                next: {
-                    tags: [cacheTag],
-                },
-                cache: "force-cache",
             },
         );
         return await response.json();
@@ -155,8 +137,6 @@ export async function fetchUsersNotInRole(
 ): ResponseJson<FetchUsersNotInRole> {
     try {
         const sessionId = await getSessionCookie();
-        // type casting to ensure that the tags are correct, if there is a typo, it will show an error
-        const cacheTag: GetRoles_C_Tag = "getRoles_C";
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/role/${roleId}/users-not-in-role`,
             {
@@ -164,10 +144,6 @@ export async function fetchUsersNotInRole(
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                next: {
-                    tags: [cacheTag],
-                },
-                cache: "force-cache",
             },
         );
         return await response.json();
