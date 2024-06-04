@@ -10,17 +10,19 @@ import {
 import { HttpStatusCode } from "@/types/http";
 import { z } from "zod";
 import {
-    updateProjectPipelineStatus,
     getOneAssociatedProject,
+    transferProjectOwnership,
 } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
-import { editProjectSettingsPipelines } from "../../schema";
+import { transferProjectOwnershipSchema } from "../../schema";
+import { getUserByEmail } from "@/repositories/users";
+import { UserType } from "@/types/user";
 
-const successMessage = "Successfully updated project settings pipelines";
-const unsuccessMessage = "Failed to update project settings pipelines";
+const successMessage = "Successfully transfer project ownership";
+const unsuccessMessage = "Failed to transfer project ownership";
 
 type Params = { params: { project_id: string } };
-export type FetchEditProjectSettingsPipelines = Record<string, unknown>;
+export type FetchTransferProjectOwnershipData = Record<string, unknown>;
 
 export async function PATCH(request: Request, { params }: Params) {
     try {
@@ -34,9 +36,9 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editProjectSettingsPipelines> =
+        const body: z.infer<typeof transferProjectOwnershipSchema> =
             await request.json();
-        const validationResult = editProjectSettingsPipelines.safeParse(body);
+        const validationResult = transferProjectOwnershipSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -64,15 +66,52 @@ export async function PATCH(request: Request, { params }: Params) {
                 unsuccessMessage,
                 generateAndFormatZodError(
                     "unknown",
-                    "Unauthorized to edit project",
+                    "Unauthorized to transfer project",
                 ),
                 HttpStatusCode.UNAUTHORIZED_401,
             );
         }
 
-        await updateProjectPipelineStatus(Number(params.project_id), body.pipelineStatus);
+        const transferToUser = await getUserByEmail(body.email);
+        if (!transferToUser) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("unknown", "User does not exist"),
+                HttpStatusCode.NOT_FOUND_404,
+            );
+        }
 
-        return buildSuccessResponse<FetchEditProjectSettingsPipelines>(
+        if (transferToUser.id === user.id) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("unknown", "User is already the owner of the project"),
+                HttpStatusCode.NOT_FOUND_404,
+            );
+        }
+
+        if (
+            !transferToUser.hasLinkedGithub ||
+            transferToUser.type !== UserType.USER
+        ) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "unknown",
+                    "User does not qualify to own this project.",
+                ),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
+        }
+
+        await transferProjectOwnership(
+            Number(params.project_id),
+            transferToUser.id,
+            project.userId,
+        );
+
+        // TODO: should send email to old and new owner;
+
+        return buildSuccessResponse<FetchTransferProjectOwnershipData>(
             successMessage,
             {},
         );

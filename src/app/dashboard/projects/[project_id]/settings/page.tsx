@@ -8,6 +8,7 @@ import { ProjectPipeline } from "./project_pipeline";
 import ProjectFile from "./project_file";
 import ProjectLink from "./project_link";
 import { ProjectControl } from "./project_control";
+import { redirect } from "next/navigation";
 
 type Params = {
     project_id: string;
@@ -21,11 +22,11 @@ export default async function ProjectSettings({ params }: { params: Params }) {
 
     const result = await fetchOneAssociatedProject(params.project_id);
     if (!result.success) {
-        throw new Error(result.message);
+        redirect("/dashboard");
     }
 
     if (!result.data.project) {
-        throw new Error("Project does not exist");
+        redirect("/dashboard");
     }
 
     const { projectRole } = checkProjectRole(
@@ -37,7 +38,7 @@ export default async function ProjectSettings({ params }: { params: Params }) {
         projectRole !== ProjectRole.OWNER &&
         projectRole !== ProjectRole.SUPER_ADMIN
     ) {
-        throw new Error("Unauthorized to access project");
+        redirect("/dashboard");
     }
 
     const originalProjectCategories = result.data.project.projectCategories.map(
