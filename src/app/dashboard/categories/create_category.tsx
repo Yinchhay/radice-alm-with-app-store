@@ -19,6 +19,16 @@ export function CreateCategoryOverlay() {
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateCategory>>>();
 
+    function onCancel() {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+
+        setLogoSrc("");
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {
@@ -138,9 +148,7 @@ export function CreateCategoryOverlay() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
+                                    onClick={onCancel}
                                 >
                                     Cancel
                                 </Button>

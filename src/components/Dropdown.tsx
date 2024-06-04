@@ -30,6 +30,7 @@ export default function Dropdown({
             }}
         >
             <button
+                type="button"
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="w-full bg-white text-black rounded-md outline outline-1 outline-gray-300 pl-3 pr-2 py-1 text-start flex items-center justify-between"
             >
@@ -49,6 +50,7 @@ export default function Dropdown({
                     {dropdownList.map((item, index) => {
                         return (
                             <button
+                                type="button"
                                 key={"dropdown" + item.name + item.value}
                                 onClick={() => {
                                     setSelectedElement(item);

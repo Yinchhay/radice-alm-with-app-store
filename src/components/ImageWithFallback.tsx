@@ -17,6 +17,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = (props) => {
 
     return (
         <Image
+            unoptimized
             {...rest}
             src={imgSrc}
             onError={() => {

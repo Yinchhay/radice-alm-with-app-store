@@ -44,6 +44,9 @@ export const lucia = new Lucia(adapter, {
             hasLinkedGithub: attributes.hasLinkedGithub,
             profileUrl: attributes.profileUrl,
             type: attributes.type,
+            email: attributes.email,
+            skillSet: attributes.skillSet,
+            description: attributes.description,
         };
     },
 });

@@ -25,6 +25,16 @@ export function EditCategoryOverlay({
     const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(category.logo));
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    function onCancel() {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+
+        setLogoSrc(fileToUrl(category.logo));
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
     useEffect(() => {
         // close the overlay after editing successfully
         if (showOverlay && result?.success) {
@@ -66,7 +76,8 @@ export function EditCategoryOverlay({
                                         description: formData.get(
                                             "description",
                                         ) as string,
-                                        currentCategoryLogo: category.logo as string,
+                                        currentCategoryLogo:
+                                            category.logo as string,
                                     },
                                     formData,
                                     pathname,
@@ -152,9 +163,7 @@ export function EditCategoryOverlay({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
+                                    onClick={onCancel}
                                 >
                                     Cancel
                                 </Button>

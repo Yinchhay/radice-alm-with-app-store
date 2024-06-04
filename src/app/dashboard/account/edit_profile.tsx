@@ -1,0 +1,382 @@
+"use client";
+import Button from "@/components/Button";
+import Card from "@/components/Card";
+import Overlay from "@/components/Overlay";
+import { useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
+import InputField from "@/components/InputField";
+import FormErrorMessages from "@/components/FormErrorMessages";
+import { IconEdit, IconPlus, IconX } from "@tabler/icons-react";
+// import { fetchEditProfileById } from "./fetch";
+import { redirect, usePathname } from "next/navigation";
+import ImageWithFallback from "@/components/ImageWithFallback";
+import { fileToUrl } from "@/lib/file";
+import { User } from "lucia";
+import TableHeader from "@/components/table/TableHeader";
+import ColumName from "@/components/table/ColumnName";
+import Table from "@/components/table/Table";
+import TableBody from "@/components/table/TableBody";
+import TableRow from "@/components/table/TableRow";
+import Cell from "@/components/table/Cell";
+import Dropdown, { DropdownElement } from "@/components/Dropdown";
+import { UserSkillSet, UserSkillSetLevel } from "@/drizzle/schema";
+import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
+
+type UserSkillSetWithId = UserSkillSet & { id: string };
+
+export function EditProfileOverlay({ user }: { user: User }) {
+    if (!user) {
+        return redirect("/login");
+    }
+
+    const pathname = usePathname();
+    const [showOverlay, setShowOverlay] = useState<boolean>(false);
+    const [result, setResult] = useState<Awaited<ReturnType<any>>>();
+    const [skillSets, setSkillSets] = useState<UserSkillSetWithId[]>(
+        addIdToSkillSet(user.skillSet),
+    );
+    const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(user.profileUrl));
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // convert enum to dropdown list
+    const skillSetValues = Object.values(UserSkillSetLevel);
+    const skillSetsDropDownList = arrayToDropdownList(
+        skillSetValues.map((value) => ({
+            name: value,
+            value,
+        })),
+        "name",
+        "value",
+    );
+
+    function addSkillSet() {
+        const emptySkillSet: UserSkillSetWithId = {
+            label: "",
+            level: skillSetValues[0],
+            id: crypto.randomUUID(),
+        };
+
+        setSkillSets((prev) => {
+            if (!Array.isArray(prev) || prev.length < 0) {
+                return [emptySkillSet];
+            }
+
+            return [...prev, emptySkillSet];
+        });
+    }
+
+    function removeSkillSet(id: string) {
+        setSkillSets((prev) => {
+            if (!Array.isArray(prev) || prev.length < 0) {
+                return [];
+            }
+
+            return prev.filter((skillSet) => skillSet.id !== id);
+        });
+    }
+
+    function onChangeSkillSetLabel(id: string, value: string) {
+        setSkillSets((prev) => {
+            if (!Array.isArray(prev) || prev.length < 0) {
+                return [];
+            }
+
+            return prev.map((skillSet) => {
+                if (skillSet.id === id) {
+                    return {
+                        ...skillSet,
+                        label: value,
+                    };
+                }
+
+                return skillSet;
+            });
+        });
+    }
+
+    function onChangeSkillSetLevel(id: string, value: string) {
+        setSkillSets((prev) => {
+            if (!Array.isArray(prev) || prev.length < 0) {
+                return [];
+            }
+
+            return prev.map((skillSet) => {
+                if (skillSet.id === id) {
+                    return {
+                        ...skillSet,
+                        level: value as UserSkillSetLevel,
+                    };
+                }
+
+                return skillSet;
+            });
+        });
+    }
+
+    // Add id to identify each skill sets so that we can use it as key in loop later
+    function addIdToSkillSet(
+        skillSetsToAddId: UserSkillSet[] | null,
+    ): UserSkillSetWithId[] {
+        if (!Array.isArray(skillSetsToAddId) || skillSetsToAddId.length < 0) {
+            return [];
+        }
+
+        // think of consequence when a user want to exploit by calling api and try to input json other format than what we expect.
+        return skillSetsToAddId.map((skillSet) => {
+            return {
+                label: skillSet.label || "",
+                level: skillSet.level || skillSetValues[0],
+                id: crypto.randomUUID(),
+            };
+        });
+    }
+
+    async function onSubmit(formData: FormData) {
+        const skillSetsWithoutId: UserSkillSet[] = skillSets.map((skillSet) => {
+            return {
+                label: skillSet.label,
+                level: skillSet.level,
+            };
+        });
+        console.log("skillSet", skillSetsWithoutId);
+        console.log("firstName", formData.get("firstName"));
+        console.log("lastName", formData.get("lastName"));
+        console.log("description", formData.get("description"));
+        console.log("profileLogo", formData.get("profileLogo"));
+    }
+
+    function onCancel() {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+
+        setLogoSrc(fileToUrl(user.profileUrl));
+        setSkillSets(addIdToSkillSet(user.skillSet));
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
+    useEffect(() => {
+        // close the overlay after editing successfully
+        if (showOverlay && result?.success) {
+            setShowOverlay(false);
+        }
+    }, [result]);
+
+    return (
+        <>
+            <Button onClick={() => setShowOverlay(true)} square={true}>
+                <IconEdit></IconEdit>
+            </Button>
+            {showOverlay && (
+                <Overlay
+                    onClose={() => {
+                        setShowOverlay(false);
+                    }}
+                >
+                    <Card className="w-[480px] font-normal flex flex-col gap-4">
+                        <form action={onSubmit} className="flex flex-col gap-4">
+                            <div>
+                                <ImageWithFallback
+                                    className="aspect-square object-cover rounded-full hover:cursor-pointer"
+                                    src={logoSrc}
+                                    alt={"profile"}
+                                    width={128}
+                                    height={128}
+                                    onClick={() => {
+                                        if (fileInputRef.current) {
+                                            fileInputRef.current.click();
+                                        }
+                                    }}
+                                />
+                                <InputField
+                                    ref={fileInputRef}
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setLogoSrc(
+                                                URL.createObjectURL(file),
+                                            );
+                                        }
+                                    }}
+                                    hidden
+                                    type="file"
+                                    name="profileLogo"
+                                    id="profileLogo"
+                                />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <div className="flex flex-col items-start">
+                                    <label
+                                        htmlFor="firstName"
+                                        className="font-normal"
+                                    >
+                                        First name
+                                    </label>
+                                    <InputField
+                                        name="firstName"
+                                        id="firstName"
+                                        defaultValue={user.firstName ?? ""}
+                                    />
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <label
+                                        htmlFor="lastName"
+                                        className="font-normal"
+                                    >
+                                        Last name
+                                    </label>
+                                    <InputField
+                                        name="lastName"
+                                        id="lastName"
+                                        defaultValue={user.lastName ?? ""}
+                                    />
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <label
+                                        htmlFor="description"
+                                        className="font-normal"
+                                    >
+                                        Description
+                                    </label>
+                                    <InputField
+                                        type="text"
+                                        name="description"
+                                        id="description"
+                                        defaultValue={user.description ?? ""}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex justify-between items-center w-full">
+                                        <h2 className="text-lg font-semibold min-w-fit">
+                                            Skill sets:
+                                        </h2>
+                                        <Button
+                                            type="button"
+                                            square={true}
+                                            variant="primary"
+                                            onClick={addSkillSet}
+                                        >
+                                            <IconPlus></IconPlus>
+                                        </Button>
+                                    </div>
+                                    <div className="">
+                                        {Array.isArray(skillSets) &&
+                                            skillSets.length > 0 && (
+                                                <Table className="w-full">
+                                                    <TableHeader>
+                                                        <ColumName>
+                                                            Label
+                                                        </ColumName>
+                                                        <ColumName className="min-w-36">
+                                                            Level
+                                                        </ColumName>
+                                                        <ColumName>
+                                                            Action
+                                                        </ColumName>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {skillSets.map(
+                                                            (skillSet) => {
+                                                                return (
+                                                                    <SkillSetRow
+                                                                        key={
+                                                                            skillSet.id
+                                                                        }
+                                                                        skillSet={
+                                                                            skillSet
+                                                                        }
+                                                                        dropDownList={
+                                                                            skillSetsDropDownList
+                                                                        }
+                                                                        onRemove={
+                                                                            removeSkillSet
+                                                                        }
+                                                                        onLabelChange={
+                                                                            onChangeSkillSetLabel
+                                                                        }
+                                                                        onLevelChange={
+                                                                            onChangeSkillSetLevel
+                                                                        }
+                                                                    />
+                                                                );
+                                                            },
+                                                        )}
+                                                    </TableBody>
+                                                </Table>
+                                            )}
+                                    </div>
+                                </div>
+                            </div>
+                            {!result?.success && result?.errors && (
+                                <FormErrorMessages errors={result?.errors} />
+                            )}
+                            <div className="flex justify-end gap-2 my-3">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={onCancel}
+                                >
+                                    Cancel
+                                </Button>
+                                <EditProfileBtn />
+                            </div>
+                        </form>
+                    </Card>
+                </Overlay>
+            )}
+        </>
+    );
+}
+
+function SkillSetRow({
+    skillSet,
+    dropDownList,
+    onRemove,
+    onLabelChange,
+    onLevelChange,
+}: {
+    skillSet: UserSkillSetWithId;
+    dropDownList: DropdownElement[];
+    onRemove: (skillSetId: string) => void;
+    onLabelChange: (id: string, value: string) => void;
+    onLevelChange: (id: string, value: string) => void;
+}) {
+    return (
+        <TableRow>
+            <Cell>
+                <InputField
+                    defaultValue={skillSet.label}
+                    onChange={(e) => onLabelChange(skillSet.id, e.target.value)}
+                />
+            </Cell>
+            <Cell>
+                <Dropdown
+                    dropdownList={dropDownList}
+                    onChange={(selectedElement) =>
+                        onLevelChange(skillSet.id, selectedElement.value)
+                    }
+                />
+            </Cell>
+            <Cell>
+                <Button
+                    type="button"
+                    onClick={() => onRemove(skillSet.id)}
+                    square={true}
+                    variant="danger"
+                >
+                    <IconX></IconX>
+                </Button>
+            </Cell>
+        </TableRow>
+    );
+}
+
+function EditProfileBtn() {
+    const formStatus = useFormStatus();
+    return (
+        <Button disabled={formStatus.pending} variant="primary">
+            {formStatus.pending ? "Editing" : "Edit"}
+        </Button>
+    );
+}

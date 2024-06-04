@@ -6,6 +6,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { profile } from "console";
+import ImageWithFallback from "@/components/ImageWithFallback";
+import { fileToUrl } from "@/lib/file";
 
 export default function Navbar({
     onClick,
@@ -31,16 +33,12 @@ export default function Navbar({
                 <h1 className="text-white font-bold">
                     {`${user.firstName} ${user.lastName}`}
                 </h1>
-                <Image
-                    className="rounded-full"
-                    src={
-                        user.profileUrl
-                            ? user.profileUrl
-                            : "/profile_placeholder.jpg"
-                    }
+                <ImageWithFallback
+                    className="aspect-square object-cover rounded-full"
+                    src={fileToUrl(user.profileUrl)}
+                    alt={"profile"}
                     width={52}
                     height={52}
-                    alt="Profile Picture"
                 />
             </Link>
         </nav>

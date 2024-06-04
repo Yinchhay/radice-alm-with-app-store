@@ -3,7 +3,6 @@ import { useState } from "react";
 import Navbar from "./navbar";
 import SideNav from "./sidenav";
 import { User } from "lucia";
-import { Permissions } from "@/types/IAM";
 import { CanAccessRoutes } from "../layout";
 
 export default function DashboardLayout({

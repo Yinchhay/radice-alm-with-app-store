@@ -49,11 +49,18 @@ export function CreateMediaOverlay() {
             formData.append("images", file);
         }
 
-        const result = await fetchCreateMedia(
-            formData,
-            pathname,
-        );
+        const result = await fetchCreateMedia(formData, pathname);
         setResult(result);
+    }
+
+    function onCancel() {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+
+        setFiles([]);
+        setResult(undefined);
+        setShowOverlay(false);
     }
 
     useEffect(() => {
@@ -85,10 +92,7 @@ export function CreateMediaOverlay() {
                                 Create Media
                             </h1>
                         </div>
-                        <form
-                            className="flex flex-col gap-2"
-                            action={onSubmit}
-                        >
+                        <form className="flex flex-col gap-2" action={onSubmit}>
                             <div className="flex flex-col items-start">
                                 <label htmlFor="title" className="font-normal">
                                     Title
@@ -203,9 +207,7 @@ export function CreateMediaOverlay() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
+                                    onClick={onCancel}
                                 >
                                     Cancel
                                 </Button>

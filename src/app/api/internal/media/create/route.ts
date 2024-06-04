@@ -73,7 +73,6 @@ export async function POST(request: Request) {
             filename: filename,
         }));
 
-        console.log(imageFilenames);
         if (imageFilenames && imageFilenames.length < 1) {
             return buildErrorResponse(
                 unsuccessMessage,

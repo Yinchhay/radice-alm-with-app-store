@@ -15,7 +15,17 @@ import {
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { projectPipeLineStatusType } from "@/app/api/internal/project/[project_id]/schema";
+import { UserType } from "@/types/user";
 
+export enum UserSkillSetLevel {
+    Know = "Know",
+    Do = "Do",
+    Teach = "Teach",
+}
+export type UserSkillSet = {
+    label: string;
+    level: UserSkillSetLevel;
+};
 export const users = mysqlTable("users", {
     id: varchar("id", {
         length: 255,
@@ -49,10 +59,9 @@ export const users = mysqlTable("users", {
         length: 50,
     })
         .notNull()
-        .default("user"),
-    skillset: json("skillset").default({
-        // todo: add default type so that we can infer the type of the object
-    }),
+        .$type<UserType>()
+        .default(UserType.USER),
+    skillSet: json("skillSet").$type<UserSkillSet[]>(),
     description: varchar("description", {
         length: 255,
     }),

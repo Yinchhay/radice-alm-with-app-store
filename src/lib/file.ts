@@ -1,6 +1,4 @@
-import { User } from "lucia";
 import path from "path";
-import { localDebug } from "./utils";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "./response";
 import { FetchFileStore } from "@/app/api/internal/file/store/route";
 import { getBaseUrl } from "./server_utils";
@@ -90,6 +88,10 @@ export async function deleteFile(
 }
 
 export function fileToUrl(file: string | null | undefined): string {
+    if (!file) {
+        return "/placeholder.webp";
+    }
+
     if (file && file.startsWith("http")) {
         return file;
     }
