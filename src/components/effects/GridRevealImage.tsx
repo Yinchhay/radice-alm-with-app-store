@@ -96,7 +96,9 @@ export default function GridRevealImage({
                 width={fill ? undefined : width}
                 height={fill ? undefined : height}
                 alt={alt}
-                className={className}
+                className={[className, canReveal ? " " : " brightness-0"].join(
+                    " ",
+                )}
             />
             <div
                 className="absolute top-0 left-0 z-10 grid select-none pointer-events-none grid-flow-col"

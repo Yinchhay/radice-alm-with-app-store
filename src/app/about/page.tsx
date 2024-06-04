@@ -16,6 +16,18 @@ const roboto_condensed = Roboto_Condensed({
 export default async function page() {
     const members = await getMembers();
 
+    const executive: MemberProfileType[] = [
+        {
+            firstName: "Bradley Jensen",
+            lastName: "MURG",
+            profileUrl: "/bradley.jpg",
+            title: "Rector",
+            email: "bmurg@paragoniu.edu.kh",
+            description:
+                "Dr. Bradley J. Murg is Interim Rector and Provost at Paragon International University. He first visited Cambodia in 2000 when he was a Henry Luce Scholar working at the Asian Development Bank.",
+        },
+    ];
+
     const advisors: MemberProfileType[] = [
         {
             firstName: "Neil IAN",
@@ -67,13 +79,13 @@ export default async function page() {
                 <h1
                     className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
                 >
-                    Co-Founders
+                    Executive
                 </h1>
                 <div className="flex justify-center gap-8 mt-4">
-                    {advisors.map((adivsor, i) => {
+                    {executive.map((member, i) => {
                         return (
                             <MemberProfile
-                                member={adivsor}
+                                member={member}
                                 variant="dark"
                                 useTitle
                             />
@@ -82,6 +94,24 @@ export default async function page() {
                 </div>
             </div>
             <div className="mx-auto py-12 max-w-[1200px]">
+                <h1
+                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                >
+                    Co-Founders
+                </h1>
+                <div className="flex justify-center gap-8 mt-4">
+                    {advisors.map((adivsor, i) => {
+                        return (
+                            <MemberProfile
+                                member={adivsor}
+                                variant="light"
+                                useTitle
+                            />
+                        );
+                    })}
+                </div>
+            </div>
+            <div className="mx-auto pb-12 max-w-[1200px]">
                 <h1
                     className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
                 >

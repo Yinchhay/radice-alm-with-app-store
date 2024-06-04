@@ -62,7 +62,7 @@ export default function MemberProfile({
                                 rows={11}
                                 width={180}
                                 height={220}
-                                revealDelay={8}
+                                revealDelay={6}
                                 fill
                                 className="object-cover"
                             />
@@ -73,7 +73,13 @@ export default function MemberProfile({
                     >
                         {member.firstName + " " + member.lastName}
                     </h1>
-                    <h2 className={`${roboto_flex.className}`}>
+                    <h2
+                        className={
+                            useTitle
+                                ? `font-bold ${roboto_condensed.className} text-lg leading-[0.9] mb-2`
+                                : "text-sm"
+                        }
+                    >
                         {useTitle ? member.title : member.email}
                     </h2>
                     <p className="text-sm text-center">{member.description}</p>
@@ -83,16 +89,30 @@ export default function MemberProfile({
             return (
                 <div className="flex flex-col items-center w-[400px]">
                     <div className="w-[180px] h-[220px] relative">
-                        <ImageWithFallback
-                            alt=""
-                            src={
-                                member.profileUrl
-                                    ? member.profileUrl
-                                    : "/wrath.jpg"
-                            }
-                            fill
-                            className="object-cover"
-                        />
+                        <ScrollReveal
+                            onReveal={() => {
+                                console.log("reveal");
+                                setReveal(true);
+                            }}
+                        >
+                            <GridRevealImage
+                                variant="light"
+                                isAlphabet={false}
+                                canReveal={reveal}
+                                src={
+                                    member.profileUrl
+                                        ? member.profileUrl
+                                        : "/wrath.jpg"
+                                }
+                                cols={9}
+                                rows={11}
+                                width={180}
+                                height={220}
+                                revealDelay={6}
+                                fill
+                                className="object-cover"
+                            />
+                        </ScrollReveal>
                     </div>
                     <h1
                         className={`font-bold text-xl mt-2 ${roboto_flex.className}`}
@@ -100,7 +120,11 @@ export default function MemberProfile({
                         {member.firstName + " " + member.lastName}
                     </h1>
                     <h2
-                        className={`font-bold ${roboto_condensed.className} text-lg`}
+                        className={
+                            useTitle
+                                ? `font-bold ${roboto_condensed.className} text-lg leading-[0.9]  mb-2`
+                                : "text-sm"
+                        }
                     >
                         {useTitle ? member.title : member.email}
                     </h2>
