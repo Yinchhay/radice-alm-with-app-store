@@ -1,8 +1,9 @@
+import { UserSkillSetLevel } from "@/drizzle/schema";
 import { z } from "zod";
 
-export const skillSetLevelSchema = z.enum(["Know", "Do", "Teach"], {
+export const skillSetLevelSchema = z.nativeEnum(UserSkillSetLevel, {
     required_error: "Skill level is required",
-    invalid_type_error: "Skill level must be one of 'Know', 'Do', 'Teach'",
+    invalid_type_error: "Skill level invalid",
 });
 export const skillSetSchema = z.object({
     label: z

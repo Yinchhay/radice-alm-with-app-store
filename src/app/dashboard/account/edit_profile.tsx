@@ -7,10 +7,9 @@ import { useFormStatus } from "react-dom";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { IconEdit, IconPlus, IconX } from "@tabler/icons-react";
-// import { fetchEditProfileById } from "./fetch";
 import { redirect, usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
-import { fileToUrl } from "@/lib/file";
+import { ACCEPTED_IMAGE_TYPES, fileToUrl } from "@/lib/file";
 import { User } from "lucia";
 import TableHeader from "@/components/table/TableHeader";
 import ColumName from "@/components/table/ColumnName";
@@ -22,6 +21,7 @@ import Dropdown, { DropdownElement } from "@/components/Dropdown";
 import { UserSkillSet, UserSkillSetLevel } from "@/drizzle/schema";
 import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
 import { fetchUpdateProfileInformation } from "./fetch";
+import TextareaField from "@/components/TextareaField";
 
 type UserSkillSetWithId = UserSkillSet & { id: string };
 
@@ -40,21 +40,23 @@ export function EditProfileOverlay({ user }: { user: User }) {
     const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(user.profileUrl));
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // convert enum to dropdown list
-    const skillSetValues = Object.values(UserSkillSetLevel);
-    const skillSetsDropDownList = arrayToDropdownList(
-        skillSetValues.map((value) => ({
-            name: value,
-            value,
-        })),
-        "name",
-        "value",
+    // convert enum to 2d array, but take only its key and value
+    const skillSetValues = Object.entries(UserSkillSetLevel).filter(
+        ([, value]) => typeof value === "number",
+    );
+    const skillSetsDropDownList: DropdownElement[] = skillSetValues.map(
+        ([name, value]) => {
+            return {
+                name: name as string,
+                value: value.toString(),
+            };
+        },
     );
 
     function addSkillSet() {
         const emptySkillSet: UserSkillSetWithId = {
             label: "",
-            level: skillSetValues[0],
+            level: UserSkillSetLevel.Know,
             id: crypto.randomUUID(),
         };
 
@@ -96,7 +98,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
         });
     }
 
-    function onChangeSkillSetLevel(id: string, value: string) {
+    function onChangeSkillSetLevel(id: string, value: number) {
         setSkillSets((prev) => {
             if (!Array.isArray(prev) || prev.length < 0) {
                 return [];
@@ -106,7 +108,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                 if (skillSet.id === id) {
                     return {
                         ...skillSet,
-                        level: value as UserSkillSet["level"],
+                        level: value as unknown as UserSkillSetLevel,
                     };
                 }
 
@@ -127,7 +129,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
         return skillSetsToAddId.map((skillSet) => {
             return {
                 label: skillSet.label || "",
-                level: skillSet.level || skillSetValues[1],
+                level: skillSet.level || UserSkillSetLevel.Know,
                 id: crypto.randomUUID(),
             };
         });
@@ -137,7 +139,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
         const skillSetsWithoutId: UserSkillSet[] = skillSets.map((skillSet) => {
             return {
                 label: skillSet.label,
-                level: skillSet.level,
+                level: Number(skillSet.level),
             };
         });
 
@@ -180,7 +182,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
             </Button>
             {showOverlay && (
                 <Overlay onClose={onCancel}>
-                    <Card className="w-[480px] font-normal flex flex-col gap-4">
+                    <Card className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto">
                         <form action={onSubmit} className="flex flex-col gap-4">
                             <div>
                                 <ImageWithFallback
@@ -205,6 +207,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                             );
                                         }
                                     }}
+                                    accept={ACCEPTED_IMAGE_TYPES.join(",")}
                                     hidden
                                     type="file"
                                     name="profileLogo"
@@ -245,8 +248,8 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                     >
                                         Description
                                     </label>
-                                    <InputField
-                                        type="text"
+                                    <TextareaField
+                                        className="h-36"
                                         name="description"
                                         id="description"
                                         defaultValue={user.description ?? ""}
@@ -266,7 +269,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                             <IconPlus></IconPlus>
                                         </Button>
                                     </div>
-                                    <div className="">
+                                    <div>
                                         {Array.isArray(skillSets) &&
                                             skillSets.length > 0 && (
                                                 <Table className="w-full">
@@ -346,7 +349,7 @@ function SkillSetRow({
     dropDownList: DropdownElement[];
     onRemove: (skillSetId: string) => void;
     onLabelChange: (id: string, value: string) => void;
-    onLevelChange: (id: string, value: string) => void;
+    onLevelChange: (id: string, value: number) => void;
 }) {
     return (
         <TableRow>
@@ -359,12 +362,19 @@ function SkillSetRow({
             <Cell>
                 <Dropdown
                     defaultSelectedElement={{
-                        name: skillSet.level,
-                        value: skillSet.level,
+                        name:
+                            dropDownList.find(
+                                (item) =>
+                                    item.value === skillSet.level.toString(),
+                            )?.name ?? dropDownList[0].name,
+                        value: skillSet.level.toString(),
                     }}
                     dropdownList={dropDownList}
                     onChange={(selectedElement) =>
-                        onLevelChange(skillSet.id, selectedElement.value)
+                        onLevelChange(
+                            skillSet.id,
+                            Number(selectedElement.value),
+                        )
                     }
                 />
             </Cell>

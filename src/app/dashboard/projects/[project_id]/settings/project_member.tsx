@@ -203,7 +203,7 @@ export default function ProjectMember({
                 </Table>
                 {showSelectorOverlay && (
                     <Selector
-                        className="w-[420px]"
+                        className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto"
                         selectorTitle="Add users to project"
                         searchPlaceholder="Search users"
                         checkListTitle="Users"

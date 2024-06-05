@@ -10,6 +10,7 @@ import { IconEdit } from "@tabler/icons-react";
 import { media } from "@/drizzle/schema";
 import { fetchEditMediaById } from "./fetch";
 import { usePathname } from "next/navigation";
+import TextareaField from "@/components/TextareaField";
 
 export function EditMediaOverlay({
     mediaOne,
@@ -63,7 +64,7 @@ export function EditMediaOverlay({
                         setShowOverlay(false);
                     }}
                 >
-                    <Card className="w-[300px] font-normal">
+                    <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
                                 Edit Media
@@ -87,7 +88,8 @@ export function EditMediaOverlay({
                                 >
                                     Description
                                 </label>
-                                <InputField
+                                <TextareaField
+                                    className="h-36"
                                     name="description"
                                     id="description"
                                     defaultValue={mediaOne.description ?? ""}

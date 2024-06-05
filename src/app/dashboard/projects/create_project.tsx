@@ -39,7 +39,7 @@ export function CreateProjectOverlay() {
                         setShowOverlay(false);
                     }}
                 >
-                    <Card className="w-[300px]">
+                    <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
                                 Create Project

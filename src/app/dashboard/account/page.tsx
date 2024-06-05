@@ -47,7 +47,7 @@ export default async function ManageAccount() {
                                 {Array.isArray(user.skillSet) &&
                                     user.skillSet.map((sk) => {
                                         // TODO: add tooltip level
-                                        return <Chip>{sk.label}</Chip>;
+                                        return <Chip key={sk.label}>{sk.label}</Chip>;
                                     })}
                             </ChipsHolder>
                         </div>
