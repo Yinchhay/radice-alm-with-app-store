@@ -10,6 +10,7 @@ import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fetchCreateMedia } from "./fetch";
+import TextareaField from "@/components/TextareaField";
 
 export function CreateMediaOverlay() {
     const pathname = usePathname();
@@ -81,10 +82,8 @@ export function CreateMediaOverlay() {
                 <IconPlus></IconPlus>
             </Button>
             {showOverlay && (
-                <Overlay
-                    onClose={onCancel}
-                >
-                    <Card className="w-[480px] font-normal">
+                <Overlay onClose={onCancel}>
+                    <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
                                 Create Media
@@ -104,7 +103,8 @@ export function CreateMediaOverlay() {
                                 >
                                     Description
                                 </label>
-                                <InputField
+                                <TextareaField
+                                    className="h-36"
                                     type="description"
                                     name="description"
                                     id="description"

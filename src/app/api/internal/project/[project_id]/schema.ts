@@ -87,7 +87,7 @@ export const imageOnlyValidation = z
     )
     .refine(
         (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-        "Only .jpg, .jpeg, .png and .webp formats are supported.",
+        "Only .jpg, .jpeg, .png and .webp formats are allowed.",
     );
 export const fileImageSchema = z.object({
     image: imageOnlyValidation,

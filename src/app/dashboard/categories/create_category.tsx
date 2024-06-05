@@ -10,6 +10,8 @@ import { fetchCreateCategory } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import { ACCEPTED_IMAGE_TYPES } from "@/lib/file";
+import TextareaField from "@/components/TextareaField";
 
 export function CreateCategoryOverlay() {
     const pathname = usePathname();
@@ -47,10 +49,8 @@ export function CreateCategoryOverlay() {
                 <IconPlus></IconPlus>
             </Button>
             {showOverlay && (
-                <Overlay
-                    onClose={onCancel}
-                >
-                    <Card className="w-[300px] font-normal">
+                <Overlay onClose={onCancel}>
+                    <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
                                 Create Category
@@ -104,7 +104,7 @@ export function CreateCategoryOverlay() {
                                             );
                                         }
                                     }}
-                                    accept="image/*"
+                                    accept={ACCEPTED_IMAGE_TYPES.join(",")}
                                     hidden
                                     type="file"
                                     name="categoryLogo"
@@ -133,8 +133,8 @@ export function CreateCategoryOverlay() {
                                 >
                                     Description
                                 </label>
-                                <InputField
-                                    type="description"
+                                <TextareaField
+                                    className="h-36"
                                     name="description"
                                     id="description"
                                 />

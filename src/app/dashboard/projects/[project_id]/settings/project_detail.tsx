@@ -11,12 +11,13 @@ import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsDetail } from "./fetch";
 import { categories as categoriesSchema } from "@/drizzle/schema";
-import { fileToUrl } from "@/lib/file";
+import { ACCEPTED_IMAGE_TYPES, fileToUrl } from "@/lib/file";
 import { useSelector } from "../../../../../hooks/useSelector";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import ChipsHolder from "@/components/ChipsHolder";
 import Chip from "@/components/Chip";
+import TextareaField from "@/components/TextareaField";
 
 export default function ProjectDetail({
     project,
@@ -38,7 +39,7 @@ export default function ProjectDetail({
     const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(project.logoUrl));
     const fileInputRef = useRef<HTMLInputElement>(null);
     const projectName = useRef<HTMLInputElement>(null);
-    const projectDescription = useRef<HTMLInputElement>(null);
+    const projectDescription = useRef<HTMLTextAreaElement>(null);
 
     const {
         showSelectorOverlay,
@@ -122,7 +123,7 @@ export default function ProjectDetail({
                             type="file"
                             name="projectLogo"
                             id="projectLogo"
-                            accept="image/*"
+                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
                         />
                     </div>
                 </div>
@@ -151,7 +152,8 @@ export default function ProjectDetail({
                         Project Description:
                     </label>
                     <div className="col-span-3">
-                        <InputField
+                        <TextareaField
+                            className="h-36"
                             ref={projectDescription}
                             defaultValue={project?.description ?? ""}
                             name="projectDescription"
@@ -169,11 +171,15 @@ export default function ProjectDetail({
                     </label>
                     <div className="col-span-3">
                         <div className="flex items-center">
-                            <ChipsHolder className="mt-1">
+                            <ChipsHolder className="mt-1  mr-2">
                                 {Array.isArray(checkedCategories) &&
                                     checkedCategories.map((cate) => {
                                         // TODO: add tooltip
-                                        return <Chip>{cate.value}</Chip>;
+                                        return (
+                                            cate.checked && (
+                                                <Chip>{cate.name}</Chip>
+                                            )
+                                        );
                                     })}
                             </ChipsHolder>
                             <Button
@@ -187,7 +193,7 @@ export default function ProjectDetail({
                         </div>
                         {showSelectorOverlay && (
                             <Selector
-                                className="w-[420px]"
+                                className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto"
                                 selectorTitle="Add categories to project"
                                 searchPlaceholder="Search categories"
                                 checkListTitle="Categories"

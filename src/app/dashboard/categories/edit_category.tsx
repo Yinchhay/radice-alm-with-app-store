@@ -11,7 +11,8 @@ import { categories } from "@/drizzle/schema";
 import { fetchEditCategoryById } from "./fetch";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
-import { fileToUrl } from "@/lib/file";
+import { ACCEPTED_IMAGE_TYPES, fileToUrl } from "@/lib/file";
+import TextareaField from "@/components/TextareaField";
 
 export function EditCategoryOverlay({
     category,
@@ -52,10 +53,8 @@ export function EditCategoryOverlay({
                 <IconEdit></IconEdit>
             </Button>
             {showOverlay && (
-                <Overlay
-                    onClose={onCancel}
-                >
-                    <Card className="w-[300px] font-normal">
+                <Overlay onClose={onCancel}>
+                    <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
                                 Edit Category
@@ -113,6 +112,7 @@ export function EditCategoryOverlay({
                                         }
                                     }}
                                     hidden
+                                    accept={ACCEPTED_IMAGE_TYPES.join(",")}
                                     type="file"
                                     name="categoryLogo"
                                     id="categoryLogo"
@@ -148,7 +148,8 @@ export function EditCategoryOverlay({
                                 >
                                     Description
                                 </label>
-                                <InputField
+                                <TextareaField
+                                    className="h-36"
                                     name="description"
                                     id="description"
                                     defaultValue={category.description ?? ""}

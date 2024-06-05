@@ -45,7 +45,7 @@ export function DeleteUserOverlay({
                         setShowOverlay(false);
                     }}
                 >
-                    <Card className="w-[300px]">
+                    <Card className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
                                 Delete
@@ -71,7 +71,7 @@ export function DeleteUserOverlay({
                             {!result?.success && result?.errors && (
                                 <FormErrorMessages errors={result?.errors} />
                             )}
-                            <div className="flex justify-end gap-2 my-3">
+                            <div className="flex justify-end gap-2">
                                 <Button
                                     type="button"
                                     variant="outline"
