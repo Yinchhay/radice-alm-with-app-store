@@ -22,6 +22,7 @@ import { UserSkillSet, UserSkillSetLevel } from "@/drizzle/schema";
 import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
 import { fetchUpdateProfileInformation } from "./fetch";
 import TextareaField from "@/components/TextareaField";
+import Tooltip from "@/components/Tooltip";
 
 type UserSkillSetWithId = UserSkillSet & { id: string };
 
@@ -177,9 +178,11 @@ export function EditProfileOverlay({ user }: { user: User }) {
 
     return (
         <>
-            <Button onClick={() => setShowOverlay(true)} square={true}>
-                <IconEdit></IconEdit>
-            </Button>
+            <Tooltip title="Edit profile">
+                <Button onClick={() => setShowOverlay(true)} square={true}>
+                    <IconEdit></IconEdit>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto">

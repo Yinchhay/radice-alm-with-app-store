@@ -2,29 +2,29 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { getPublicProjectsByCategory } from "@/repositories/project";
+import { getPublicProjectsByCategoryId } from "@/repositories/project";
 import { NextRequest } from "next/server";
 
-export type GetPublicProjectsByCategoryReturnType = Awaited<
-    ReturnType<typeof getPublicProjectsByCategory>
+export type GetPublicProjectsByCategoryIdReturnType = Awaited<
+    ReturnType<typeof getPublicProjectsByCategoryId>
 >;
 
-export type FetchPublicProjectsCategoriesData = {
-    projects: GetPublicProjectsByCategoryReturnType;
+export type FetchPublicProjectsByCategoryIdData = {
+    projects: GetPublicProjectsByCategoryIdReturnType;
 };
 type Params = { params: { category_id: string } };
 
-const successMessage = "Get public projects by category successfully";
-const unsuccessMessage = "Get public projects by category failed";
+const successMessage = "Get public projects by category id successfully";
+const unsuccessMessage = "Get public projects by category id failed";
 
-// This api return only categories that have projects and the projects are public
+// This api return only category id that have projects and the projects are public
 export async function GET(request: NextRequest, { params }: Params) {
     try {
-        const projects = await getPublicProjectsByCategory(
+        const projects = await getPublicProjectsByCategoryId(
             Number(params.category_id),
         );
 
-        return buildSuccessResponse<FetchPublicProjectsCategoriesData>(
+        return buildSuccessResponse<FetchPublicProjectsByCategoryIdData>(
             successMessage,
             {
                 projects: projects,

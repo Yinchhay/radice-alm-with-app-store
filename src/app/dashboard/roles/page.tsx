@@ -17,6 +17,8 @@ import { Permissions } from "@/types/IAM";
 import { CreateRoleOverlay } from "./create_role";
 import { DeleteRoleOverlay } from "./delete_role";
 import { fetchRoles } from "./fetch";
+import Link from "next/link";
+import Tooltip from "@/components/Tooltip";
 
 type ManageRolesProps = {
     searchParams?: {
@@ -71,7 +73,7 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
                     <Table className="my-4 w-full">
                         <TableHeader>
                             <ColumName className="text-start">Name</ColumName>
-                            <ColumName className="flex justify-end">
+                            <ColumName className="flex justify-end font-normal">
                                 {canCreateRole && <CreateRoleOverlay />}
                             </ColumName>
                         </TableHeader>
@@ -122,14 +124,16 @@ function Role({
             <Cell data-test={`roleName-${role.name}`}>{role.name}</Cell>
             <Cell className="flex justify-end gap-2">
                 {canEditRole && (
-                    <a href={`/dashboard/roles/edit/${role.id}`}>
-                        <Button
-                            data-test={`editRole-${role.name}`}
-                            square={true}
-                        >
-                            <IconEdit></IconEdit>
-                        </Button>
-                    </a>
+                    <Tooltip title="Edit role">
+                        <Link href={`/dashboard/roles/edit/${role.id}`}>
+                            <Button
+                                data-test={`editRole-${role.name}`}
+                                square={true}
+                            >
+                                <IconEdit></IconEdit>
+                            </Button>
+                        </Link>
+                    </Tooltip>
                 )}
                 {canDeleteRole && <DeleteRoleOverlay role={role} />}
             </Cell>

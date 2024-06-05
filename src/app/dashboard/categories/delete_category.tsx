@@ -9,6 +9,7 @@ import { useFormStatus } from "react-dom";
 import { IconX } from "@tabler/icons-react";
 import { fetchDeleteCategoryById } from "./fetch";
 import { usePathname } from "next/navigation";
+import Tooltip from "@/components/Tooltip";
 
 export function DeleteCategoryOverlay({
     category,
@@ -29,16 +30,16 @@ export function DeleteCategoryOverlay({
 
     return (
         <>
-            <div className="">
-                <Button
-                    data-test={`deleteCategory-${category.name}`}
-                    onClick={() => setShowOverlay(true)}
-                    square={true}
-                    variant="danger"
-                >
-                    <IconX></IconX>
-                </Button>
-            </div>
+                <Tooltip title="Delete category">
+                    <Button
+                        data-test={`deleteCategory-${category.name}`}
+                        onClick={() => setShowOverlay(true)}
+                        square={true}
+                        variant="danger"
+                    >
+                        <IconX></IconX>
+                    </Button>
+                </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {

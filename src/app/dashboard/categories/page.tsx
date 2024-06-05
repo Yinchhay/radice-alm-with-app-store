@@ -37,7 +37,7 @@ export default async function ManageCategories({
         page = 1;
     }
 
-    const result = await fetchCategories(page, 9);
+    const result = await fetchCategories(page, 5);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -80,7 +80,7 @@ export default async function ManageCategories({
                         <ColumName>Name</ColumName>
                         <ColumName>Short name</ColumName>
                         <ColumName>Description</ColumName>
-                        <ColumName className="flex justify-end">
+                        <ColumName className="flex justify-end font-normal">
                             {canCreateCategory && <CreateCategoryOverlay />}
                         </ColumName>
                     </TableHeader>

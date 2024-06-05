@@ -9,6 +9,7 @@ import { useFormStatus } from "react-dom";
 import { IconX } from "@tabler/icons-react";
 import { fetchDeleteMediaById } from "./fetch";
 import { usePathname } from "next/navigation";
+import Tooltip from "@/components/Tooltip";
 
 export function DeleteMediaOverlay({
     mediaOne,
@@ -29,7 +30,7 @@ export function DeleteMediaOverlay({
 
     return (
         <>
-            <div className="group">
+            <Tooltip className="group" title="Delete media">
                 <Button
                     onClick={() => setShowOverlay(true)}
                     square
@@ -42,7 +43,7 @@ export function DeleteMediaOverlay({
                         stroke={1.3}
                     />
                 </Button>
-            </div>
+            </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {

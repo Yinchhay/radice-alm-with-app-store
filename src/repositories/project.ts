@@ -4,6 +4,7 @@ import {
 } from "@/app/api/internal/project/[project_id]/schema";
 import { db } from "@/drizzle/db";
 import {
+    categories,
     projectCategories,
     ProjectLink,
     projectMembers,
@@ -13,7 +14,16 @@ import {
 } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
-import { eq, sql, or, inArray, count, and } from "drizzle-orm";
+import {
+    eq,
+    sql,
+    or,
+    inArray,
+    count,
+    and,
+    getTableColumns,
+    InferSelectModel,
+} from "drizzle-orm";
 import { z } from "zod";
 import { getUserByEmail } from "./users";
 
@@ -337,7 +347,7 @@ export async function updateProjectPipelineStatus(
         .where(eq(projects.id, projectId));
 }
 
-export async function getPublicProjectsByCategory(categoryId: number) {
+export async function getPublicProjectsByCategoryId(categoryId: number) {
     return await db.query.projects.findMany({
         with: {
             projectCategories: {
@@ -362,6 +372,56 @@ export async function getPublicProjectsByCategory(categoryId: number) {
                 ),
             ),
     });
+}
+
+// get public categories that have project is public true. get at least 1 project, if doesn't have, don't return the category
+export async function getPublicProjectsByCategories() {
+    const { createdAt, updatedAt, ...project } = getTableColumns(projects);
+    const {
+        createdAt: _,
+        updatedAt: __,
+        ...category
+    } = getTableColumns(categories);
+    const unstructured = await db
+        .selectDistinct({
+            category: category,
+            project: project,
+        })
+        .from(categories)
+        .innerJoin(
+            projectCategories,
+            eq(categories.id, projectCategories.categoryId),
+        )
+        .innerJoin(
+            projects,
+            and(
+                eq(projectCategories.projectId, projects.id),
+                eq(projects.isPublic, true),
+            ),
+        );
+
+    type Category = typeof category;
+    type Project = typeof project;
+    type CategoryProjects = Category & { projects: Project[] };
+
+    // push category and then category has projects
+    let categoriesStructure: CategoryProjects[] = [];
+
+    for (const { category, project } of unstructured) {
+        const categoryIndex = categoriesStructure.findIndex(
+            (c) => c.id === (category.id as any),
+        );
+        if (categoryIndex === -1) {
+            categoriesStructure.push({
+                ...category,
+                projects: [project],
+            } as any);
+        } else {
+            categoriesStructure[categoryIndex].projects.push(project as any);
+        }
+    }
+
+    return categoriesStructure;
 }
 
 export async function getPublicProjectsByUserId(userId: string) {

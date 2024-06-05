@@ -23,6 +23,7 @@ import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsLinks } from "./fetch";
 import { usePathname } from "next/navigation";
 import { editProjectSettingsLinks } from "@/app/api/internal/project/[project_id]/schema";
+import Tooltip from "@/components/Tooltip";
 
 export default function ProjectSettingLink({
     project,
@@ -115,7 +116,7 @@ export default function ProjectSettingLink({
                         <TableHeader>
                             <ColumName>Link title</ColumName>
                             <ColumName>Link url</ColumName>
-                            <ColumName className="flex justify-end">
+                            <ColumName className="flex justify-end font-normal">
                                 <AddLinkOverlay addLink={addLink} />
                             </ColumName>
                         </TableHeader>
@@ -202,16 +203,18 @@ function LinkCell({
             </Cell>
             <Cell>
                 <div className="flex justify-end gap-2">
-                    <Button
-                        square={true}
-                        variant="danger"
-                        type="button"
-                        onClick={() => {
-                            onRemove(link);
-                        }}
-                    >
-                        <IconX></IconX>
-                    </Button>
+                    <Tooltip title="Remove link from project">
+                        <Button
+                            square={true}
+                            variant="danger"
+                            type="button"
+                            onClick={() => {
+                                onRemove(link);
+                            }}
+                        >
+                            <IconX></IconX>
+                        </Button>
+                    </Tooltip>
                 </div>
             </Cell>
         </TableRow>
@@ -262,14 +265,16 @@ function AddLinkOverlay({ addLink }: { addLink: (link: ProjectLink) => void }) {
 
     return (
         <>
-            <Button
-                onClick={() => setShowOverlay(true)}
-                square={true}
-                type="button"
-                variant="primary"
-            >
-                <IconPlus></IconPlus>
-            </Button>
+            <Tooltip title="Add link to project">
+                <Button
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    type="button"
+                    variant="primary"
+                >
+                    <IconPlus></IconPlus>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {

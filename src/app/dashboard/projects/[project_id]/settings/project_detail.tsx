@@ -18,6 +18,7 @@ import ImageWithFallback from "@/components/ImageWithFallback";
 import ChipsHolder from "@/components/ChipsHolder";
 import Chip from "@/components/Chip";
 import TextareaField from "@/components/TextareaField";
+import Tooltip from "@/components/Tooltip";
 
 export default function ProjectDetail({
     project,
@@ -51,7 +52,7 @@ export default function ProjectDetail({
         onReset: onResetCategories,
         itemsCheckListDisplay,
         checkedItems: checkedCategories,
-    } = useSelector(categories, originalProjectCategories, "name", "id");
+    } = useSelector(categories, originalProjectCategories, "shortName", "id");
 
     function onResetClick() {
         if (!project) return;
@@ -182,14 +183,16 @@ export default function ProjectDetail({
                                         );
                                     })}
                             </ChipsHolder>
-                            <Button
-                                onClick={openSelector}
-                                square={true}
-                                variant="primary"
-                                type="button"
-                            >
-                                <IconPlus></IconPlus>
-                            </Button>
+                            <Tooltip title={"Add categories"}>
+                                <Button
+                                    onClick={openSelector}
+                                    square={true}
+                                    variant="primary"
+                                    type="button"
+                                >
+                                    <IconPlus></IconPlus>
+                                </Button>
+                            </Tooltip>
                         </div>
                         {showSelectorOverlay && (
                             <Selector

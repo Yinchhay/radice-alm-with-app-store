@@ -51,7 +51,7 @@ export default async function ManagePartners() {
                     <TableHeader>
                         <ColumName>Name</ColumName>
                         <ColumName>Email</ColumName>
-                        <ColumName className="flex justify-end">
+                        <ColumName className="flex justify-end font-normal">
                             {canCreatePartner && <CreatePartnerOverlay />}
                         </ColumName>
                     </TableHeader>

@@ -9,6 +9,7 @@ import { IconX } from "@tabler/icons-react";
 import { fetchDeletePartnerById } from "./fetch";
 import { usePathname } from "next/navigation";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
+import Tooltip from "@/components/Tooltip";
 
 export function DeletePartnerOverlay({
     partner,
@@ -29,7 +30,7 @@ export function DeletePartnerOverlay({
 
     return (
         <>
-            <div className="">
+            <Tooltip title="Delete partner">
                 <Button
                     data-test={`deletePartner-${partner.firstName}`}
                     onClick={() => setShowOverlay(true)}
@@ -38,7 +39,7 @@ export function DeletePartnerOverlay({
                 >
                     <IconX></IconX>
                 </Button>
-            </div>
+            </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {

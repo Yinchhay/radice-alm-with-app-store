@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fetchCreateMedia } from "./fetch";
 import TextareaField from "@/components/TextareaField";
+import Tooltip from "@/components/Tooltip";
 
 export function CreateMediaOverlay() {
     const pathname = usePathname();
@@ -73,14 +74,16 @@ export function CreateMediaOverlay() {
 
     return (
         <>
-            <Button
-                onClick={() => setShowOverlay(true)}
-                square={true}
-                type="button"
-                variant="primary"
-            >
-                <IconPlus></IconPlus>
-            </Button>
+            <Tooltip title="Create a media">
+                <Button
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    type="button"
+                    variant="primary"
+                >
+                    <IconPlus></IconPlus>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">

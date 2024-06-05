@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import { useFormStatus } from "react-dom";
 
 import { fetchCreateRole } from "./fetch";
+import Tooltip from "@/components/Tooltip";
 
 export function CreateRoleOverlay() {
     const pathname = usePathname();
@@ -27,14 +28,16 @@ export function CreateRoleOverlay() {
 
     return (
         <>
-            <Button
-                data-test="createRole"
-                onClick={() => setShowOverlay(true)}
-                square={true}
-                variant="primary"
-            >
-                <IconPlus></IconPlus>
-            </Button>
+            <Tooltip title="Create role">
+                <Button
+                    data-test="createRole"
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    variant="primary"
+                >
+                    <IconPlus></IconPlus>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <div className="font-normal">
                     <Overlay

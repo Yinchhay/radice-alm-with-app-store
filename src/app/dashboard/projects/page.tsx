@@ -17,6 +17,7 @@ import { fileToUrl } from "@/lib/file";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import Chip from "@/components/Chip";
 import ChipsHolder from "@/components/ChipsHolder";
+import Tooltip from "@/components/Tooltip";
 
 type ManageAssociatedProps = {
     searchParams?: {
@@ -132,9 +133,19 @@ function Project({
                                     (categoryJoin) => {
                                         // TODO: add tooltip
                                         return (
-                                            <Chip>
-                                                {categoryJoin.category.name}
-                                            </Chip>
+                                            <Tooltip
+                                                key={categoryJoin.category.id}
+                                                title={
+                                                    categoryJoin.category.name
+                                                }
+                                            >
+                                                <Chip>
+                                                    {
+                                                        categoryJoin.category
+                                                            .shortName
+                                                    }
+                                                </Chip>
+                                            </Tooltip>
                                         );
                                     },
                                 )}
@@ -143,54 +154,60 @@ function Project({
                 </div>
                 <div className="absolute bottom-0 right-0 flex gap-2">
                     {/* TODO: update link url to preview */}
-                    <Link href={""}>
-                        <Button
-                            square
-                            variant="outline"
-                            className="outline-0 group"
-                        >
-                            <IconEye
-                                size={28}
-                                className="group-hover:text-blue-500 transition-all"
-                                stroke={1.3}
-                            />
-                        </Button>
-                    </Link>
-                    {canViewSettings && (
-                        <Link
-                            href={`/dashboard/projects/${project.id}/settings`}
-                            className="group"
-                        >
+                    <Tooltip title="Preview" position="top">
+                        <Link href={""}>
                             <Button
                                 square
                                 variant="outline"
-                                className="outline-0"
+                                className="outline-0 group"
                             >
-                                <IconSettings
+                                <IconEye
                                     size={28}
                                     className="group-hover:text-blue-500 transition-all"
                                     stroke={1.3}
                                 />
                             </Button>
                         </Link>
+                    </Tooltip>
+                    {canViewSettings && (
+                        <Tooltip title="Project setting" position="top">
+                            <Link
+                                href={`/dashboard/projects/${project.id}/settings`}
+                                className="group"
+                            >
+                                <Button
+                                    square
+                                    variant="outline"
+                                    className="outline-0"
+                                >
+                                    <IconSettings
+                                        size={28}
+                                        className="group-hover:text-blue-500 transition-all"
+                                        stroke={1.3}
+                                    />
+                                </Button>
+                            </Link>
+                        </Tooltip>
                     )}
                     {canEdit && (
-                        <Link
-                            href={`/dashboard/projects/${project.id}/builder`}
-                            className="group"
-                        >
-                            <Button
-                                square
-                                variant="outline"
-                                className="outline-0"
+                        <Tooltip title="Project content builder" position="top">
+                            <Link
+                                href={`/dashboard/projects/${project.id}/builder`}
+                                className="group"
                             >
-                                <IconHammer
-                                    size={28}
-                                    className="group-hover:text-blue-500 transition-all"
-                                    stroke={1.3}
-                                />
-                            </Button>
-                        </Link>
+                                <Button
+                                    square
+                                    variant="outline"
+                                    className="outline-0"
+                                >
+                                    <IconHammer
+                                        size={28}
+                                        className="group-hover:text-blue-500 transition-all"
+                                        stroke={1.3}
+                                    />
+                                </Button>
+                            </Link>
+                        </Tooltip>
                     )}
                 </div>
             </div>

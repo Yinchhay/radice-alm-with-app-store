@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { ACCEPTED_IMAGE_TYPES } from "@/lib/file";
 import TextareaField from "@/components/TextareaField";
+import Tooltip from "@/components/Tooltip";
 
 export function CreateCategoryOverlay() {
     const pathname = usePathname();
@@ -40,14 +41,16 @@ export function CreateCategoryOverlay() {
 
     return (
         <>
-            <Button
-                data-test="createCategory"
-                onClick={() => setShowOverlay(true)}
-                square={true}
-                variant="primary"
-            >
-                <IconPlus></IconPlus>
-            </Button>
+            <Tooltip title="Create a category">
+                <Button
+                    data-test="createCategory"
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    variant="primary"
+                >
+                    <IconPlus></IconPlus>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">

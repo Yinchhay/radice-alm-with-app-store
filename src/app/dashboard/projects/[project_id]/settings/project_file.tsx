@@ -15,6 +15,7 @@ import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsFiles } from "./fetch";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { usePathname } from "next/navigation";
+import Tooltip from "@/components/Tooltip";
 
 export type FileList = {
     file?: File;
@@ -138,7 +139,7 @@ export default function ProjectFile({
                     <TableHeader>
                         <ColumName>Filename</ColumName>
                         <ColumName>size</ColumName>
-                        <ColumName className="flex justify-end">
+                        <ColumName className="flex justify-end font-normal">
                             <input
                                 hidden
                                 className="hidden"
@@ -147,14 +148,16 @@ export default function ProjectFile({
                                 multiple
                                 onChange={handleUploadFiles}
                             />
-                            <Button
-                                onClick={handleUploadFilesClick}
-                                square={true}
-                                variant="primary"
-                                type="button"
-                            >
-                                <IconPlus></IconPlus>
-                            </Button>
+                            <Tooltip title="Upload file to project">
+                                <Button
+                                    onClick={handleUploadFilesClick}
+                                    square={true}
+                                    variant="primary"
+                                    type="button"
+                                >
+                                    <IconPlus></IconPlus>
+                                </Button>
+                            </Tooltip>
                         </ColumName>
                     </TableHeader>
                     <TableBody>
@@ -220,14 +223,16 @@ function FileRow({
             <Cell className="text-center">{fileSizeToString(file.size)}</Cell>
             <Cell>
                 <div className="flex justify-end gap-2">
-                    <Button
-                        type="button"
-                        square={true}
-                        variant="danger"
-                        onClick={onDeleteClick}
-                    >
-                        <IconX></IconX>
-                    </Button>
+                    <Tooltip title="Remove file from project">
+                        <Button
+                            type="button"
+                            square={true}
+                            variant="danger"
+                            onClick={onDeleteClick}
+                        >
+                            <IconX></IconX>
+                        </Button>
+                    </Tooltip>
                 </div>
             </Cell>
         </TableRow>

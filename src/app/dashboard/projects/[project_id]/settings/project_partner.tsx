@@ -22,6 +22,7 @@ import Selector from "@/components/Selector";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { usePathname } from "next/navigation";
 import { UserWithoutPassword } from "./project_member";
+import Tooltip from "@/components/Tooltip";
 
 export type PartnerList = {
     partner: UserWithoutPassword;
@@ -156,7 +157,8 @@ export default function ProjectPartner({
                 <Table className="my-4 w-full">
                     <TableHeader>
                         <ColumName>Name</ColumName>
-                        <ColumName className="flex justify-end">
+                        <ColumName className="flex justify-end font-normal">
+                            <Tooltip title="Add partner to project">
                             <Button
                                 onClick={openSelector}
                                 square={true}
@@ -165,6 +167,7 @@ export default function ProjectPartner({
                             >
                                 <IconPlus></IconPlus>
                             </Button>
+                            </Tooltip>
                         </ColumName>
                     </TableHeader>
                     <TableBody>
@@ -233,16 +236,18 @@ function Partner({
             <Cell className="text-center">{`${partner.firstName} ${partner.lastName}`}</Cell>
             <Cell>
                 <div className="flex justify-end gap-2">
-                    <Button
-                        square={true}
-                        variant="danger"
-                        type="button"
-                        onClick={() => {
-                            onRemove(partner.id);
-                        }}
-                    >
-                        <IconX></IconX>
-                    </Button>
+                    <Tooltip title="Remove partner from project">
+                        <Button
+                            square={true}
+                            variant="danger"
+                            type="button"
+                            onClick={() => {
+                                onRemove(partner.id);
+                            }}
+                        >
+                            <IconX></IconX>
+                        </Button>
+                    </Tooltip>
                 </div>
             </Cell>
         </TableRow>

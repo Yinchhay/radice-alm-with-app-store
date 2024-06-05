@@ -9,6 +9,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { fetchCreateProject } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
+import Tooltip from "@/components/Tooltip";
 
 export function CreateProjectOverlay() {
     const pathname = usePathname();
@@ -25,14 +26,16 @@ export function CreateProjectOverlay() {
 
     return (
         <>
-            <Button
-                data-test="createProject"
-                onClick={() => setShowOverlay(true)}
-                square={true}
-                variant="primary"
-            >
-                <IconPlus></IconPlus>
-            </Button>
+            <Tooltip title="Create a project" zIndex={5000}>
+                <Button
+                    data-test="createProject"
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    variant="primary"
+                >
+                    <IconPlus></IconPlus>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {

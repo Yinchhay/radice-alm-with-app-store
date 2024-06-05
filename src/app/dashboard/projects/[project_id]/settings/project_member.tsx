@@ -22,6 +22,7 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { editMemberArray } from "@/app/api/internal/project/[project_id]/schema";
 import { z } from "zod";
 import { usePathname } from "next/navigation";
+import Tooltip from "@/components/Tooltip";
 
 export type UserWithoutPassword = Omit<typeof users.$inferSelect, 'password'>
 
@@ -186,15 +187,17 @@ export default function ProjectMember({
                         <ColumName>Name</ColumName>
                         <ColumName>Title</ColumName>
                         <ColumName>Can Edit</ColumName>
-                        <ColumName className="flex justify-end">
-                            <Button
-                                onClick={openSelector}
-                                square={true}
-                                variant="primary"
-                                type="button"
-                            >
-                                <IconPlus></IconPlus>
-                            </Button>
+                        <ColumName className="flex justify-end font-normal">
+                            <Tooltip title="Add member to project" className="font-normal">
+                                <Button
+                                    onClick={openSelector}
+                                    square={true}
+                                    variant="primary"
+                                    type="button"
+                                >
+                                    <IconPlus></IconPlus>
+                                </Button>
+                            </Tooltip>
                         </ColumName>
                     </TableHeader>
                     <TableBody>
@@ -299,16 +302,18 @@ function Member({
             </Cell>
             <Cell>
                 <div className="flex justify-end gap-2">
-                    <Button
-                        square={true}
-                        variant="danger"
-                        type="button"
-                        onClick={() => {
-                            onRemove(member.id);
-                        }}
-                    >
-                        <IconX></IconX>
-                    </Button>
+                    <Tooltip title="Remove member from project">
+                        <Button
+                            square={true}
+                            variant="danger"
+                            type="button"
+                            onClick={() => {
+                                onRemove(member.id);
+                            }}
+                        >
+                            <IconX></IconX>
+                        </Button>
+                    </Tooltip>
                 </div>
             </Cell>
         </TableRow>

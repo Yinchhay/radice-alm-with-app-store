@@ -9,6 +9,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { useFormStatus } from "react-dom";
 import { fetchCreatePartner } from "./fetch";
 import { usePathname } from "next/navigation";
+import Tooltip from "@/components/Tooltip";
 
 export function CreatePartnerOverlay() {
     const pathname = usePathname();
@@ -26,14 +27,16 @@ export function CreatePartnerOverlay() {
 
     return (
         <>
-            <Button
-                data-test="createPartner"
-                onClick={() => setShowOverlay(true)}
-                square={true}
-                variant="primary"
-            >
-                <IconPlus></IconPlus>
-            </Button>
+            <Tooltip title="Create a partner">
+                <Button
+                    data-test="createPartner"
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    variant="primary"
+                >
+                    <IconPlus></IconPlus>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {

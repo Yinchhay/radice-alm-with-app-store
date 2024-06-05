@@ -9,6 +9,8 @@ import { IconEdit } from "@tabler/icons-react";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { EditProfileOverlay } from "./edit_profile";
+import Tooltip from "@/components/Tooltip";
+import { UserSkillSetLevel } from "@/drizzle/schema";
 
 export default async function ManageAccount() {
     const user = await getAuthUser();
@@ -47,7 +49,14 @@ export default async function ManageAccount() {
                                 {Array.isArray(user.skillSet) &&
                                     user.skillSet.map((sk) => {
                                         // TODO: add tooltip level
-                                        return <Chip key={sk.label}>{sk.label}</Chip>;
+                                        return (
+                                            <Tooltip
+                                                key={sk.label}
+                                                title={`Level: ${UserSkillSetLevel[sk.level]}`}
+                                            >
+                                                <Chip>{sk.label}</Chip>
+                                            </Tooltip>
+                                        );
                                     })}
                             </ChipsHolder>
                         </div>

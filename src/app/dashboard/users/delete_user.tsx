@@ -9,12 +9,9 @@ import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import { fetchDeleteUserById } from "./fetch";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
+import Tooltip from "@/components/Tooltip";
 
-export function DeleteUserOverlay({
-    user,
-}: {
-    user: UserWithoutPassword;
-}) {
+export function DeleteUserOverlay({ user }: { user: UserWithoutPassword }) {
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
@@ -29,7 +26,7 @@ export function DeleteUserOverlay({
 
     return (
         <>
-            <div className="">
+            <Tooltip title="Delete user">
                 <Button
                     data-test={`deleteUser-${user.id}`}
                     onClick={() => setShowOverlay(true)}
@@ -38,7 +35,7 @@ export function DeleteUserOverlay({
                 >
                     <IconX></IconX>
                 </Button>
-            </div>
+            </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {
@@ -63,7 +60,7 @@ export function DeleteUserOverlay({
                             action={async () => {
                                 const result = await fetchDeleteUserById(
                                     user.id,
-                                    pathname
+                                    pathname,
                                 );
                                 setResult(result);
                             }}

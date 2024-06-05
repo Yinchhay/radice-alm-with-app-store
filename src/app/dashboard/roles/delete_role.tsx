@@ -11,6 +11,7 @@ import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 
 import { fetchDeleteRoleById } from "./fetch";
+import Tooltip from "@/components/Tooltip";
 
 export function DeleteRoleOverlay({
     role,
@@ -31,16 +32,16 @@ export function DeleteRoleOverlay({
 
     return (
         <>
-            <div className="">
-                <Button
-                    data-test={`deleteRole-${role.name}`}
-                    onClick={() => setShowOverlay(true)}
-                    square={true}
-                    variant="danger"
-                >
-                    <IconX></IconX>
-                </Button>
-            </div>
+                <Tooltip title="Delete role">
+                    <Button
+                        data-test={`deleteRole-${role.name}`}
+                        onClick={() => setShowOverlay(true)}
+                        square={true}
+                        variant="danger"
+                    >
+                        <IconX></IconX>
+                    </Button>
+                </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {

@@ -12,6 +12,7 @@ import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 
 import { fetchCreateUser } from "./fetch";
+import Tooltip from "@/components/Tooltip";
 
 export function CreateUserOverlay() {
     const pathname = usePathname();
@@ -28,15 +29,16 @@ export function CreateUserOverlay() {
 
     return (
         <>
-            <Button
-                data-test="createUser"
-                onClick={() => setShowOverlay(true)}
-                square={true}
-                variant="primary"
-            >
-                <IconPlus></IconPlus>
-            </Button>
-
+            <Tooltip title="Create a user">
+                <Button
+                    data-test="createUser"
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    variant="primary"
+                >
+                    <IconPlus></IconPlus>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <div className="font-normal">
                     <Overlay

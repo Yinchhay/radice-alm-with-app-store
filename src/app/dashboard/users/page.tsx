@@ -47,7 +47,7 @@ export default async function ManageUsers() {
                         <TableHeader>
                             <ColumName className="text-start">Name</ColumName>
                             <ColumName className="text-start">Email</ColumName>
-                            <ColumName className="flex justify-end">
+                            <ColumName className="flex justify-end font-normal">
                                 {canCreateUser && <CreateUserOverlay />}
                             </ColumName>
                         </TableHeader>

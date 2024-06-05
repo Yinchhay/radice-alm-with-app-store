@@ -11,6 +11,7 @@ import { media } from "@/drizzle/schema";
 import { fetchEditMediaById } from "./fetch";
 import { usePathname } from "next/navigation";
 import TextareaField from "@/components/TextareaField";
+import Tooltip from "@/components/Tooltip";
 
 export function EditMediaOverlay({
     mediaOne,
@@ -44,7 +45,7 @@ export function EditMediaOverlay({
 
     return (
         <>
-            <div className="group">
+            <Tooltip className="group" title="Edit media">
                 <Button
                     onClick={() => setShowOverlay(true)}
                     square
@@ -57,7 +58,7 @@ export function EditMediaOverlay({
                         stroke={1.3}
                     />
                 </Button>
-            </div>
+            </Tooltip>
             {showOverlay && (
                 <Overlay
                     onClose={() => {

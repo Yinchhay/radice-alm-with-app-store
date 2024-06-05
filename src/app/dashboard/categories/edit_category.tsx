@@ -13,6 +13,7 @@ import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { ACCEPTED_IMAGE_TYPES, fileToUrl } from "@/lib/file";
 import TextareaField from "@/components/TextareaField";
+import Tooltip from "@/components/Tooltip";
 
 export function EditCategoryOverlay({
     category,
@@ -45,13 +46,15 @@ export function EditCategoryOverlay({
 
     return (
         <>
-            <Button
-                data-test={`editCategory-${category.name}`}
-                onClick={() => setShowOverlay(true)}
-                square={true}
-            >
-                <IconEdit></IconEdit>
-            </Button>
+            <Tooltip title="Edit category">
+                <Button
+                    data-test={`editCategory-${category.name}`}
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                >
+                    <IconEdit></IconEdit>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
