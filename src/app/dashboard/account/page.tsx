@@ -34,34 +34,21 @@ export default async function ManageAccount() {
                         <div className="flex gap-4">
                             <h1 className="text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</h1>
                             <div className="">
-                                <EditProfileOverlay user={user}/>
+                                <EditProfileOverlay user={user} />
                             </div>
                         </div>
                         <h3 className="text-lg">{user.email}</h3>
                         <h3 className="text-sm">{user.description}</h3>
                         <div className="flex gap-2">
-                            {/* TODO: for skillset */}
                             <h2 className="text-lg font-semibold min-w-fit">
                                 Skill sets:
                             </h2>
-                            <ChipsHolder className="mb-4">
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
-                                <Chip>Temp</Chip>
+                            <ChipsHolder>
+                                {Array.isArray(user.skillSet) &&
+                                    user.skillSet.map((sk) => {
+                                        // TODO: add tooltip level
+                                        return <Chip>{sk.label}</Chip>;
+                                    })}
                             </ChipsHolder>
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 import { lucia } from "@/auth/lucia";
 import { localDebug } from "@/lib/utils";
 import { createUser, getUserByEmail } from "@/repositories/users";
+import { UserType } from "@/types/user";
 
 import bcrypt from "bcrypt";
 import { generateId } from "lucia";
@@ -71,7 +72,7 @@ async function signup(formData: FormData): Promise<ActionResult> {
             firstName: firstName,
             lastName: lastName,
             password: hashedPassword,
-            type: "user",
+            type: UserType.USER,
         });
 
         if (!createdUser) {

@@ -5,6 +5,8 @@ import { eq, count, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
+import { z } from "zod";
+import { updateProfileInformationFormSchema } from "@/app/api/internal/account/schema";
 
 /**
  * not everywhere is required to use cache, for example this function
@@ -92,7 +94,10 @@ export const getAllUsers = async (hasLinkedGithub: boolean = true) => {
     });
 };
 
-export const getUserById = async (userId: string, hasLinkedGithub: boolean = true) => {
+export const getUserById = async (
+    userId: string,
+    hasLinkedGithub: boolean = true,
+) => {
     if (process.env.NODE_ENV !== "development") {
         hasLinkedGithub = true;
     }
@@ -165,6 +170,19 @@ export const updateUserHasLinkedGithubByUserId = async (
         .update(users)
         .set({
             hasLinkedGithub: attributes.hasLinkedGithub,
+        })
+        .where(eq(users.id, userId));
+};
+
+export const updateUserProfileInformation = async (userId: string, body: z.infer<typeof updateProfileInformationFormSchema>) => {
+    return await db
+        .update(users)
+        .set({
+            firstName: body.firstName,
+            lastName: body.lastName,
+            profileUrl: body.profileLogo,
+            description: body.description,
+            skillSet: body.skillSet,
         })
         .where(eq(users.id, userId));
 };

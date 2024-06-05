@@ -21,6 +21,7 @@ import Cell from "@/components/table/Cell";
 import Dropdown, { DropdownElement } from "@/components/Dropdown";
 import { UserSkillSet, UserSkillSetLevel } from "@/drizzle/schema";
 import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
+import { fetchUpdateProfileInformation } from "./fetch";
 
 type UserSkillSetWithId = UserSkillSet & { id: string };
 
@@ -31,7 +32,8 @@ export function EditProfileOverlay({ user }: { user: User }) {
 
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
-    const [result, setResult] = useState<Awaited<ReturnType<any>>>();
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchUpdateProfileInformation>>>();
     const [skillSets, setSkillSets] = useState<UserSkillSetWithId[]>(
         addIdToSkillSet(user.skillSet),
     );
@@ -104,7 +106,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                 if (skillSet.id === id) {
                     return {
                         ...skillSet,
-                        level: value as UserSkillSetLevel,
+                        level: value as UserSkillSet["level"],
                     };
                 }
 
@@ -125,7 +127,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
         return skillSetsToAddId.map((skillSet) => {
             return {
                 label: skillSet.label || "",
-                level: skillSet.level || skillSetValues[0],
+                level: skillSet.level || skillSetValues[1],
                 id: crypto.randomUUID(),
             };
         });
@@ -138,11 +140,19 @@ export function EditProfileOverlay({ user }: { user: User }) {
                 level: skillSet.level,
             };
         });
-        console.log("skillSet", skillSetsWithoutId);
-        console.log("firstName", formData.get("firstName"));
-        console.log("lastName", formData.get("lastName"));
-        console.log("description", formData.get("description"));
-        console.log("profileLogo", formData.get("profileLogo"));
+
+        const res = await fetchUpdateProfileInformation(
+            {
+                firstName: formData.get("firstName") as string,
+                lastName: formData.get("lastName") as string,
+                skillSet: skillSetsWithoutId,
+                description: formData.get("description") as string,
+                currentProfileLogo: user.profileUrl ?? "",
+            },
+            formData,
+            pathname,
+        );
+        setResult(res);
     }
 
     function onCancel() {
@@ -169,11 +179,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                 <IconEdit></IconEdit>
             </Button>
             {showOverlay && (
-                <Overlay
-                    onClose={() => {
-                        setShowOverlay(false);
-                    }}
-                >
+                <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal flex flex-col gap-4">
                         <form action={onSubmit} className="flex flex-col gap-4">
                             <div>
@@ -352,6 +358,10 @@ function SkillSetRow({
             </Cell>
             <Cell>
                 <Dropdown
+                    defaultSelectedElement={{
+                        name: skillSet.level,
+                        value: skillSet.level,
+                    }}
                     dropdownList={dropDownList}
                     onChange={(selectedElement) =>
                         onLevelChange(skillSet.id, selectedElement.value)

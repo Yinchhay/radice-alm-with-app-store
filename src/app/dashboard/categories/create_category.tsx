@@ -48,9 +48,7 @@ export function CreateCategoryOverlay() {
             </Button>
             {showOverlay && (
                 <Overlay
-                    onClose={() => {
-                        setShowOverlay(false);
-                    }}
+                    onClose={onCancel}
                 >
                     <Card className="w-[300px] font-normal">
                         <div className="flex flex-col items-center gap-2">

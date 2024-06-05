@@ -15,6 +15,8 @@ import { Permissions } from "@/types/IAM";
 import { User } from "lucia";
 import { fileToUrl } from "@/lib/file";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import Chip from "@/components/Chip";
+import ChipsHolder from "@/components/ChipsHolder";
 
 type ManageAssociatedProps = {
     searchParams?: {
@@ -124,16 +126,19 @@ function Project({
                     <div className="flex flex-col">
                         <h1 className="text-xl">{project.name}</h1>
                         <p className="text-sm">{project.description}</p>
-                        <div className="flex flex-row gap-2 mt-1">
-                            {project.projectCategories.map((categoryJoin) => (
-                                <span
-                                    key={categoryJoin.id}
-                                    className="text-xs bg-gray-200 py-1 px-2 rounded-full"
-                                >
-                                    {categoryJoin.category.name}
-                                </span>
-                            ))}
-                        </div>
+                        <ChipsHolder className="mt-1">
+                            {Array.isArray(project.projectCategories) &&
+                                project.projectCategories.map(
+                                    (categoryJoin) => {
+                                        // TODO: add tooltip
+                                        return (
+                                            <Chip>
+                                                {categoryJoin.category.name}
+                                            </Chip>
+                                        );
+                                    },
+                                )}
+                        </ChipsHolder>
                     </div>
                 </div>
                 <div className="absolute bottom-0 right-0 flex gap-2">

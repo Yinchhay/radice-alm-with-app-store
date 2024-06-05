@@ -15,6 +15,8 @@ import { fileToUrl } from "@/lib/file";
 import { useSelector } from "../../../../../hooks/useSelector";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import ChipsHolder from "@/components/ChipsHolder";
+import Chip from "@/components/Chip";
 
 export default function ProjectDetail({
     project,
@@ -167,18 +169,13 @@ export default function ProjectDetail({
                     </label>
                     <div className="col-span-3">
                         <div className="flex items-center">
-                            {checkedCategories.map(
-                                (cate) =>
-                                    // only show checked categories
-                                    cate.checked && (
-                                        <div
-                                            key={cate.value}
-                                            className="bg-gray-200 rounded-full px-2 py-1 text-sm mr-2"
-                                        >
-                                            {cate.name}
-                                        </div>
-                                    ),
-                            )}
+                            <ChipsHolder className="mt-1">
+                                {Array.isArray(checkedCategories) &&
+                                    checkedCategories.map((cate) => {
+                                        // TODO: add tooltip
+                                        return <Chip>{cate.value}</Chip>;
+                                    })}
+                            </ChipsHolder>
                             <Button
                                 onClick={openSelector}
                                 square={true}

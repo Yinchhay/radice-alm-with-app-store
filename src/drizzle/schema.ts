@@ -16,16 +16,11 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { projectPipeLineStatusType } from "@/app/api/internal/project/[project_id]/schema";
 import { UserType } from "@/types/user";
+import { skillSetLevelSchema, skillSetSchema } from "@/app/api/internal/account/schema";
 
-export enum UserSkillSetLevel {
-    Know = "Know",
-    Do = "Do",
-    Teach = "Teach",
-}
-export type UserSkillSet = {
-    label: string;
-    level: UserSkillSetLevel;
-};
+export const UserSkillSetLevel = skillSetLevelSchema.enum;
+export type UserSkillSet = z.infer<typeof skillSetSchema>;
+
 export const users = mysqlTable("users", {
     id: varchar("id", {
         length: 255,
@@ -54,7 +49,6 @@ export const users = mysqlTable("users", {
     profileUrl: varchar("profile_url", {
         length: 255,
     }),
-    // type 'user', 'superadmin', 'partner'
     type: varchar("type", {
         length: 50,
     })

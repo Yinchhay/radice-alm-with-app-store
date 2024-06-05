@@ -45,7 +45,7 @@ export default function Dropdown({
                     onMouseLeave={() => {
                         setIsHovering(false);
                     }}
-                    className="absolute w-full bg-white rounded-md outline outline-1 outline-gray-300 p-1 mt-1"
+                    className="absolute w-full bg-white rounded-md outline outline-1 outline-gray-300 p-1 mt-1 z-[1]"
                 >
                     {dropdownList.map((item, index) => {
                         return (
