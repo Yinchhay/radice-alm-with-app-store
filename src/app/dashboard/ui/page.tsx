@@ -19,6 +19,7 @@ import Dropdown from "@/components/Dropdown";
 import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
+import Tooltip from "@/components/Tooltip";
 
 export default function Home({
     searchParams,
@@ -327,6 +328,30 @@ export default function Home({
                             console.log(state);
                         }}
                     />
+                </div>
+                <div className="flex flex-col gap-2">
+                    <h1 className="mb-2 font-bold">Tooltip:</h1>
+                    <Tooltip title="Top Tooltip Super Longgggggggggggggggggg">
+                        <Button>Top</Button>
+                    </Tooltip>
+                    <Tooltip
+                        title="Right Super Longgggggggggggggggggg"
+                        position="right"
+                    >
+                        <Button>Right</Button>
+                    </Tooltip>
+                    <Tooltip
+                        title="Left Super Longgggggggggggggggggg"
+                        position="left"
+                    >
+                        <Button>Left</Button>
+                    </Tooltip>
+                    <Tooltip
+                        title="Bottom Super Longgggggggggggggggggg"
+                        position="bottom"
+                    >
+                        <Button>Bottom</Button>
+                    </Tooltip>
                 </div>
             </div>
         </div>

@@ -25,18 +25,19 @@ export default function CategoryProjectLogo({
                     isAlphabet={false}
                     variant={variant}
                     src={src}
-                    width={120}
-                    height={120}
+                    width={160}
+                    height={160}
                     rows={5}
                     cols={5}
                     revealDelay={12}
                     className={[
                         "aspect-square object-cover border relative z-10",
                         variant == "light"
-                            ? "border-gray-200"
+                            ? "border-gray-300"
                             : "border-gray-100/25",
                     ].join(" ")}
                 />
+                <div className="w-[160px] h-[160px] border border-black absolute top-2 left-2"></div>
             </div>
         </ScrollReveal>
     );

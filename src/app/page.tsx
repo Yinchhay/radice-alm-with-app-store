@@ -12,6 +12,7 @@ import { db } from "@/drizzle/db";
 import Footer from "@/components/Footer";
 import TechButton from "@/components/TechButton";
 import { fetchPublicCategories } from "./fetch";
+import CategorySectionNew from "./_components/CategorySectionNew";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -128,7 +129,7 @@ export default async function Home() {
             </div>
             {categories.map((category, i) => {
                 return (
-                    <CategorySection
+                    <CategorySectionNew
                         variant={i % 2 === 0 ? "light" : "dark"}
                         category={category}
                         key={`category-section-${i}`}

@@ -105,6 +105,7 @@ export default function Carousel({
                         />
                     </p>
                     <TechButton
+                        link={`#${categories[currentSlide].shortName}`}
                         variant="light"
                         className="mt-12"
                         text="VIEW"
