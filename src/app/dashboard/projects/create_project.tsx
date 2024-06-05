@@ -47,9 +47,12 @@ export function CreateProjectOverlay() {
                         </div>
                         <form
                             action={async (formData: FormData) => {
-                                const result = await fetchCreateProject({
-                                    name: formData.get("name") as string,
-                                }, pathname);
+                                const result = await fetchCreateProject(
+                                    {
+                                        name: formData.get("name") as string,
+                                    },
+                                    pathname,
+                                );
                                 setResult(result);
                             }}
                         >

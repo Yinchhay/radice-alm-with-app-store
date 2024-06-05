@@ -3,7 +3,7 @@ export default function Tooltip({
     className = "",
     children,
     position = "top",
-    zIndex = 20,
+    zIndex = 100,
 }: {
     title: string;
     className?: string;
@@ -33,7 +33,8 @@ export default function Tooltip({
         <div className="relative group w-fit">
             {children}
             <div
-                className={`absolute z-[${zIndex}] text-nowrap opacity-0 transition-all ${positionClassName} group-hover:opacity-100 bg-white rounded-sm p-2 border shadow-sm`}
+                style={{ zIndex }}
+                className={`absolute text-nowrap opacity-0 transition-all ${positionClassName} group-hover:opacity-100 bg-white rounded-sm p-2 border shadow-sm`}
             >
                 {title}
             </div>
