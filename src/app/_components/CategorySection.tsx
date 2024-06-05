@@ -7,7 +7,7 @@ import CategoryProjectLogo from "./CategoryProjectLogo";
 import SpecialEffectText from "../../components/effects/SpecialEffectText";
 import SpecialEffectSentence from "../../components/effects/SpecialEffectSentence";
 import { PublicCategory } from "../api/public/categories/route";
-import { GetPublicProjectsByCategoryReturnType } from "../api/public/categories/[category_id]/projects/route";
+import { GetPublicProjectsByCategoryIdReturnType } from "../api/public/categories/[category_id]/projects/route";
 import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
 const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
 const roboto_condensed = Roboto_Condensed({
@@ -25,7 +25,7 @@ export default function CategorySection({
 }) {
     const [selectedProject, setSelectedProject] = useState<number>(0);
     const [projects, setProjects] =
-        useState<GetPublicProjectsByCategoryReturnType>();
+        useState<GetPublicProjectsByCategoryIdReturnType>();
 
     useEffect(() => {
         async function loadProjects() {

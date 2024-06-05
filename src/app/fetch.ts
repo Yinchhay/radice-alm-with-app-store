@@ -2,7 +2,7 @@
 import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
 import { getBaseUrl } from "@/lib/server_utils";
 import { FetchPublicCategoriesData } from "./api/public/categories/route";
-import { FetchPublicProjectsCategoriesData } from "./api/public/categories/[category_id]/projects/route";
+import { FetchPublicProjectsByCategoryIdData } from "./api/public/categories/[category_id]/projects/route";
 
 // export async function getCategories() {
 //     const categories = await db.query.categories.findMany();
@@ -26,7 +26,7 @@ export async function fetchPublicCategories(): ResponseJson<FetchPublicCategorie
 
 export async function fetchPublicProjectsByCategory(
     categoryId: number,
-): ResponseJson<FetchPublicProjectsCategoriesData> {
+): ResponseJson<FetchPublicProjectsByCategoryIdData> {
     try {
         const response = await fetch(
             `${await getBaseUrl()}/api/public/categories/${categoryId}/projects`,
