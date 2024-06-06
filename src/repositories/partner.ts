@@ -32,8 +32,6 @@ export const getPartners = async (search: string = "") => {
 
 export const deletePartnerById = async (partnerId: string) => {
     return await db.transaction(async (tx) => {
-        await tx.delete(sessions).where(eq(sessions.userId, partnerId));
-
         return tx
             .delete(users)
             .where(

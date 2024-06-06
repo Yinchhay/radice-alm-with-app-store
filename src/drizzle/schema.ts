@@ -93,7 +93,9 @@ export const sessions = mysqlTable("sessions", {
         length: 255,
     })
         .notNull()
-        .references(() => users.id),
+        .references(() => users.id, {
+            onDelete: "cascade",
+        }),
     expiresAt: datetime("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
@@ -178,10 +180,14 @@ export const userRoles = mysqlTable("user_roles", {
         length: 255,
     })
         .notNull()
-        .references(() => users.id),
+        .references(() => users.id, {
+            onDelete: "cascade",
+        }),
     roleId: int("role_id")
         .notNull()
-        .references(() => roles.id),
+        .references(() => roles.id, {
+            onDelete: "cascade",
+        }),
 });
 
 export const userRolesRelations = relations(userRoles, ({ one }) => ({
@@ -215,7 +221,9 @@ export const oauthProviders = mysqlTable("oauth_providers", {
         length: 255,
     })
         .notNull()
-        .references(() => users.id),
+        .references(() => users.id, {
+            onDelete: "cascade",
+        }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -238,7 +246,9 @@ export const emailVerifications = mysqlTable("email_verifications", {
         length: 255,
     })
         .notNull()
-        .references(() => users.id)
+        .references(() => users.id, {
+            onDelete: "cascade",
+        })
         .unique(),
     expiresAt: datetime("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
@@ -276,7 +286,9 @@ export const applicationForms = mysqlTable("application_forms", {
     }),
     reviewedByUserId: varchar("reviewed_by_user_id", {
         length: 255,
-    }).references(() => users.id),
+    }).references(() => users.id, {
+        onDelete: "cascade",
+    }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -339,8 +351,10 @@ export const projects = mysqlTable("projects", {
     userId: varchar("user_id", {
         length: 255,
     })
-        .notNull()
-        .references(() => users.id),
+        .references(() => users.id, {
+            // on delete allow delete user.
+            onDelete: "set null",
+        }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -368,11 +382,14 @@ export const files = mysqlTable("files", {
     }).notNull(),
     userId: varchar("user_id", {
         length: 255,
-    })
-        .notNull()
-        .references(() => users.id),
+    }).references(() => users.id, {
+        onDelete: "set null",
+    }),
     // if project id is null, it mean that the file is not belong to a project
-    projectId: int("project_id").references(() => projects.id),
+    projectId: int("project_id").references(() => projects.id, {
+        // technically don't allow delete project
+    }),
+    createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const filesRelations = relations(files, ({ one }) => ({
@@ -390,10 +407,14 @@ export const projectCategories = mysqlTable("project_categories", {
     id: int("id").primaryKey().autoincrement(),
     projectId: int("project_id")
         .notNull()
-        .references(() => projects.id),
+        .references(() => projects.id, {
+            onDelete: "cascade",
+        }),
     categoryId: int("category_id")
         .notNull()
-        .references(() => categories.id),
+        .references(() => categories.id, {
+            onDelete: "cascade",
+        }),
 });
 
 export const projectCategoriesRelations = relations(
@@ -418,12 +439,16 @@ export const projectMembers = mysqlTable("project_members", {
     canEdit: boolean("can_edit").default(false),
     projectId: int("project_id")
         .notNull()
-        .references(() => projects.id),
+        .references(() => projects.id, {
+            onDelete: "cascade",
+        }),
     userId: varchar("user_id", {
         length: 255,
     })
         .notNull()
-        .references(() => users.id),
+        .references(() => users.id, {
+            onDelete: "cascade",
+        }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -443,13 +468,17 @@ export const projectPartners = mysqlTable("project_partners", {
     id: int("id").primaryKey().autoincrement(),
     projectId: int("project_id")
         .notNull()
-        .references(() => projects.id),
+        .references(() => projects.id, {
+            onDelete: "cascade",
+        }),
     // only for user type 'partner'
     partnerId: varchar("partner_id", {
         length: 255,
     })
         .notNull()
-        .references(() => users.id),
+        .references(() => users.id, {
+            onDelete: "cascade",
+        }),
 });
 
 export const projectPartnersRelations = relations(

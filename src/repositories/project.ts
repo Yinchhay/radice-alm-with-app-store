@@ -497,7 +497,7 @@ export async function getProjectByIdForPublic(project_id: number) {
 export async function transferProjectOwnership(
     projectId: number,
     transferToUserId: string,
-    ownerUserId: string,
+    ownerUserId: string | null,
 ) {
     // when transfer to another person, make the owner become member of the project
     return await db.transaction(async (tx) => {
@@ -508,11 +508,13 @@ export async function transferProjectOwnership(
             })
             .where(eq(projects.id, projectId));
 
-        await tx.insert(projectMembers).values({
-            projectId: projectId,
-            userId: ownerUserId,
-            title: "",
-            canEdit: false,
-        });
+        if (ownerUserId) {
+            await tx.insert(projectMembers).values({
+                projectId: projectId,
+                userId: ownerUserId,
+                title: "",
+                canEdit: false,
+            });
+        }
     });
 }

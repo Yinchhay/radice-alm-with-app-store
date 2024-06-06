@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { sessions, users } from "@/drizzle/schema";
+import { users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
 import { eq, count, sql, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -76,7 +76,7 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
 
 export const deleteUserById = async (userId: string) => {
     return await db.transaction(async (transaction) => {
-        await transaction.delete(sessions).where(eq(sessions.userId, userId));
+        // don't worry about foreign key, we have cascade delete
         // allow only delete member
         return await transaction
             .delete(users)

@@ -32,6 +32,9 @@ export async function POST() {
 
         await lucia.invalidateSession(session.id);
 
+        // This delete all expired sessions not just the current one
+        // await lucia.deleteExpiredSessions();
+
         const sessionCookie = lucia.createBlankSessionCookie();
         cookies().set(
             sessionCookie.name,
