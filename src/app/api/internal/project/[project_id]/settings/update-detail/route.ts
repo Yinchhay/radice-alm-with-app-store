@@ -15,7 +15,7 @@ import {
 } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { editProjectSettingsDetail, fileImageSchema } from "../../schema";
-import { uploadFiles } from "@/lib/file";
+import { deleteFile, uploadFiles } from "@/lib/file";
 import { lucia } from "@/auth/lucia";
 import { findItemsToBeCreated, findItemsToBeDeleted } from "@/lib/filter";
 
@@ -35,6 +35,31 @@ export async function PATCH(request: Request, { params }: Params) {
         }
         if (errorNoPermission) {
             return buildNoPermissionErrorResponse();
+        }
+
+        const project = await getOneAssociatedProject(
+            Number(params.project_id),
+        );
+        if (!project) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("unknown", "Project does not exist"),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
+        }
+        const { projectRole } = checkProjectRole(user.id, project, user.type);
+        if (
+            projectRole !== ProjectRole.OWNER &&
+            projectRole !== ProjectRole.SUPER_ADMIN
+        ) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "unknown",
+                    "Unauthorized to edit project",
+                ),
+                HttpStatusCode.UNAUTHORIZED_401,
+            );
         }
 
         const formData = await request.formData();
@@ -69,6 +94,8 @@ export async function PATCH(request: Request, { params }: Params) {
                     HttpStatusCode.BAD_REQUEST_400,
                 );
             }
+
+            await deleteFile(project.logoUrl || "", sessionId ?? "");
             logoUrl = response.data.filenames[0];
         }
 
@@ -89,31 +116,6 @@ export async function PATCH(request: Request, { params }: Params) {
                 unsuccessMessage,
                 formatZodError(validationResult.error),
                 HttpStatusCode.BAD_REQUEST_400,
-            );
-        }
-
-        const project = await getOneAssociatedProject(
-            Number(params.project_id),
-        );
-        if (!project) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError("unknown", "Project does not exist"),
-                HttpStatusCode.BAD_REQUEST_400,
-            );
-        }
-        const { projectRole } = checkProjectRole(user.id, project, user.type);
-        if (
-            projectRole !== ProjectRole.OWNER &&
-            projectRole !== ProjectRole.SUPER_ADMIN
-        ) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError(
-                    "unknown",
-                    "Unauthorized to edit project",
-                ),
-                HttpStatusCode.UNAUTHORIZED_401,
             );
         }
 

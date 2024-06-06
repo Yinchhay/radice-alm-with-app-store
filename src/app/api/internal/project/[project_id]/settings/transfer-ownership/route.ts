@@ -84,14 +84,18 @@ export async function PATCH(request: Request, { params }: Params) {
         if (transferToUser.id === user.id) {
             return buildErrorResponse(
                 unsuccessMessage,
-                generateAndFormatZodError("unknown", "User is already the owner of the project"),
+                generateAndFormatZodError(
+                    "unknown",
+                    "User is already the owner of the project",
+                ),
                 HttpStatusCode.NOT_FOUND_404,
             );
         }
 
         if (
             !transferToUser.hasLinkedGithub ||
-            transferToUser.type !== UserType.USER
+            (transferToUser.type !== UserType.USER &&
+                transferToUser.type !== UserType.SUPER_ADMIN)
         ) {
             return buildErrorResponse(
                 unsuccessMessage,

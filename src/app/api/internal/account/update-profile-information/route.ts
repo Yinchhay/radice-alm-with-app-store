@@ -13,7 +13,7 @@ import { z } from "zod";
 import { updateProfileInformationFormSchema } from "../schema";
 import { fileImageSchema } from "../../project/[project_id]/schema";
 import { lucia } from "@/auth/lucia";
-import { uploadFiles } from "@/lib/file";
+import { deleteFile, uploadFiles } from "@/lib/file";
 import { updateUserProfileInformation } from "@/repositories/users";
 
 export type FetchUpdateProfileInformation = Record<string, never>;
@@ -67,6 +67,8 @@ export async function PATCH(request: Request) {
                     HttpStatusCode.BAD_REQUEST_400,
                 );
             }
+            
+            await deleteFile(formData.get("currentProfileLogo") as string, sessionId ?? "");
             profileLogo = response.data.filenames[0];
         }
 

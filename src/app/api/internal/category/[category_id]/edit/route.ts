@@ -15,7 +15,7 @@ import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { editCategoryFormSchema } from "../../schema";
 import { lucia } from "@/auth/lucia";
-import { uploadFiles } from "@/lib/file";
+import { deleteFile, uploadFiles } from "@/lib/file";
 import { fileImageSchema } from "../../../project/[project_id]/schema";
 
 export type FetchEditCategory = Record<string, never>;
@@ -67,6 +67,8 @@ export async function PATCH(request: Request, { params }: Params) {
                     HttpStatusCode.BAD_REQUEST_400,
                 );
             }
+
+            await deleteFile(formData.get("currentCategoryLogo") as string, sessionId ?? "");
             logo = response.data.filenames[0];
         }
 
