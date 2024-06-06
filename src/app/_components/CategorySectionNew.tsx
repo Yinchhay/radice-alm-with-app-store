@@ -13,6 +13,7 @@ import Image from "next/image";
 import { fileToUrl } from "@/lib/file";
 import { CategoryAndProjects } from "@/repositories/project";
 import GridRevealImage from "@/components/effects/GridRevealImage";
+import ProjectList from "./ProjectList";
 const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -52,80 +53,13 @@ export default function CategorySectionNew({
                                     <div
                                         className={`col-span-2 ${roboto_flex.className} uppercase`}
                                     >
-                                        <ul className="flex mb-[-4px] gap-2">
-                                            {category.projects.map(
-                                                (project, i) => {
-                                                    return (
-                                                        <button
-                                                            onClick={() =>
-                                                                setSelectedProject(
-                                                                    i,
-                                                                )
-                                                            }
-                                                            className={[
-                                                                "flex-shrink-0 focus:outline-transparent  transition-all relative group cursor-pointer grid place-items-center w-[80px] h-[80px]",
-                                                            ].join(" ")}
-                                                            key={`${category.name}-${project.name}-${project.id}`}
-                                                        >
-                                                            <ImageWithFallback
-                                                                src={
-                                                                    `/api/file?filename=${project.logoUrl}` ||
-                                                                    "/placeholder.webp"
-                                                                }
-                                                                width={80}
-                                                                height={80}
-                                                                className={[
-                                                                    "aspect-square object-cover duration-200 border border-gray-300",
-                                                                    selectedProject ==
-                                                                    i
-                                                                        ? "scale-[90%]"
-                                                                        : "group-hover:scale-[90%]",
-                                                                ].join(" ")}
-                                                                alt=""
-                                                            />{" "}
-                                                            <div className="w-[80px] h-[80px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-                                                                <div
-                                                                    className={[
-                                                                        "duration-150 group-active:duration-75 border-t border-l border-black w-5 h-5 bg-transparent absolute",
-                                                                        selectedProject !=
-                                                                        i
-                                                                            ? "top-[-.4rem] left-[-.4rem] opacity-0"
-                                                                            : "top-[-.1rem] left-[-.1rem]",
-                                                                    ].join(" ")}
-                                                                ></div>
-                                                                <div
-                                                                    className={[
-                                                                        "duration-150 group-active:duration-75 border-b border-l border-black w-5 h-5 bg-transparent absolute",
-                                                                        selectedProject !=
-                                                                        i
-                                                                            ? "bottom-[-.4rem] left-[-.4rem] opacity-0"
-                                                                            : "bottom-[-.1rem] left-[-.1rem]",
-                                                                    ].join(" ")}
-                                                                ></div>
-                                                                <div
-                                                                    className={[
-                                                                        "duration-150 group-active:duration-75 border-t border-r border-black w-5 h-5 bg-transparent absolute",
-                                                                        selectedProject !=
-                                                                        i
-                                                                            ? "top-[-.4rem] right-[-.4rem] opacity-0"
-                                                                            : "top-[-.1rem] right-[-.1rem]",
-                                                                    ].join(" ")}
-                                                                ></div>
-                                                                <div
-                                                                    className={[
-                                                                        "duration-150 group-active:duration-75 border-b border-r border-black w-5 h-5 bg-transparent absolute",
-                                                                        selectedProject !=
-                                                                        i
-                                                                            ? "bottom-[-.4rem] right-[-.4rem] opacity-0"
-                                                                            : "bottom-[-.1rem] right-[-.1rem]",
-                                                                    ].join(" ")}
-                                                                ></div>
-                                                            </div>
-                                                        </button>
-                                                    );
-                                                },
-                                            )}
-                                        </ul>
+                                        <ProjectList
+                                            categoryAndProjects={category}
+                                            selectProject={(i) =>
+                                                setSelectedProject(i)
+                                            }
+                                            selectedProject={selectedProject}
+                                        />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-5 mt-12">
