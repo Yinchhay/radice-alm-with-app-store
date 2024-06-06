@@ -77,7 +77,7 @@ export default async function MemberPublicProfilePage({
                                                             {
                                                                 categoryJoin
                                                                     .category
-                                                                    .shortName
+                                                                    .name
                                                             }
                                                         </Chip>
                                                     ),

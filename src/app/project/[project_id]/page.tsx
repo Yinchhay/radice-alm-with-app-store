@@ -42,7 +42,7 @@ export default async function ProjectPage({
                         <ChipsHolder className="mb-4">
                             {project.projectCategories.map((categoryJoin) => (
                                 <Chip key={categoryJoin.id}>
-                                    {categoryJoin.category.shortName}
+                                    {categoryJoin.category.name}
                                 </Chip>
                             ))}
                         </ChipsHolder>

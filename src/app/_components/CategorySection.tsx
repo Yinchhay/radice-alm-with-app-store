@@ -44,7 +44,7 @@ export default function CategorySection({
                     {projects && projects.length > 0 && (
                         <div
                             className="bg-white py-16 min-h-[620px]"
-                            id={`${category.shortName}`}
+                            id={`${category.name}`}
                         >
                             <div className="container mx-auto">
                                 <h1
@@ -53,7 +53,7 @@ export default function CategorySection({
                                         roboto_condensed.className,
                                     ].join(" ")}
                                 >
-                                    {category.shortName}
+                                    {category.name}
                                 </h1>
                                 <div>
                                     <div className="flex justify-between mt-8">
@@ -213,13 +213,13 @@ export default function CategorySection({
                     {projects && projects.length > 0 && (
                         <div
                             className="bg-black py-16 text-white min-h-[620px]"
-                            id={`${category.shortName}`}
+                            id={`${category.name}`}
                         >
                             <div className="container mx-auto">
                                 <div className="flex justify-end">
                                     <div className="w-[600px]">
                                         <h1 className="text-5xl font-bold">
-                                            {category.shortName}
+                                            {category.name}
                                         </h1>
                                     </div>
                                 </div>
