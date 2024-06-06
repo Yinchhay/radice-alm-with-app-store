@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { users } from "@/drizzle/schema";
+import { sessions, users } from "@/drizzle/schema";
 import { UserType } from "@/types/user";
 import bcrypt from "bcrypt";
 import { and, eq, like, sql } from "drizzle-orm";
@@ -21,13 +21,23 @@ export const getPartners = async (search: string = "") => {
         columns: {
             password: false,
         },
-        where: (table) => and(eq(table.type, UserType.PARTNER), like(table.email, `%${search}%`)),
+        where: (table) =>
+            and(
+                eq(table.type, UserType.PARTNER),
+                like(table.email, `%${search}%`),
+            ),
         orderBy: sql`id DESC`,
     });
 };
 
 export const deletePartnerById = async (partnerId: string) => {
-    return await db
-        .delete(users)
-        .where(and(eq(users.type, UserType.PARTNER), eq(users.id, partnerId)));
+    return await db.transaction(async (tx) => {
+        await tx.delete(sessions).where(eq(sessions.userId, partnerId));
+
+        return tx
+            .delete(users)
+            .where(
+                and(eq(users.type, UserType.PARTNER), eq(users.id, partnerId)),
+            );
+    });
 };

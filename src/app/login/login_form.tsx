@@ -22,7 +22,7 @@ export default function LoginForm() {
                         password: formData.get("password") as string,
                     });
 
-                    if (result?.success) {
+                    if (result.success) {
                         redirect("/dashboard/projects");
                     }
 
