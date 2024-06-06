@@ -78,7 +78,6 @@ export default async function ManageCategories({
                     <TableHeader>
                         <ColumName>Logo</ColumName>
                         <ColumName>Name</ColumName>
-                        <ColumName>Short name</ColumName>
                         <ColumName>Description</ColumName>
                         <ColumName className="flex justify-end font-normal">
                             {canCreateCategory && <CreateCategoryOverlay />}
@@ -135,9 +134,6 @@ function Category({
             </Cell>
             <Cell data-test={`categoryName-${category.name}`}>
                 {category.name}
-            </Cell>
-            <Cell data-test={`categoryShortName-${category.shortName}`}>
-                {category.shortName}
             </Cell>
             <Cell data-test={`categoryDescription-${category.description}`}>
                 {category.description}

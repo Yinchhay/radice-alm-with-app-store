@@ -52,7 +52,7 @@ export default function ProjectDetail({
         onReset: onResetCategories,
         itemsCheckListDisplay,
         checkedItems: checkedCategories,
-    } = useSelector(categories, originalProjectCategories, "shortName", "id");
+    } = useSelector(categories, originalProjectCategories, "name", "id");
 
     function onResetClick() {
         if (!project) return;
@@ -178,7 +178,9 @@ export default function ProjectDetail({
                                         // TODO: add tooltip
                                         return (
                                             cate.checked && (
-                                                <Chip>{cate.name}</Chip>
+                                                <Chip key={cate.name}>
+                                                    {cate.name}
+                                                </Chip>
                                             )
                                         );
                                     })}

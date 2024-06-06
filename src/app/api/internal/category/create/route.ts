@@ -73,7 +73,6 @@ export async function POST(request: Request) {
 
         const body: z.infer<typeof createCategoryFormSchema> = {
             name: formData.get("name") as string,
-            shortName: formData.get("shortName") as string,
             description: formData.get("description") as string,
             logo,
         };

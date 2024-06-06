@@ -34,6 +34,26 @@ export function useSelector<T>(
         onReset();
     }, [items, originalSelectedItems]);
 
+    function setItemsCheckListDisplayWithLimit(
+        checkListDisplay: CheckBoxElement[],
+        limit: number = 5,
+    ) {
+        // if already checked show the checked items, don't limit the checked. If not checked, limit the unchecked items
+        const checkedItems = checkListDisplay.filter((item) => item.checked);
+        const uncheckedItems = checkListDisplay.filter((item) => !item.checked);
+
+        if (checkedItems.length > limit) {
+            setItemsCheckListDisplay(checkedItems);
+        } else {
+            // example: limit = 5, checked = 3, unchecked = 10, display = 5 (3 checked + 2 unchecked)
+            setItemsCheckListDisplay(
+                checkedItems.concat(
+                    uncheckedItems.slice(0, limit - checkedItems.length),
+                ),
+            );
+        }
+    }
+
     function updateChecked(
         list: CheckBoxElement[],
         changedItem: CheckBoxElement,
@@ -69,7 +89,7 @@ export function useSelector<T>(
         const filteredItems = itemsCheckList.filter((item) =>
             item.name.toLowerCase().includes(search.toLowerCase()),
         );
-        setItemsCheckListDisplay(
+        setItemsCheckListDisplayWithLimit(
             updateCheckedByTwoLists(filteredItems, checkedItems),
         );
     }
@@ -87,18 +107,18 @@ export function useSelector<T>(
         setCheckedItems(updateCheckedItems);
 
         if (updateDisplayCheckList) {
-            setItemsCheckListDisplay(updateCheckedItems);
+            setItemsCheckListDisplayWithLimit(updateCheckedItems);
         }
     }
 
     function onCancel() {
         setCheckedItems(checkedItemsBeforeEdit);
-        setItemsCheckListDisplay(checkedItemsBeforeEdit);
+        setItemsCheckListDisplayWithLimit(checkedItemsBeforeEdit);
         closeSelector();
     }
 
     function onConfirm() {
-        setItemsCheckListDisplay(checkedItems);
+        setItemsCheckListDisplayWithLimit(checkedItems);
         closeSelector();
     }
 
@@ -109,7 +129,7 @@ export function useSelector<T>(
         );
 
         setCheckedItems(comparedList);
-        setItemsCheckListDisplay(comparedList);
+        setItemsCheckListDisplayWithLimit(comparedList);
     }
 
     return {

@@ -142,7 +142,7 @@ function Project({
                                                 <Chip>
                                                     {
                                                         categoryJoin.category
-                                                            .shortName
+                                                            .name
                                                     }
                                                 </Chip>
                                             </Tooltip>

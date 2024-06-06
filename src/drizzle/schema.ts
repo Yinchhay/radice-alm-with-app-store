@@ -16,7 +16,7 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { projectPipeLineStatusType } from "@/app/api/internal/project/[project_id]/schema";
 import { UserType } from "@/types/user";
-import { skillSetLevelSchema, skillSetSchema } from "@/app/api/internal/account/schema";
+import { skillSetSchema } from "@/app/api/internal/account/schema";
 
 export enum UserSkillSetLevel {
     Know = 0,
@@ -294,11 +294,6 @@ export const applicationFormsRelations = relations(
 export const categories = mysqlTable("categories", {
     id: int("id").primaryKey().autoincrement(),
     name: varchar("name", {
-        length: 50,
-    })
-        .notNull()
-        .unique(),
-    shortName: varchar("short_name", {
         length: 50,
     })
         .notNull()

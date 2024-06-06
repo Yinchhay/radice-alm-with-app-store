@@ -65,9 +65,6 @@ export function CreateCategoryOverlay() {
                                 const result = await fetchCreateCategory(
                                     {
                                         name: formData.get("name") as string,
-                                        shortName: formData.get(
-                                            "shortName",
-                                        ) as string,
                                         description: formData.get(
                                             "description",
                                         ) as string,
@@ -119,15 +116,6 @@ export function CreateCategoryOverlay() {
                                     Name
                                 </label>
                                 <InputField name="name" id="name" />
-                            </div>
-                            <div className="flex flex-col items-start">
-                                <label
-                                    htmlFor="shortName"
-                                    className="font-normal"
-                                >
-                                    Short name
-                                </label>
-                                <InputField name="shortName" id="shortName" />
                             </div>
                             <div className="flex flex-col items-start">
                                 <label

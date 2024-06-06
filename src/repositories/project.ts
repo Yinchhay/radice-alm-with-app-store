@@ -266,6 +266,21 @@ export async function editProjectSettingMembersById(
                 if (!userTypeUser) {
                     continue;
                 }
+
+                const isAlreadyMember = await tx.query.projectMembers.findFirst(
+                    {
+                        where: (table, { eq, and }) =>
+                            and(
+                                eq(table.projectId, projectId),
+                                eq(table.userId, member.userId),
+                            ),
+                    },
+                );
+
+                if (isAlreadyMember) {
+                    continue;
+                }
+
                 await tx.insert(projectMembers).values({
                     projectId: projectId,
                     userId: member.userId,

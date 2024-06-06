@@ -53,7 +53,6 @@ export async function fetchCreateCategory(
         }
 
         formData.append("name", body.name);
-        formData.append("shortName", body.shortName);
         formData.append("description", body.description);
 
         const sessionId = await getSessionCookie();
@@ -111,7 +110,6 @@ export async function fetchEditCategoryById(
         }
 
         formData.append("name", body.name);
-        formData.append("shortName", body.shortName);
         formData.append("description", body.description);
         formData.append("currentCategoryLogo", body.currentCategoryLogo as string);
 

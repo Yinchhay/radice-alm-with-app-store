@@ -22,7 +22,6 @@ export const editCategoryById = async (
         .set({
             name: category.name,
             description: category.description,
-            shortName: category.shortName,
             logo: category.logo,
         })
         .where(eq(categories.id, categoryId));
@@ -57,7 +56,6 @@ export const getPublicCategoriesWhereItHasProjects = async () => {
             id: categories.id,
             name: categories.name,
             description: categories.description,
-            shortName: categories.shortName,
             logo: categories.logo,
         })
         .from(categories)

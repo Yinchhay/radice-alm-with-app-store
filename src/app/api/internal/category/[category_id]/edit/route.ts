@@ -76,7 +76,6 @@ export async function PATCH(request: Request, { params }: Params) {
 
         const body: z.infer<typeof editCategoryFormSchema> = {
             name: formData.get("name") as string,
-            shortName: formData.get("shortName") as string,
             description: formData.get("description") as string,
             logo,
             categoryId: Number(params.category_id),

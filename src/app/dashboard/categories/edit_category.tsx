@@ -70,9 +70,6 @@ export function EditCategoryOverlay({
                                     {
                                         categoryId: category.id,
                                         name: formData.get("name") as string,
-                                        shortName: formData.get(
-                                            "shortName",
-                                        ) as string,
                                         description: formData.get(
                                             "description",
                                         ) as string,
@@ -129,19 +126,6 @@ export function EditCategoryOverlay({
                                     name="name"
                                     id="name"
                                     defaultValue={category.name}
-                                />
-                            </div>
-                            <div className="flex flex-col items-start">
-                                <label
-                                    htmlFor="shortName"
-                                    className="font-normal"
-                                >
-                                    Short name
-                                </label>
-                                <InputField
-                                    name="shortName"
-                                    id="shortName"
-                                    defaultValue={category.shortName}
                                 />
                             </div>
                             <div className="flex flex-col items-start">

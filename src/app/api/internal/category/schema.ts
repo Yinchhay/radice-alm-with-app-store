@@ -16,16 +16,6 @@ export const createCategoryFormSchema = z.object({
             message:
                 "Category name must be less than or equal to 50 characters",
         }),
-    shortName: z
-        .string()
-        .trim()
-        .min(1, {
-            message: "Category short name is required",
-        })
-        .max(50, {
-            message:
-                "Category short name must be less than or equal to 50 characters",
-        }),
     description: z.string().trim().max(255, {
         message: "Description must be less than or equal to 255 characters",
     }),
@@ -58,16 +48,6 @@ export const editCategoryFormSchema = z.object({
         .max(50, {
             message:
                 "Category name must be less than or equal to 50 characters",
-        }),
-    shortName: z
-        .string()
-        .trim()
-        .min(1, {
-            message: "Category short name is required",
-        })
-        .max(50, {
-            message:
-                "Category short name must be less than or equal to 50 characters",
         }),
     description: z.string().trim().max(255, {
         message: "Description must be less than or equal to 255 characters",

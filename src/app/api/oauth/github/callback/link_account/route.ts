@@ -53,11 +53,11 @@ export async function GET(request: Request): Promise<Response> {
             });
         }
 
-        if (user.type === UserType.PARTNER) {
+        if (user.type !== UserType.USER) {
             return new Response(null, {
                 status: HttpStatusCode.TEMPORARY_REDIRECT_307,
                 headers: {
-                    Location: "/link_oauth/github?error_message=Partner cannot link github account",
+                    Location: "/link_oauth/github?error_message=Your account type cannot link to github account",
                 },
             });
         }
