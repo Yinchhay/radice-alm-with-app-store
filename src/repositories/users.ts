@@ -28,7 +28,7 @@ export const createUser = async (user: typeof users.$inferInsert) => {
         ...user,
         password: hashedPassword,
     };
-    
+
     return await db.insert(users).values({
         ...userWithHashedPassword,
         type: UserType.USER,
@@ -101,6 +101,13 @@ export const getAllUsers = async () => {
 
 export const getUserById = async (userId: string) => {
     return await db.query.users.findFirst({
+        with: {
+            oauthProviders: {
+                columns: {
+                    providerUserId: true,
+                },
+            },
+        },
         columns: {
             password: false,
         },
