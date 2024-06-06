@@ -21,7 +21,6 @@ export async function GET(request: NextRequest, { params }: Params) {
     try {
         const member = await getUserById(
             params.member_id,
-            Boolean(request.nextUrl.searchParams.get("hasLinkedGithub")),
         );
 
         return buildSuccessResponse<FetchPublicMemberByIdData>(successMessage, {

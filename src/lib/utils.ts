@@ -1,3 +1,6 @@
+// Important do not change hasLinkedGithub to false, we use it to filter users who have linked github account to consider as members of the system
+export const hasLinkedGithub = true;
+
 export function localDebug(message: string, from: string): void {
     if (process.env.NODE_ENV === "development") {
         console.debug(`From ${from}: ${message}`);

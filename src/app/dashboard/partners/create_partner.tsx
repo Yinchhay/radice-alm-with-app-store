@@ -20,7 +20,7 @@ export function CreatePartnerOverlay() {
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {
-            console.log("Created partner pw: ", result.data.password);
+            // console.log("Created partner pw: ", result.data.password);
             setShowOverlay(false);
         }
     }, [result]);

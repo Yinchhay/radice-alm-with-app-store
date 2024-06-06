@@ -54,19 +54,20 @@ export function CreateUserOverlay() {
                             </div>
                             <form
                                 action={async (formData: FormData) => {
-                                    const generatedPassword =
-                                        generatePassword();
-                                    const result = await fetchCreateUser({
-                                        firstName: formData.get(
-                                            "firstName",
-                                        ) as string,
-                                        lastName: formData.get(
-                                            "lastName",
-                                        ) as string,
-                                        email: formData.get("email") as string,
-                                        password: generatedPassword,
-                                    }, pathname);
-                                    console.log(generatedPassword)
+                                    const result = await fetchCreateUser(
+                                        {
+                                            firstName: formData.get(
+                                                "firstName",
+                                            ) as string,
+                                            lastName: formData.get(
+                                                "lastName",
+                                            ) as string,
+                                            email: formData.get(
+                                                "email",
+                                            ) as string,
+                                        },
+                                        pathname,
+                                    );
                                     setResult(result);
                                 }}
                             >

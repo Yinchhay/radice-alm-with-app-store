@@ -1,4 +1,4 @@
-import { formatZodError, generateAndFormatZodError } from "@/lib/form";
+import { formatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
     buildErrorResponse,
@@ -7,17 +7,19 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { revalidateTags } from "@/lib/server_utils";
-import { createUser, GetUsers_C_Tag } from "@/repositories/users";
-
+import { createUser } from "@/repositories/users";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { createUserFormSchema } from "../schema";
-import { GetProjects_C_Tag, OneAssociatedProject_C_Tag } from "@/repositories/project";
+import { generatePassword } from "@/lib/utils";
+import { sendMail } from "@/smtp/mail";
 
-export type FetchCreateUser = Record<string, never>;
+export type FetchCreateUser = {
+    email: string;
+    password: string;
+};
 
 const successMessage = "Create user successfully";
 const unsuccessMessage = "Create user failed";
@@ -33,8 +35,8 @@ export async function POST(request: Request) {
         if (errorNoPermission) {
             return buildNoPermissionErrorResponse();
         }
-        const body: z.infer<typeof createUserFormSchema> =
-            await request.json();
+        let body: z.infer<typeof createUserFormSchema> = await request.json();
+        body.password = generatePassword();
         const validationResult = createUserFormSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
@@ -50,8 +52,22 @@ export async function POST(request: Request) {
             throw new Error(ErrorMessage.SomethingWentWrong);
         }
 
-        await revalidateTags<GetUsers_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag>("getUsers_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
-        return buildSuccessResponse<FetchCreateUser>(successMessage, {});
+        // remember in development, the email will be sent to default email (not the actual email user). check sendMail function in src/smtp/mail.ts
+        const mailResult = await sendMail({
+            subject: "Your Radice Account Has Been Created",
+            // change to your email
+            to: body.email,
+            text: `Welcome to Radice! Your account has been successfully created. Below are your account details: \n\nEmail: ${body.email}\nPassword: ${body.password}\n\nPlease keep this information safe and do not share it with anyone.`,
+        });
+
+        // if want to do something when email is sent successfully
+        // if (mailResult && mailResult.accepted.length > 0) {
+        // }
+
+        return buildSuccessResponse<FetchCreateUser>(successMessage, {
+            email: body.email,
+            password: body.password,
+        });
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);
     }

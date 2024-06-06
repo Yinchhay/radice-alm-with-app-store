@@ -20,9 +20,7 @@ const unsuccessMessage = "Get public member failed";
 // This api return only member that have projects and the projects are public
 export async function GET(request: NextRequest) {
     try {
-        const member = await getAllUsers(
-            Boolean(request.nextUrl.searchParams.get("hasLinkedGithub")),
-        );
+        const member = await getAllUsers();
 
         return buildSuccessResponse<FetchPublicMemberData>(successMessage, {
             members: member,

@@ -57,7 +57,8 @@ export async function GET(request: Request): Promise<Response> {
             return new Response(null, {
                 status: HttpStatusCode.TEMPORARY_REDIRECT_307,
                 headers: {
-                    Location: "/link_oauth/github?error_message=Your account type cannot link to github account",
+                    Location:
+                        "/link_oauth/github?error_message=Your account type cannot link to github account",
                 },
             });
         }
@@ -69,6 +70,14 @@ export async function GET(request: Request): Promise<Response> {
         if (userHasLinkedGithubOAuth) {
             // check if the github account is the same
             if (userHasLinkedGithubOAuth.providerUserId == githubUser.id) {
+                // if somehow the user has linked github but the flag is not set yet
+                // just a very rare case
+                if (!user.hasLinkedGithub) {
+                    await updateUserHasLinkedGithubByUserId(user.id, {
+                        hasLinkedGithub: true,
+                    });
+                }
+
                 return new Response(null, {
                     status: HttpStatusCode.FOUND_302,
                     headers: {

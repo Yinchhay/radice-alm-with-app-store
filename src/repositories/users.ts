@@ -1,18 +1,19 @@
 import { db } from "@/drizzle/db";
 import { sessions, users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
-import { eq, count, sql } from "drizzle-orm";
+import { eq, count, sql, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 import { z } from "zod";
 import { updateProfileInformationFormSchema } from "@/app/api/internal/account/schema";
+import { hasLinkedGithub } from "@/lib/utils";
 
 /**
  * not everywhere is required to use cache, for example this function
  * is used in the login page, and we don't want to cache the user
  */
-// for login, so no need to hide password
+// for login, so no need to hide password, doesn't matter the user type. it's not for return to client
 export const getUserByEmail = async (email: string) => {
     return await db.query.users.findFirst({
         where: (user, { eq }) => eq(user.email, email),
@@ -27,12 +28,17 @@ export const createUser = async (user: typeof users.$inferInsert) => {
         ...user,
         password: hashedPassword,
     };
-    return await db.insert(users).values(userWithHashedPassword);
+    
+    return await db.insert(users).values({
+        ...userWithHashedPassword,
+        type: UserType.USER,
+    });
 };
 
 export type GetUserRolesAndRolePermissions_C_Tag =
     | `getUserRolesAndRolePermissions_C:${string}`
     | `getUserRolesAndRolePermissions_C`;
+// important, do not use this function to show client
 export const getUserRolesAndRolePermissions_C = async (userId: string) => {
     return await cache(
         async (userId: string) => {
@@ -71,17 +77,16 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
 export const deleteUserById = async (userId: string) => {
     return await db.transaction(async (transaction) => {
         await transaction.delete(sessions).where(eq(sessions.userId, userId));
-        return await transaction.delete(users).where(eq(users.id, userId));
+        // allow only delete member
+        return await transaction
+            .delete(users)
+            .where(and(eq(users.id, userId), eq(users.type, UserType.USER)));
     });
 };
 
 export type GetUsers_C_Tag = `getUsers_C`;
 
-export const getAllUsers = async (hasLinkedGithub: boolean = true) => {
-    if (process.env.NODE_ENV !== "development") {
-        hasLinkedGithub = true;
-    }
-
+export const getAllUsers = async () => {
     return await db.query.users.findMany({
         columns: {
             password: false,
@@ -94,14 +99,7 @@ export const getAllUsers = async (hasLinkedGithub: boolean = true) => {
     });
 };
 
-export const getUserById = async (
-    userId: string,
-    hasLinkedGithub: boolean = true,
-) => {
-    if (process.env.NODE_ENV !== "development") {
-        hasLinkedGithub = true;
-    }
-
+export const getUserById = async (userId: string) => {
     return await db.query.users.findFirst({
         columns: {
             password: false,
@@ -124,15 +122,12 @@ export const getAllUsersExceptThisUser = async (userId: string) => {
             and(
                 eq(table.type, UserType.USER),
                 not(eq(table.id, userId)),
-                eq(
-                    table.hasLinkedGithub,
-                    // TODO: on production, this should be true
-                    false,
-                ),
+                eq(table.hasLinkedGithub, hasLinkedGithub),
             ),
     });
 };
 
+// since user type is partner, we don't need to specify hasLinkedGithub
 export const getAllPartnersExceptThisUser = async (userId: string) => {
     return await db.query.users.findMany({
         columns: {
@@ -154,11 +149,20 @@ export const getUsers = async (
         columns: {
             password: false,
         },
+        where: (table, { eq }) => eq(table.type, UserType.USER),
     });
 };
 
 export const getUsersTotalRow = async () => {
-    const totalRows = await db.select({ count: count() }).from(users);
+    const totalRows = await db
+        .select({ count: count() })
+        .from(users)
+        .where(
+            and(
+                eq(users.type, UserType.USER),
+                eq(users.hasLinkedGithub, hasLinkedGithub),
+            ),
+        );
     return totalRows[0].count;
 };
 
@@ -174,7 +178,10 @@ export const updateUserHasLinkedGithubByUserId = async (
         .where(eq(users.id, userId));
 };
 
-export const updateUserProfileInformation = async (userId: string, body: z.infer<typeof updateProfileInformationFormSchema>) => {
+export const updateUserProfileInformation = async (
+    userId: string,
+    body: z.infer<typeof updateProfileInformationFormSchema>,
+) => {
     return await db
         .update(users)
         .set({

@@ -5,6 +5,7 @@ import DashboardLayout from "./_components/dashboard-layout";
 import { AllPermissionsInTheSystem, userCanAccessRoute } from "@/lib/IAM";
 import { hasPermission } from "@/lib/IAM";
 import { cache } from "react";
+import { UserType } from "@/types/user";
 
 export const metadata: Metadata = {
     title: "Dashboard | Radi Center",
@@ -32,6 +33,10 @@ export default async function DashboardManageLayout({
     const user = await getAuthUser();
     if (!user) {
         redirect("/login");
+    }
+
+    if (user.type === UserType.USER && !user.hasLinkedGithub) {
+        redirect("/link_oauth/github");
     }
 
     const { userPermissions } = await hasPermission(

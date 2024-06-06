@@ -15,6 +15,7 @@ import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { createPartnerFormSchema } from "../schema";
 import { generatePassword } from "@/lib/utils";
+import { sendMail } from "@/smtp/mail";
 
 export type FetchCreatePartner = {
     email: string;
@@ -54,9 +55,17 @@ export async function POST(request: Request) {
             throw new Error(ErrorMessage.SomethingWentWrong);
         }
 
-        if (process.env.NODE_ENV === "production") {
-            // TODO: send email to partner's email in production
-        }
+        // remember in development, the email will be sent to default email (not the actual email user). check sendMail function in src/smtp/mail.ts
+        const mailResult = await sendMail({
+            subject: "Your Radice Account Has Been Created",
+            // change to your email
+            to: body.email,
+            text: `Welcome to Radice! Your account has been successfully created. Below are your account details: \n\nEmail: ${body.email}\nPassword: ${body.password}\n\nPlease keep this information safe and do not share it with anyone.`,
+        });
+
+        // if want to do something when email is sent successfully
+        // if (mailResult && mailResult.accepted.length > 0) {
+        // }
 
         return buildSuccessResponse<FetchCreatePartner>(successMessage, {
             email: body.email,

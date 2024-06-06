@@ -38,7 +38,7 @@ export async function fetchUsers(
 }
 
 export async function fetchCreateUser(
-    body: z.infer<typeof createUserFormSchema>,
+    body: Omit<z.infer<typeof createUserFormSchema>, "password">,
     pathname: string,
 ): ResponseJson<FetchCreateUser> {
     try {
