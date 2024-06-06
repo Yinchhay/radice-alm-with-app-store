@@ -9,17 +9,21 @@ import {
     getSessionCookie,
     revalidateTags,
 } from "@/lib/server_utils";
+import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { FetchDeleteUser } from "@/app/api/internal/users/[user_id]/delete/route";
 import { z } from "zod";
 import { createUserFormSchema } from "@/app/api/internal/users/schema";
 import { FetchCreateUser } from "@/app/api/internal/users/create/route";
 import { revalidatePath } from "next/cache";
 
-export async function fetchUsers(): ResponseJson<FetchUsersData> {
+export async function fetchUsers(
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_PAGE,
+): ResponseJson<FetchUsersData> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/users`,
+            `${await getBaseUrl()}/api/internal/users?page=${page}&rowsPerPage=${rowsPerPage}`,
             {
                 method: "GET",
                 headers: {
@@ -91,8 +95,7 @@ export async function fetchAllUsers(): ResponseJson<FetchUsersData> {
             },
         );
         return await response.json();
-    }
-    catch (error: any) {
+    } catch (error: any) {
         return fetchErrorSomethingWentWrong;
     }
 }

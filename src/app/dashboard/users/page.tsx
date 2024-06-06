@@ -5,23 +5,36 @@ import ColumName from "@/components/table/ColumnName";
 import TableBody from "@/components/table/TableBody";
 import TableRow from "@/components/table/TableRow";
 import Cell from "@/components/table/Cell";
+import Pagination from "@/components/Pagination";
 import { CreateUserOverlay } from "./create_user";
 import { DeleteUserOverlay } from "./delete_user";
 import { fetchUsers } from "./fetch";
 import { users } from "@/drizzle/schema";
 import { getAuthUser } from "@/auth/lucia";
 import { hasPermission } from "@/lib/IAM";
+import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import { Permissions } from "@/types/IAM";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 
-export default async function ManageUsers() {
+type ManageUsersProps = {
+    searchParams?: {
+        page?: string;
+    };
+};
+
+export default async function ManageUsers({ searchParams }: ManageUsersProps) {
     const user = await getAuthUser();
 
     if (!user) {
         throw new Error("Unauthorized to access this page");
     }
 
-    const result = await fetchUsers();
+    let page = Number(searchParams?.page) || 1;
+    if (page < 1) {
+        page = 1;
+    }
+
+    const result = await fetchUsers(page, ROWS_PER_PAGE);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -60,6 +73,14 @@ export default async function ManageUsers() {
                             )}
                         </TableBody>
                     </Table>
+                    {result.data.maxPage > 1 && (
+                        <div className="float-right">
+                            <Pagination
+                                page={page}
+                                maxPage={result.data.maxPage}
+                            />
+                        </div>
+                    )}
                 </div>
             </Suspense>
         </div>
