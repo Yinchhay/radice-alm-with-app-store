@@ -118,14 +118,14 @@ function Media({
     return (
         <Card square>
             <div className="flex flex-row gap-4 relative">
-                <ImageWithFallback
-                    className="aspect-square object-cover rounded-sm"
-                    src={fileToUrl(image)}
-                    alt={"media logo"}
-                    width={128}
-                    height={128}
-                />
-                <div className="flex pr-8">
+                    <ImageWithFallback
+                        className="aspect-square object-cover rounded-sm w-32 h-32"
+                        src={fileToUrl(image)}
+                        alt={"media logo"}
+                        width={128}
+                        height={128}
+                    />
+                <div className="flex pr-8  mb-6">
                     <div className="flex flex-col">
                         <h1 className="text-xl">{mediaOne.title}</h1>
                         <p className="text-sm">{dateToString(mediaOne.date)}</p>
@@ -134,7 +134,9 @@ function Media({
                 </div>
                 <div className="absolute bottom-0 right-0 flex gap-2">
                     {canEditMedia && <EditMediaOverlay mediaOne={mediaOne} />}
-                    {canDeleteMedia && <DeleteMediaOverlay mediaOne={mediaOne} />}
+                    {canDeleteMedia && (
+                        <DeleteMediaOverlay mediaOne={mediaOne} />
+                    )}
                 </div>
             </div>
         </Card>

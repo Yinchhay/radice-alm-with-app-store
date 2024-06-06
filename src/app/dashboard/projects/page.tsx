@@ -117,13 +117,13 @@ function Project({
         <Card square>
             <div className="flex flex-row gap-4 relative">
                 <ImageWithFallback
-                    className="aspect-square object-cover rounded-sm"
+                    className="aspect-square object-cover rounded-sm  w-32 h-32"
                     src={fileToUrl(project.logoUrl)}
                     alt={"project logo"}
                     width={128}
                     height={128}
                 />
-                <div className="flex pr-8">
+                <div className="flex pr-8  mb-6">
                     <div className="flex flex-col">
                         <h1 className="text-xl">{project.name}</h1>
                         <p className="text-sm">{project.description}</p>
