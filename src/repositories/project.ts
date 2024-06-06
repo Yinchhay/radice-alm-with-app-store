@@ -374,6 +374,9 @@ export async function getPublicProjectsByCategoryId(categoryId: number) {
     });
 }
 
+type Temp = Omit<typeof projects.$inferSelect, "updatedAt" | "createdAt">;
+type Temp1 = Omit<typeof categories.$inferSelect, "updatedAt" | "createdAt">;
+export type CategoryAndProjects = Temp1 & { projects: Temp[] };
 // get public categories that have project is public true. get at least 1 project, if doesn't have, don't return the category
 export async function getPublicProjectsByCategories() {
     const { createdAt, updatedAt, ...project } = getTableColumns(projects);
@@ -400,22 +403,18 @@ export async function getPublicProjectsByCategories() {
             ),
         );
 
-    type Category = typeof category;
-    type Project = typeof project;
-    type CategoryProjects = Category & { projects: Project[] };
-
     // push category and then category has projects
-    let categoriesStructure: CategoryProjects[] = [];
+    let categoriesStructure: CategoryAndProjects[] = [];
 
     for (const { category, project } of unstructured) {
         const categoryIndex = categoriesStructure.findIndex(
-            (c) => c.id === (category.id as any),
+            (c) => c.id === category.id,
         );
         if (categoryIndex === -1) {
             categoriesStructure.push({
                 ...category,
                 projects: [project],
-            } as any);
+            });
         } else {
             categoriesStructure[categoryIndex].projects.push(project as any);
         }

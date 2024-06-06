@@ -11,7 +11,10 @@ import { categories } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import Footer from "@/components/Footer";
 import TechButton from "@/components/TechButton";
-import { fetchPublicCategories } from "./fetch";
+import {
+    fetchPublicCategories,
+    fetchPublicProjectsAndCategories,
+} from "./fetch";
 import CategorySectionNew from "./_components/CategorySectionNew";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -28,13 +31,14 @@ const roboto = Roboto({
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-    const result = await fetchPublicCategories();
+    const result = await fetchPublicProjectsAndCategories();
 
     if (!result.success) {
         return;
     }
 
-    const categories = result.data.categories;
+    const categoriesAndProjects = result.data.categories;
+    console.log(categoriesAndProjects);
     return (
         <div>
             <Navbar />
@@ -125,9 +129,9 @@ export default async function Home() {
                         clipPath: "polygon(0 0, 0% 100%, 100% 100%)",
                     }}
                 ></div>
-                <Carousel categories={categories} />
+                <Carousel categories={categoriesAndProjects} />
             </div>
-            {categories.map((category, i) => {
+            {categoriesAndProjects.map((category, i) => {
                 return (
                     <CategorySectionNew
                         variant={i % 2 === 0 ? "light" : "dark"}

@@ -112,7 +112,7 @@ export default function GridRevealImage({
                 {randomContent.map((content, i) => (
                     <div
                         key={uuidv4()}
-                        className={`transition-colors text-sm text-center ${getVariantClasses()}`}
+                        className={`grid place-items-center transition-colors text-sm text-center ${getVariantClasses()}`}
                         style={{
                             animationPlayState: getPlayState(canReveal),
                             animationName: "fadeOut",

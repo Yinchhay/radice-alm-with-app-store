@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from "react";
 import Image, { ImageProps } from "next/image";
 
@@ -11,13 +11,12 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = (props) => {
     const { src, fallbackSrc = "/placeholder.webp", ...rest } = props;
     const [imgSrc, setImgSrc] = useState<string>(src);
 
-    useEffect(() => {   
+    useEffect(() => {
         setImgSrc(src);
     }, [src]);
 
     return (
         <Image
-            unoptimized
             {...rest}
             src={imgSrc}
             onError={() => {

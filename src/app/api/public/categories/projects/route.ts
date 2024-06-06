@@ -13,6 +13,11 @@ export type FetchPublicProjectsCategoriesData = {
     categories: GetPublicProjectsByCategoriesReturnType;
 };
 
+export type PublicProjectsAndCategory =
+    GetPublicProjectsByCategoriesReturnType extends Array<infer Item>
+        ? Item
+        : never;
+
 const successMessage = "Get public projects by categories successfully";
 const unsuccessMessage = "Get public projects by categories failed";
 

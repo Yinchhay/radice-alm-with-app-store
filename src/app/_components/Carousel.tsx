@@ -3,10 +3,10 @@ import { Roboto_Condensed, Roboto } from "next/font/google";
 import Image from "next/image";
 import { useState } from "react";
 import TechButton from "../../components/TechButton";
-import { GetPublicCategoriesReturnType } from "@/app/api/public/categories/route";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fileToUrl } from "@/lib/file";
 import SpecialEffectSentence from "@/components/effects/SpecialEffectSentence";
+import { CategoryAndProjects } from "@/repositories/project";
 
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -17,7 +17,7 @@ const roboto_condensed = Roboto_Condensed({
 export default function Carousel({
     categories,
 }: {
-    categories: GetPublicCategoriesReturnType;
+    categories: CategoryAndProjects[];
 }) {
     const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -78,7 +78,7 @@ export default function Carousel({
                         ].join(" ")}
                     >
                         {categories.length > 0
-                            ? categories[currentSlide].shortName
+                            ? categories[currentSlide].name
                             : ""}
                     </h2>
                 </div>
@@ -105,7 +105,7 @@ export default function Carousel({
                         />
                     </p>
                     <TechButton
-                        link={`#${categories[currentSlide].shortName}`}
+                        link={`#${categories[currentSlide].name}`}
                         variant="light"
                         className="mt-12"
                         text="VIEW"
