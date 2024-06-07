@@ -432,6 +432,14 @@ export async function getPublicProjectsByUserId(userId: string) {
     const memberIds = await memberAssociatedProjectIds(userId);
 
     return db.query.projects.findMany({
+        with: {
+            projectCategories: {
+                with: {
+                    category: true,
+                },
+            },
+            user: true,
+        },
         where: (table, { or, inArray, and }) =>
             and(
                 eq(table.isPublic, true),
@@ -449,6 +457,14 @@ export async function getPublicProjectsByPartnerId(userId: string) {
     const partnerIds = await partnerAssociatedProjectIds(userId);
 
     return db.query.projects.findMany({
+        with: {
+            projectCategories: {
+                with: {
+                    category: true,
+                },
+            },
+            user: true,
+        },
         where: (table, { or, inArray, and }) =>
             and(
                 eq(table.isPublic, true),

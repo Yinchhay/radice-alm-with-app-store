@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import ImageWithFallback from "../ImageWithFallback";
 import { useEffect, useState } from "react";
 
-export default function GridRevealImage({
+export default function GridRevealVideo({
     src,
     width,
     height,

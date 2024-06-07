@@ -123,6 +123,7 @@ export default async function ProjectPage({
                                     (projectPartner, i) => {
                                         return (
                                             <MemberProfile
+                                                userType="partner"
                                                 key={`member-${projectPartner.partner.id}-${i}`}
                                                 member={projectPartner.partner}
                                                 variant="light"

@@ -82,7 +82,7 @@ export default function CategorySectionNew({
                                             </div>
                                             <div className="col-span-2">
                                                 <div
-                                                    className={`w-[180px] h-[100px] absolute left-[85%] mt-[-8px] bg-gradient-to-r from-transparent via-white to-white z-30 duration-200 ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
+                                                    className={`w-[100px] h-[100px] absolute left-[90%] mt-[-8px] bg-gradient-to-r from-transparent via-white to-white z-30 duration-200 ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
                                                 ></div>
                                                 <button
                                                     onClick={() => {
