@@ -78,11 +78,7 @@ export const userRelations = relations(users, ({ many, one }) => ({
     projectPartners: many(projectPartners),
     sessions: many(sessions),
     files: many(files),
-    // one user can only have one email verification code
-    codeVerification: one(codeVerifications, {
-        fields: [users.id],
-        references: [codeVerifications.userId],
-    }),
+    codeVerifications: many(codeVerifications),
 }));
 
 export const sessions = mysqlTable("sessions", {
