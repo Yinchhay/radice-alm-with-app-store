@@ -20,6 +20,21 @@ export const getUserByEmail = async (email: string) => {
     });
 };
 
+export const updateUserPassword = async (
+    userId: string,
+    newPassword: string,
+) => {
+    const SALT_ROUNDS = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    return await db
+        .update(users)
+        .set({
+            password: hashedPassword,
+        })
+        .where(eq(users.id, userId));
+};
+
 export const createUser = async (user: typeof users.$inferInsert) => {
     const SALT_ROUNDS = 10;
     const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);

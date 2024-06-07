@@ -60,3 +60,24 @@ export const updateProfileInformationFormSchema = z.object({
         },
     ),
 });
+
+export const changePasswordSchema = z.object({
+    oldPassword: z
+        .string()
+        .trim()
+        .min(8, {
+            message: "Old password must be at least 8 characters long",
+        })
+        .max(255, {
+            message: "Old password must be less than 255 characters",
+        }),
+    newPassword: z
+        .string()
+        .trim()
+        .min(8, {
+            message: "New password must be at least 8 characters long",
+        })
+        .max(255, {
+            message: "New password must be less than 255 characters",
+        }),
+});

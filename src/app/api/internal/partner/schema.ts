@@ -26,7 +26,7 @@ export const createPartnerFormSchema = z.object({
             message: "Email is required",
         })
         .max(255, {
-            message: "Email is must be less than 255 characters",
+            message: "Email must be less than 255 characters",
         })
         .email({
             message: "Invalid email address",
@@ -34,11 +34,11 @@ export const createPartnerFormSchema = z.object({
     password: z
         .string()
         .trim()
-        .min(1, {
-            message: "Password is required",
+        .min(8, {
+            message: "Password must be at least 8 characters long",
         })
         .max(255, {
-            message: "Password is must be less than 255 characters",
+            message: "Password must be less than 255 characters",
         }),
 });
 

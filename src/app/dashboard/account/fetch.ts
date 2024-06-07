@@ -1,5 +1,9 @@
-"use server"
-import { updateProfileInformationFormSchema } from "@/app/api/internal/account/schema";
+"use server";
+import { FetchChangePasswordData } from "@/app/api/internal/account/change-password/route";
+import {
+    changePasswordSchema,
+    updateProfileInformationFormSchema,
+} from "@/app/api/internal/account/schema";
 import { FetchUpdateProfileInformation } from "@/app/api/internal/account/update-profile-information/route";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
@@ -36,6 +40,30 @@ export async function fetchUpdateProfileInformation(
                     Authorization: `Bearer ${sessionId}`,
                 },
                 body: formData,
+            },
+        );
+
+        revalidatePath(pathname);
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchChangePassword(
+    body: z.infer<typeof changePasswordSchema>,
+    pathname: string,
+): ResponseJson<FetchChangePasswordData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/account/change-password`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
             },
         );
 

@@ -11,6 +11,8 @@ import { Suspense } from "react";
 import { EditProfileOverlay } from "./edit_profile";
 import Tooltip from "@/components/Tooltip";
 import { UserSkillSetLevel } from "@/drizzle/schema";
+import { ChangeEmailOverlay } from "./change_email";
+import { ChangePasswordOverlay } from "./change_password";
 
 export default async function ManageAccount() {
     const user = await getAuthUser();
@@ -32,7 +34,7 @@ export default async function ManageAccount() {
                             height={128}
                         />
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-4">
                         <div className="flex gap-4">
                             <h1 className="text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</h1>
                             <div className="">
@@ -59,6 +61,10 @@ export default async function ManageAccount() {
                                         );
                                     })}
                             </ChipsHolder>
+                        </div>
+                        <div className="">
+                            {/* <ChangeEmailOverlay /> */}
+                            <ChangePasswordOverlay />
                         </div>
                     </div>
                 </Card>
