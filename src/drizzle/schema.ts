@@ -79,9 +79,9 @@ export const userRelations = relations(users, ({ many, one }) => ({
     sessions: many(sessions),
     files: many(files),
     // one user can only have one email verification code
-    emailVerification: one(emailVerifications, {
+    codeVerification: one(codeVerifications, {
         fields: [users.id],
-        references: [emailVerifications.userId],
+        references: [codeVerifications.userId],
     }),
 }));
 
@@ -235,7 +235,11 @@ export const oauthProvidersRelations = relations(oauthProviders, ({ one }) => ({
     }),
 }));
 
-export const emailVerifications = mysqlTable("email_verifications", {
+export enum CodeVerificationType {
+    CHANGE_EMAIL = "change_email",
+    FORGOT_PASSWORD = "forgot_password",
+}
+export const codeVerifications = mysqlTable("code_verifications", {
     id: int("id").primaryKey().autoincrement(),
     code: varchar("code", {
         length: 255,
@@ -250,16 +254,21 @@ export const emailVerifications = mysqlTable("email_verifications", {
             onDelete: "cascade",
         })
         .unique(),
+    type: varchar("type", {
+        length: 100,
+    })
+        .notNull()
+        .$type<CodeVerificationType>(),
     expiresAt: datetime("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const emailVerificationsRelations = relations(
-    emailVerifications,
+export const codeVerificationsRelations = relations(
+    codeVerifications,
     ({ one }) => ({
         user: one(users, {
-            fields: [emailVerifications.userId],
+            fields: [codeVerifications.userId],
             references: [users.id],
         }),
     }),
@@ -350,11 +359,10 @@ export const projects = mysqlTable("projects", {
     pipelineStatus: json("pipeline_status").$type<ProjectPipelineStatus>(),
     userId: varchar("user_id", {
         length: 255,
-    })
-        .references(() => users.id, {
-            // on delete allow delete user.
-            onDelete: "set null",
-        }),
+    }).references(() => users.id, {
+        // on delete allow delete user.
+        onDelete: "set null",
+    }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
