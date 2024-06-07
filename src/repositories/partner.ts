@@ -39,3 +39,13 @@ export const deletePartnerById = async (partnerId: string) => {
             );
     });
 };
+
+export const getPartnerById = async (userId: string) => {
+    return await db.query.users.findFirst({
+        columns: {
+            password: false,
+        },
+        where: (table, { eq, and }) =>
+            and(eq(table.id, userId), eq(table.type, UserType.PARTNER)),
+    });
+};

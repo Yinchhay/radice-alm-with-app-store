@@ -14,18 +14,8 @@ import {
 } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
-import {
-    eq,
-    sql,
-    or,
-    inArray,
-    count,
-    and,
-    getTableColumns,
-    InferSelectModel,
-} from "drizzle-orm";
+import { eq, sql, or, inArray, count, and, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
-import { getUserByEmail } from "./users";
 
 export const createProject = async (project: typeof projects.$inferInsert) => {
     return await db.insert(projects).values(project);
@@ -439,21 +429,36 @@ export async function getPublicProjectsByCategories() {
 }
 
 export async function getPublicProjectsByUserId(userId: string) {
-    return await db.query.projects.findMany({
-        with: {
-            projectCategories: {
-                with: {
-                    category: true,
-                },
-            },
-            user: {
-                columns: {
-                    password: false,
-                },
-            },
-        },
-        where: (table, { eq, and }) =>
-            and(eq(table.isPublic, true), eq(table.userId, userId)),
+    const memberIds = await memberAssociatedProjectIds(userId);
+
+    return db.query.projects.findMany({
+        where: (table, { or, inArray, and }) =>
+            and(
+                eq(table.isPublic, true),
+                or(
+                    // check if the user is the owner of the project
+                    eq(table.userId, userId),
+                    // if not, check if the user is associated with the project
+                    inArray(table.id, memberIds),
+                ),
+            ),
+    });
+}
+
+export async function getPublicProjectsByPartnerId(userId: string) {
+    const partnerIds = await partnerAssociatedProjectIds(userId);
+
+    return db.query.projects.findMany({
+        where: (table, { or, inArray, and }) =>
+            and(
+                eq(table.isPublic, true),
+                or(
+                    // check if the user is the owner of the project
+                    eq(table.userId, userId),
+                    // if not, check if the user is associated with the project
+                    inArray(table.id, partnerIds),
+                ),
+            ),
     });
 }
 

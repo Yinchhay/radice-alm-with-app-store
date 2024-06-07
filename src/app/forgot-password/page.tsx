@@ -1,16 +1,14 @@
 import { Metadata } from "next";
-import LoginForm from "./login_form";
 import { getAuthUser } from "@/auth/lucia";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import Button from "@/components/Button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { IconBrandGithub } from "@tabler/icons-react";
+import ForgotPasswordForm from "./forgot_password_form";
 
 export const metadata: Metadata = {
-    title: "Login into your account | Radi Center",
-    description: "Login into your account to access your dashboard",
+    title: "Forgot password | Radi Center",
+    description:
+        "Forgot your password? No worries, we got you covered! Just enter your email and we will send you a link to reset your password",
 };
 
 export default async function Page() {
@@ -24,14 +22,7 @@ export default async function Page() {
             <Navbar />
             <div className="container mx-auto min-h-[60vh] grid justify-center mt-16">
                 <div className="flex gap-4 flex-col">
-                    <LoginForm />
-                    <Link href={"/forgot-password"}>Forgot password</Link>
-                    <Link href="/api/oauth/github/login">
-                        <Button className="flex gap-2">
-                            <IconBrandGithub />
-                            Sign in with GitHub
-                        </Button>
-                    </Link>
+                    <ForgotPasswordForm />
                 </div>
             </div>
             <Footer />

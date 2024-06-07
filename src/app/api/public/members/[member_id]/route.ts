@@ -1,6 +1,7 @@
 import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
+    buildErrorResponse,
 } from "@/lib/response";
 import { getUserById } from "@/repositories/users";
 import { NextRequest } from "next/server";
@@ -22,6 +23,12 @@ export async function GET(request: NextRequest, { params }: Params) {
         const member = await getUserById(
             params.member_id,
         );
+
+        if (!member) {
+            return buildErrorResponse(unsuccessMessage, {
+                message: "Member not found",
+            });
+        }
 
         return buildSuccessResponse<FetchPublicMemberByIdData>(successMessage, {
             member: member,

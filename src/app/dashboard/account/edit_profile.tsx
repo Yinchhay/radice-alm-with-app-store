@@ -23,6 +23,7 @@ import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
 import { fetchUpdateProfileInformation } from "./fetch";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
+import { UserType } from "@/types/user";
 
 type UserSkillSetWithId = UserSkillSet & { id: string };
 
@@ -258,67 +259,69 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                         defaultValue={user.description ?? ""}
                                     />
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex justify-between items-center w-full">
-                                        <h2 className="text-lg font-semibold min-w-fit">
-                                            Skill sets:
-                                        </h2>
-                                        <Button
-                                            type="button"
-                                            square={true}
-                                            variant="primary"
-                                            onClick={addSkillSet}
-                                        >
-                                            <IconPlus></IconPlus>
-                                        </Button>
+                                {user.type === UserType.USER && (
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex justify-between items-center w-full">
+                                            <h2 className="text-lg font-semibold min-w-fit">
+                                                Skill sets:
+                                            </h2>
+                                            <Button
+                                                type="button"
+                                                square={true}
+                                                variant="primary"
+                                                onClick={addSkillSet}
+                                            >
+                                                <IconPlus></IconPlus>
+                                            </Button>
+                                        </div>
+                                        <div>
+                                            {Array.isArray(skillSets) &&
+                                                skillSets.length > 0 && (
+                                                    <Table className="w-full">
+                                                        <TableHeader>
+                                                            <ColumName>
+                                                                Label
+                                                            </ColumName>
+                                                            <ColumName className="min-w-36">
+                                                                Level
+                                                            </ColumName>
+                                                            <ColumName>
+                                                                Action
+                                                            </ColumName>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {skillSets.map(
+                                                                (skillSet) => {
+                                                                    return (
+                                                                        <SkillSetRow
+                                                                            key={
+                                                                                skillSet.id
+                                                                            }
+                                                                            skillSet={
+                                                                                skillSet
+                                                                            }
+                                                                            dropDownList={
+                                                                                skillSetsDropDownList
+                                                                            }
+                                                                            onRemove={
+                                                                                removeSkillSet
+                                                                            }
+                                                                            onLabelChange={
+                                                                                onChangeSkillSetLabel
+                                                                            }
+                                                                            onLevelChange={
+                                                                                onChangeSkillSetLevel
+                                                                            }
+                                                                        />
+                                                                    );
+                                                                },
+                                                            )}
+                                                        </TableBody>
+                                                    </Table>
+                                                )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        {Array.isArray(skillSets) &&
-                                            skillSets.length > 0 && (
-                                                <Table className="w-full">
-                                                    <TableHeader>
-                                                        <ColumName>
-                                                            Label
-                                                        </ColumName>
-                                                        <ColumName className="min-w-36">
-                                                            Level
-                                                        </ColumName>
-                                                        <ColumName>
-                                                            Action
-                                                        </ColumName>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {skillSets.map(
-                                                            (skillSet) => {
-                                                                return (
-                                                                    <SkillSetRow
-                                                                        key={
-                                                                            skillSet.id
-                                                                        }
-                                                                        skillSet={
-                                                                            skillSet
-                                                                        }
-                                                                        dropDownList={
-                                                                            skillSetsDropDownList
-                                                                        }
-                                                                        onRemove={
-                                                                            removeSkillSet
-                                                                        }
-                                                                        onLabelChange={
-                                                                            onChangeSkillSetLabel
-                                                                        }
-                                                                        onLevelChange={
-                                                                            onChangeSkillSetLevel
-                                                                        }
-                                                                    />
-                                                                );
-                                                            },
-                                                        )}
-                                                    </TableBody>
-                                                </Table>
-                                            )}
-                                    </div>
-                                </div>
+                                )}
                             </div>
                             {!result?.success && result?.errors && (
                                 <FormErrorMessages errors={result?.errors} />

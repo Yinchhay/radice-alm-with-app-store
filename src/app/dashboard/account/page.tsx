@@ -13,6 +13,7 @@ import Tooltip from "@/components/Tooltip";
 import { UserSkillSetLevel } from "@/drizzle/schema";
 import { ChangeEmailOverlay } from "./change_email";
 import { ChangePasswordOverlay } from "./change_password";
+import { UserType } from "@/types/user";
 
 export default async function ManageAccount() {
     const user = await getAuthUser();
@@ -43,25 +44,27 @@ export default async function ManageAccount() {
                         </div>
                         <h3 className="text-lg">{user.email}</h3>
                         <h3 className="text-sm">{user.description}</h3>
-                        <div className="flex gap-2">
-                            <h2 className="text-lg font-semibold min-w-fit">
-                                Skill sets:
-                            </h2>
-                            <ChipsHolder>
-                                {Array.isArray(user.skillSet) &&
-                                    user.skillSet.map((sk) => {
-                                        // TODO: add tooltip level
-                                        return (
-                                            <Tooltip
-                                                key={sk.label}
-                                                title={`Level: ${UserSkillSetLevel[sk.level]}`}
-                                            >
-                                                <Chip>{sk.label}</Chip>
-                                            </Tooltip>
-                                        );
-                                    })}
-                            </ChipsHolder>
-                        </div>
+                        {user.type === UserType.USER && (
+                            <div className="flex gap-2">
+                                <h2 className="text-lg font-semibold min-w-fit">
+                                    Skill sets:
+                                </h2>
+                                <ChipsHolder>
+                                    {Array.isArray(user.skillSet) &&
+                                        user.skillSet.map((sk) => {
+                                            // TODO: add tooltip level
+                                            return (
+                                                <Tooltip
+                                                    key={sk.label}
+                                                    title={`Level: ${UserSkillSetLevel[sk.level]}`}
+                                                >
+                                                    <Chip>{sk.label}</Chip>
+                                                </Tooltip>
+                                            );
+                                        })}
+                                </ChipsHolder>
+                            </div>
+                        )}
                         <div className="">
                             {/* <ChangeEmailOverlay /> */}
                             <ChangePasswordOverlay />
