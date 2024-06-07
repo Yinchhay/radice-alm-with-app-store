@@ -3,6 +3,9 @@ import Button from "@/components/Button";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { IconBrandGithub, IconHome } from "@tabler/icons-react";
 
 export const metadata: Metadata = {
     title: "Link Github | Radi Center",
@@ -23,8 +26,33 @@ export default async function ConnectWithGithub({ searchParams }: Props) {
     }
 
     return (
-        <Link href={"/api/oauth/github/link_account"}>
-            <Button>Link github</Button>
-        </Link>
+        <div>
+            <Navbar />
+            <div className="container mx-auto min-h-[60vh] grid justify-center mt-16">
+                <div className="flex gap-4 flex-col">
+                    <div className="">
+                        <h1 className="text-3xl font-bold w-[550px] text-center">
+                            In order to access dashboard, you must connect your
+                            Github account with Radice
+                        </h1>
+                    </div>
+                    <div className="flex gap-4 flex-col items-center">
+                        <Link href={"/api/oauth/github/link_account"}>
+                            <Button className="flex gap-2 w-full">
+                                <IconBrandGithub />
+                                Connect with Github account
+                            </Button>
+                        </Link>
+                        <Link href={"/"}>
+                            <Button className="flex gap-2 w-full">
+                                <IconHome />
+                                Go back to home page
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+            <Footer />
+        </div>
     );
 }
