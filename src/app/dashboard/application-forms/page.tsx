@@ -114,6 +114,12 @@ function ApplicationForm({
                             </p>
                         </div>
                         <div className="flex gap-2">
+                            <h1 className="font-semibold">Email:</h1>
+                            <p className="font-normal">
+                                {applicationForm.email}
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
                             <h1 className="font-semibold">Reason:</h1>
                             <p className="font-normal">
                                 {applicationForm.reason}
