@@ -1,32 +1,57 @@
 "use server";
 
+import { FetchPublicProjectsByIdData } from "@/app/api/public/members/[member_id]/projects/route";
+import { FetchPublicMemberByIdData } from "@/app/api/public/members/[member_id]/route";
 import { db } from "@/drizzle/db";
+import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { getBaseUrl } from "@/lib/server_utils";
 import { UserType } from "@/types/user";
 
 // TODO: Missing isPublic
-export const getPublicMemberById = async (memberId: string) => {
-    return await db.query.users.findFirst({
-        where: (table, { and, eq }) =>
-            and(
-                eq(table.type, UserType.USER),
-                eq(table.hasLinkedGithub, true),
-                eq(table.id, memberId),
-            ),
-    });
-};
-
-// TODO: Set isPublic to true, now is false
-export async function getPublicProjectByUserId(userId: string) {
-    return await db.query.projects.findMany({
-        with: {
-            projectCategories: {
-                with: {
-                    category: true,
-                },
+export async function getPublicMemberById(
+    memberId: string,
+): ResponseJson<FetchPublicMemberByIdData> {
+    try {
+        const response = await fetch(
+            `${await getBaseUrl()}/api/public/members/${memberId}`,
+            {
+                method: "GET",
+                cache: "no-cache",
             },
-            user: true,
-        },
-        where: (table, { eq, and }) =>
-            and(eq(table.isPublic, true), eq(table.userId, userId)),
-    });
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+export async function getPublicProjectByMemberId(
+    memberId: string,
+): ResponseJson<FetchPublicProjectsByIdData> {
+    try {
+        const response = await fetch(
+            `${await getBaseUrl()}/api/public/members/${memberId}/projects`,
+            {
+                method: "GET",
+                cache: "no-cache",
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function getGithubProfileURL(githubID: string) {
+    try {
+        const response = await fetch(
+            `https://api.github.com/user/${githubID}`,
+            {
+                method: "GET",
+                cache: "no-cache",
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
 }

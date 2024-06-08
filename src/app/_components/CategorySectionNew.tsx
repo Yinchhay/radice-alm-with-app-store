@@ -13,7 +13,7 @@ import Image from "next/image";
 import { fileToUrl } from "@/lib/file";
 import { CategoryAndProjects } from "@/repositories/project";
 import GridRevealImage from "@/components/effects/GridRevealImage";
-import ProjectList from "./ProjectList";
+import GridRvealVideo from "@/components/effects/GridRevealVideo";
 const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -28,6 +28,11 @@ export default function CategorySectionNew({
     variant: string;
     category: CategoryAndProjects;
 }) {
+    const moveLength = 88;
+    const [maxPos, setMaxPos] = useState(
+        category.projects.length > 6 ? category.projects.length - 6 : 0,
+    );
+    const [currentPos, setCurrentPos] = useState(0);
     const [selectedProject, setSelectedProject] = useState<number>(0);
 
     switch (variant) {
@@ -49,17 +54,143 @@ export default function CategorySectionNew({
                                     >
                                         {category.name}
                                     </h1>
-                                    <div></div>
                                     <div
-                                        className={`col-span-2 ${roboto_flex.className} uppercase`}
+                                        className={`col-span-3 ${roboto_flex.className} uppercase`}
                                     >
-                                        <ProjectList
-                                            categoryAndProjects={category}
-                                            selectProject={(i) =>
-                                                setSelectedProject(i)
-                                            }
-                                            selectedProject={selectedProject}
-                                        />
+                                        <div className="relative grid grid-cols-3 overflow-hidden py-2">
+                                            <div className="relative h-[100px] mt-[-8px] z-10 grid grid-cols-4">
+                                                <div className="bg-white col-span-3"></div>
+                                                <div className="absolute w-[100px] h-[100px] right-0 bg-gradient-to-l from-transparent via-white to-white"></div>
+                                                <button
+                                                    onClick={() => {
+                                                        if (currentPos > 0) {
+                                                            setCurrentPos(
+                                                                currentPos - 1,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`absolute z-40 top-[50%] left-[80%] translate-y-[-50%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos > 0 ? "" : "opacity-0 pointer-events-none"}`}
+                                                >
+                                                    <Image
+                                                        src="/arrow.svg"
+                                                        width={22}
+                                                        height={40}
+                                                        alt=""
+                                                        className="invert opacity-75 -scale-100"
+                                                    />
+                                                </button>
+                                            </div>
+                                            <div className="col-span-2">
+                                                <div
+                                                    className={`w-[100px] h-[100px] absolute left-[90%] mt-[-8px] bg-gradient-to-r from-transparent via-white to-white z-30 duration-200 ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
+                                                ></div>
+                                                <button
+                                                    onClick={() => {
+                                                        if (
+                                                            currentPos < maxPos
+                                                        ) {
+                                                            setCurrentPos(
+                                                                currentPos + 1,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`absolute z-40 translate-y-[-8px] left-[90%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
+                                                >
+                                                    <Image
+                                                        src="/arrow.svg"
+                                                        width={22}
+                                                        height={40}
+                                                        alt=""
+                                                        className="invert opacity-75"
+                                                    />
+                                                </button>
+                                                <ul
+                                                    className="flex mb-[-4px] gap-2 duration-200"
+                                                    style={{
+                                                        transform: `translateX(${-currentPos * moveLength}px)`,
+                                                    }}
+                                                >
+                                                    {category.projects.map(
+                                                        (project, i) => (
+                                                            <button
+                                                                onClick={() =>
+                                                                    setSelectedProject(
+                                                                        i,
+                                                                    )
+                                                                }
+                                                                className={[
+                                                                    "flex-shrink-0 focus:outline-transparent transition-all relative group cursor-pointer grid place-items-center w-[80px] h-[80px] select-none",
+                                                                ].join(" ")}
+                                                                key={`${category.name}-${project.name}-${project.id}`}
+                                                            >
+                                                                <ImageWithFallback
+                                                                    src={
+                                                                        `/api/file?filename=${project.logoUrl}` ||
+                                                                        "/placeholder.webp"
+                                                                    }
+                                                                    width={80}
+                                                                    height={80}
+                                                                    className={[
+                                                                        "aspect-square object-cover duration-200 border border-gray-300",
+                                                                        selectedProject ===
+                                                                        i
+                                                                            ? "scale-[90%]"
+                                                                            : "group-hover:scale-[90%]",
+                                                                    ].join(" ")}
+                                                                    alt=""
+                                                                />
+                                                                <div className="w-[80px] h-[80px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-20">
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-t border-l border-black w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "top-[-.4rem] left-[-.4rem] opacity-0"
+                                                                                : "top-[-.1rem] left-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-b border-l border-black w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "bottom-[-.4rem] left-[-.4rem] opacity-0"
+                                                                                : "bottom-[-.1rem] left-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-t border-r border-black w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "top-[-.4rem] right-[-.4rem] opacity-0"
+                                                                                : "top-[-.1rem] right-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-b border-r border-black w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "bottom-[-.4rem] right-[-.4rem] opacity-0"
+                                                                                : "bottom-[-.1rem] right-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                </div>
+                                                            </button>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-5 mt-12">
@@ -95,7 +226,8 @@ export default function CategorySectionNew({
                                                         "no-repeat",
                                                 }}
                                             >
-                                                <GridRevealImage
+                                                <GridRvealVideo
+                                                    fill
                                                     isAlphabet={false}
                                                     canReveal
                                                     variant="light"
@@ -103,11 +235,13 @@ export default function CategorySectionNew({
                                                     height={400}
                                                     cols={18}
                                                     rows={10}
-                                                    revealDelay={3}
+                                                    revealDelay={2}
                                                     className="object-cover"
-                                                    src={fileToUrl(
-                                                        category.logo,
-                                                    )}
+                                                    src={
+                                                        fileToUrl(category.logo)
+                                                            ? "/cloud_cover.mp4"
+                                                            : "/cloud_cover.mp4"
+                                                    }
                                                     alt=""
                                                 />
                                             </div>

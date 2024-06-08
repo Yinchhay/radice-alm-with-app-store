@@ -1,10 +1,6 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import {
-    getGithubProfileURL,
-    getPublicMemberById,
-    getPublicProjectByMemberId,
-} from "./fetch";
+import { getPublicPartnerById, getPublicProjectByPartnerId } from "./fetch";
 import Image from "next/image";
 import Link from "next/link";
 import Card from "@/components/Card";
@@ -12,32 +8,26 @@ import Chip from "@/components/Chip";
 import ChipsHolder from "@/components/ChipsHolder";
 import GridRevealImage from "@/components/effects/GridRevealImage";
 
-export default async function MemberPublicProfilePage({
+export default async function PartnerPublicProfilePage({
     params,
 }: {
-    params: { member_id: string };
+    params: { partner_id: string };
 }) {
-    const fetchMembers = await getPublicMemberById(params.member_id);
-    const fetchProjects = await getPublicProjectByMemberId(params.member_id);
+    const fetchPartners = await getPublicPartnerById(params.partner_id);
+    const fetchProjects = await getPublicProjectByPartnerId(params.partner_id);
 
-    if (!fetchMembers.success) {
+    if (!fetchPartners.success) {
         return;
     }
     if (!fetchProjects.success) {
         return;
     }
-    const member = fetchMembers.data.member;
+    const partner = fetchPartners.data.partner;
     const projects = fetchProjects.data.projects;
-    let fetchGithub;
-    if (member) {
-        fetchGithub = await getGithubProfileURL(
-            member.oauthProviders[0].providerUserId,
-        );
-    }
     return (
         <div>
             <Navbar />
-            {member && (
+            {partner && (
                 <div className="container min-h-[70vh] mx-auto py-8 grid grid-cols-2 gap-8">
                     <div className="flex flex-col gap-2">
                         <div className="w-[180px] h-[220px] relative">
@@ -47,8 +37,8 @@ export default async function MemberPublicProfilePage({
                                 width={180}
                                 height={220}
                                 src={
-                                    member.profileUrl
-                                        ? member.profileUrl
+                                    partner.profileUrl
+                                        ? partner.profileUrl
                                         : "/wrath.jpg"
                                 }
                                 fill
@@ -58,53 +48,11 @@ export default async function MemberPublicProfilePage({
                         </div>
                         <div>
                             <h1 className="text-xl font-bold">
-                                {member.firstName + " " + member.lastName}
+                                {partner.firstName + " " + partner.lastName}
                             </h1>
-                            <h2 className="">{member.email}</h2>
+                            <h2 className="">{partner.email}</h2>
                         </div>
-                        {member.skillSet && (
-                            <ChipsHolder>
-                                {member.skillSet.map((skill, i) => {
-                                    return (
-                                        <Chip
-                                            textClassName="text-white"
-                                            bgClassName={[
-                                                skill.level == 0
-                                                    ? "bg-green-500"
-                                                    : "",
-                                                skill.level == 1
-                                                    ? "bg-blue-500"
-                                                    : "",
-                                                skill.level == 2
-                                                    ? "bg-purple-500"
-                                                    : "",
-                                            ].join(" ")}
-                                        >
-                                            {skill.label}
-                                        </Chip>
-                                    );
-                                })}
-                            </ChipsHolder>
-                        )}
-                        {member.description && <p>{member.description}</p>}
-                        {member.hasLinkedGithub && fetchGithub && (
-                            <>
-                                <div className="flex">
-                                    <Link
-                                        href={fetchGithub.html_url}
-                                        className="text-white rounded-full flex items-end justify-center bg-white"
-                                        target="_blank"
-                                    >
-                                        <Image
-                                            src="/github-mark.svg"
-                                            width={36}
-                                            height={36}
-                                            alt="Github Icon"
-                                        />
-                                    </Link>
-                                </div>
-                            </>
-                        )}
+                        {partner.description && <p>{partner.description}</p>}
                     </div>
                     <div>
                         <h2 className="font-bold mb-2">Researches:</h2>

@@ -4,6 +4,11 @@ import { useFormStatus } from "react-dom";
 import Button from "@/components/Button";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { useState } from "react";
+import {
+    fetchForgotPasswordSendEmail,
+    fetchVerifyForgotPasswordCode,
+} from "./fetch";
+import { redirect } from "next/navigation";
 
 export default function ForgotPasswordForm() {
     const [isVerifyForm, setIsVerifyForm] = useState<boolean>(false);
@@ -53,16 +58,12 @@ function EmailForm({
         <form
             className="grid gap-4"
             action={async (formData: FormData) => {
-                // const result = await fetchLoginCredential({
-                //     email: formData.get("email") as string,
-                //     password: formData.get("password") as string,
-                // });
-                // if (result.success) {
-                //     redirect("/dashboard/projects");
-                // }
-                // setResult(result);
-
                 setEmail(formData.get("email") as string);
+
+                fetchForgotPasswordSendEmail({
+                    email: formData.get("email") as string,
+                });
+
                 // we don't care about the result, just move to the next form
                 // simulate a delay to make it look like we're doing something xD
                 await new Promise((resolve) => {
@@ -96,7 +97,8 @@ function VerifyCodeForm({
     setIsEmailForm: () => void;
     email: string;
 }) {
-    const [result, setResult] = useState<Awaited<ReturnType<any>>>();
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchVerifyForgotPasswordCode>>>();
 
     function onBack() {
         setResult(undefined);
@@ -107,14 +109,17 @@ function VerifyCodeForm({
         <form
             className="grid gap-4"
             action={async (formData: FormData) => {
-                // const result = await fetchLoginCredential({
-                //     email: formData.get("email") as string,
-                //     password: formData.get("password") as string,
-                // });
-                // if (result.success) {
-                //     redirect("/dashboard/projects");
-                // }
-                // setResult(result);
+                const result = await fetchVerifyForgotPasswordCode({
+                    email: email,
+                    newPassword: formData.get("newPassword") as string,
+                    code: formData.get("code") as string,
+                });
+                if (result.success) {
+                    redirect(
+                        "/login?message=Password reset successfully. Please login.",
+                    );
+                }
+                setResult(result);
             }}
         >
             <div>
@@ -125,6 +130,15 @@ function VerifyCodeForm({
                 </p>
                 <label htmlFor="code">Verification code</label>
                 <InputField name="code" id="code" required />
+            </div>
+            <div>
+                <label htmlFor="newPassword">New password</label>
+                <InputField
+                    name="newPassword"
+                    id="newPassword"
+                    type="password"
+                    required
+                />
             </div>
             {!result?.success && result?.errors && (
                 <FormErrorMessages errors={result?.errors} />

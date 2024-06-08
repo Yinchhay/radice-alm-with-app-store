@@ -28,10 +28,12 @@ export default function MemberProfile({
     member,
     variant,
     useTitle = false,
+    userType = "member",
 }: {
     useTitle?: boolean;
     member: any;
     variant: string;
+    userType?: "member" | "partner";
 }) {
     const [reveal, setReveal] = useState(false);
 
@@ -40,7 +42,7 @@ export default function MemberProfile({
             return (
                 <div className="flex flex-col items-center w-[400px]">
                     <Link
-                        href={`/member/${member.id}`}
+                        href={`/${userType}/${member.id}`}
                         className="w-[180px] h-[220px] relative"
                     >
                         <ScrollReveal
