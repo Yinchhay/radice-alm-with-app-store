@@ -57,7 +57,7 @@ export default function CategorySectionNew({
                                     <div
                                         className={`col-span-3 ${roboto_flex.className} uppercase`}
                                     >
-                                        <div className="relative grid grid-cols-3 overflow-hidden py-2">
+                                        <div className="relative grid grid-cols-3 overflow-hidden py-2 mb-[-20px]">
                                             <div className="relative h-[100px] mt-[-8px] z-10 grid grid-cols-4">
                                                 <div className="bg-white col-span-3"></div>
                                                 <div className="absolute w-[100px] h-[100px] right-0 bg-gradient-to-l from-transparent via-white to-white"></div>

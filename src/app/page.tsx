@@ -48,7 +48,7 @@ export default async function Home() {
                     src={"/paragon.svg"}
                     width={240}
                     height={784}
-                    className="absolute left-0 mt-[50px]"
+                    className="absolute left-0 mt-[58px]"
                 />
             </div>
             {/* <div className="container mx-auto overflow-hidden max-w-[80vw]">
@@ -93,7 +93,11 @@ export default async function Home() {
                     </div>
                     <div className={roboto_flex.className}>
                         <div className="flex relative mt-12 items-center">
-                            <TechButton variant="dark" text="R & D" />
+                            <TechButton
+                                link="#r&d"
+                                variant="dark"
+                                text="R & D"
+                            />
                             <div className="ml-6 relative">
                                 <div className="w-24 text-sm h-[36px] leading-[1.25]">
                                     <RandomText originalText={"RESEARCH &"} />
@@ -122,7 +126,7 @@ export default async function Home() {
                     </div>
                 </div> */}
             </div>
-            <div className="relative bg-black pt-4 pb-8">
+            <div className="relative bg-black pt-4 pb-8" id="r&d">
                 <div
                     className="absolute top-[-48px] bg-black w-12 h-12"
                     style={{
