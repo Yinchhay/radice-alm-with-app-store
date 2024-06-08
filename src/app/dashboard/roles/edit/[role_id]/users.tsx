@@ -292,11 +292,12 @@ function User({
         email: string;
     };
 }) {
+    const idForCheckBox = "usersNotInRole"+user.id;
     return (
         <div className="flex gap-1" key={user.id}>
-            <input type="checkbox" value={user.id} id="usersNotInRole" />
+            <input type="checkbox" value={user.id} id={idForCheckBox} />
 
-            <label htmlFor="usersNotInRole">
+            <label htmlFor={idForCheckBox}>
                 {user.firstName} {user.lastName}
             </label>
         </div>
