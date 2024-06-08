@@ -283,16 +283,16 @@ export const applicationForms = mysqlTable("application_forms", {
     })
         .notNull()
         .unique(),
-    phoneNumber: varchar("phone_number", {
-        length: 30,
-    }),
-    cvUrl: varchar("cv_url", {
+    reason: varchar("reason", {
+        length: 5000,
+    }).notNull(),
+    cv: varchar("cv", {
         length: 2083,
-    }),
+    }).notNull(),
     reviewedByUserId: varchar("reviewed_by_user_id", {
         length: 255,
     }).references(() => users.id, {
-        onDelete: "cascade",
+        onDelete: "set null",
     }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),

@@ -65,7 +65,7 @@ export default function ImageComponent({
             const sessionId = await getSessionCookie();
             let formData = new FormData();
             formData.append("files", fileList[0]);
-            const response = await fetch(`/api/internal/file/store`, {
+            const response = await fetch(`/api/file/store`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${sessionId}`,

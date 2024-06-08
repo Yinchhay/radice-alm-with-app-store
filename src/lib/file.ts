@@ -1,19 +1,20 @@
 import path from "path";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "./response";
-import { FetchFileStore } from "@/app/api/internal/file/store/route";
+import { FetchFileStore } from "@/app/api/file/store/route";
 import { getBaseUrl } from "./server_utils";
 
 // limit file size to 100MB
 const KB = 1024;
 const MB = KB * KB;
 export const MAX_FILE_SIZE = 100 * MB;
-
+export const CV_MAX_FILE_SIZE = 10 * MB;
 export const ACCEPTED_IMAGE_TYPES = [
     "image/jpeg",
     "image/jpg",
     "image/png",
     "image/webp",
 ];
+export const ACCEPTED_CV_TYPES = ["application/pdf", "application/msword"];
 
 export function readableFileSize(bytes: number): string {
     if (bytes < 1) {
@@ -48,16 +49,13 @@ export async function uploadFiles(
             formData.append("project_id", projectId as unknown as string);
         }
 
-        const response = await fetch(
-            `${await getBaseUrl()}/api/internal/file/store`,
-            {
-                method: "POST",
-                body: formData,
-                headers: {
-                    Authorization: `Bearer ${sessionId}`,
-                },
+        const response = await fetch(`${await getBaseUrl()}/api/file/store`, {
+            method: "POST",
+            body: formData,
+            headers: {
+                Authorization: `Bearer ${sessionId}`,
             },
-        );
+        });
 
         return await response.json();
     } catch (error) {
@@ -92,7 +90,8 @@ export function fileToUrl(file: string | null | undefined): string {
         return "/placeholder.webp";
     }
 
-    if (file && file.startsWith("http")) {
+    const fileStarsWith = ["http", "/"];
+    if (fileStarsWith.some((fsw) => file.startsWith(fsw))) {
         return file;
     }
 

@@ -9,13 +9,12 @@ import {
 import { HttpStatusCode } from "@/types/http";
 import fs from "fs";
 import path from "path";
-import { createFileFormSchema } from "../schema";
-import { formatZodError, generateAndFormatZodError } from "@/lib/form";
+import { createFileFormSchema } from "../../internal/file/schema";
+import { formatZodError } from "@/lib/form";
 import { createFile } from "@/repositories/files";
 import { ErrorMessage } from "@/types/error";
 
 import { getFileStoragePath, readableFileSize } from "@/lib/file";
-import { localDebug } from "@/lib/utils";
 
 const successMessage = "File uploaded successfully";
 const unsuccessMessage = "Failed to upload file";
@@ -29,12 +28,6 @@ export async function POST(request: Request) {
         const requiredPermission = new Set([]);
         const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(request, requiredPermission);
-        if (errorNoBearerToken) {
-            return buildNoBearerTokenErrorResponse();
-        }
-        if (errorNoPermission) {
-            return buildNoPermissionErrorResponse();
-        }
 
         const formData = await request.formData();
         const data = {
@@ -70,7 +63,7 @@ export async function POST(request: Request) {
             await fs.promises.writeFile(savePathAndFileName, buffer);
 
             const createFileResult = await createFile({
-                userId: user.id,
+                userId: user?.id,
                 filename: filename,
                 size: readableFileSize(file.size),
                 projectId: data.projectId,
@@ -78,6 +71,8 @@ export async function POST(request: Request) {
 
             // if no row is affected, meaning that creating file failed
             if (createFileResult[0].affectedRows < 1) {
+                // remove the savedFile
+                await fs.promises.unlink(savePathAndFileName);
                 throw new Error(ErrorMessage.SomethingWentWrong);
             }
 

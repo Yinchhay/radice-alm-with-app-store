@@ -24,7 +24,7 @@ export default function UploadImage() {
         }
 
         const sessionId = await getSessionCookie();
-        const response = await fetch("/api/internal/file/store", {
+        const response = await fetch("/api/file/store", {
             method: "POST",
             body: formData,
             headers: {
