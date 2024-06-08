@@ -3,6 +3,7 @@ import ImageWithFallback from "@/components/ImageWithFallback";
 import GridRevealImage from "@/components/effects/GridRevealImage";
 import ScrollReveal from "@/components/effects/ScrollReveal";
 import SpecialEffectSentence from "@/components/effects/SpecialEffectSentence";
+import { fileToUrl } from "@/lib/file";
 import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
@@ -56,9 +57,7 @@ export default function MemberProfile({
                                 isAlphabet={false}
                                 canReveal={reveal}
                                 src={
-                                    member.profileUrl
-                                        ? member.profileUrl
-                                        : "/wrath.jpg"
+                                    fileToUrl(member.profileUrl) || "/wrath.jpg"
                                 }
                                 cols={9}
                                 rows={11}
@@ -102,9 +101,7 @@ export default function MemberProfile({
                                 isAlphabet={false}
                                 canReveal={reveal}
                                 src={
-                                    member.profileUrl
-                                        ? member.profileUrl
-                                        : "/wrath.jpg"
+                                    fileToUrl(member.profileUrl) || "/wrath.jpg"
                                 }
                                 cols={9}
                                 rows={11}
