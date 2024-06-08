@@ -8,6 +8,7 @@ import { UserType } from "@/types/user";
 import { z } from "zod";
 import { updateProfileInformationFormSchema } from "@/app/api/internal/account/schema";
 import { hasLinkedGithub } from "@/lib/utils";
+import { SALT_ROUNDS } from "@/lib/IAM";
 
 /**
  * not everywhere is required to use cache, for example this function
@@ -24,7 +25,6 @@ export const updateUserPassword = async (
     userId: string,
     newPassword: string,
 ) => {
-    const SALT_ROUNDS = 10;
     const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
 
     return await db
@@ -36,7 +36,6 @@ export const updateUserPassword = async (
 };
 
 export const createUser = async (user: typeof users.$inferInsert) => {
-    const SALT_ROUNDS = 10;
     const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
 
     const userWithHashedPassword = {

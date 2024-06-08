@@ -1,7 +1,168 @@
-export default function ManageApplicationForms() {
+import { getAuthUser } from "@/auth/lucia";
+import Card from "@/components/Card";
+import { applicationForms, ApplicationFormStatus } from "@/drizzle/schema";
+import { Suspense } from "react";
+import { fetchApplicationForms } from "./fetch";
+import { hasPermission } from "@/lib/IAM";
+import { Permissions } from "@/types/IAM";
+import Pagination from "@/components/Pagination";
+import { fileToUrl } from "@/lib/file";
+import Link from "next/link";
+import { dateToString, dateToStringDetail } from "@/lib/utils";
+import Button from "@/components/Button";
+import { ApproveApplicationFormOverlay } from "./approve_form";
+import { RejectApplicationFormOverlay } from "./reject_form";
+
+type ManageApplicationFormsProps = {
+    searchParams?: {
+        page?: string;
+    };
+};
+
+export default async function ManageApplicationForms({
+    searchParams,
+}: ManageApplicationFormsProps) {
+    const user = await getAuthUser();
+
+    if (!user) {
+        throw new Error("Unauthorized to access this page");
+    }
+
+    let page = Number(searchParams?.page) || 1;
+    if (page < 1) {
+        page = 1;
+    }
+
+    const result = await fetchApplicationForms(page, 5);
+    if (!result.success) {
+        throw new Error(result.message);
+    }
+
+    const [canApproveAndRejectPermission] = await Promise.all([
+        hasPermission(
+            user.id,
+            new Set([Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS]),
+        ),
+    ]);
+
+    const canApproveAndReject = canApproveAndRejectPermission.canAccess;
+
+    const ApplicationFormLists = result.data.applicationForms.map((af) => {
+        return (
+            <ApplicationForm
+                key={af.id}
+                applicationForm={af}
+                canApproveAndReject={canApproveAndReject}
+            />
+        );
+    });
+
+    const showPagination =
+        result.data.maxPage >= page && result.data.maxPage > 1;
+
     return (
-        <div>
-            <h1>Manage ApplicationForms</h1>
+        <div className="w-full max-w-[1000px] mx-auto">
+            <Suspense fallback={"loading..."}>
+                <h1 className="text-2xl">Application Forms</h1>
+                {result.data.applicationForms.length > 0 ? (
+                    <div className="my-4 w-full flex gap-4 flex-col">
+                        {ApplicationFormLists}
+                    </div>
+                ) : (
+                    <NoApplicationForm page={page} />
+                )}
+                {showPagination && (
+                    <div className="float-right">
+                        <Pagination page={page} maxPage={result.data.maxPage} />
+                    </div>
+                )}
+            </Suspense>
         </div>
+    );
+}
+
+function NoApplicationForm({ page }: { page: number }) {
+    return (
+        <div className="flex flex-col items-center justify-center h-48">
+            <p className="text-lg">{`No application form found in the system for page ${page}!`}</p>
+        </div>
+    );
+}
+
+function ApplicationForm({
+    applicationForm,
+    canApproveAndReject,
+}: {
+    applicationForm: typeof applicationForms.$inferSelect;
+    canApproveAndReject: boolean;
+}) {
+    return (
+        <Card square>
+            <div className="flex flex-row gap-4 relative">
+                <div className="flex w-full ">
+                    <div className="flex flex-col w-full">
+                        <div className="flex gap-2">
+                            <h1 className="font-semibold">First name:</h1>
+                            <p className="font-normal">
+                                {applicationForm.firstName}
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
+                            <h1 className="font-semibold">Last name:</h1>
+                            <p className="font-normal">
+                                {applicationForm.lastName}
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
+                            <h1 className="font-semibold">Reason:</h1>
+                            <p className="font-normal">
+                                {applicationForm.reason}
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
+                            <h1 className="font-semibold">Curriculum vitae:</h1>
+                            <Link
+                                href={fileToUrl(applicationForm.cv)}
+                                target="_blank"
+                            >
+                                <p className="font-normal">
+                                    {applicationForm.cv}
+                                </p>
+                            </Link>
+                        </div>
+                        <div className="flex gap-2">
+                            <h1 className="font-semibold">
+                                Request to join at:
+                            </h1>
+                            <p className="font-normal">
+                                {dateToStringDetail(
+                                    applicationForm.createdAt as Date,
+                                )}
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
+                            <h1 className="font-semibold">Status:</h1>
+                            <p className="font-normal">
+                                {applicationForm.status}
+                            </p>
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                            {canApproveAndReject &&
+                                applicationForm.status ===
+                                    ApplicationFormStatus.PENDING && (
+                                    <>
+                                        <RejectApplicationFormOverlay
+                                            applicationForm={applicationForm}
+                                        />
+                                        <ApproveApplicationFormOverlay
+                                            applicationForm={applicationForm}
+                                        />
+                                    </>
+                                )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Card>
     );
 }

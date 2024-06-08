@@ -123,7 +123,7 @@ function Project({
                     width={128}
                     height={128}
                 />
-                <div className="flex pr-8  mb-6">
+                <div className="flex mb-6">
                     <div className="flex flex-col">
                         <h1 className="text-xl">{project.name}</h1>
                         <p className="text-sm">{project.description}</p>
@@ -140,10 +140,7 @@ function Project({
                                                 }
                                             >
                                                 <Chip>
-                                                    {
-                                                        categoryJoin.category
-                                                            .name
-                                                    }
+                                                    {categoryJoin.category.name}
                                                 </Chip>
                                             </Tooltip>
                                         );

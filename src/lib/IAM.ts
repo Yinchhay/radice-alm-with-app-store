@@ -6,6 +6,8 @@ import { localDebug } from "./utils";
 import { UserType } from "@/types/user";
 import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
 
+export const SALT_ROUNDS = 10;
+
 /**
  * This function take a user id and a set of required permissions and return a boolean and a message
  * Brief: get user roles, then get role permissions, then check if the user has the required

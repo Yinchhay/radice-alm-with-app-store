@@ -123,7 +123,7 @@ function ApplyBtn() {
     const formStatus = useFormStatus();
     return (
         <Button disabled={formStatus.pending} variant="primary">
-            Apply to Join
+            {formStatus.pending ? "Applying" : "Apply"}
         </Button>
     );
 }

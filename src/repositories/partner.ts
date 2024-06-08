@@ -1,11 +1,11 @@
 import { db } from "@/drizzle/db";
 import { sessions, users } from "@/drizzle/schema";
+import { SALT_ROUNDS } from "@/lib/IAM";
 import { UserType } from "@/types/user";
 import bcrypt from "bcrypt";
 import { and, eq, like, sql } from "drizzle-orm";
 
 export const createPartner = async (user: typeof users.$inferInsert) => {
-    const SALT_ROUNDS = 10;
     const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
 
     return await db.insert(users).values({

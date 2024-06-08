@@ -27,3 +27,21 @@ export function generatePassword(): string {
     }
     return password;
 }
+
+export function dateToString(date: Date) {
+    return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+}
+
+export function dateToStringDetail(date: Date) {
+    return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+    });
+}

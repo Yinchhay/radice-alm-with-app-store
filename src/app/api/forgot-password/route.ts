@@ -64,7 +64,8 @@ export async function POST(request: NextRequest) {
         }
 
         // remember in development, the email will be sent to default email (not the actual email user). check sendMail function in src/smtp/mail.ts
-        const mailResult = await sendMail({
+        // for faster wait time we can remove await here since we don't need to wait for the email to be sent, if u want mailResult then add await
+        const mailResult = sendMail({
             subject: "Radice forgot password verification code",
             to: userExists.email,
             text:

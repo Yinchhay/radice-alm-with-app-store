@@ -270,6 +270,11 @@ export const codeVerificationsRelations = relations(
     }),
 );
 
+export enum ApplicationFormStatus {
+    PENDING = "Pending",
+    APPROVED = "Approved",
+    REJECTED = "Rejected",
+}
 export const applicationForms = mysqlTable("application_forms", {
     id: int("id").primaryKey().autoincrement(),
     firstName: varchar("first_name", {
@@ -289,6 +294,12 @@ export const applicationForms = mysqlTable("application_forms", {
     cv: varchar("cv", {
         length: 2083,
     }).notNull(),
+    status: varchar("approved", {
+        length: 50,
+    })
+        .notNull()
+        .$type<ApplicationFormStatus>()
+        .default(ApplicationFormStatus.PENDING),
     reviewedByUserId: varchar("reviewed_by_user_id", {
         length: 255,
     }).references(() => users.id, {

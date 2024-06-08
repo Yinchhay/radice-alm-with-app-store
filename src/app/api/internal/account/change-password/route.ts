@@ -90,7 +90,8 @@ export async function PATCH(request: Request) {
         }
 
         // remember in development, the email will be sent to default email (not the actual email user). check sendMail function in src/smtp/mail.ts
-        const mailResult = await sendMail({
+        // for faster wait time we can remove await here since we don't need to wait for the email to be sent, if u want mailResult then add await
+        const mailResult = sendMail({
             subject: "Your Radice account password has been changed",
             to: user.email,
             text: `${userExists.firstName} ${userExists.lastName}, your password has been successfully changed. If you did not make this change, please contact us immediately.`,

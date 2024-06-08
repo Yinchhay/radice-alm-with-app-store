@@ -53,7 +53,8 @@ export async function POST(request: Request) {
         }
 
         // remember in development, the email will be sent to default email (not the actual email user). check sendMail function in src/smtp/mail.ts
-        const mailResult = await sendMail({
+        // for faster wait time we can remove await here since we don't need to wait for the email to be sent, if u want mailResult then add await
+        const mailResult = sendMail({
             subject: "Your Radice account has been created",
             to: body.email,
             text: `Welcome to Radice! Your account has been successfully created. Below are your account details: \n\nEmail: ${body.email}\nPassword: ${body.password}\n\nPlease keep this information safe and do not share it with anyone.`,

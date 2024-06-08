@@ -11,6 +11,7 @@ import { media } from "@/drizzle/schema";
 import Pagination from "@/components/Pagination";
 import { DeleteMediaOverlay } from "./delete_media";
 import { EditMediaOverlay } from "./edit_media";
+import { dateToString } from "@/lib/utils";
 
 type ManageMediaProps = {
     searchParams?: {
@@ -106,14 +107,6 @@ function Media({
     canDeleteMedia: boolean;
 }) {
     const image = mediaOne.files[0].filename;
-
-    function dateToString(date: Date) {
-        return new Date(date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    }
 
     return (
         <Card square>
