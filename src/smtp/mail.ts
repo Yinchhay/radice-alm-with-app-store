@@ -44,7 +44,7 @@ export const sendMail = async (mailOptions: SendMailOptions) => {
 
         if (process.env.NODE_ENV === "development") {
             // if mail is being sent in local development, don't send to actual email user;
-            mailOptions.to = "lifegoalcs2@gmail.com";
+            mailOptions.to = process.env.DEV_EMAIL || "lifegoalcs2@gmail.com";
         }
 
         return await transporter.sendMail(mailOptions);

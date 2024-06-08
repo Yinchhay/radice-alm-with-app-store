@@ -26,7 +26,7 @@ export default async function Page() {
                 <div className="flex gap-4 flex-col">
                     <LoginForm />
                     <Link href={"/forgot-password"}>Forgot password</Link>
-                    <Link href="/api/oauth/github/login">
+                    <Link href="/api/oauth/github/login" prefetch={false}>
                         <Button className="flex gap-2">
                             <IconBrandGithub />
                             Sign in with GitHub

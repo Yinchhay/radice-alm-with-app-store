@@ -58,8 +58,6 @@ function EmailForm({
         <form
             className="grid gap-4"
             action={async (formData: FormData) => {
-                setEmail(formData.get("email") as string);
-
                 fetchForgotPasswordSendEmail({
                     email: formData.get("email") as string,
                 });
@@ -81,6 +79,7 @@ function EmailForm({
                     id="email"
                     required
                     defaultValue={email}
+                    onChange={(e) => setEmail(e.target.value)}
                 />
             </div>
             <div className="flex justify-end gap-2 my-3">

@@ -8,7 +8,7 @@ import Table from "@/components/table/Table";
 import TableBody from "@/components/table/TableBody";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
-import { readableFileSize } from "@/lib/file";
+import { fileToUrl, readableFileSize } from "@/lib/file";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -16,6 +16,7 @@ import { fetchEditProjectSettingsFiles } from "./fetch";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
+import Link from "next/link";
 
 export type FileList = {
     file?: File;
@@ -129,7 +130,7 @@ export default function ProjectFile({
 
     useEffect(() => {
         setFileLists(project.files);
-    }, [project.files])
+    }, [project.files]);
 
     return (
         <Card>
@@ -216,10 +217,24 @@ function FileRow({
 
         return readableFileSize(Number(size));
     };
+    const fileIsStoredInStorage = file.file instanceof File;
 
     return (
         <TableRow className="align-middle">
-            <Cell className="text-center">{file.filename}</Cell>
+            <Cell className="text-center">
+                {fileIsStoredInStorage ? (
+                    <Link
+                        href={URL.createObjectURL(file?.file!)}
+                        target="_blank"
+                    >
+                        {file.filename}
+                    </Link>
+                ) : (
+                    <Link href={fileToUrl(file.filename)} target="_blank">
+                        {file.filename}
+                    </Link>
+                )}
+            </Cell>
             <Cell className="text-center">{fileSizeToString(file.size)}</Cell>
             <Cell>
                 <div className="flex justify-end gap-2">

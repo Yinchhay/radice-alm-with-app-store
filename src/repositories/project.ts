@@ -529,13 +529,14 @@ export async function transferProjectOwnership(
             })
             .where(eq(projects.id, projectId));
 
-        if (ownerUserId) {
-            await tx.insert(projectMembers).values({
-                projectId: projectId,
-                userId: ownerUserId,
-                title: "",
-                canEdit: false,
-            });
-        }
+        
+        // if (ownerUserId) {
+        //     await tx.insert(projectMembers).values({
+        //         projectId: projectId,
+        //         userId: ownerUserId,
+        //         title: "",
+        //         canEdit: false,
+        //     });
+        // }
     });
 }

@@ -135,31 +135,6 @@ export const getUserById = async (userId: string) => {
     });
 };
 
-export const getAllUsersExceptThisUser = async (userId: string) => {
-    return await db.query.users.findMany({
-        columns: {
-            password: false,
-        },
-        where: (table, { and, eq, not }) =>
-            and(
-                eq(table.type, UserType.USER),
-                not(eq(table.id, userId)),
-                eq(table.hasLinkedGithub, hasLinkedGithub),
-            ),
-    });
-};
-
-// since user type is partner, we don't need to specify hasLinkedGithub
-export const getAllPartnersExceptThisUser = async (userId: string) => {
-    return await db.query.users.findMany({
-        columns: {
-            password: false,
-        },
-        where: (table, { and, eq, not }) =>
-            and(eq(table.type, UserType.PARTNER), not(eq(table.id, userId))),
-    });
-};
-
 export const getUsers = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,

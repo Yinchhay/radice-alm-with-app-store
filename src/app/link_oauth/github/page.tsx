@@ -37,7 +37,7 @@ export default async function ConnectWithGithub({ searchParams }: Props) {
                         </h1>
                     </div>
                     <div className="flex gap-4 flex-col items-center">
-                        <Link href={"/api/oauth/github/link_account"}>
+                        <Link href={"/api/oauth/github/link_account"} prefetch={false}>
                             <Button className="flex gap-2 w-full">
                                 <IconBrandGithub />
                                 Connect with Github account
