@@ -11,6 +11,7 @@ import Card from "@/components/Card";
 import Chip from "@/components/Chip";
 import ChipsHolder from "@/components/ChipsHolder";
 import GridRevealImage from "@/components/effects/GridRevealImage";
+import { fileToUrl } from "@/lib/file";
 
 export default async function MemberPublicProfilePage({
     params,
@@ -47,9 +48,7 @@ export default async function MemberPublicProfilePage({
                                 width={180}
                                 height={220}
                                 src={
-                                    member.profileUrl
-                                        ? member.profileUrl
-                                        : "/wrath.jpg"
+                                    fileToUrl(member.profileUrl) || "/wrath.jpg"
                                 }
                                 fill
                                 className="object-cover"

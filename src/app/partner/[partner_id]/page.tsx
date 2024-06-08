@@ -7,6 +7,8 @@ import Card from "@/components/Card";
 import Chip from "@/components/Chip";
 import ChipsHolder from "@/components/ChipsHolder";
 import GridRevealImage from "@/components/effects/GridRevealImage";
+import { fileToUrl } from "@/lib/file";
+import ImageWithFallback from "@/components/ImageWithFallback";
 
 export default async function PartnerPublicProfilePage({
     params,
@@ -37,9 +39,8 @@ export default async function PartnerPublicProfilePage({
                                 width={180}
                                 height={220}
                                 src={
-                                    partner.profileUrl
-                                        ? partner.profileUrl
-                                        : "/wrath.jpg"
+                                    fileToUrl(partner.profileUrl) ||
+                                    "/wrath.jpg"
                                 }
                                 fill
                                 className="object-cover"
@@ -65,11 +66,10 @@ export default async function PartnerPublicProfilePage({
                                             className="flex"
                                         >
                                             <div className="w-[80px] h-[80px] relative shrink-0 border border-gray-200">
-                                                <Image
-                                                    src={
-                                                        `/api/file?filename=${project.logoUrl}` ||
-                                                        "/placeholder.webp"
-                                                    }
+                                                <ImageWithFallback
+                                                    src={fileToUrl(
+                                                        project.logoUrl,
+                                                    )}
                                                     fill
                                                     className="object-cover"
                                                     alt=""
