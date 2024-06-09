@@ -31,10 +31,12 @@ export default async function MemberPublicProfilePage({
     const projects = fetchProjects.data.projects;
     let fetchGithub;
     if (member) {
-        fetchGithub = await getGithubProfileURL(
-            member.oauthProviders[0].providerUserId,
-            member.oauthProviders[0].accessToken,
-        );
+        if (member.oauthProviders.length > 0) {
+            fetchGithub = await getGithubProfileURL(
+                member.oauthProviders[0].providerUserId,
+                member.oauthProviders[0].accessToken,
+            );
+        }
     }
     return (
         <div>

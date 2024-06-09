@@ -59,7 +59,7 @@ export const users = mysqlTable("users", {
         .notNull()
         .$type<UserType>()
         .default(UserType.USER),
-    skillSet: json("skillSet").$type<UserSkillSet[]>(),
+    skillSet: json("skillSet").$type<UserSkillSet[]>().default([]),
     description: varchar("description", {
         length: 255,
     }),
