@@ -41,13 +41,22 @@ export async function getPublicProjectByMemberId(
     }
 }
 
-export async function getGithubProfileURL(githubID: string) {
+export async function getGithubProfileURL(
+    githubID: string,
+    accessToken: string | null,
+) {
     try {
+        console.log(accessToken);
         const response = await fetch(
             `https://api.github.com/user/${githubID}`,
             {
                 method: "GET",
                 cache: "no-cache",
+                headers: accessToken
+                    ? {
+                          Authorization: `token ${accessToken}`,
+                      }
+                    : {},
             },
         );
         return await response.json();

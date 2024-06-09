@@ -119,6 +119,7 @@ export const getUserById = async (userId: string) => {
             oauthProviders: {
                 columns: {
                     providerUserId: true,
+                    accessToken: true,
                 },
             },
         },

@@ -33,6 +33,7 @@ export default async function MemberPublicProfilePage({
     if (member) {
         fetchGithub = await getGithubProfileURL(
             member.oauthProviders[0].providerUserId,
+            member.oauthProviders[0].accessToken,
         );
     }
     return (
@@ -66,6 +67,8 @@ export default async function MemberPublicProfilePage({
                                 {member.skillSet.map((skill, i) => {
                                     return (
                                         <Chip
+                                            key={`${skill.label}-chip-${i}`}
+                                            className="rounded-sm"
                                             textClassName="text-white"
                                             bgClassName={[
                                                 skill.level == 0
@@ -85,7 +88,7 @@ export default async function MemberPublicProfilePage({
                                 })}
                             </ChipsHolder>
                         )}
-                        {member.description && <p>{member.description}</p>}
+                        <p>{member.description}</p>
                         {member.hasLinkedGithub && fetchGithub && (
                             <>
                                 <div className="flex">
