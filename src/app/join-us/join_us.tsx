@@ -5,10 +5,12 @@ import TextareaField from "@/components/TextareaField";
 import { ACCEPTED_CV_TYPES } from "@/lib/file";
 import { Roboto_Condensed } from "next/font/google";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { fetchCreateApplicationForm } from "./fetch";
 import { useFormStatus } from "react-dom";
 import FormErrorMessages from "@/components/FormErrorMessages";
+import ReCAPTCHA from "react-google-recaptcha";
+import { RECAPTCHA_KEY } from "@/lib/utils";
 
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -17,8 +19,10 @@ const roboto_condensed = Roboto_Condensed({
 });
 
 export default function JoinUsForm() {
-    const [result, setResult] = useState<Awaited<ReturnType<typeof fetchCreateApplicationForm>>>();
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchCreateApplicationForm>>>();
     const [success, setSuccess] = useState<boolean>(false);
+    const captchaRef = useRef<ReCAPTCHA>(null);
 
     return (
         <div className="container mx-auto">
@@ -46,9 +50,14 @@ export default function JoinUsForm() {
             ) : (
                 <form
                     action={async (formData: FormData) => {
+                        formData.append(
+                            "captchaToken",
+                            captchaRef.current?.getValue() || "",
+                        );
+
                         const result =
                             await fetchCreateApplicationForm(formData);
-                            
+
                         setResult(result);
                         if (result.success) {
                             setSuccess(true);
@@ -104,10 +113,11 @@ export default function JoinUsForm() {
                             />
                         </label>
                     </div>
+                    <ReCAPTCHA sitekey={RECAPTCHA_KEY} ref={captchaRef} />
                     {!result?.success && result?.errors && (
                         <FormErrorMessages errors={result?.errors} />
                     )}
-                    <div className="flex justify-end">
+                    <div className="flex justify-end mb-4">
                         <ApplyBtn />
                     </div>
                 </form>

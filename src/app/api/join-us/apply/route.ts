@@ -15,6 +15,7 @@ import { createApplicationFormSchema, cvFileSchema } from "../schema";
 import { uploadFiles } from "@/lib/file";
 import { getUserByEmail } from "@/repositories/users";
 import { ApplicationFormStatus, FileBelongTo } from "@/drizzle/schema";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export type FetchCreateApplicationForm = Record<string, never>;
 
@@ -24,6 +25,17 @@ const unsuccessMessage = "Create application form failed";
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
+        if (!(await verifyRecaptcha(formData.get("captchaToken") as string))) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "captchaToken",
+                    "Please complete the captcha",
+                ),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
+        }
+
         // check if user sent a cvFile
         if (!formData.has("cvFile")) {
             return buildErrorResponse(
@@ -70,6 +82,7 @@ export async function POST(request: Request) {
         cv = response.data.filenames[0];
 
         let body: z.infer<typeof createApplicationFormSchema> = {
+            captchaToken: formData.get("captchaToken") as string,
             email: formData.get("email") as string,
             firstName: formData.get("firstName") as string,
             lastName: formData.get("lastName") as string,

@@ -25,4 +25,7 @@ export const loginCredentialSchema = z.object({
         .max(32, {
             message: "Password must be at most 32 characters long",
         }),
+    captchaToken: z.string().trim().min(1, {
+        message: "Please complete the captcha",
+    }),
 });

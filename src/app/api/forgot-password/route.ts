@@ -8,7 +8,7 @@ import { getUserByEmail } from "@/repositories/users";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { forgotPasswordSchema } from "./schema";
-import { formatZodError } from "@/lib/form";
+import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { HttpStatusCode } from "@/types/http";
 import {
     generateVerificationCode,
@@ -16,6 +16,7 @@ import {
 } from "@/repositories/code_verifications";
 import { CodeVerificationType } from "@/drizzle/schema";
 import { sendMail } from "@/smtp/mail";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export type FetchForgotPasswordSendEmail = Record<never, never>;
 
@@ -34,6 +35,14 @@ export async function POST(request: NextRequest) {
             );
         }
         body = validationResult.data;
+
+        if (!(await verifyRecaptcha(body.captchaToken))) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("captchaToken", "Captcha is invalid"),
+                HttpStatusCode.NOT_ACCEPTABLE_406,
+            );
+        }
 
         const userExists = await getUserByEmail(body.email);
         if (!userExists) {
