@@ -32,7 +32,7 @@ export async function POST(request: Request) {
         if (errorNoPermission) {
             return buildNoPermissionErrorResponse();
         }
-        const body: z.infer<typeof createRoleFormSchema> =
+        let body: z.infer<typeof createRoleFormSchema> =
             await request.json();
         const validationResult = createRoleFormSchema.safeParse(body);
         if (!validationResult.success) {
@@ -42,6 +42,7 @@ export async function POST(request: Request) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const createResult = await createRole(body);
         // if no row is affected, meaning that creating role failed

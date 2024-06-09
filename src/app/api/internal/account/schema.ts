@@ -61,23 +61,42 @@ export const updateProfileInformationFormSchema = z.object({
     ),
 });
 
-export const changePasswordSchema = z.object({
-    oldPassword: z
-        .string()
-        .trim()
-        .min(8, {
-            message: "Old password must be at least 8 characters long",
-        })
-        .max(255, {
-            message: "Old password must be less than 255 characters",
-        }),
-    newPassword: z
-        .string()
-        .trim()
-        .min(8, {
-            message: "New password must be at least 8 characters long",
-        })
-        .max(255, {
-            message: "New password must be less than 255 characters",
-        }),
-});
+export const changePasswordSchema = z
+    .object({
+        oldPassword: z
+            .string()
+            .trim()
+            .min(8, {
+                message: "Old password must be at least 8 characters long",
+            })
+            .max(255, {
+                message: "Old password must be less than 255 characters",
+            }),
+        newPassword: z
+            .string()
+            .trim()
+            .min(8, {
+                message: "New password must be at least 8 characters long",
+            })
+            .max(255, {
+                message: "New password must be less than 255 characters",
+            }),
+        newConfirmPassword: z
+            .string()
+            .trim()
+            .min(8, {
+                message:
+                    "Confirm new password must be at least 8 characters long",
+            })
+            .max(255, {
+                message:
+                    "Confirm new password must be less than 255 characters",
+            }),
+    })
+    .refine((value) => value.newPassword === value.newConfirmPassword, {
+        message: "New password and confirm new password does not match",
+        path: ["newConfirmPassword"],
+    }).refine((value) => value.oldPassword !== value.newPassword, {
+        message: "Old password and new password must be different",
+        path: ["newPassword"],
+    });

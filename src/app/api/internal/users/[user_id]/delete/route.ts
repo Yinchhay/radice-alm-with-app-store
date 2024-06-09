@@ -38,7 +38,7 @@ export async function DELETE(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const data: z.infer<typeof deleteUserFormSchema> = {
+        let data: z.infer<typeof deleteUserFormSchema> = {
             userId: String(params.user_id),
         };
         const validationResult = deleteUserFormSchema.safeParse(data);
@@ -49,6 +49,7 @@ export async function DELETE(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        data = validationResult.data;
 
         const deleteResult = await deleteUserById(data.userId);
         // if no row is affected, meaning that the user didn't get deleted

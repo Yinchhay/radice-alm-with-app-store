@@ -35,7 +35,7 @@ export async function DELETE(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const data: z.infer<typeof deleteMediaSchema> = {
+        let data: z.infer<typeof deleteMediaSchema> = {
             mediaId: Number(params.media_id),
         };
         const validationResult = deleteMediaSchema.safeParse(data);
@@ -46,6 +46,7 @@ export async function DELETE(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        data = validationResult.data;
 
         // Delete all files associated with the media first before deleting the media from the database
         const media = await getMediaById(data.mediaId);

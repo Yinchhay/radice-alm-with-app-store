@@ -48,7 +48,7 @@ export async function GET(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof getOneAssociatedProjectSchema> = {
+        let body: z.infer<typeof getOneAssociatedProjectSchema> = {
             userId: user.id,
             projectId: params.project_id,
         };
@@ -60,6 +60,7 @@ export async function GET(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const project = await getOneAssociatedProject(
             Number(params.project_id),

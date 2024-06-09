@@ -9,6 +9,15 @@ export const createMedia = async (mediaValue: typeof media.$inferInsert) => {
     return await db.insert(media).values(mediaValue);
 };
 
+export const getAllMedias = async () => {
+    return await db.query.media.findMany({
+        columns: {
+            createdAt: false,
+            updatedAt: false,
+        }
+    });
+};
+
 export const getMedias = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,

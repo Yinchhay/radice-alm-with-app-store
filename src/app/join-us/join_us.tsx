@@ -46,9 +46,6 @@ export default function JoinUsForm() {
             ) : (
                 <form
                     action={async (formData: FormData) => {
-                        console.log(
-                            formData.get("cvFile"),
-                        )
                         const result =
                             await fetchCreateApplicationForm(formData);
                             

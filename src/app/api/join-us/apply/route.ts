@@ -4,13 +4,17 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { createApplicationForm, getApplicationFormByEmail } from "@/repositories/application_forms";
+import {
+    createApplicationForm,
+    getApplicationFormByEmail,
+} from "@/repositories/application_forms";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { z } from "zod";
 import { createApplicationFormSchema, cvFileSchema } from "../schema";
 import { uploadFiles } from "@/lib/file";
 import { getUserByEmail } from "@/repositories/users";
+import { ApplicationFormStatus } from "@/drizzle/schema";
 
 export type FetchCreateApplicationForm = Record<string, never>;
 
@@ -63,7 +67,7 @@ export async function POST(request: Request) {
         }
         cv = response.data.filenames[0];
 
-        const body: z.infer<typeof createApplicationFormSchema> = {
+        let body: z.infer<typeof createApplicationFormSchema> = {
             email: formData.get("email") as string,
             firstName: formData.get("firstName") as string,
             lastName: formData.get("lastName") as string,
@@ -78,15 +82,35 @@ export async function POST(request: Request) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
-        const existingApplicationForm = await getApplicationFormByEmail(body.email);
+        const existingApplicationForm = await getApplicationFormByEmail(
+            body.email,
+        );
         if (existingApplicationForm) {
+            let message = "";
+
+            switch (existingApplicationForm.status) {
+                case ApplicationFormStatus.PENDING:
+                    message =
+                        "You have already applied to join us. Please wait for our response.";
+                    break;
+                case ApplicationFormStatus.APPROVED:
+                    message = "You have already joined us.";
+                    break;
+                case ApplicationFormStatus.REJECTED:
+                    message =
+                        "You have already applied to join us but your application was rejected.";
+                    break;
+                default:
+                    message =
+                        "You have already applied to join us. Please wait for our response.";
+                    break;
+            }
+
             return buildErrorResponse(
                 unsuccessMessage,
-                generateAndFormatZodError(
-                    "email",
-                    "You have already applied to join us. Please wait for our response.",
-                ),
+                generateAndFormatZodError("unknown", message),
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
@@ -95,10 +119,7 @@ export async function POST(request: Request) {
         if (existingApprovedUser) {
             return buildErrorResponse(
                 unsuccessMessage,
-                generateAndFormatZodError(
-                    "email",
-                    "Email already exists",
-                ),
+                generateAndFormatZodError("email", "Email already exists"),
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }

@@ -33,7 +33,7 @@ export async function DELETE(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const data: z.infer<typeof deletePartnerFormSchema> = {
+        let data: z.infer<typeof deletePartnerFormSchema> = {
             partnerId: params.partner_id,
         };
         const validationResult = deletePartnerFormSchema.safeParse(data);
@@ -44,6 +44,7 @@ export async function DELETE(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        data = validationResult.data;
 
         const deleteResult = await deletePartnerById(data.partnerId);
         // if no row is affected, meaning that the partner didn't get deleted

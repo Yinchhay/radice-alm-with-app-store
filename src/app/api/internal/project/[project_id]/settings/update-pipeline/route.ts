@@ -34,7 +34,7 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editProjectSettingsPipelines> =
+        let body: z.infer<typeof editProjectSettingsPipelines> =
             await request.json();
         const validationResult = editProjectSettingsPipelines.safeParse(body);
         if (!validationResult.success) {
@@ -44,6 +44,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const project = await getOneAssociatedProject(
             Number(params.project_id),

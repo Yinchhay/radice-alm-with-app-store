@@ -48,6 +48,7 @@ export async function POST(request: Request) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const createResult = await createPartner(body);
         // if no row is affected, meaning that creating partner failed

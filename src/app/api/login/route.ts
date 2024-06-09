@@ -17,7 +17,7 @@ import { cookies } from "next/headers";
 import { revalidateTags } from "@/lib/server_utils";
 
 export type FetchLoginCredential = {
-    sessionId: string
+    sessionId: string;
 };
 
 const successMessage = "Login by credential successfully";
@@ -25,8 +25,7 @@ const unsuccessMessage = "Login by credential failed";
 
 export async function POST(request: Request, response: Response) {
     try {
-        const body: z.infer<typeof loginCredentialSchema> =
-            await request.json();
+        let body: z.infer<typeof loginCredentialSchema> = await request.json();
 
         const validationResult = loginCredentialSchema.safeParse(body);
         if (!validationResult.success) {
@@ -36,6 +35,7 @@ export async function POST(request: Request, response: Response) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const userExists = await getUserByEmail(body.email);
         if (!userExists) {

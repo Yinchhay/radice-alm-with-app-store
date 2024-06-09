@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const userExists = await getUserByEmail(body.email);
         if (!userExists) {

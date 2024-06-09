@@ -36,7 +36,7 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof transferProjectOwnershipSchema> =
+        let body: z.infer<typeof transferProjectOwnershipSchema> =
             await request.json();
         const validationResult = transferProjectOwnershipSchema.safeParse(body);
         if (!validationResult.success) {
@@ -46,6 +46,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const project = await getOneAssociatedProject(
             Number(params.project_id),

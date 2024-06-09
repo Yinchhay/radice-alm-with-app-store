@@ -100,7 +100,7 @@ export async function PATCH(request: Request, { params }: Params) {
         }
 
         const projectCategories = formData.get("projectCategories");
-        const body: z.infer<typeof editProjectSettingsDetail> = {
+        let body: z.infer<typeof editProjectSettingsDetail> = {
             projectName: formData.get("projectName") as string,
             projectDescription: formData.get("projectDescription") as string,
             userId: user.id,
@@ -118,6 +118,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         // if user did not send a logo, use the existing logo
         if (!logoUrl) {

@@ -37,7 +37,7 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        const body: z.infer<typeof deleteFileFormSchema> = await request.json();
+        let body: z.infer<typeof deleteFileFormSchema> = await request.json();
         const validationResult = deleteFileFormSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
@@ -46,6 +46,7 @@ export async function DELETE(request: NextRequest) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const filename = body.filename;
         const savePath = getFileStoragePath();

@@ -33,7 +33,7 @@ export async function DELETE(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const data: z.infer<typeof deleteCategoryFormSchema> = {
+        let data: z.infer<typeof deleteCategoryFormSchema> = {
             categoryId: Number(params.category_id),
         };
         const validationResult = deleteCategoryFormSchema.safeParse(data);
@@ -44,6 +44,7 @@ export async function DELETE(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        data = validationResult.data;
 
         const deleteResult = await deleteCategoryById(data.categoryId);
         // if no row is affected, meaning that the category didn't get deleted

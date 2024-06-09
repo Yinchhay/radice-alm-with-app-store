@@ -34,7 +34,7 @@ export async function PATCH(request: Request, { params }: Params) {
         }
 
         const formData = await request.formData();
-        const body: z.infer<typeof editProjectSettingsFiles> = {
+        let body: z.infer<typeof editProjectSettingsFiles> = {
             fileToRemove: formData.getAll("fileToRemove") as string[],
             fileToUpload: formData.getAll("fileToUpload") as File[],
         };
@@ -47,6 +47,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const project = await getOneAssociatedProject(
             Number(params.project_id),

@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof getAssociatedProjectFormSchema> = {
+        let body: z.infer<typeof getAssociatedProjectFormSchema> = {
             userId: user.id,
         };
         const validationResult = getAssociatedProjectFormSchema.safeParse(body);
@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const page: number =
             Number(request.nextUrl.searchParams.get("page")) || 1;

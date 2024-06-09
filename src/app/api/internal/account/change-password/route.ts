@@ -32,7 +32,7 @@ export async function PATCH(request: Request) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof changePasswordSchema> = await request.json();
+        let body: z.infer<typeof changePasswordSchema> = await request.json();
         const validationResult = changePasswordSchema.safeParse(body);
         if (!validationResult.success) {
             return buildErrorResponse(
@@ -41,17 +41,7 @@ export async function PATCH(request: Request) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
-
-        if (body.oldPassword === body.newPassword) {
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError(
-                    "oldPassword",
-                    "New password must be different from the old password",
-                ),
-                HttpStatusCode.NOT_FOUND_404,
-            );
-        }
+        body = validationResult.data;
 
         const userExists = await getUserByEmail(user.email);
         if (!userExists) {

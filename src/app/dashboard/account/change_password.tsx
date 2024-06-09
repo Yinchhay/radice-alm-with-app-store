@@ -5,7 +5,6 @@ import Overlay from "@/components/Overlay";
 import { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconPlus } from "@tabler/icons-react";
 import { fetchChangePassword } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
@@ -25,6 +24,7 @@ export function ChangePasswordOverlay() {
             {
                 oldPassword: formData.get("oldPassword") as string,
                 newPassword: formData.get("newPassword") as string,
+                newConfirmPassword: formData.get("newConfirmPassword") as string,
             },
             pathname,
         );
@@ -76,6 +76,19 @@ export function ChangePasswordOverlay() {
                                     type="password"
                                     name="newPassword"
                                     id="newPassword"
+                                />
+                            </div>
+                            <div className="flex flex-col items-start">
+                                <label
+                                    htmlFor="newConfirmPassword"
+                                    className="font-normal"
+                                >
+                                    Confirm new password
+                                </label>
+                                <InputField
+                                    type="password"
+                                    name="newConfirmPassword"
+                                    id="newConfirmPassword"
                                 />
                             </div>
                             {!result?.success && result?.errors && (

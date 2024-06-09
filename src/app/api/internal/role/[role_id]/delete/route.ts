@@ -37,7 +37,7 @@ export async function DELETE(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const data: z.infer<typeof deleteRoleFormSchema> = {
+        let data: z.infer<typeof deleteRoleFormSchema> = {
             roleId: Number(params.role_id),
         };
         const validationResult = deleteRoleFormSchema.safeParse(data);
@@ -48,6 +48,7 @@ export async function DELETE(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        data = validationResult.data;
 
         const deleteResult = await deleteRoleById(data.roleId);
         // if no row is affected, meaning that the role didn't get deleted

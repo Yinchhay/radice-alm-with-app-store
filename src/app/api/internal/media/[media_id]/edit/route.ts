@@ -32,7 +32,7 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editMediaSchema> = await request.json();
+        let body: z.infer<typeof editMediaSchema> = await request.json();
         body.mediaId = Number(params.media_id);
         body.date = new Date(body.date);
         const validationResult = editMediaSchema.safeParse(body);
@@ -43,6 +43,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const editResult = await editMediaById(body.mediaId, body);
         // if no row is affected, meaning that the media didn't get edited

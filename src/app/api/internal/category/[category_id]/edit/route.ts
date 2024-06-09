@@ -76,7 +76,7 @@ export async function PATCH(request: Request, { params }: Params) {
             logo = formData.get("currentCategoryLogo") as string;
         }
 
-        const body: z.infer<typeof editCategoryFormSchema> = {
+        let body: z.infer<typeof editCategoryFormSchema> = {
             name: formData.get("name") as string,
             description: formData.get("description") as string,
             logo,
@@ -90,6 +90,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const editResult = await editCategoryById(body.categoryId, body);
         // if no row is affected, meaning that the category didn't get edited

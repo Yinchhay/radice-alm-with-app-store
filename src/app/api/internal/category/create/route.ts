@@ -71,7 +71,7 @@ export async function POST(request: Request) {
             logo = response.data.filenames[0];
         }
 
-        const body: z.infer<typeof createCategoryFormSchema> = {
+        let body: z.infer<typeof createCategoryFormSchema> = {
             name: formData.get("name") as string,
             description: formData.get("description") as string,
             logo,
@@ -84,6 +84,7 @@ export async function POST(request: Request) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const createResult = await createCategory(body);
         // if no row is affected, meaning that creating category failed

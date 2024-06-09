@@ -8,10 +8,9 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import { revalidateTags } from "@/lib/server_utils";
-import { editRoleById, GetRoles_C_Tag } from "@/repositories/role";
+import { editRoleById } from "@/repositories/role";
 import { GetUserRolesAndRolePermissions_C_Tag } from "@/repositories/users";
 
-import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
@@ -35,7 +34,7 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const body: z.infer<typeof editRoleByIdSchema> = await request.json();
+        let body: z.infer<typeof editRoleByIdSchema> = await request.json();
         body.roleId = Number(params.role_id);
         const validationResult = editRoleByIdSchema.safeParse(body);
         if (!validationResult.success) {
@@ -45,6 +44,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const editResult = await editRoleById(body);
 
@@ -57,7 +57,6 @@ export async function PATCH(request: Request, { params }: Params) {
         //     );
         // }
 
-        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>("getUserRolesAndRolePermissions_C");
         return buildSuccessResponse<FetchEditRole>(successMessage, {});
     } catch (error: any) {

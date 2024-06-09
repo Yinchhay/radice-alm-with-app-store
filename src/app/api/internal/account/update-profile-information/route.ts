@@ -77,7 +77,7 @@ export async function PATCH(request: Request) {
         }
 
         const skillSet = formData.get("skillSet");
-        const body: z.infer<typeof updateProfileInformationFormSchema> = {
+        let body: z.infer<typeof updateProfileInformationFormSchema> = {
             firstName: formData.get("firstName") as string,
             lastName: formData.get("lastName") as string,
             skillSet: skillSet
@@ -95,6 +95,7 @@ export async function PATCH(request: Request) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         const updateResult = await updateUserProfileInformation(user.id, body);
         // if no row is affected, meaning that creating profile failed

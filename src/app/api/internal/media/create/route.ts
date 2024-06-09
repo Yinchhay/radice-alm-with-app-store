@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
         const formData = await request.formData();
         // check if user sent a mediaLogo
-        const body: z.infer<typeof createMediaSchema> = {
+        let body: z.infer<typeof createMediaSchema> = {
             title: formData.get("title") as string,
             description: formData.get("description") as string,
             date: formData.get("date") as unknown as Date,
@@ -50,6 +50,7 @@ export async function POST(request: Request) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        body = validationResult.data;
 
         let imageFilenames: MediaFile[] = [];
         const authorizationHeader = request.headers.get("Authorization");

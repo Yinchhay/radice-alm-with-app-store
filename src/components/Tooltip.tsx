@@ -3,7 +3,7 @@ export default function Tooltip({
     className = "",
     children,
     position = "top",
-    zIndex = 100,
+    zIndex = 40,
 }: {
     title: string;
     className?: string;

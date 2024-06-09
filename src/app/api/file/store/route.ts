@@ -1,8 +1,6 @@
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
     buildErrorResponse,
-    buildNoBearerTokenErrorResponse,
-    buildNoPermissionErrorResponse,
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
@@ -26,11 +24,13 @@ export type FetchFileStore = {
 export async function POST(request: Request) {
     try {
         const requiredPermission = new Set([]);
-        const { errorNoBearerToken, errorNoPermission, user } =
-            await checkBearerAndPermission(request, requiredPermission);
+        const { user } = await checkBearerAndPermission(
+            request,
+            requiredPermission,
+        );
 
         const formData = await request.formData();
-        const data = {
+        let data = {
             files: formData.getAll("files") as File[],
             projectId: Number(formData.get("project_id")) || null,
         };
@@ -43,6 +43,8 @@ export async function POST(request: Request) {
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        data = validationResult.data as typeof data;
+
         let filenames: string[] = [];
         const savePath = getFileStoragePath();
 
