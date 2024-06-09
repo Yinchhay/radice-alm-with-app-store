@@ -11,13 +11,11 @@ export default function Dropdown({
     defaultSelectedElement,
     onChange,
     onChangeIndex,
-    returnIndex = false,
 }: {
     dropdownList: DropdownElement[];
     defaultSelectedElement?: DropdownElement;
     onChange?: (selectedElement: DropdownElement) => void;
     onChangeIndex?: (index: number) => void;
-    returnIndex?: boolean;
 }) {
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const [isHovering, setIsHovering] = useState<boolean>(false);
@@ -64,8 +62,7 @@ export default function Dropdown({
                                 onClick={() => {
                                     setSelectedElement(item);
                                     if (onChange) onChange(item);
-                                    if (returnIndex && onChangeIndex)
-                                        onChangeIndex(index);
+                                    if (onChangeIndex) onChangeIndex(index);
                                     setShowDropdown(false);
                                 }}
                                 className="w-full px-1 rounded-md py-1 bg-white hover:brightness-90 text-start flex items-center gap-2"

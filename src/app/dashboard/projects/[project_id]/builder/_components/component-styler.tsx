@@ -73,7 +73,6 @@ export default function ComponentStyler({
                                           ]
                                         : headingFontSizes[2]
                                 }
-                                returnIndex
                                 onChangeIndex={(index) => saveFontSize(index)}
                             />
                         )}
@@ -89,7 +88,6 @@ export default function ComponentStyler({
                                           ]
                                         : paragraphFontSizes[1]
                                 }
-                                returnIndex
                                 onChangeIndex={(index) => saveFontSize(index)}
                             />
                         )}
@@ -104,9 +102,12 @@ export default function ComponentStyler({
                                     ? fontWeights[
                                           selectedComponent.style.fontWeight
                                       ]
-                                    : fontWeights[2]
+                                    : fontWeights[
+                                          selectedComponent.type == "heading"
+                                              ? 2
+                                              : 1
+                                      ]
                             }
-                            returnIndex
                             onChangeIndex={(index) => saveFontWeight(index)}
                         />
                     </div>
@@ -128,7 +129,6 @@ export default function ComponentStyler({
                                                   : 0
                                           ]
                                 }
-                                returnIndex
                                 onChangeIndex={(index) => saveFontAlign(index)}
                             />
                         </div>

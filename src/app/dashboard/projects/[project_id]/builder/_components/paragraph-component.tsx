@@ -86,7 +86,7 @@ export default function ParagraphComponent({
             <ReactTextareaAutosize
                 spellCheck={false}
                 ref={textRef}
-                className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[2].value} ${component.style && component.style.fontAlign !== undefined ? fontAligns[component.style.fontAlign].value : fontAligns[0].value} w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
+                className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value} ${component.style && component.style.fontAlign !== undefined ? fontAligns[component.style.fontAlign].value : fontAligns[0].value} w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
                 onClick={() => {
                     if (!isDragging) {
                         onSelected(component.id);
