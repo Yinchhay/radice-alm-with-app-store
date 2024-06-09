@@ -1,6 +1,6 @@
 "use client";
 import Button from "@/components/Button";
-import { Component } from "@/types/content";
+import { Component, fontWeights, paragraphFontSizes } from "@/types/content";
 import React, { useEffect, useState } from "react";
 import ReactTextareaAutosize from "react-textarea-autosize";
 import { useSortable } from "@dnd-kit/sortable";
@@ -140,7 +140,7 @@ export default function ListComponent({
             className={[
                 "outline outline-1 outline-transparent hover:outline-gray-400 p-4 rounded-md",
                 selectedComponentID == component.id ? "outline-gray-400" : "",
-                isDragging ? "" : "transition-all",
+                isDragging ? "" : "duration-200",
             ].join(" ")}
         >
             <div
@@ -152,7 +152,7 @@ export default function ListComponent({
             >
                 <ReactTextareaAutosize
                     spellCheck={false}
-                    className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                    className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[2].value}  w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
                     value={currentComponent.text}
                     onChange={(e) =>
                         setCurrentComponent((prevComponent) => ({
@@ -168,7 +168,7 @@ export default function ListComponent({
                                 <ReactTextareaAutosize
                                     spellCheck={false}
                                     id={`row_${currentComponent.id}_${i}`}
-                                    className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                    className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[2].value} w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
                                     value={row}
                                     onChange={(e) =>
                                         handleRowChange(i, e.target.value)

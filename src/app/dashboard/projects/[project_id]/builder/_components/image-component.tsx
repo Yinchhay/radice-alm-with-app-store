@@ -83,7 +83,7 @@ export default function ImageComponent({
             className={[
                 "outline outline-1 outline-transparent hover:outline-gray-400 p-4 rounded-md",
                 selectedComponentID == component.id ? "outline-gray-400" : "",
-                isDragging ? "" : "transition-all",
+                isDragging ? "" : "duration-200",
             ].join(" ")}
             ref={setNodeRef}
             style={style}
@@ -168,16 +168,15 @@ export default function ImageComponent({
                     <Button
                         onClick={async () => {
                             let newData = component;
-                            let newImg = await changeImage(); 
-                            
+                            let newImg = await changeImage();
+
                             onSelected("");
-                            if(newImg) {
-                                newData.text = newImg
-                                setImageSrc(newImg)
-                            }
-                            else {
-                                newData.text = "/placeholder.webp"
-                                setImageSrc("/placeholder.webp")
+                            if (newImg) {
+                                newData.text = newImg;
+                                setImageSrc(newImg);
+                            } else {
+                                newData.text = "/placeholder.webp";
+                                setImageSrc("/placeholder.webp");
                             }
                             onSave(newData);
                         }}

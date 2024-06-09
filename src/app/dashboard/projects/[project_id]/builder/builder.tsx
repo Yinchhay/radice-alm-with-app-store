@@ -28,6 +28,7 @@ import {
     fetchOneAssociatedProject,
 } from "./fetch";
 import { useParams } from "next/navigation";
+import ComponentStyler from "./_components/component-styler";
 
 export default function Builder() {
     const params = useParams<{ project_id: string }>();
@@ -41,6 +42,18 @@ export default function Builder() {
     const [components, setComponents] = useState<Component[]>([]);
     const [dataLoaded, setDataLoaded] = useState(false);
     const [selectedComponent, setSelectedComponent] = useState<string>("");
+
+    function findComponentById(
+        components: Component[],
+        selectedId: string,
+    ): Component | null {
+        for (const component of components) {
+            if (component.id === selectedId) {
+                return component;
+            }
+        }
+        return null;
+    }
 
     useEffect(() => {
         async function loadProjectData() {
@@ -175,12 +188,23 @@ export default function Builder() {
     };
     return (
         <div className="relative">
-            <ComponentAdder
-                onAddHeading={addHeading}
-                onAddImage={addImage}
-                onAddList={addList}
-                onAddParagraph={addParagraph}
-            />
+            <div className="fixed right-8 z-20 w-[280px] grid gap-4">
+                <ComponentAdder
+                    onAddHeading={addHeading}
+                    onAddImage={addImage}
+                    onAddList={addList}
+                    onAddParagraph={addParagraph}
+                />
+                <ComponentStyler
+                    selectedComponent={findComponentById(
+                        components,
+                        selectedComponent,
+                    )}
+                    onStyleChange={(newData) => {
+                        SaveComponent(newData);
+                    }}
+                />
+            </div>
             <div className="w-full max-w-[920px] mx-auto bg-transparent z-10 relative">
                 <DndContext
                     sensors={sensors}

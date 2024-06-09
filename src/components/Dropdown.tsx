@@ -1,5 +1,5 @@
 import { IconCheck, IconChevronDown } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface DropdownElement {
     name: string;
@@ -10,16 +10,25 @@ export default function Dropdown({
     dropdownList,
     defaultSelectedElement,
     onChange,
+    onChangeIndex,
+    returnIndex = false,
 }: {
     dropdownList: DropdownElement[];
     defaultSelectedElement?: DropdownElement;
     onChange?: (selectedElement: DropdownElement) => void;
+    onChangeIndex?: (index: number) => void;
+    returnIndex?: boolean;
 }) {
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const [isHovering, setIsHovering] = useState<boolean>(false);
     const [selectedElement, setSelectedElement] = useState<DropdownElement>(
         defaultSelectedElement ? defaultSelectedElement : dropdownList[0],
     );
+    useEffect(() => {
+        setSelectedElement(
+            defaultSelectedElement ? defaultSelectedElement : dropdownList[0],
+        );
+    }, [defaultSelectedElement]);
     return (
         <div
             className="w-full relative"
@@ -55,6 +64,8 @@ export default function Dropdown({
                                 onClick={() => {
                                     setSelectedElement(item);
                                     if (onChange) onChange(item);
+                                    if (returnIndex && onChangeIndex)
+                                        onChangeIndex(index);
                                     setShowDropdown(false);
                                 }}
                                 className="w-full px-1 rounded-md py-1 bg-white hover:brightness-90 text-start flex items-center gap-2"

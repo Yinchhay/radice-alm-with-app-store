@@ -1,7 +1,12 @@
 "use client";
 import Button from "@/components/Button";
 import InputField from "@/components/InputField";
-import { Component } from "@/types/content";
+import {
+    Component,
+    fontAligns,
+    fontWeights,
+    headingFontSizes,
+} from "@/types/content";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import ReactTextareaAutosize from "react-textarea-autosize";
@@ -75,13 +80,13 @@ export default function HeadingComponent({
             className={[
                 "outline outline-1 outline-transparent hover:outline-gray-400 p-4 rounded-md",
                 selectedComponentID == component.id ? "outline-gray-400" : "",
-                isDragging ? "" : "transition-all",
+                isDragging ? "" : "duration-200",
             ].join(" ")}
         >
             <ReactTextareaAutosize
                 spellCheck={false}
                 ref={textRef}
-                className="text-5xl font-extrabold text-center w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                className={`${component.style && component.style.fontSize !== undefined ? headingFontSizes[component.style.fontSize].value : headingFontSizes[2].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[2].value} ${component.style && component.style.fontAlign !== undefined ? fontAligns[component.style.fontAlign].value : fontAligns[1].value} w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
                 onClick={() => {
                     if (!isDragging) {
                         onSelected(component.id);
