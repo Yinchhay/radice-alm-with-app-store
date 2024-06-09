@@ -1,28 +1,46 @@
-import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/mysql2";
 import * as schema from "./schema";
-import mysqlPool from "./connection";
+import mysql, { ConnectionOptions } from "mysql2";
 
-declare global {
-    var db: typeof dbInstance | undefined;
+export const connectionConfig: ConnectionOptions = {
+    host: process.env.DB_HOST ?? "localhost",
+    port: parseInt(process.env.DB_PORT ?? "3306"),
+    database: process.env.DB_DATABASE ?? "",
+    user: process.env.DB_USERNAME ?? "",
+    password: process.env.DB_PASSWORD ?? "",
+};
+
+if (
+    !connectionConfig.host ||
+    !connectionConfig.port ||
+    !connectionConfig.database ||
+    !connectionConfig.user ||
+    !connectionConfig.password
+) {
+    throw new Error("Invalid connection configuration");
 }
 
-let dbInstance: MySql2Database<typeof schema>;
+// Singleton function to ensure only one db instance is created
+function singleton<Value>(name: string, value: () => Value): Value {
+    const globalAny: any = global;
+    globalAny.__singletons = globalAny.__singletons || {};
 
-// Reuse the same connection in development to avoid creating multiple connections causing too many connections error
-if (process.env.NODE_ENV === "production") {
-    dbInstance = drizzle(mysqlPool, {
+    if (!globalAny.__singletons[name]) {
+        globalAny.__singletons[name] = value();
+    }
+
+    return globalAny.__singletons[name];
+}
+
+// Function to create the database connection and apply migrations if needed
+export function createDatabaseConnection() {
+    const poolConnection = mysql.createPool(connectionConfig);
+    return drizzle(poolConnection, {
         schema,
         mode: "default",
     });
-} else {
-    if (!global.db) {
-        global.db = drizzle(mysqlPool, {
-            schema,
-            mode: "default",
-        });
-    }
-
-    dbInstance = global.db;
 }
 
-export { dbInstance as db };
+const db = singleton("db", createDatabaseConnection);
+
+export { db, schema };
