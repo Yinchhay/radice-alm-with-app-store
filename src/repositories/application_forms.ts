@@ -48,26 +48,17 @@ export const getApplicationFormsTotalRow = async () => {
 
 export const rejectApplicationFormById = async (
     applicationFormId: number,
-    reviewer_id: string,
 ) => {
     return await db.transaction(async (tx) => {
-        const updatedResult = await tx
-            .update(applicationForms)
-            .set({
-                status: ApplicationFormStatus.REJECTED,
-                reviewedByUserId: reviewer_id,
-            })
-            .where(
-                and(
-                    eq(applicationForms.id, applicationFormId),
-                    // only allow reject pending application
-                    eq(applicationForms.status, ApplicationFormStatus.PENDING),
-                ),
-            );
-
-        return await tx.query.applicationForms.findFirst({
+        const af = await tx.query.applicationForms.findFirst({
             where: (table, { eq }) => eq(table.id, applicationFormId),
         });
+
+        await tx.delete(applicationForms).where(
+            eq(applicationForms.id, applicationFormId),
+        );
+
+        return af;
     });
 };
 

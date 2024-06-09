@@ -14,6 +14,7 @@ import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { editProjectSettingsFiles } from "../../schema";
 import { lucia } from "@/auth/lucia";
 import { deleteFile, uploadFiles } from "@/lib/file";
+import { FileBelongTo } from "@/drizzle/schema";
 
 const successMessage = "Successfully updated project settings files";
 const unsuccessMessage = "Failed to update project settings files";
@@ -95,11 +96,11 @@ export async function PATCH(request: Request, { params }: Params) {
             }
         }
         if (body.fileToUpload) {
-            const response = await uploadFiles(
-                body.fileToUpload,
-                sessionId ?? "",
-                Number(params.project_id),
-            );
+            const response = await uploadFiles(body.fileToUpload, {
+                sessionId: sessionId ?? "",
+                projectId: project.id,
+                belongTo: FileBelongTo.ProjectSetting,
+            });
 
             if (!response.success) {
                 // {errors : {undefined: "Expected object, received string"}}

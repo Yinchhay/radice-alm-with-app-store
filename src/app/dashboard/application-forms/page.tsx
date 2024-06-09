@@ -158,9 +158,11 @@ function ApplicationForm({
                                     ApplicationFormStatus.PENDING && (
                                     <>
                                         <RejectApplicationFormOverlay
+                                            key={applicationForm.id}
                                             applicationForm={applicationForm}
                                         />
                                         <ApproveApplicationFormOverlay
+                                            key={applicationForm.id}
                                             applicationForm={applicationForm}
                                         />
                                     </>

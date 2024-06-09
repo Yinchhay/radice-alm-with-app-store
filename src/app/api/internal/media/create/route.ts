@@ -15,7 +15,7 @@ import { z } from "zod";
 import { createMediaSchema } from "../schema";
 import { lucia } from "@/auth/lucia";
 import { uploadFiles } from "@/lib/file";
-import { MediaFile } from "@/drizzle/schema";
+import { FileBelongTo, MediaFile } from "@/drizzle/schema";
 
 export type FetchCreateMedia = Record<string, never>;
 
@@ -55,7 +55,10 @@ export async function POST(request: Request) {
         let imageFilenames: MediaFile[] = [];
         const authorizationHeader = request.headers.get("Authorization");
         const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
-        const response = await uploadFiles(body.images, sessionId ?? "");
+        const response = await uploadFiles(body.images, {
+            sessionId: sessionId ?? "",
+            belongTo: FileBelongTo.Media,
+        });
 
         if (!response.success) {
             const errorMessage =

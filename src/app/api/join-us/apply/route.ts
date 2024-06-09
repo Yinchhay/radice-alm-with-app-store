@@ -14,7 +14,7 @@ import { z } from "zod";
 import { createApplicationFormSchema, cvFileSchema } from "../schema";
 import { uploadFiles } from "@/lib/file";
 import { getUserByEmail } from "@/repositories/users";
-import { ApplicationFormStatus } from "@/drizzle/schema";
+import { ApplicationFormStatus, FileBelongTo } from "@/drizzle/schema";
 
 export type FetchCreateApplicationForm = Record<string, never>;
 
@@ -50,7 +50,9 @@ export async function POST(request: Request) {
             );
         }
         const files = [file];
-        const response = await uploadFiles(files, "");
+        const response = await uploadFiles(files, {
+            belongTo: FileBelongTo.ApplicationForm,
+        });
 
         if (!response.success) {
             const errorMessage =

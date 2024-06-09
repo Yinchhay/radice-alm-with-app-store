@@ -40,7 +40,7 @@ export function EditCategoryOverlay({
     useEffect(() => {
         // close the overlay after editing successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            onCancel();
         }
     }, [result]);
 

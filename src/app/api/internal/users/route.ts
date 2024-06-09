@@ -37,9 +37,14 @@ export async function GET(request: NextRequest) {
 
         const page: number =
             Number(request.nextUrl.searchParams.get("page")) || 1;
-        const rowsPerPage: number =
+        let rowsPerPage: number =
             Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
             ROWS_PER_PAGE;
+
+                    // limit to max 100 rows per page
+        if (rowsPerPage > 100) {
+            rowsPerPage = 100;
+        }
 
         const users = await getUsers(page, rowsPerPage);
         const totalRows = await getUsersTotalRow();

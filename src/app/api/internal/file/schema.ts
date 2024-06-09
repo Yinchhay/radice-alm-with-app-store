@@ -1,3 +1,4 @@
+import { FileBelongTo } from "@/drizzle/schema";
 import { MAX_FILE_SIZE } from "@/lib/file";
 import { z } from "zod";
 
@@ -28,6 +29,7 @@ export const fileAnySchema = z
 export const createFileFormSchema = z.object({
     files: fileAnySchema,
     projectId: z.number().nullable(),
+    belongTo: z.nativeEnum(FileBelongTo).nullable(),
 });
 
 export const deleteFileFormSchema = z.object({

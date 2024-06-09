@@ -7,12 +7,14 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { deleteCategoryById } from "@/repositories/category";
+import { deleteCategoryById, getCategoryById } from "@/repositories/category";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { deleteCategoryFormSchema } from "../../schema";
+import { deleteFile } from "@/lib/file";
+import { lucia } from "@/auth/lucia";
 
 // update type if we were to return any data back to the response
 export type FetchDeleteCategory = Record<string, never>;
@@ -45,6 +47,21 @@ export async function DELETE(request: Request, { params }: Params) {
             );
         }
         data = validationResult.data;
+
+        const category = await getCategoryById(data.categoryId);
+        if (!category) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("unknown", ErrorMessage.NotFound),
+                HttpStatusCode.NOT_FOUND_404,
+            );
+        }
+
+        if (category.logo) {
+            const authorizationHeader = request.headers.get("Authorization");
+            const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+            await deleteFile(category.logo, sessionId ?? "");
+        }
 
         const deleteResult = await deleteCategoryById(data.categoryId);
         // if no row is affected, meaning that the category didn't get deleted

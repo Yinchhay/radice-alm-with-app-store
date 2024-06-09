@@ -385,6 +385,14 @@ export const projectsRelations = relations(projects, ({ many, one }) => ({
     }),
 }));
 
+export enum FileBelongTo {
+    ProjectSetting  = "project_setting",
+    ContentBuilder = "content_builder",
+    User = "user",
+    Media = "media",
+    Category = "category",
+    ApplicationForm = "application_form",
+}
 export const files = mysqlTable("files", {
     id: int("id").primaryKey().autoincrement(),
     filename: varchar("filename", {
@@ -395,6 +403,10 @@ export const files = mysqlTable("files", {
     size: varchar("size", {
         length: 50,
     }).notNull(),
+    // use to identify the file belong to which entity so that user with permission can delete it
+    belongTo: varchar("belong_to", {
+        length: 50,
+    }).$type<FileBelongTo>(),
     userId: varchar("user_id", {
         length: 255,
     }).references(() => users.id, {

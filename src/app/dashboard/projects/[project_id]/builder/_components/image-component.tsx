@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button";
 import { getSessionCookie } from "@/lib/server_utils";
 import { fileToUrl } from "@/lib/file";
+import { FileBelongTo } from "@/drizzle/schema";
 
 export default function ImageComponent({
     component,
@@ -65,6 +66,7 @@ export default function ImageComponent({
             const sessionId = await getSessionCookie();
             let formData = new FormData();
             formData.append("files", fileList[0]);
+            formData.append("belongTo", FileBelongTo.ContentBuilder);
             const response = await fetch(`/api/file/store`, {
                 method: "POST",
                 headers: {

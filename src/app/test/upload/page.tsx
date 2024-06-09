@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/Button";
+import { FileBelongTo } from "@/drizzle/schema";
 import { getSessionCookie } from "@/lib/server_utils";
 import Image from "next/image";
 import { useRef, useState } from "react";
@@ -22,6 +23,7 @@ export default function UploadImage() {
         for (const file of files) {
             formData.append("files", file);
         }
+        formData.append("belongTo", FileBelongTo.ContentBuilder);
 
         const sessionId = await getSessionCookie();
         const response = await fetch("/api/file/store", {
@@ -42,7 +44,7 @@ export default function UploadImage() {
 
     return (
         <div>
-            <input type="file" ref={imageRef} multiple/>
+            <input type="file" ref={imageRef} multiple />
             <Button onClick={handleUpload}>Upload</Button>
             {image && (
                 <>

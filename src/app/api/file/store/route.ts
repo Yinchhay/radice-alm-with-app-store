@@ -13,6 +13,8 @@ import { createFile } from "@/repositories/files";
 import { ErrorMessage } from "@/types/error";
 
 import { getFileStoragePath, readableFileSize } from "@/lib/file";
+import { z } from "zod";
+import { FileBelongTo } from "@/drizzle/schema";
 
 const successMessage = "File uploaded successfully";
 const unsuccessMessage = "Failed to upload file";
@@ -30,9 +32,10 @@ export async function POST(request: Request) {
         );
 
         const formData = await request.formData();
-        let data = {
+        let data: z.infer<typeof createFileFormSchema> = {
             files: formData.getAll("files") as File[],
-            projectId: Number(formData.get("project_id")) || null,
+            projectId: Number(formData.get("projectId")) || null,
+            belongTo: (formData.get("belongTo") as FileBelongTo) || null,
         };
 
         const validationResult = createFileFormSchema.safeParse(data);
@@ -69,6 +72,7 @@ export async function POST(request: Request) {
                 filename: filename,
                 size: readableFileSize(file.size),
                 projectId: data.projectId,
+                belongTo: data.belongTo,
             });
 
             // if no row is affected, meaning that creating file failed

@@ -15,6 +15,7 @@ import { fileImageSchema } from "../../project/[project_id]/schema";
 import { lucia } from "@/auth/lucia";
 import { deleteFile, uploadFiles } from "@/lib/file";
 import { updateUserProfileInformation } from "@/repositories/users";
+import { FileBelongTo } from "@/drizzle/schema";
 
 export type FetchUpdateProfileInformation = Record<string, never>;
 
@@ -52,7 +53,10 @@ export async function PATCH(request: Request) {
             const files = [file];
             const authorizationHeader = request.headers.get("Authorization");
             const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
-            const response = await uploadFiles(files, sessionId ?? "");
+            const response = await uploadFiles(files, {
+                sessionId: sessionId ?? "",
+                belongTo: FileBelongTo.User,
+            });
 
             if (!response.success) {
                 const errorMessage =
@@ -67,8 +71,11 @@ export async function PATCH(request: Request) {
                     HttpStatusCode.BAD_REQUEST_400,
                 );
             }
-            
-            await deleteFile(formData.get("currentProfileLogo") as string, sessionId ?? "");
+
+            await deleteFile(
+                formData.get("currentProfileLogo") as string,
+                sessionId ?? "",
+            );
             profileLogo = response.data.filenames[0];
         }
 

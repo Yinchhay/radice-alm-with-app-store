@@ -157,7 +157,7 @@ export const getUsersTotalRow = async () => {
         .where(
             and(
                 eq(users.type, UserType.USER),
-                eq(users.hasLinkedGithub, hasLinkedGithub),
+                // eq(users.hasLinkedGithub, hasLinkedGithub),
             ),
         );
     return totalRows[0].count;

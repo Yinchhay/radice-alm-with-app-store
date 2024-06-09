@@ -141,10 +141,10 @@ function Category({
             <Cell>
                 <div className="flex gap-2 justify-end">
                     {canEditCategory && (
-                        <EditCategoryOverlay category={category} />
+                        <EditCategoryOverlay category={category}/>
                     )}
                     {canDeleteCategory && (
-                        <DeleteCategoryOverlay category={category} />
+                        <DeleteCategoryOverlay category={category}/>
                     )}
                 </div>
             </Cell>

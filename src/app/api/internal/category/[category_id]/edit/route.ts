@@ -17,6 +17,7 @@ import { editCategoryFormSchema } from "../../schema";
 import { lucia } from "@/auth/lucia";
 import { deleteFile, uploadFiles } from "@/lib/file";
 import { fileImageSchema } from "../../../project/[project_id]/schema";
+import { FileBelongTo } from "@/drizzle/schema";
 
 export type FetchEditCategory = Record<string, never>;
 
@@ -55,7 +56,10 @@ export async function PATCH(request: Request, { params }: Params) {
             const files = [file];
             const authorizationHeader = request.headers.get("Authorization");
             const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
-            const response = await uploadFiles(files, sessionId ?? "");
+            const response = await uploadFiles(files, {
+                sessionId: sessionId ?? "",
+                belongTo: FileBelongTo.Category,
+            });
 
             if (!response.success) {
                 return buildErrorResponse(
@@ -68,7 +72,10 @@ export async function PATCH(request: Request, { params }: Params) {
                 );
             }
 
-            await deleteFile(formData.get("currentCategoryLogo") as string, sessionId ?? "");
+            await deleteFile(
+                formData.get("currentCategoryLogo") as string,
+                sessionId ?? "",
+            );
             logo = response.data.filenames[0];
         }
 

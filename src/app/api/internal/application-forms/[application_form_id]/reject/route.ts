@@ -1,3 +1,5 @@
+import { lucia } from "@/auth/lucia";
+import { deleteFile } from "@/lib/file";
 import { generateAndFormatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
@@ -36,7 +38,6 @@ export async function PATCH(request: Request, { params }: Params) {
         // during reject, we reject and return back the application form details
         const applicationForm = await rejectApplicationFormById(
             Number(params.application_form_id),
-            user.id,
         );
         if (!applicationForm) {
             return buildErrorResponse(
@@ -48,6 +49,10 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.NOT_FOUND_404,
             );
         }
+
+        const authorizationHeader = request.headers.get("Authorization");
+        const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+        await deleteFile(applicationForm.cv, sessionId ?? "");
 
         // remember in development, the email will be sent to default email (not the actual email user). check sendMail function in src/smtp/mail.ts
         // for faster wait time we can remove await here since we don't need to wait for the email to be sent, if u want mailResult then add await

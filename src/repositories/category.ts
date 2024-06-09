@@ -13,6 +13,12 @@ export const deleteCategoryById = async (categoryId: number) => {
     return await db.delete(categories).where(eq(categories.id, categoryId));
 };
 
+export const getCategoryById = async (categoryId: number) => {
+    return await db.query.categories.findFirst({
+        where: eq(categories.id, categoryId),
+    });
+};
+
 export const editCategoryById = async (
     categoryId: number,
     category: typeof categories.$inferInsert,

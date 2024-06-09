@@ -16,6 +16,7 @@ import { createCategoryFormSchema } from "../schema";
 import { fileImageSchema } from "../../project/[project_id]/schema";
 import { lucia } from "@/auth/lucia";
 import { uploadFiles } from "@/lib/file";
+import { FileBelongTo } from "@/drizzle/schema";
 
 export type FetchCreateCategory = Record<string, never>;
 
@@ -53,7 +54,10 @@ export async function POST(request: Request) {
             const files = [file];
             const authorizationHeader = request.headers.get("Authorization");
             const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
-            const response = await uploadFiles(files, sessionId ?? "");
+            const response = await uploadFiles(files, {
+                sessionId: sessionId ?? "",
+                belongTo: FileBelongTo.Category,
+            });
 
             if (!response.success) {
                 const errorMessage =

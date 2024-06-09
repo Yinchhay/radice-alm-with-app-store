@@ -12,9 +12,11 @@ import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { checkBearerAndPermission, hasPermission } from "@/lib/IAM";
 import { z } from "zod";
 import { deleteFileFormSchema } from "../schema";
-import { checkProjectRole } from "@/lib/project";
+import { checkProjectRole, ProjectRole } from "@/lib/project";
 import { UserType } from "@/types/user";
 import { Permissions } from "@/types/IAM";
+import { FileBelongTo } from "@/drizzle/schema";
+import { localDebug } from "@/lib/utils";
 
 const successMessage = "Delete file successfully";
 const unsuccessMessage = "Delete file failed";
@@ -70,38 +72,65 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        // check permission to access the file only if the file is in a project
-        if (fileDetail.project) {
-            const { canEdit } = checkProjectRole(
-                user.id,
-                fileDetail.project,
-                user.type,
-            );
+        if (fileDetail) {
+            let canDelete = false;
+            let requiredPermission: Set<Permissions> = new Set([]);
+            switch (fileDetail.belongTo) {
+                case FileBelongTo.Media:
+                    requiredPermission.add(Permissions.DELETE_MEDIA);
+                    requiredPermission.add(Permissions.EDIT_MEDIA);
+                    break;
+                case FileBelongTo.ApplicationForm:
+                    requiredPermission.add(
+                        Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS,
+                    );
+                    break;
+                case FileBelongTo.Category:
+                    requiredPermission.add(Permissions.DELETE_CATEGORIES);
+                    requiredPermission.add(Permissions.EDIT_CATEGORIES);
+                    break;
+                case FileBelongTo.ContentBuilder:
+                    if (fileDetail.project) {
+                        canDelete = checkProjectRole(
+                            user.id,
+                            fileDetail.project,
+                            user.type,
+                        ).canEdit;
+                    }
 
-            if (!canEdit) {
-                return buildErrorResponse(
-                    unsuccessMessage,
-                    generateAndFormatZodError(
-                        "unknown",
-                        "Unauthorized to delete the file!!",
-                    ),
-                    HttpStatusCode.UNAUTHORIZED_401,
-                );
+                    break;
+                case FileBelongTo.ProjectSetting:
+                    if (fileDetail.project) {
+                        const { projectRole } = checkProjectRole(
+                            user.id,
+                            fileDetail.project,
+                            user.type,
+                        );
+                        canDelete =
+                            projectRole === ProjectRole.OWNER ||
+                            projectRole === ProjectRole.SUPER_ADMIN;
+                    }
+                    break;
+                case FileBelongTo.User:
+                    canDelete = user.id === fileDetail.userId;
+                    break;
+                default:
+                    canDelete = false;
+                    break;
             }
-        } else {
-            // if the file is not in a project, check by comparing who uploaded the file
-            // only owner, super admin or person with permission delete media can delete the file
 
-            const userPermission = await hasPermission(
-                user.id,
-                new Set([Permissions.DELETE_MEDIA]),
-            );
+            if (requiredPermission.size > 0) {
+                canDelete = (await hasPermission(user.id, requiredPermission))
+                    .canAccess;
+            }
 
-            if (
-                fileDetail.userId !== user.id &&
-                user.type !== UserType.SUPER_ADMIN &&
-                !userPermission.canAccess
-            ) {
+            const isSuperAdmin = user.type === UserType.SUPER_ADMIN;
+            if (!isSuperAdmin && !canDelete) {
+                localDebug(
+                    `Not authorized to delete the file. File belong to ${fileDetail.belongTo}, isSuperAdmin ${isSuperAdmin}, canDelete ${canDelete}`,
+                    "/api/internal/file/delete/route.ts DELETE()",
+                );
+
                 return buildErrorResponse(
                     unsuccessMessage,
                     generateAndFormatZodError(
@@ -114,7 +143,6 @@ export async function DELETE(request: NextRequest) {
         }
 
         const deleteResult = await deleteFileByFilename(filename);
-        // if no row is affected, meaning that the category didn't get deleted
         if (deleteResult[0].affectedRows < 1) {
             return buildErrorResponse(
                 unsuccessMessage,

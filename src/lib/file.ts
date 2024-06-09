@@ -2,6 +2,7 @@ import path from "path";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "./response";
 import { FetchFileStore } from "@/app/api/file/store/route";
 import { getBaseUrl } from "./server_utils";
+import { FileBelongTo } from "@/drizzle/schema";
 
 // limit file size to 100MB
 const KB = 1024;
@@ -37,8 +38,15 @@ export function getFileStoragePath(): string {
 
 export async function uploadFiles(
     files: File[],
-    sessionId: string,
-    projectId?: number,
+    {
+        sessionId = "",
+        projectId,
+        belongTo,
+    }: {
+        sessionId?: string;
+        projectId?: number;
+        belongTo?: FileBelongTo;
+    },
 ): ResponseJson<FetchFileStore> {
     try {
         const formData = new FormData();
@@ -46,7 +54,10 @@ export async function uploadFiles(
             formData.append("files", file);
         }
         if (projectId) {
-            formData.append("project_id", projectId as unknown as string);
+            formData.append("projectId", projectId as unknown as string);
+        }
+        if (belongTo) {
+            formData.append("belongTo", belongTo as unknown as string);
         }
 
         const response = await fetch(`${await getBaseUrl()}/api/file/store`, {

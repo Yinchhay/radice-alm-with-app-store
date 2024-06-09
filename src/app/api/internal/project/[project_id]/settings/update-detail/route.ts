@@ -18,6 +18,7 @@ import { editProjectSettingsDetail, fileImageSchema } from "../../schema";
 import { deleteFile, uploadFiles } from "@/lib/file";
 import { lucia } from "@/auth/lucia";
 import { findItemsToBeCreated, findItemsToBeDeleted } from "@/lib/filter";
+import { FileBelongTo } from "@/drizzle/schema";
 
 const successMessage = "Successfully updated project settings detail";
 const unsuccessMessage = "Failed to update project settings detail";
@@ -82,7 +83,10 @@ export async function PATCH(request: Request, { params }: Params) {
             const files = [file];
             const authorizationHeader = request.headers.get("Authorization");
             const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
-            const response = await uploadFiles(files, sessionId ?? "");
+            const response = await uploadFiles(files, {
+                sessionId: sessionId ?? "",
+                belongTo: FileBelongTo.ProjectSetting,
+            });
 
             if (!response.success) {
                 return buildErrorResponse(
