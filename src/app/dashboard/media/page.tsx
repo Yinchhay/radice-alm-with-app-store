@@ -111,13 +111,13 @@ function Media({
     return (
         <Card square>
             <div className="flex flex-row gap-4 relative">
-                    <ImageWithFallback
-                        className="aspect-square object-cover rounded-sm w-32 h-32"
-                        src={fileToUrl(image)}
-                        alt={"media logo"}
-                        width={128}
-                        height={128}
-                    />
+                <ImageWithFallback
+                    className="aspect-square object-cover rounded-sm w-32 h-32"
+                    src={fileToUrl(image)}
+                    alt={"media logo"}
+                    width={128}
+                    height={128}
+                />
                 <div className="flex pr-8  mb-6">
                     <div className="flex flex-col">
                         <h1 className="text-xl">{mediaOne.title}</h1>
@@ -125,7 +125,13 @@ function Media({
                         <p className="text-sm">{mediaOne.description}</p>
                     </div>
                 </div>
-                <div className="absolute bottom-0 right-0 flex gap-2">
+                <div
+                    className="absolute bottom-0 right-0 flex gap-2"
+                    key={
+                        mediaOne.id +
+                        new Date(mediaOne.updatedAt!).toISOString()
+                    }
+                >
                     {canEditMedia && <EditMediaOverlay mediaOne={mediaOne} />}
                     {canDeleteMedia && (
                         <DeleteMediaOverlay mediaOne={mediaOne} />

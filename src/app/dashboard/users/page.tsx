@@ -111,7 +111,12 @@ function User({
             </Cell>
             <Cell data-test={`email-${user.email}`}>{user.email}</Cell>
             <Cell className="flex justify-end gap-2">
-                {canDeleteUser && <DeleteUserOverlay user={user} />}
+                <div
+                    className=""
+                    key={user.id + new Date(user.updatedAt!).toISOString()}
+                >
+                    {canDeleteUser && <DeleteUserOverlay user={user} />}
+                </div>
             </Cell>
         </TableRow>
     );

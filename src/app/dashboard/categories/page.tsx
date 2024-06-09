@@ -139,12 +139,15 @@ function Category({
                 {category.description}
             </Cell>
             <Cell>
-                <div className="flex gap-2 justify-end">
+                <div
+                    className="flex gap-2 justify-end"
+                    key={category.id + new Date(category.updatedAt!).toISOString()}
+                >
                     {canEditCategory && (
-                        <EditCategoryOverlay category={category}/>
+                        <EditCategoryOverlay category={category} />
                     )}
                     {canDeleteCategory && (
-                        <DeleteCategoryOverlay category={category}/>
+                        <DeleteCategoryOverlay category={category} />
                     )}
                 </div>
             </Cell>

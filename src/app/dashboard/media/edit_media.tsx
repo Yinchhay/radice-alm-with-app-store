@@ -23,6 +23,11 @@ export function EditMediaOverlay({
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchEditMediaById>>>();
 
+    function onCancel() {
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
     async function onSubmit(formData: FormData) {
         const result = await fetchEditMediaById(
             {
@@ -39,7 +44,7 @@ export function EditMediaOverlay({
     useEffect(() => {
         // close the overlay after editing successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            onCancel();
         }
     }, [result]);
 
@@ -61,9 +66,7 @@ export function EditMediaOverlay({
             </Tooltip>
             {showOverlay && (
                 <Overlay
-                    onClose={() => {
-                        setShowOverlay(false);
-                    }}
+                    onClose={onCancel}
                 >
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
@@ -104,7 +107,11 @@ export function EditMediaOverlay({
                                     type="date"
                                     name="date"
                                     id="date"
-                                    defaultValue={new Date(mediaOne.date).toISOString().split("T")[0]}
+                                    defaultValue={
+                                        new Date(mediaOne.date)
+                                            .toISOString()
+                                            .split("T")[0]
+                                    }
                                 />
                             </div>
                             {!result?.success && result?.errors && (
@@ -114,9 +121,7 @@ export function EditMediaOverlay({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
+                                    onClick={onCancel}
                                 >
                                     Cancel
                                 </Button>

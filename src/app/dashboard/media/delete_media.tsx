@@ -21,10 +21,15 @@ export function DeleteMediaOverlay({
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteMediaById>>>();
 
+    function onCancel() {
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
     useEffect(() => {
         // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            onCancel();
         }
     }, [result]);
 
@@ -32,7 +37,7 @@ export function DeleteMediaOverlay({
         <>
             <Tooltip className="group" title="Delete media">
                 <Button
-                    onClick={() => setShowOverlay(true)}
+                    onClick={onCancel}
                     square
                     variant="outline"
                     className="outline-0"
@@ -78,9 +83,7 @@ export function DeleteMediaOverlay({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
+                                    onClick={onCancel}
                                 >
                                     Cancel
                                 </Button>

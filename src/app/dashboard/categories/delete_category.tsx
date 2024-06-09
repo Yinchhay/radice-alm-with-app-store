@@ -21,30 +21,33 @@ export function DeleteCategoryOverlay({
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteCategoryById>>>();
 
+    function onCancel() {
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
     useEffect(() => {
         // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            onCancel();
         }
     }, [result]);
 
     return (
         <>
-                <Tooltip title="Delete category">
-                    <Button
-                        data-test={`deleteCategory-${category.name}`}
-                        onClick={() => setShowOverlay(true)}
-                        square={true}
-                        variant="danger"
-                    >
-                        <IconX></IconX>
-                    </Button>
-                </Tooltip>
+            <Tooltip title="Delete category">
+                <Button
+                    data-test={`deleteCategory-${category.name}`}
+                    onClick={() => setShowOverlay(true)}
+                    square={true}
+                    variant="danger"
+                >
+                    <IconX></IconX>
+                </Button>
+            </Tooltip>
             {showOverlay && (
                 <Overlay
-                    onClose={() => {
-                        setShowOverlay(false);
-                    }}
+                    onClose={onCancel}
                 >
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
@@ -74,9 +77,7 @@ export function DeleteCategoryOverlay({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
+                                    onClick={onCancel}
                                 >
                                     Cancel
                                 </Button>

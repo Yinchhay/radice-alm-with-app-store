@@ -95,7 +95,7 @@ function Partner({
                 {partner.email}
             </Cell>
             <Cell>
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-2 justify-end" key={partner.id}>
                     {canDeletePartner && (
                         <DeletePartnerOverlay partner={partner} />
                     )}

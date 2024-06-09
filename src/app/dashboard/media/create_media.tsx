@@ -68,7 +68,7 @@ export function CreateMediaOverlay() {
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            onCancel();
         }
     }, [result]);
 

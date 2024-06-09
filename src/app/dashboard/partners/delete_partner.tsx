@@ -21,10 +21,15 @@ export function DeletePartnerOverlay({
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeletePartnerById>>>();
 
+    function onCancel() {
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
     useEffect(() => {
         // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            onCancel();
         }
     }, [result]);
 
@@ -41,11 +46,7 @@ export function DeletePartnerOverlay({
                 </Button>
             </Tooltip>
             {showOverlay && (
-                <Overlay
-                    onClose={() => {
-                        setShowOverlay(false);
-                    }}
-                >
+                <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
@@ -74,9 +75,7 @@ export function DeletePartnerOverlay({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
+                                    onClick={onCancel}
                                 >
                                     Cancel
                                 </Button>

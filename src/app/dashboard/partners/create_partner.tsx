@@ -17,11 +17,15 @@ export function CreatePartnerOverlay() {
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreatePartner>>>();
 
+    function onCancel() {
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {
-            // console.log("Created partner pw: ", result.data.password);
-            setShowOverlay(false);
+            onCancel();
         }
     }, [result]);
 
@@ -39,9 +43,7 @@ export function CreatePartnerOverlay() {
             </Tooltip>
             {showOverlay && (
                 <Overlay
-                    onClose={() => {
-                        setShowOverlay(false);
-                    }}
+                    onClose={onCancel}
                 >
                     <Card className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
@@ -51,11 +53,18 @@ export function CreatePartnerOverlay() {
                         </div>
                         <form
                             action={async (formData: FormData) => {
-                                const result = await fetchCreatePartner({
-                                    email: formData.get("email") as string,
-                                    firstName: formData.get("firstName") as string,
-                                    lastName: formData.get("lastName") as string,
-                                }, pathname);
+                                const result = await fetchCreatePartner(
+                                    {
+                                        email: formData.get("email") as string,
+                                        firstName: formData.get(
+                                            "firstName",
+                                        ) as string,
+                                        lastName: formData.get(
+                                            "lastName",
+                                        ) as string,
+                                    },
+                                    pathname,
+                                );
                                 setResult(result);
                             }}
                         >
@@ -94,9 +103,7 @@ export function CreatePartnerOverlay() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setShowOverlay(false);
-                                    }}
+                                    onClick={onCancel}
                                 >
                                     Cancel
                                 </Button>

@@ -152,7 +152,15 @@ function ApplicationForm({
                                 {applicationForm.status}
                             </p>
                         </div>
-                        <div className="flex gap-2 justify-end">
+                        <div
+                            className="flex gap-2 justify-end"
+                            key={
+                                applicationForm.id +
+                                new Date(
+                                    applicationForm.updatedAt!,
+                                ).toISOString()
+                            }
+                        >
                             {canApproveAndReject &&
                                 applicationForm.status ===
                                     ApplicationFormStatus.PENDING && (
