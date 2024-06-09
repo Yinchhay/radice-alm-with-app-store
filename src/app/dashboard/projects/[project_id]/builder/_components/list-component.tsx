@@ -152,7 +152,7 @@ export default function ListComponent({
             >
                 <ReactTextareaAutosize
                     spellCheck={false}
-                    className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value}  w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
+                    className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value} w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
                     value={currentComponent.text}
                     onChange={(e) =>
                         setCurrentComponent((prevComponent) => ({

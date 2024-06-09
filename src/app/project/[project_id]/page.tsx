@@ -3,7 +3,13 @@ import { getProjectByIdForPublic } from "./fetch";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { fileToUrl } from "@/lib/file";
-import { Component } from "@/types/content";
+import {
+    Component,
+    fontAligns,
+    fontWeights,
+    headingFontSizes,
+    paragraphFontSizes,
+} from "@/types/content";
 import MemberProfile from "@/app/about/_components/MemberProfile";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import ChipsHolder from "@/components/ChipsHolder";
@@ -55,7 +61,7 @@ export default async function ProjectPage({
                                             componentBlock = (
                                                 <h1
                                                     key={i}
-                                                    className="text-5xl font-extrabold text-center w-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                                    className={`${component.style && component.style.fontSize !== undefined ? headingFontSizes[component.style.fontSize].value : headingFontSizes[2].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[2].value} ${component.style && component.style.fontAlign !== undefined ? fontAligns[component.style.fontAlign].value : fontAligns[1].value} w-full resize-none focus:outline-none overflow-hidden bg-transparent`}
                                                 >
                                                     {component.text}
                                                 </h1>
@@ -82,7 +88,9 @@ export default async function ProjectPage({
                                             break;
                                         case "paragraph":
                                             componentBlock = (
-                                                <p className="w-full resize-none focus:outline-none overflow-hidden bg-transparent">
+                                                <p
+                                                    className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value} ${component.style && component.style.fontAlign !== undefined ? fontAligns[component.style.fontAlign].value : fontAligns[0].value} w-full resize-none focus:outline-none overflow-hidden bg-transparent`}
+                                                >
                                                     {component.text}
                                                 </p>
                                             );
@@ -90,7 +98,9 @@ export default async function ProjectPage({
                                         case "list":
                                             componentBlock = (
                                                 <div>
-                                                    <h3 className="w-full resize-none focus:outline-none overflow-hidden bg-transparent mb-1">
+                                                    <h3
+                                                        className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value} w-full resize-none focus:outline-none overflow-hidden bg-transparent mb-1`}
+                                                    >
                                                         {component.text}
                                                     </h3>
                                                     <ul className="list-disc pl-6">
