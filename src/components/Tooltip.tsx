@@ -30,11 +30,11 @@ export default function Tooltip({
             break;
     }
     return (
-        <div className="relative group w-fit">
+        <div className={`relative group w-fit ${className}`}>
             {children}
             <div
                 style={{ zIndex }}
-                className={`absolute text-nowrap opacity-0 transition-all ${positionClassName} group-hover:opacity-100 bg-white rounded-sm p-2 border shadow-sm`}
+                className={`absolute pointer-events-none text-nowrap opacity-0 transition-all ${positionClassName} group-hover:opacity-100 bg-white rounded-sm p-2 border shadow-sm`}
             >
                 {title}
             </div>

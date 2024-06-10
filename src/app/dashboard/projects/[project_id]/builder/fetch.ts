@@ -3,6 +3,7 @@ import { FetchEditProjectContent } from "@/app/api/internal/project/[project_id]
 import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
 import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
+import { Chapter } from "@/types/content";
 
 export async function fetchOneAssociatedProject(
     projectId: string,
@@ -24,9 +25,9 @@ export async function fetchOneAssociatedProject(
         return fetchErrorSomethingWentWrong;
     }
 }
-export async function fetchEditProjectContentbyId(
+export async function fetchEditProjectContentById(
     projectId: string,
-    chapters: any,
+    chapters: Chapter[],
 ): ResponseJson<FetchEditProjectContent> {
     try {
         const sessionId = await getSessionCookie();

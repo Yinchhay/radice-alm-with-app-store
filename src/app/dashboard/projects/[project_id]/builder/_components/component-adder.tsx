@@ -1,5 +1,6 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import Tooltip from "@/components/Tooltip";
 
 export default function ComponentAdder({
     onAddHeading,
@@ -14,20 +15,44 @@ export default function ComponentAdder({
 }) {
     return (
         <Card>
-            <h1 className="font-bold text-lg mb-4">Components</h1>
+            <h1 className="font-bold text-lg mb-2">Components</h1>
             <div className="grid grid-cols-3 gap-4 font-bold">
-                <Button className="w-12" square={true} onClick={onAddHeading}>
-                    H
-                </Button>
-                <Button className="w-12" square={true} onClick={onAddImage}>
-                    I
-                </Button>
-                <Button className="w-12" square={true} onClick={onAddParagraph}>
-                    P
-                </Button>
-                <Button className="w-12" square={true} onClick={onAddList}>
-                    L
-                </Button>
+                <Tooltip title="Heading" className="w-full" position="bottom">
+                    <Button
+                        className="w-full text-lg"
+                        square={true}
+                        onClick={onAddHeading}
+                    >
+                        H
+                    </Button>
+                </Tooltip>
+                <Tooltip title="Image" className="w-full" position="bottom">
+                    <Button
+                        className="w-full text-lg"
+                        square={true}
+                        onClick={onAddImage}
+                    >
+                        I
+                    </Button>
+                </Tooltip>
+                <Tooltip title="Paragraph" className="w-full" position="bottom">
+                    <Button
+                        className="w-full text-lg"
+                        square={true}
+                        onClick={onAddParagraph}
+                    >
+                        P
+                    </Button>
+                </Tooltip>
+                <Tooltip title="List" className="w-full" position="bottom">
+                    <Button
+                        className="w-full text-lg"
+                        square={true}
+                        onClick={onAddList}
+                    >
+                        L
+                    </Button>
+                </Tooltip>
             </div>
         </Card>
     );

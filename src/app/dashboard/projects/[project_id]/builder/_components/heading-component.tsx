@@ -1,13 +1,11 @@
 "use client";
 import Button from "@/components/Button";
-import InputField from "@/components/InputField";
 import {
     Component,
     fontAligns,
     fontWeights,
     headingFontSizes,
 } from "@/types/content";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import ReactTextareaAutosize from "react-textarea-autosize";
 import { useSortable } from "@dnd-kit/sortable";
@@ -78,8 +76,10 @@ export default function HeadingComponent({
             aria-describedby=""
             data-no-dnd="true"
             className={[
-                "outline outline-1 outline-transparent hover:outline-gray-400 p-4 rounded-md",
-                selectedComponentID == component.id ? "outline-gray-400" : "",
+                "outline outline-1 hover:outline-gray-400 p-4 rounded-md",
+                selectedComponentID == component.id
+                    ? "outline-gray-400"
+                    : "outline-transparent",
                 isDragging ? "" : "duration-200",
             ].join(" ")}
         >

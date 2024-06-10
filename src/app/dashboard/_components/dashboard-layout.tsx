@@ -20,13 +20,16 @@ export default function DashboardLayout({
         setShowSideNav(!showSideNav);
     }
     return (
-        <div className="relative">
+        <div className="relative bg-slate-50 min-h-screen">
             <Navbar onClick={toggleSideNav} user={user} />
             <div className="relative">
-                <SideNav showSideNav={showSideNav} canAccessRoutes={canAccessRoutes}/>
+                <SideNav
+                    showSideNav={showSideNav}
+                    canAccessRoutes={canAccessRoutes}
+                />
                 <main
                     className={[
-                        "min-h-screen bg-slate-50 p-8 transition-all",
+                        "p-8 transition-all",
                         showSideNav ? "ml-[300px]" : "",
                     ].join(" ")}
                 >

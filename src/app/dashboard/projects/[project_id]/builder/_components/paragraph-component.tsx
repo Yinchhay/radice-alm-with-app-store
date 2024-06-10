@@ -78,8 +78,10 @@ export default function ParagraphComponent({
             aria-describedby=""
             data-no-dnd="true"
             className={[
-                "outline outline-1 outline-transparent hover:outline-gray-400 p-4 rounded-md",
-                selectedComponentID == component.id ? "outline-gray-400" : "",
+                "outline outline-1 hover:outline-gray-400 p-4 rounded-md",
+                selectedComponentID == component.id
+                    ? "outline-gray-400"
+                    : "outline-transparent",
                 isDragging ? "" : "duration-200",
             ].join(" ")}
         >

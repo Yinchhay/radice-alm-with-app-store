@@ -1,5 +1,11 @@
 import { DropdownElement } from "@/components/Dropdown";
 
+export interface Chapter {
+    id: string;
+    name: string;
+    components: Component[];
+}
+
 export interface Component {
     id: string;
     type: string;
@@ -11,21 +17,6 @@ export interface Component {
         fontWeight?: number;
         fontAlign?: number;
     };
-}
-
-export interface FontSize {
-    name: string;
-    className: string;
-}
-
-export interface FontWeight {
-    name: string;
-    className: string;
-}
-
-export interface FontAlign {
-    name: string;
-    className: string;
 }
 
 export const headingFontSizes: DropdownElement[] = [

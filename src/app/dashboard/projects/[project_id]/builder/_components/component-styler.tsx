@@ -59,7 +59,7 @@ export default function ComponentStyler({
         <>
             {selectedComponent && selectedComponent.type !== "image" && (
                 <Card>
-                    <h1 className="font-bold text-lg mb-4">Styles</h1>
+                    <h1 className="font-bold text-lg mb-2">Styles</h1>
                     <div className="grid grid-cols-2 gap-4 items-center">
                         <h2>Font Size:</h2>
                         {selectedComponent.type == "heading" && (

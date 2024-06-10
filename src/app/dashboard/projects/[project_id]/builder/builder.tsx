@@ -4,18 +4,13 @@ import {
     DragEndEvent,
     KeyboardSensor,
     MouseSensor,
-    closestCorners,
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
-import {
-    SortableContext,
-    arrayMove,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { useEffect, useRef, useState } from "react";
 import { ErrorComponent } from "./_components/error-component";
-import { Component } from "@/types/content";
+import { Chapter, Component } from "@/types/content";
 import { parse } from "path";
 import ImageComponent from "./_components/image-component";
 import ParagraphComponent from "./_components/paragraph-component";
@@ -24,11 +19,16 @@ import HeadingComponent from "./_components/heading-component";
 import ComponentAdder from "./_components/component-adder";
 import { v4 } from "uuid";
 import {
-    fetchEditProjectContentbyId,
+    fetchEditProjectContentById,
     fetchOneAssociatedProject,
 } from "./fetch";
 import { useParams } from "next/navigation";
 import ComponentStyler from "./_components/component-styler";
+import ChapterManager from "./_components/chapter-manage";
+import Overlay from "@/components/Overlay";
+import InputField from "@/components/InputField";
+import Button from "@/components/Button";
+import Card from "@/components/Card";
 
 export default function Builder() {
     const params = useParams<{ project_id: string }>();
@@ -39,9 +39,52 @@ export default function Builder() {
     });
     const keyboardSensor = useSensor(KeyboardSensor);
     const sensors = useSensors(mouseSensor, keyboardSensor);
+    const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+    const [chapters, setChapters] = useState<Chapter[]>([]);
     const [components, setComponents] = useState<Component[]>([]);
     const [dataLoaded, setDataLoaded] = useState(false);
     const [selectedComponent, setSelectedComponent] = useState<string>("");
+    const [showCreateOverlay, setShowCreateOverlay] = useState(false);
+    const defaultChapterName = "New Chapter";
+    const [newChapterName, setNewChapterName] = useState(defaultChapterName);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    function deleteChapter(ID: string) {
+        if (selectedChapter !== null) {
+            if (selectedChapter <= 0) {
+                setComponents([]);
+                setSelectedChapter(null);
+            } else {
+                setSelectedChapter(0);
+                setComponents(chapters[0].components);
+            }
+        }
+        setChapters((prevContent) =>
+            prevContent.filter((chapter) => chapter.id !== ID),
+        );
+    }
+
+    function editChapterName(ID: string, chapterName: string) {
+        setChapters((prevContent) =>
+            prevContent.map((chapter) =>
+                chapter.id === ID ? { ...chapter, name: chapterName } : chapter,
+            ),
+        );
+    }
+
+    function addChapter() {
+        let newChapter: Chapter = {
+            id: v4(),
+            name: newChapterName,
+            components: [],
+        };
+        setChapters((prevChapters) => [...prevChapters, newChapter]);
+        if (chapters.length == 0) {
+            setSelectedChapter(0);
+        }
+        setNewChapterName(defaultChapterName);
+        setErrorMessage("");
+    }
 
     function findComponentById(
         components: Component[],
@@ -63,11 +106,19 @@ export default function Builder() {
                 if (result.data.project) {
                     if (result.data.project.projectContent) {
                         setDataLoaded(true);
-                        setComponents(
-                            JSON.parse(
-                                result.data.project.projectContent as string,
-                            ),
-                        );
+                        if (result.data.project.projectContent) {
+                            try {
+                                setChapters(
+                                    JSON.parse(
+                                        result.data.project
+                                            .projectContent as string,
+                                    ),
+                                );
+                                setSelectedChapter(0);
+                            } catch {
+                                setChapters([]);
+                            }
+                        }
                     } else {
                         setDataLoaded(true);
                     }
@@ -82,10 +133,18 @@ export default function Builder() {
     }, []);
 
     useEffect(() => {
+        console.log(selectedChapter);
+        if (chapters.length > 0 && selectedChapter !== null) {
+            setComponents(chapters[selectedChapter].components);
+            setSelectedComponent("");
+        }
+    }, [selectedChapter]);
+
+    useEffect(() => {
         async function updateProjectContent() {
-            const result = await fetchEditProjectContentbyId(
+            const result = await fetchEditProjectContentById(
                 params.project_id,
-                components,
+                chapters,
             );
             if (result.success) {
                 console.log(result.data);
@@ -96,7 +155,33 @@ export default function Builder() {
         if (dataLoaded) {
             updateProjectContent();
         }
+    }, [chapters]);
+
+    useEffect(() => {
+        setChapters((prevChapters) => {
+            return prevChapters.map((chapter, i) => {
+                if (i == selectedChapter) {
+                    chapter.components = components;
+                }
+                return chapter;
+            });
+        });
     }, [components]);
+
+    function reOrderChapterList(e: DragEndEvent) {
+        if (e.over) {
+            if (e.active.id != e.over.id) {
+                const oldIndex = chapters.findIndex(
+                    (chapter) => chapter.id === e.active.id,
+                );
+                const newIndex = chapters.findIndex(
+                    (chapter) => chapter.id === e.over?.id,
+                );
+                setChapters(arrayMove(chapters, oldIndex, newIndex));
+                setSelectedChapter(newIndex);
+            }
+        }
+    }
 
     function reOrderComponentList(e: DragEndEvent) {
         if (e.over) {
@@ -157,196 +242,326 @@ export default function Builder() {
 
     // Function to add a heading component
     const addHeading = () => {
-        const newComponent = generateComponent("heading", "New Heading");
-        setComponents((prevComponents) => [...prevComponents, newComponent]);
-        setLastComponentId(newComponent.id); // Set last component ID
-        setInitializing(false); // Component initialization is complete
+        if (chapters.length > 0) {
+            const newComponent = generateComponent("heading", "New Heading");
+            setComponents((prevComponents) => [
+                ...prevComponents,
+                newComponent,
+            ]);
+            setLastComponentId(newComponent.id); // Set last component ID
+            setSelectedComponent(newComponent.id);
+            setInitializing(false); // Component initialization is complete
+        }
     };
 
     // Function to add an image component
     const addImage = () => {
-        const newComponent = generateComponent("image", "/placeholder.webp");
-        setComponents((prevComponents) => [...prevComponents, newComponent]);
-        setLastComponentId(newComponent.id); // Set last component ID
-        setInitializing(false); // Component initialization is complete
+        if (chapters.length > 0) {
+            const newComponent = generateComponent(
+                "image",
+                "/placeholder.webp",
+            );
+            setComponents((prevComponents) => [
+                ...prevComponents,
+                newComponent,
+            ]);
+            setLastComponentId(newComponent.id); // Set last component ID
+            setSelectedComponent(newComponent.id);
+            setInitializing(false); // Component initialization is complete
+        }
     };
 
     // Function to add a list component
     const addList = () => {
-        const newComponent = generateComponent("list", "Listing");
-        setComponents((prevComponents) => [...prevComponents, newComponent]);
-        setLastComponentId(newComponent.id); // Set last component ID
-        setInitializing(false); // Component initialization is complete
+        if (chapters.length > 0) {
+            const newComponent = generateComponent("list", "Listing");
+            setComponents((prevComponents) => [
+                ...prevComponents,
+                newComponent,
+            ]);
+            setLastComponentId(newComponent.id); // Set last component ID
+            setSelectedComponent(newComponent.id);
+            setInitializing(false); // Component initialization is complete
+        }
     };
 
     // Function to add a paragraph component
     const addParagraph = () => {
-        const newComponent = generateComponent("paragraph", "New paragraph");
-        setComponents((prevComponents) => [...prevComponents, newComponent]);
-        setLastComponentId(newComponent.id); // Set last component ID
-        setInitializing(false); // Component initialization is complete
+        if (chapters.length > 0) {
+            const newComponent = generateComponent(
+                "paragraph",
+                "New paragraph",
+            );
+            setComponents((prevComponents) => [
+                ...prevComponents,
+                newComponent,
+            ]);
+            setLastComponentId(newComponent.id); // Set last component ID
+            setSelectedComponent(newComponent.id);
+            setInitializing(false); // Component initialization is complete
+        }
     };
     return (
-        <div className="relative">
-            <div className="fixed right-8 z-20 w-[280px] grid gap-4">
-                <ComponentAdder
-                    onAddHeading={addHeading}
-                    onAddImage={addImage}
-                    onAddList={addList}
-                    onAddParagraph={addParagraph}
-                />
-                <ComponentStyler
-                    selectedComponent={findComponentById(
-                        components,
-                        selectedComponent,
-                    )}
-                    onStyleChange={(newData) => {
-                        SaveComponent(newData);
-                    }}
-                />
-            </div>
-            <div className="w-full max-w-[920px] mx-auto bg-transparent z-10 relative">
-                <DndContext
-                    sensors={sensors}
-                    onDragEnd={(e) => {
-                        reOrderComponentList(e);
+        <div className="relative grid grid-cols-[270px_minmax(auto,920px)_270px] w-full max-w-[1500px] mx-auto">
+            {showCreateOverlay && (
+                <Overlay
+                    onClose={() => {
+                        setNewChapterName(defaultChapterName);
+                        setErrorMessage("");
+                        setShowCreateOverlay(false);
                     }}
                 >
-                    <SortableContext items={components}>
-                        {components.map((component, i) => {
-                            let componentBlock;
-                            switch (component.type) {
-                                case "heading":
-                                    componentBlock = (
-                                        <div
-                                            key={component.id}
-                                            ref={
-                                                i === components.length - 1
-                                                    ? lastComponentRef
-                                                    : undefined
-                                            }
-                                        >
-                                            <HeadingComponent
-                                                selectedComponentID={
-                                                    selectedComponent
-                                                }
-                                                onSelected={(id) => {
-                                                    console.log("Selected");
-                                                    setSelectedComponent(id);
-                                                }}
-                                                component={component}
-                                                onSave={(newData) => {
-                                                    SaveComponent(newData);
-                                                }}
-                                                onDelete={(ID) => {
-                                                    DeleteComponent(ID);
-                                                }}
-                                            />
-                                        </div>
-                                    );
-                                    break;
-                                case "image":
-                                    componentBlock = (
-                                        <div
-                                            key={component.id}
-                                            ref={
-                                                i === components.length - 1
-                                                    ? lastComponentRef
-                                                    : undefined
-                                            }
-                                        >
-                                            <ImageComponent
-                                                selectedComponentID={
-                                                    selectedComponent
-                                                }
-                                                onSelected={(id) => {
-                                                    console.log("Selected");
-                                                    setSelectedComponent(id);
-                                                }}
-                                                component={component}
-                                                onSave={(newData) => {
-                                                    SaveComponent(newData);
-                                                }}
-                                                onDelete={(ID) => {
-                                                    DeleteComponent(ID);
-                                                }}
-                                            />
-                                        </div>
-                                    );
-                                    break;
-                                case "paragraph":
-                                    componentBlock = (
-                                        <div
-                                            key={component.id}
-                                            ref={
-                                                i === components.length - 1
-                                                    ? lastComponentRef
-                                                    : undefined
-                                            }
-                                        >
-                                            <ParagraphComponent
-                                                selectedComponentID={
-                                                    selectedComponent
-                                                }
-                                                onSelected={(id) => {
-                                                    console.log("Selected");
-                                                    setSelectedComponent(id);
-                                                }}
-                                                component={component}
-                                                onSave={(newData) => {
-                                                    SaveComponent(newData);
-                                                }}
-                                                onDelete={(ID) => {
-                                                    DeleteComponent(ID);
-                                                }}
-                                            />
-                                        </div>
-                                    );
-                                    break;
-                                case "list":
-                                    componentBlock = (
-                                        <div
-                                            key={component.id}
-                                            ref={
-                                                i === components.length - 1
-                                                    ? lastComponentRef
-                                                    : undefined
-                                            }
-                                        >
-                                            <ListComponent
-                                                selectedComponentID={
-                                                    selectedComponent
-                                                }
-                                                onSelected={(id) => {
-                                                    console.log("Selected");
-                                                    setSelectedComponent(id);
-                                                }}
-                                                component={component}
-                                                onSave={(newData) => {
-                                                    SaveComponent(newData);
-                                                }}
-                                                onDelete={(ID) => {
-                                                    DeleteComponent(ID);
-                                                }}
-                                            />
-                                        </div>
-                                    );
-                                    break;
-                                default:
-                                    componentBlock = (
-                                        <ErrorComponent
-                                            component={component}
-                                            key={component.id}
-                                        />
-                                    );
+                    <Card className="w-[300px]">
+                        <h1 className="text-2xl font-bold capitalize text-center">
+                            Create Chapter
+                        </h1>
+                        <h2 className="mt-4 mb-1 font-bold">Chapter Name</h2>
+                        <InputField
+                            defaultValue={newChapterName}
+                            onChange={(e) => {
+                                setNewChapterName(e.target.value);
+                            }}
+                        />
+                        {errorMessage.length > 0 && (
+                            <div className="my-2 py-1 px-3 rounded-sm bg-red-100 ">
+                                <p className="text-red-500">{errorMessage}</p>
+                            </div>
+                        )}
+                        <div className="flex justify-end gap-2 mt-6">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setNewChapterName(defaultChapterName);
+                                    setErrorMessage("");
+                                    setShowCreateOverlay(false);
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={() => {
+                                    const trimmedChapterName =
+                                        newChapterName.trim();
+                                    if (trimmedChapterName.length == 0) {
+                                        setErrorMessage(
+                                            "Chapter name must not be empty",
+                                        );
+                                    } else if (
+                                        trimmedChapterName.length >= 100
+                                    ) {
+                                        setErrorMessage(
+                                            "Chapter name must not be longer than 100 characters",
+                                        );
+                                    } else {
+                                        addChapter();
+                                        setShowCreateOverlay(false);
+                                    }
+                                }}
+                            >
+                                Confirm
+                            </Button>
+                        </div>
+                    </Card>
+                </Overlay>
+            )}
+            <div className="grid gap-2 w-full z-10 relative">
+                <div className="absolute ">
+                    <div className="fixed w-[270px]">
+                        <ChapterManager
+                            onEditChapterName={(chapterID, chapterName) =>
+                                editChapterName(chapterID, chapterName)
                             }
-                            return componentBlock;
-                        })}
-                    </SortableContext>
-                </DndContext>
+                            selectedChapter={selectedChapter}
+                            chapters={chapters}
+                            selectChapterIndex={(index) => {
+                                setSelectedChapter(index);
+                            }}
+                            onCreateChapter={() => setShowCreateOverlay(true)}
+                            onDeleteChapter={(chapterID) =>
+                                deleteChapter(chapterID)
+                            }
+                            moveChapters={(e) => reOrderChapterList(e)}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="z-[5] relative bg-transparent">
+                <div className="w-full px-4">
+                    <DndContext
+                        sensors={sensors}
+                        onDragEnd={(e) => {
+                            reOrderComponentList(e);
+                        }}
+                    >
+                        <SortableContext items={components}>
+                            {components.map((component, i) => {
+                                let componentBlock;
+                                switch (component.type) {
+                                    case "heading":
+                                        componentBlock = (
+                                            <div
+                                                key={component.id}
+                                                ref={
+                                                    i === components.length - 1
+                                                        ? lastComponentRef
+                                                        : undefined
+                                                }
+                                            >
+                                                <HeadingComponent
+                                                    selectedComponentID={
+                                                        selectedComponent
+                                                    }
+                                                    onSelected={(id) => {
+                                                        console.log("Selected");
+                                                        setSelectedComponent(
+                                                            id,
+                                                        );
+                                                    }}
+                                                    component={component}
+                                                    onSave={(newData) => {
+                                                        SaveComponent(newData);
+                                                    }}
+                                                    onDelete={(ID) => {
+                                                        DeleteComponent(ID);
+                                                    }}
+                                                />
+                                            </div>
+                                        );
+                                        break;
+                                    case "image":
+                                        componentBlock = (
+                                            <div
+                                                key={component.id}
+                                                ref={
+                                                    i === components.length - 1
+                                                        ? lastComponentRef
+                                                        : undefined
+                                                }
+                                            >
+                                                <ImageComponent
+                                                    selectedComponentID={
+                                                        selectedComponent
+                                                    }
+                                                    onSelected={(id) => {
+                                                        console.log("Selected");
+                                                        setSelectedComponent(
+                                                            id,
+                                                        );
+                                                    }}
+                                                    component={component}
+                                                    onSave={(newData) => {
+                                                        SaveComponent(newData);
+                                                    }}
+                                                    onDelete={(ID) => {
+                                                        DeleteComponent(ID);
+                                                    }}
+                                                />
+                                            </div>
+                                        );
+                                        break;
+                                    case "paragraph":
+                                        componentBlock = (
+                                            <div
+                                                key={component.id}
+                                                ref={
+                                                    i === components.length - 1
+                                                        ? lastComponentRef
+                                                        : undefined
+                                                }
+                                            >
+                                                <ParagraphComponent
+                                                    selectedComponentID={
+                                                        selectedComponent
+                                                    }
+                                                    onSelected={(id) => {
+                                                        console.log("Selected");
+                                                        setSelectedComponent(
+                                                            id,
+                                                        );
+                                                    }}
+                                                    component={component}
+                                                    onSave={(newData) => {
+                                                        SaveComponent(newData);
+                                                    }}
+                                                    onDelete={(ID) => {
+                                                        DeleteComponent(ID);
+                                                    }}
+                                                />
+                                            </div>
+                                        );
+                                        break;
+                                    case "list":
+                                        componentBlock = (
+                                            <div
+                                                key={component.id}
+                                                ref={
+                                                    i === components.length - 1
+                                                        ? lastComponentRef
+                                                        : undefined
+                                                }
+                                            >
+                                                <ListComponent
+                                                    selectedComponentID={
+                                                        selectedComponent
+                                                    }
+                                                    onSelected={(id) => {
+                                                        console.log("Selected");
+                                                        setSelectedComponent(
+                                                            id,
+                                                        );
+                                                    }}
+                                                    component={component}
+                                                    onSave={(newData) => {
+                                                        SaveComponent(newData);
+                                                    }}
+                                                    onDelete={(ID) => {
+                                                        DeleteComponent(ID);
+                                                    }}
+                                                />
+                                            </div>
+                                        );
+                                        break;
+                                    default:
+                                        componentBlock = (
+                                            <ErrorComponent
+                                                component={component}
+                                                key={component.id}
+                                            />
+                                        );
+                                }
+                                return componentBlock;
+                            })}
+                        </SortableContext>
+                    </DndContext>
+                </div>
+            </div>
+            <div className="w-full z-10 relative">
+                <div className="absolute">
+                    <div className="fixed w-[270px]">
+                        <div className="grid gap-4">
+                            <ComponentAdder
+                                onAddHeading={addHeading}
+                                onAddImage={addImage}
+                                onAddList={addList}
+                                onAddParagraph={addParagraph}
+                            />
+                            <ComponentStyler
+                                selectedComponent={findComponentById(
+                                    components,
+                                    selectedComponent,
+                                )}
+                                onStyleChange={(newData) => {
+                                    SaveComponent(newData);
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
             <div
-                className="w-screen h-screen  fixed top-0 left-0 z-0"
+                className="w-screen h-screen fixed top-0 left-0 z-0"
                 onClick={() => setSelectedComponent("")}
             ></div>
         </div>
