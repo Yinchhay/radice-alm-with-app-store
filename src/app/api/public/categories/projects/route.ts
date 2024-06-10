@@ -5,6 +5,8 @@ import {
 import { getPublicProjectsByCategories } from "@/repositories/project";
 import { NextRequest } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export type GetPublicProjectsByCategoriesReturnType = Awaited<
     ReturnType<typeof getPublicProjectsByCategories>
 >;

@@ -5,6 +5,8 @@ import {
 import { getAllMedias } from "@/repositories/media";
 import { NextRequest } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export type GetPublicMediasReturnType = Awaited<
     ReturnType<typeof getAllMedias>
 >;

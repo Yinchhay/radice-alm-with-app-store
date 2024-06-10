@@ -5,6 +5,8 @@ import {
 import { getAllUsers } from "@/repositories/users";
 import { NextRequest } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export type GetPublicMemberReturnType = Awaited<ReturnType<typeof getAllUsers>>;
 
 export type PublicMember =
