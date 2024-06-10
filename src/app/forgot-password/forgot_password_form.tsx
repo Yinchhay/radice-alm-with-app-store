@@ -3,12 +3,14 @@ import InputField from "@/components/InputField";
 import { useFormStatus } from "react-dom";
 import Button from "@/components/Button";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
     fetchForgotPasswordSendEmail,
     fetchVerifyForgotPasswordCode,
 } from "./fetch";
 import { redirect } from "next/navigation";
+import ReCAPTCHA from "react-google-recaptcha";
+import { RECAPTCHA_KEY } from "@/lib/utils";
 
 export default function ForgotPasswordForm() {
     const [isVerifyForm, setIsVerifyForm] = useState<boolean>(false);
@@ -54,12 +56,23 @@ function EmailForm({
     setEmail: (email: string) => void;
     setIsVerifyCodeForm: () => void;
 }) {
+    const captchaRef = useRef<ReCAPTCHA>(null);
+    const [captchaError, setCaptchaError] = useState<{
+        captcha: string;
+    } | null>(null);
+
     return (
         <form
             className="grid gap-4"
             action={async (formData: FormData) => {
+                if (!captchaRef.current?.getValue()) {
+                    setCaptchaError({ captcha: "Please complete the captcha" });
+                    return;
+                }
+
                 fetchForgotPasswordSendEmail({
                     email: formData.get("email") as string,
+                    captchaToken: captchaRef.current?.getValue() || "",
                 });
 
                 // we don't care about the result, just move to the next form
@@ -82,6 +95,8 @@ function EmailForm({
                     onChange={(e) => setEmail(e.target.value)}
                 />
             </div>
+            <ReCAPTCHA sitekey={RECAPTCHA_KEY} ref={captchaRef} />
+            {captchaError && <FormErrorMessages errors={captchaError} />}
             <div className="flex justify-end gap-2 my-3">
                 <EmailFormButton />
             </div>
@@ -98,6 +113,7 @@ function VerifyCodeForm({
 }) {
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchVerifyForgotPasswordCode>>>();
+    const captchaRef = useRef<ReCAPTCHA>(null);
 
     function onBack() {
         setResult(undefined);
@@ -112,6 +128,7 @@ function VerifyCodeForm({
                     email: email,
                     newPassword: formData.get("newPassword") as string,
                     code: formData.get("code") as string,
+                    captchaToken: captchaRef.current?.getValue() || "",
                 });
                 if (result.success) {
                     redirect(
@@ -139,6 +156,7 @@ function VerifyCodeForm({
                     required
                 />
             </div>
+            <ReCAPTCHA sitekey={RECAPTCHA_KEY} ref={captchaRef} />
             {!result?.success && result?.errors && (
                 <FormErrorMessages errors={result?.errors} />
             )}

@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    env: {
+        RECAPTCHA_KEY: process.env.RECAPTCHA_KEY,
+    },
     images: {
         // temporary
 

@@ -56,10 +56,10 @@ export const createApplicationFormSchema = z.object({
         .max(5000, {
             message: "Reason is must be less than 5000 characters",
         }),
-    cv: z
-        .string()
-        .trim()
-        .max(2083, {
-            message: "Cv is too long, max 2083 characters",
-        })
+    cv: z.string().trim().max(2083, {
+        message: "Cv is too long, max 2083 characters",
+    }),
+    captchaToken: z.string().trim().min(1, {
+        message: "Please complete the captcha",
+    }),
 });

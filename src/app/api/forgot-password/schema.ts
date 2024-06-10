@@ -13,6 +13,9 @@ export const forgotPasswordSchema = z.object({
         .email({
             message: "Invalid email address",
         }),
+    captchaToken: z.string().trim().min(1, {
+        message: "Please complete the captcha",
+    }),
 });
 
 export const verifyForgotPasswordCodeSchema = z.object({
@@ -46,4 +49,7 @@ export const verifyForgotPasswordCodeSchema = z.object({
         .max(255, {
             message: "Password must be less than 255 characters",
         }),
+    captchaToken: z.string().trim().min(1, {
+        message: "Please complete the captcha",
+    }),
 });

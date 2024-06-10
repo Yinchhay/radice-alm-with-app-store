@@ -8,7 +8,7 @@ import { getUserByEmail, updateUserPassword } from "@/repositories/users";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { verifyForgotPasswordCodeSchema } from "..//schema";
-import { formatZodError } from "@/lib/form";
+import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { HttpStatusCode } from "@/types/http";
 import {
     getVerificationCodeByUserIdAndType,
@@ -17,6 +17,7 @@ import {
 import { CodeVerificationType } from "@/drizzle/schema";
 import { sendMail } from "@/smtp/mail";
 import { ErrorMessage } from "@/types/error";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export type FetchVerifyForgotPasswordCodeData = Record<never, never>;
 
@@ -36,6 +37,14 @@ export async function POST(request: NextRequest) {
             );
         }
         body = validationResult.data;
+
+        if (!(await verifyRecaptcha(body.captchaToken))) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("captchaToken", "Captcha is invalid"),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
+        }
 
         const userExists = await getUserByEmail(body.email);
         if (!userExists) {

@@ -15,6 +15,7 @@ import bcrypt from "bcrypt";
 import { lucia } from "@/auth/lucia";
 import { cookies } from "next/headers";
 import { revalidateTags } from "@/lib/server_utils";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export type FetchLoginCredential = {
     sessionId: string;
@@ -36,6 +37,14 @@ export async function POST(request: Request, response: Response) {
             );
         }
         body = validationResult.data;
+
+        if (!(await verifyRecaptcha(body.captchaToken))) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("captchaToken", "Captcha is invalid"),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
+        }
 
         const userExists = await getUserByEmail(body.email);
         if (!userExists) {

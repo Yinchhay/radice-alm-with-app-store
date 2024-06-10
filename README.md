@@ -88,6 +88,10 @@ Run the cypress e2e with specific test file:
 npx cypress run --spec cypress/e2e/file_name.spec.ts
 ```
 
+## Recaptcha
+
+Register your site with [Google Recaptcha](https://www.google.com/recaptcha/admin/create) and get the site key and secret key.
+
 ## Learn More
 
 To learn more about this project tech stack, take a look at the following resources:
