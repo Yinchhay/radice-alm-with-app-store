@@ -3,6 +3,7 @@ import Button from "@/components/Button";
 import InputField from "@/components/InputField";
 import {
     Component,
+    TextAlign,
     fontAligns,
     fontWeights,
     paragraphFontSizes,
@@ -88,7 +89,25 @@ export default function ParagraphComponent({
             <ReactTextareaAutosize
                 spellCheck={false}
                 ref={textRef}
-                className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value} ${component.style && component.style.fontAlign !== undefined ? fontAligns[component.style.fontAlign].value : fontAligns[0].value} w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
+                className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                style={{
+                    fontSize:
+                        component.style &&
+                        component.style.fontSize !== undefined
+                            ? paragraphFontSizes[component.style.fontSize].value
+                            : paragraphFontSizes[1].value,
+                    fontWeight:
+                        component.style &&
+                        component.style.fontWeight !== undefined
+                            ? fontWeights[component.style.fontWeight].value
+                            : fontWeights[1].value,
+                    textAlign:
+                        component.style &&
+                        component.style.fontAlign !== undefined
+                            ? (fontAligns[component.style.fontAlign]
+                                  .value as TextAlign)
+                            : (fontAligns[0].value as TextAlign),
+                }}
                 onClick={() => {
                     if (!isDragging) {
                         onSelected(component.id);

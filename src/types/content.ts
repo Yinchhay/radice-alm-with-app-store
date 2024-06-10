@@ -19,55 +19,62 @@ export interface Component {
     };
 }
 
+export type TextAlign = "left" | "right" | "center" | "justify";
+
 export const headingFontSizes: DropdownElement[] = [
     {
         name: "36",
-        value: "text-3xl",
+        value: "36px",
     },
     {
         name: "40",
-        value: "text-4xl",
+        value: "40px",
     },
     {
         name: "48",
-        value: "text-5xl",
+        value: "48px",
     },
 ];
 export const paragraphFontSizes: DropdownElement[] = [
     {
         name: "16",
-        value: "text-base",
+        value: "16px",
     },
     {
         name: "18",
-        value: "text-lg",
+        value: "18px",
     },
     {
         name: "20",
-        value: "text-xl",
+        value: "20px",
     },
 ];
 export const fontAligns: DropdownElement[] = [
     {
         name: "Left",
-        value: "text-left",
+        value: "start",
     },
     {
         name: "Center",
-        value: "text-center",
+        value: "center",
+    },
+    {
+        name: "Right",
+        value: "end",
     },
 ];
+
 export const fontWeights: DropdownElement[] = [
     {
         name: "Light",
-        value: "font-light",
+        value: "300",
     },
     {
         name: "Normal",
-        value: "font-normal",
+        value: "400",
     },
     {
         name: "Bold",
-        value: "font-bold",
+        value: "700",
     },
 ];
