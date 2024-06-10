@@ -1,36 +1,29 @@
 "use client";
 import InputField from "@/components/InputField";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export default function ProjectSearch({
-    searchDelay = 500,
+    searchDelay = 250,
 }: {
     searchDelay?: number;
 }) {
-    const [search, setSearch] = useState<string>("");
+    const searchRef = useRef<HTMLInputElement>(null);
     const searchParams = useSearchParams();
     const router = useRouter();
 
     const searchDebounced = useDebouncedCallback((value: string) => {
-        setSearch(value);
-    }, searchDelay);
-
-    useEffect(() => {
-        if (searchParams.get("search") == search) {
-            return;
-        }
-
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("search", search);
-
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        newSearchParams.set("search", value);
         router.push(`?${newSearchParams.toString()}`);
-    }, [search]);
+    }, searchDelay);
 
     return (
         <InputField
+            defaultValue={searchParams.get("search") || ""}
             isSearch={true}
+            ref={searchRef}
             placeholder="Search projects"
             onChange={(e) => searchDebounced(e.target.value)}
         />

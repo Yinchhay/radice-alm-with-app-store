@@ -19,6 +19,7 @@ import { DeleteRoleOverlay } from "./delete_role";
 import { fetchRoles } from "./fetch";
 import Link from "next/link";
 import Tooltip from "@/components/Tooltip";
+import NoRole from "./no_role";
 
 type ManageRolesProps = {
     searchParams?: {
@@ -81,8 +82,7 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
                             {result.data.roles.length > 0 ? (
                                 RoleList
                             ) : (
-                                // TODO: style here
-                                <NoRole />
+                                <NoRole page={page} />
                             )}
                         </TableBody>
                     </Table>
@@ -97,16 +97,6 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
                 </div>
             </Suspense>
         </div>
-    );
-}
-
-function NoRole() {
-    return (
-        <>
-            <TableRow>
-                <Cell>No role found in the system!</Cell>
-            </TableRow>
-        </>
     );
 }
 

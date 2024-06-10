@@ -1,18 +1,22 @@
-"use server"
+"use server";
 import { FetchDeletePartner } from "@/app/api/internal/partner/[partner_id]/delete/route";
 import { FetchCreatePartner } from "@/app/api/internal/partner/create/route";
 import { FetchPartnersData } from "@/app/api/internal/partner/route";
 import { createPartnerFormSchema } from "@/app/api/internal/partner/schema";
+import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-export async function fetchPartners(): ResponseJson<FetchPartnersData> {
+export async function fetchPartners(
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_PAGE,
+): ResponseJson<FetchPartnersData> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/partner`,
+            `${await getBaseUrl()}/api/internal/partner?page=${page}&rowsPerPage=${rowsPerPage}`,
             {
                 method: "GET",
                 headers: {

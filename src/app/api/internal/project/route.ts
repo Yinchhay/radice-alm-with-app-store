@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 
         const projectForManageAllProjects =
             await getProjectsForManageAllProjects(page, rowsPerPage, search);
-        const totalRows = await getProjectsForManageAllProjectsTotalRow();
+        const totalRows = await getProjectsForManageAllProjectsTotalRow(search);
 
         return buildSuccessResponse<FetchProjectsForManageAllProjectsData>(
             successMessage,

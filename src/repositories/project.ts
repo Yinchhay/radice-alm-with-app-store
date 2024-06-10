@@ -14,7 +14,16 @@ import {
 } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
-import { eq, sql, or, inArray, count, and, getTableColumns } from "drizzle-orm";
+import {
+    eq,
+    sql,
+    or,
+    inArray,
+    count,
+    and,
+    getTableColumns,
+    like,
+} from "drizzle-orm";
 import { z } from "zod";
 
 export const createProject = async (project: typeof projects.$inferInsert) => {
@@ -149,8 +158,13 @@ export async function getOneAssociatedProject(project_id: number) {
     return project;
 }
 
-export async function getProjectsForManageAllProjectsTotalRow() {
-    const totalRows = await db.select({ count: count() }).from(projects);
+export async function getProjectsForManageAllProjectsTotalRow(
+    search: string = "",
+) {
+    const totalRows = await db
+        .select({ count: count() })
+        .from(projects)
+        .where(like(projects.name, `%${search}%`));
     return totalRows[0].count;
 }
 

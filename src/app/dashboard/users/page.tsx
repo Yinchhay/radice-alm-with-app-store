@@ -15,6 +15,7 @@ import { hasPermission } from "@/lib/IAM";
 import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import { Permissions } from "@/types/IAM";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
+import NoUser from "./no_user";
 
 type ManageUsersProps = {
     searchParams?: {
@@ -68,8 +69,7 @@ export default async function ManageUsers({ searchParams }: ManageUsersProps) {
                             {result.data.users.length > 0 ? (
                                 UserList
                             ) : (
-                                // TODO: style here
-                                <NoUser />
+                                <NoUser page={page} />
                             )}
                         </TableBody>
                     </Table>
@@ -84,16 +84,6 @@ export default async function ManageUsers({ searchParams }: ManageUsersProps) {
                 </div>
             </Suspense>
         </div>
-    );
-}
-
-function NoUser() {
-    return (
-        <>
-            <TableRow>
-                <Cell>No user found in the system!</Cell>
-            </TableRow>
-        </>
     );
 }
 

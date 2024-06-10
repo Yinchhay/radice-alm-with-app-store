@@ -12,6 +12,7 @@ import Pagination from "@/components/Pagination";
 import { DeleteMediaOverlay } from "./delete_media";
 import { EditMediaOverlay } from "./edit_media";
 import { dateToString } from "@/lib/utils";
+import NoMedia from "./no_media";
 
 type ManageMediaProps = {
     searchParams?: {
@@ -82,18 +83,6 @@ export default async function ManageMedia({ searchParams }: ManageMediaProps) {
                 )}
             </Suspense>
         </div>
-    );
-}
-
-function NoMedia({ page }: { page: number }) {
-    let message = `No media found on page ${page}`;
-
-    return (
-        <>
-            <div className="flex flex-col items-center justify-between gap-4 my-4">
-                <h1 className="text-lg">{message}</h1>
-            </div>
-        </>
     );
 }
 

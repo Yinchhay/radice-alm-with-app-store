@@ -1,10 +1,7 @@
 import { Suspense } from "react";
 import Pagination from "@/components/Pagination";
 import Card from "@/components/Card";
-import { IconEye } from "@tabler/icons-react";
-import Button from "@/components/Button";
 import { SuccessResponse } from "@/lib/response";
-import Link from "next/link";
 import { getAuthUser } from "@/auth/lucia";
 import { fileToUrl } from "@/lib/file";
 import ImageWithFallback from "@/components/ImageWithFallback";
@@ -14,9 +11,8 @@ import Tooltip from "@/components/Tooltip";
 import { fetchProjectsForManageAllProjects } from "./fetch";
 import { FetchProjectsForManageAllProjectsData } from "@/app/api/internal/project/route";
 import ProjectSearch from "./search_project";
-import ToggleSwitch from "@/components/ToggleSwitch";
-import { fetchUpdateProjectPublicStatus } from "../projects/[project_id]/settings/fetch";
 import ToggleProjectPublic from "./toggle_project_public";
+import NoProject from "./no_project";
 
 type ManageAllProjectsProps = {
     searchParams?: {
@@ -68,7 +64,7 @@ export default async function ManageAllProject({
                         {ProjectLists}
                     </div>
                 ) : (
-                    <NoProject page={page} search={searchParams?.search} />
+                    <NoProject search={searchParams?.search} page={page} />
                 )}
                 {showPagination && (
                     <div className="float-right mb-4">
@@ -77,22 +73,6 @@ export default async function ManageAllProject({
                 )}
             </Suspense>
         </div>
-    );
-}
-
-function NoProject({ page, search = "" }: { page: number; search?: string }) {
-    let message = `No project found on page ${page}`;
-
-    if (search) {
-        message += ` with search term "${search}"`;
-    }
-
-    return (
-        <>
-            <div className="flex flex-col items-center justify-between gap-4 my-4">
-                <h1 className="text-lg">{message}</h1>
-            </div>
-        </>
     );
 }
 

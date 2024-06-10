@@ -18,6 +18,7 @@ import ImageWithFallback from "@/components/ImageWithFallback";
 import Chip from "@/components/Chip";
 import ChipsHolder from "@/components/ChipsHolder";
 import Tooltip from "@/components/Tooltip";
+import NoAssociatedProject from "./no_associated_project";
 
 type ManageAssociatedProps = {
     searchParams?: {
@@ -69,7 +70,7 @@ export default async function ManageAssociatedProject({
                         {ProjectLists}
                     </div>
                 ) : (
-                    <NoProject page={page} />
+                    <NoAssociatedProject page={page} />
                 )}
                 {showPagination && (
                     <div className="float-right mb-4">
@@ -78,22 +79,6 @@ export default async function ManageAssociatedProject({
                 )}
             </Suspense>
         </div>
-    );
-}
-
-function NoProject({ page }: { page: number }) {
-    let message = `No project found on page ${page}`;
-
-    if (page === 1) {
-        message = "You are not associated with any project.";
-    }
-
-    return (
-        <>
-            <div className="flex flex-col items-center justify-between gap-4 my-4">
-                <h1 className="text-lg">{message}</h1>
-            </div>
-        </>
     );
 }
 

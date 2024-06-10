@@ -16,6 +16,7 @@ import { getAuthUser } from "@/auth/lucia";
 import { Permissions } from "@/types/IAM";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fileToUrl } from "@/lib/file";
+import NoCategory from "./no_category";
 
 type ManageCategoriesProps = {
     searchParams?: {
@@ -87,7 +88,6 @@ export default async function ManageCategories({
                         {result.data.categories.length > 0 ? (
                             CategoryLists
                         ) : (
-                            // TODO: style here
                             <NoCategory page={page} />
                         )}
                     </TableBody>
@@ -99,16 +99,6 @@ export default async function ManageCategories({
                 )}
             </Suspense>
         </div>
-    );
-}
-
-function NoCategory({ page }: { page: number }) {
-    return (
-        <>
-            <TableRow>
-                <Cell>{`No category found in the system for page ${page}!`}</Cell>
-            </TableRow>
-        </>
     );
 }
 
@@ -141,7 +131,10 @@ function Category({
             <Cell>
                 <div
                     className="flex gap-2 justify-end"
-                    key={category.id + new Date(category.updatedAt!).toISOString()}
+                    key={
+                        category.id +
+                        new Date(category.updatedAt!).toISOString()
+                    }
                 >
                     {canEditCategory && (
                         <EditCategoryOverlay category={category} />

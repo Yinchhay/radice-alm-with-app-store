@@ -1,9 +1,10 @@
 import { db } from "@/drizzle/db";
 import { sessions, users } from "@/drizzle/schema";
 import { SALT_ROUNDS } from "@/lib/IAM";
+import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 import bcrypt from "bcrypt";
-import { and, eq, like, sql } from "drizzle-orm";
+import { and, count, eq, like, sql } from "drizzle-orm";
 
 export const createPartner = async (user: typeof users.$inferInsert) => {
     const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
@@ -15,8 +16,24 @@ export const createPartner = async (user: typeof users.$inferInsert) => {
     });
 };
 
-export type GetPartners_C_Tag = `getPartners_C`;
-export const getPartners = async (search: string = "") => {
+export const getPartnersTotalRow = async (search: string = "") => {
+    const totalRows = await db
+        .select({ count: count() })
+        .from(users)
+        .where(
+            and(
+                eq(users.type, UserType.PARTNER),
+                like(users.email, `%${search}%`),
+            ),
+        );
+    return totalRows[0].count;
+};
+
+export const getPartners = async (
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
+) => {
     return await db.query.users.findMany({
         columns: {
             password: false,
@@ -26,6 +43,8 @@ export const getPartners = async (search: string = "") => {
                 eq(table.type, UserType.PARTNER),
                 like(table.email, `%${search}%`),
             ),
+        limit: rowsPerPage,
+        offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,
     });
 };
@@ -46,8 +65,7 @@ export const getAllPartners = async () => {
         columns: {
             password: false,
         },
-        where: (table, { and, eq }) =>
-            and(eq(table.type, UserType.PARTNER)),
+        where: (table, { and, eq }) => and(eq(table.type, UserType.PARTNER)),
     });
 };
 

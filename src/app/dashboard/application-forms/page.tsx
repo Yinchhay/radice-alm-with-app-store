@@ -8,10 +8,10 @@ import { Permissions } from "@/types/IAM";
 import Pagination from "@/components/Pagination";
 import { fileToUrl } from "@/lib/file";
 import Link from "next/link";
-import { dateToString, dateToStringDetail } from "@/lib/utils";
-import Button from "@/components/Button";
+import { dateToStringDetail } from "@/lib/utils";
 import { ApproveApplicationFormOverlay } from "./approve_form";
 import { RejectApplicationFormOverlay } from "./reject_form";
+import NoApplicationForm from "./no_application_form";
 
 type ManageApplicationFormsProps = {
     searchParams?: {
@@ -77,14 +77,6 @@ export default async function ManageApplicationForms({
                     </div>
                 )}
             </Suspense>
-        </div>
-    );
-}
-
-function NoApplicationForm({ page }: { page: number }) {
-    return (
-        <div className="flex flex-col items-center justify-center h-48">
-            <p className="text-lg">{`No application form found in the system for page ${page}!`}</p>
         </div>
     );
 }

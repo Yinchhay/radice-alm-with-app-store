@@ -12,15 +12,31 @@ import { Permissions } from "@/types/IAM";
 import { fetchPartners } from "./fetch";
 import { DeletePartnerOverlay } from "./delete_partner";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
+import NoPartner from "./no_partner";
+import Pagination from "@/components/Pagination";
 
-export default async function ManagePartners() {
+type ManagePartnersProps = {
+    searchParams?: {
+        page?: string;
+    };
+};
+
+
+export default async function ManagePartners({
+    searchParams,
+}: ManagePartnersProps) {
     const user = await getAuthUser();
 
     if (!user) {
         throw new Error("Unauthorized to access this page");
     }
 
-    const result = await fetchPartners();
+    let page = Number(searchParams?.page) || 1;
+    if (page < 1) {
+        page = 1;
+    }
+
+    const result = await fetchPartners(page, 5);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -43,6 +59,9 @@ export default async function ManagePartners() {
         );
     });
 
+    const showPagination =
+    result.data.maxPage >= page && result.data.maxPage > 1;
+
     return (
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
@@ -59,23 +78,17 @@ export default async function ManagePartners() {
                         {result.data.partners.length > 0 ? (
                             PartnerLists
                         ) : (
-                            // TODO: style here
-                            <NoPartner />
+                            <NoPartner page={page}/>
                         )}
                     </TableBody>
                 </Table>
+                {showPagination && (
+                    <div className="float-right">
+                        <Pagination page={page} maxPage={result.data.maxPage} />
+                    </div>
+                )}
             </Suspense>
         </div>
-    );
-}
-
-function NoPartner() {
-    return (
-        <>
-            <TableRow>
-                <Cell>{`No partner found in the system!`}</Cell>
-            </TableRow>
-        </>
     );
 }
 
