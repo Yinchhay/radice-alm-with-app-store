@@ -131,7 +131,6 @@ function Project({
                             {Array.isArray(project.projectCategories) &&
                                 project.projectCategories.map(
                                     (categoryJoin) => {
-                                        // TODO: add tooltip
                                         return (
                                             <Tooltip
                                                 key={categoryJoin.category.id}

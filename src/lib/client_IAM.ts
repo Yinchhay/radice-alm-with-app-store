@@ -21,7 +21,6 @@ export const PermissionNames = new Map<number, string>([
     ],
     [Permissions.CREATE_OWN_PROJECTS, "Create own projects"],
     [Permissions.CHANGE_PROJECT_STATUS, "Change project status"],
-    [Permissions.DELETE_PROJECTS, "Delete projects"],
     [Permissions.CREATE_MEDIA, "Create media"],
     [Permissions.EDIT_MEDIA, "Edit media"],
     [Permissions.DELETE_MEDIA, "Delete media"],

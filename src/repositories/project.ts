@@ -149,6 +149,31 @@ export async function getOneAssociatedProject(project_id: number) {
     return project;
 }
 
+export async function getProjectsForManageAllProjectsTotalRow() {
+    const totalRows = await db.select({ count: count() }).from(projects);
+    return totalRows[0].count;
+}
+
+export async function getProjectsForManageAllProjects(
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
+) {
+    return await db.query.projects.findMany({
+        with: {
+            projectCategories: {
+                with: {
+                    category: true,
+                },
+            },
+        },
+        where: (table, { like }) => like(table.name, `%${search}%`),
+        limit: rowsPerPage,
+        offset: (page - 1) * rowsPerPage,
+        orderBy: sql`id DESC`,
+    });
+}
+
 export async function editProjectContentById(
     project_id: number,
     chapters: string,
@@ -529,7 +554,6 @@ export async function transferProjectOwnership(
             })
             .where(eq(projects.id, projectId));
 
-        
         // if (ownerUserId) {
         //     await tx.insert(projectMembers).values({
         //         projectId: projectId,

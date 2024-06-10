@@ -153,7 +153,9 @@ export const rolePermissions = mysqlTable("role_permissions", {
         .references(() => roles.id),
     permissionId: int("permission_id")
         .notNull()
-        .references(() => permissions.id),
+        .references(() => permissions.id, {
+            onDelete: "cascade",
+        }),
 });
 
 export const rolePermissionsRelations = relations(
@@ -362,7 +364,7 @@ export const projects = mysqlTable("projects", {
     }),
     isPublic: boolean("is_public").default(false),
     projectContent: json("project_content").default([]),
-    links: json("links").$type<ProjectLink[]>(),
+    links: json("links").$type<ProjectLink[]>().default([]),
     pipelineStatus: json("pipeline_status").$type<ProjectPipelineStatus>(),
     userId: varchar("user_id", {
         length: 255,

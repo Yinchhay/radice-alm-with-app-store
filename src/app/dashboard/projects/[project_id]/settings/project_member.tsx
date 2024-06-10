@@ -24,7 +24,7 @@ import { z } from "zod";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 
-export type UserWithoutPassword = Omit<typeof users.$inferSelect, 'password'>
+export type UserWithoutPassword = Omit<typeof users.$inferSelect, "password">;
 
 export type MemberList = {
     member: UserWithoutPassword;
@@ -38,8 +38,8 @@ export default function ProjectMember({
     originalProjectMembers,
 }: {
     project: FetchOneAssociatedProjectData["project"];
-    usersInTheSystem: (UserWithoutPassword)[];
-    originalProjectMembers: (UserWithoutPassword)[];
+    usersInTheSystem: UserWithoutPassword[];
+    originalProjectMembers: UserWithoutPassword[];
 }) {
     if (!project) {
         throw new Error("Project not found");
@@ -188,7 +188,10 @@ export default function ProjectMember({
                         <ColumName>Title</ColumName>
                         <ColumName>Can Edit</ColumName>
                         <ColumName className="flex justify-end font-normal">
-                            <Tooltip title="Add member to project" className="font-normal">
+                            <Tooltip
+                                title="Add member to project"
+                                className="font-normal"
+                            >
                                 <Button
                                     onClick={openSelector}
                                     square={true}

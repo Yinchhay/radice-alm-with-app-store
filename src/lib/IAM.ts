@@ -207,7 +207,6 @@ export const RouteRequiredPermissions = new Map<RouteKey, Set<Permissions>>([
         "manageAllProjects",
         new Set([
             Permissions.CHANGE_PROJECT_STATUS,
-            Permissions.DELETE_PROJECTS,
         ]),
     ],
     [
