@@ -54,7 +54,7 @@ export default function JoinUsForm() {
                             "captchaToken",
                             captchaRef.current?.getValue() || "",
                         );
-
+                        captchaRef.current?.reset();
                         const result =
                             await fetchCreateApplicationForm(formData);
 

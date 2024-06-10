@@ -14,7 +14,7 @@ export const loginCredentialSchema = z.object({
             message: "Email is required",
         })
         .email({
-            message: "Invalid email address",
+            message: "Email address is invalid",
         }),
     password: z
         .string({ required_error: "Password is required" })

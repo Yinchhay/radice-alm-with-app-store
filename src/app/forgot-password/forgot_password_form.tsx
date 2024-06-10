@@ -75,6 +75,7 @@ function EmailForm({
                     captchaToken: captchaRef.current?.getValue() || "",
                 });
 
+                captchaRef.current?.reset();
                 // we don't care about the result, just move to the next form
                 // simulate a delay to make it look like we're doing something xD
                 await new Promise((resolve) => {
@@ -130,6 +131,8 @@ function VerifyCodeForm({
                     code: formData.get("code") as string,
                     captchaToken: captchaRef.current?.getValue() || "",
                 });
+
+                captchaRef.current?.reset();
                 if (result.success) {
                     redirect(
                         "/login?message=Password reset successfully. Please login.",

@@ -361,7 +361,7 @@ export const projects = mysqlTable("projects", {
         length: 2083,
     }),
     isPublic: boolean("is_public").default(false),
-    projectContent: json("project_content"),
+    projectContent: json("project_content").default([]),
     links: json("links").$type<ProjectLink[]>(),
     pipelineStatus: json("pipeline_status").$type<ProjectPipelineStatus>(),
     userId: varchar("user_id", {

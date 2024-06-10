@@ -34,7 +34,7 @@ export const createUserFormSchema = z.object({
             message: "Email must be less than 255 characters",
         })
         .email({
-            message: "Invalid email address",
+            message: "Email address is invalid",
         }),
     password: z
         .string()

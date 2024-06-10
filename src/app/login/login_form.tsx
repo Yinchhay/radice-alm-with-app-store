@@ -26,6 +26,8 @@ export default function LoginForm() {
                         captchaToken: captchaRef.current?.getValue() || "",
                     });
 
+                    captchaRef.current?.reset();
+
                     if (result.success) {
                         redirect("/dashboard/projects");
                     }
