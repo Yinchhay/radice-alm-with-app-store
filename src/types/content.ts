@@ -56,10 +56,6 @@ export const fontAligns: DropdownElement[] = [
         name: "Center",
         value: "text-center",
     },
-    {
-        name: "Right",
-        value: "text-right",
-    },
 ];
 export const fontWeights: DropdownElement[] = [
     {
