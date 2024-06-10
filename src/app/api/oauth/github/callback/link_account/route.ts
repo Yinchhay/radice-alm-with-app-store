@@ -1,13 +1,12 @@
 import { github } from "@/auth/github";
 import { getAuthUser } from "@/auth/lucia";
+import { getBaseUrl } from "@/lib/server_utils";
 import {
     createOauthProvider,
-    getOAuthProviderByGithubId,
     getOAuthProviderByUserId,
 } from "@/repositories/oauth_provider";
 import { updateUserHasLinkedGithubByUserId } from "@/repositories/users";
 import { ErrorMessage } from "@/types/error";
-import { HttpStatusCode } from "@/types/http";
 import { OAuthProviderId } from "@/types/oauth";
 import { UserType } from "@/types/user";
 import { OAuth2RequestError } from "arctic";
@@ -26,12 +25,9 @@ export async function GET(request: Request): Promise<Response> {
     const storedState = cookies().get("github_oauth_state")?.value ?? null;
 
     if (!code || !state || !storedState || state !== storedState) {
-        return new Response(null, {
-            status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-            headers: {
-                Location: "/link_oauth/github?error_message=Bad request",
-            },
-        });
+        return Response.redirect(
+            `${await getBaseUrl()}/link_oauth/github?error_message=Bad request"`,
+        );
     }
 
     try {
@@ -45,22 +41,15 @@ export async function GET(request: Request): Promise<Response> {
 
         const user = await getAuthUser();
         if (!user) {
-            return new Response(null, {
-                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-                headers: {
-                    Location: `/login?type=github&error_message=${ErrorMessage.UserUnauthenticated}`,
-                },
-            });
+            return Response.redirect(
+                `${await getBaseUrl()}/login?type=github&error_message=${ErrorMessage.UserUnauthenticated}`,
+            );
         }
 
         if (user.type !== UserType.USER) {
-            return new Response(null, {
-                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-                headers: {
-                    Location:
-                        "/link_oauth/github?error_message=Your account type cannot link to github account",
-                },
-            });
+            return Response.redirect(
+                `${await getBaseUrl()}/link_oauth/github?error_message=Your account type cannot link to github account`,
+            );
         }
 
         const userHasLinkedGithubOAuth = await getOAuthProviderByUserId(
@@ -78,24 +67,16 @@ export async function GET(request: Request): Promise<Response> {
                     });
                 }
 
-                return new Response(null, {
-                    status: HttpStatusCode.FOUND_302,
-                    headers: {
-                        Location:
-                            "/link_oauth/github?error_message=The github account has already linked to your account",
-                    },
-                });
+                return Response.redirect(
+                    `${await getBaseUrl()}/link_oauth/github?error_message=The github account has already linked to your account`,
+                );
             }
 
             // check if the github account is linked to another user
             if (userHasLinkedGithubOAuth.providerUserId != githubUser.id) {
-                return new Response(null, {
-                    status: HttpStatusCode.FOUND_302,
-                    headers: {
-                        Location:
-                            "/link_oauth/github?error_message=The github account has already linked to another user's account",
-                    },
-                });
+                return Response.redirect(
+                    `${await getBaseUrl()}/link_oauth/github?error_message=The github account has already linked to another user's account`,
+                );
             }
         }
 
@@ -107,13 +88,9 @@ export async function GET(request: Request): Promise<Response> {
             accessToken: tokens.accessToken,
         });
         if (oauthProvider[0].affectedRows < 1) {
-            return new Response(null, {
-                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-                headers: {
-                    Location:
-                        "/link_oauth/github?error_message=Failed to link github",
-                },
-            });
+            return Response.redirect(
+                `${await getBaseUrl()}/link_oauth/github?error_message=Failed to link github`,
+            );
         }
 
         const updateUserHasLinkedGithub =
@@ -121,39 +98,24 @@ export async function GET(request: Request): Promise<Response> {
                 hasLinkedGithub: true,
             });
         if (updateUserHasLinkedGithub[0].affectedRows < 1) {
-            return new Response(null, {
-                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-                headers: {
-                    Location:
-                        "/link_oauth/github?error_message=Failed to link github",
-                },
-            });
+            return Response.redirect(
+                `${await getBaseUrl()}/link_oauth/github?error_message=Failed to link github`,
+            );
         }
 
-        return new Response(null, {
-            status: HttpStatusCode.FOUND_302,
-            headers: {
-                Location:
-                    "/link_oauth/github?message=Linked github successfully",
-            },
-        });
+        return Response.redirect(
+            `${await getBaseUrl()}/link_oauth/github?message=Linked github successfully`,
+        );
     } catch (e) {
         // the specific error message depends on the provider
         if (e instanceof OAuth2RequestError) {
-            return new Response(null, {
-                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-                headers: {
-                    Location: "/link_oauth/github?error_message=Invalid code",
-                },
-            });
+            return Response.redirect(
+                `${await getBaseUrl()}/link_oauth/github?error_message=Invalid code`,
+            );
         }
 
-        return new Response(null, {
-            status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-            headers: {
-                Location:
-                    "/link_oauth/github?error_message=Failed to link github",
-            },
-        });
+        return Response.redirect(
+            `${await getBaseUrl()}/link_oauth/github?error_message=Failed to link github`,
+        );
     }
 }

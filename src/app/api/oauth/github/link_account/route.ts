@@ -25,9 +25,9 @@ export async function GET(request: Request) {
             );
         }
 
-        if (user.type === UserType.PARTNER) {
+        if (user.type !== UserType.USER) {
             return Response.redirect(
-                `${await getBaseUrl()}/link_oauth/github?error_message="Partner cannot link github account"`,
+                `${await getBaseUrl()}/link_oauth/github?error_message="Your account type cannot link to github account"`,
             );
         }
 

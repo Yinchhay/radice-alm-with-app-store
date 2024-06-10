@@ -1,12 +1,11 @@
 import { github } from "@/auth/github";
 import { lucia } from "@/auth/lucia";
-import { revalidateTags } from "@/lib/server_utils";
+import { getBaseUrl, revalidateTags } from "@/lib/server_utils";
 import {
     getOAuthProviderByGithubId,
     updateOAuthProviderAccessTokenById,
 } from "@/repositories/oauth_provider";
 import { GetUserRolesAndRolePermissions_C_Tag } from "@/repositories/users";
-import { HttpStatusCode } from "@/types/http";
 import { OAuth2RequestError } from "arctic";
 import { cookies } from "next/headers";
 
@@ -23,12 +22,9 @@ export async function GET(request: Request): Promise<Response> {
     const storedState = cookies().get("github_oauth_state")?.value ?? null;
 
     if (!code || !state || !storedState || state !== storedState) {
-        return new Response(null, {
-            status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-            headers: {
-                Location: "/login?type=github&error_message=Bad request",
-            },
-        });
+        return Response.redirect(
+            `${await getBaseUrl()}/login?type=github&error_message=Bad request`,
+        );
     }
 
     try {
@@ -45,14 +41,9 @@ export async function GET(request: Request): Promise<Response> {
 
         if (!existingUserOAuthProvider) {
             // if not found, user is not in the system (they must request to join and get accepted by application reviewer first, then login. for the first time login, we will ask the user to connect to github)
-            // Note: use a 3XX code to let the browser know a redirect is required.
-            // ref: https://stackoverflow.com/questions/66108986/nodejs-doesnt-redirect-when-changing-location-header
-            return new Response(null, {
-                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-                headers: {
-                    Location: "/login?type=github&error_message=User not found",
-                },
-            });
+            return Response.redirect(
+                `${await getBaseUrl()}/login?type=github&error_message=User not found`,
+            );
         }
 
         // even though currently we don't need access token, but we store it anyway in case we need to use it.
@@ -78,30 +69,18 @@ export async function GET(request: Request): Promise<Response> {
             `getUserRolesAndRolePermissions_C:${existingUserOAuthProvider.userId}`,
         );
 
-        return new Response(null, {
-            status: HttpStatusCode.FOUND_302,
-            headers: {
-                Location: "/dashboard",
-            },
-        });
+        return Response.redirect(`${await getBaseUrl()}/dashboard`);
     } catch (e) {
         // the specific error message depends on the provider
         if (e instanceof OAuth2RequestError) {
             // invalid code
-            return new Response(null, {
-                status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-                headers: {
-                    Location: "/login?type=github&error_message=Bad request",
-                },
-            });
+            return Response.redirect(
+                `${await getBaseUrl()}/login?type=github&error_message=Bad request`,
+            );
         }
 
-        return new Response(null, {
-            status: HttpStatusCode.TEMPORARY_REDIRECT_307,
-            headers: {
-                Location:
-                    "/login?type=github&error_message=Internal server error",
-            },
-        });
+        return Response.redirect(
+            `${await getBaseUrl()}/login?type=github&error_message=Internal server error`,
+        );
     }
 }
