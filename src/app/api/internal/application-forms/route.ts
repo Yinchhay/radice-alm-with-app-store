@@ -46,14 +46,15 @@ export async function GET(request: NextRequest) {
         let rowsPerPage: number =
             Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
             ROWS_PER_PAGE;
+        const search = request.nextUrl.searchParams.get("search") || "";
 
         // limit to max 100 rows per page
         if (rowsPerPage > 100) {
             rowsPerPage = 100;
         }
 
-        const applicationForms = await getApplicationForms(page, rowsPerPage);
-        const totalRows = await getApplicationFormsTotalRow();
+        const applicationForms = await getApplicationForms(page, rowsPerPage, search);
+        const totalRows = await getApplicationFormsTotalRow(search);
 
         return buildSuccessResponse<FetchApplicationFormsData>(successMessage, {
             applicationForms: applicationForms,

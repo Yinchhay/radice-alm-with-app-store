@@ -19,10 +19,12 @@ import Chip from "@/components/Chip";
 import ChipsHolder from "@/components/ChipsHolder";
 import Tooltip from "@/components/Tooltip";
 import NoAssociatedProject from "./no_associated_project";
+import SearchBar from "@/components/SearchBar";
 
 type ManageAssociatedProps = {
     searchParams?: {
         page?: string;
+        search?: string;
     };
 };
 
@@ -40,7 +42,7 @@ export default async function ManageAssociatedProject({
         page = 1;
     }
 
-    const result = await fetchAssociatedProjects(page, 4);
+    const result = await fetchAssociatedProjects(page, 4, searchParams?.search);
     if (!result.success) {
         console.error(result.message);
         throw new Error(result.message);
@@ -64,6 +66,9 @@ export default async function ManageAssociatedProject({
                 <div className="flex flex-row justify-between">
                     <h1 className="text-2xl">Projects</h1>
                     {canCreateProject && <CreateProjectOverlay />}
+                </div>
+                <div className="mt-4">
+                    <SearchBar placeholder="Search associated projects" />
                 </div>
                 {result.data.projects.length > 0 ? (
                     <div className="my-4 w-full flex gap-4 flex-col">

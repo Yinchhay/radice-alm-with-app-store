@@ -4,7 +4,7 @@ import {
     users,
 } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
-import { and, count, eq, sql } from "drizzle-orm";
+import { and, count, eq, like, sql } from "drizzle-orm";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import bcrypt from "bcrypt";
 import { SALT_ROUNDS } from "@/lib/IAM";
@@ -31,32 +31,33 @@ export const getApplicationFormByEmail = async (email: string) => {
 export const getApplicationForms = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
 ) => {
     return await db.query.applicationForms.findMany({
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,
+        where: (table, { like }) => like(table.firstName, `%${search}%`),
     });
 };
 
-export const getApplicationFormsTotalRow = async () => {
+export const getApplicationFormsTotalRow = async (search: string = "") => {
     const totalRows = await db
         .select({ count: count() })
-        .from(applicationForms);
+        .from(applicationForms)
+        .where(like(applicationForms.firstName, `%${search}%`));
     return totalRows[0].count;
 };
 
-export const rejectApplicationFormById = async (
-    applicationFormId: number,
-) => {
+export const rejectApplicationFormById = async (applicationFormId: number) => {
     return await db.transaction(async (tx) => {
         const af = await tx.query.applicationForms.findFirst({
             where: (table, { eq }) => eq(table.id, applicationFormId),
         });
 
-        await tx.delete(applicationForms).where(
-            eq(applicationForms.id, applicationFormId),
-        );
+        await tx
+            .delete(applicationForms)
+            .where(eq(applicationForms.id, applicationFormId));
 
         return af;
     });

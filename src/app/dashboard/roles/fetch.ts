@@ -28,11 +28,12 @@ import { revalidatePath } from "next/cache";
 export async function fetchRoles(
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
 ): ResponseJson<FetchRolesData> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/role?page=${page}&rowsPerPage=${rowsPerPage}`,
+            `${await getBaseUrl()}/api/internal/role?page=${page}&rowsPerPage=${rowsPerPage}&search=${search}`,
             {
                 method: "GET",
                 headers: {

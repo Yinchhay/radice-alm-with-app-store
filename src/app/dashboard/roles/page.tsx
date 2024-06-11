@@ -20,10 +20,12 @@ import { fetchRoles } from "./fetch";
 import Link from "next/link";
 import Tooltip from "@/components/Tooltip";
 import NoRole from "./no_role";
+import SearchBar from "@/components/SearchBar";
 
 type ManageRolesProps = {
     searchParams?: {
         page?: string;
+        search?: string;
     };
 };
 
@@ -38,7 +40,7 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
         page = 1;
     }
 
-    const result = await fetchRoles(page, ROWS_PER_PAGE);
+    const result = await fetchRoles(page, ROWS_PER_PAGE, searchParams?.search);
 
     if (!result.success) {
         throw new Error(result.message);
@@ -71,6 +73,9 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
             <Suspense fallback={"loading..."}>
                 <div>
                     <h1 className="text-2xl">Manage Roles</h1>
+                    <div className="mt-4">
+                        <SearchBar placeholder="Search roles" />
+                    </div>
                     <Table className="my-4 w-full">
                         <TableHeader>
                             <ColumName className="text-start">Name</ColumName>

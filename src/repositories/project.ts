@@ -71,7 +71,10 @@ export const partnerAssociatedProjectIds = async (
 };
 
 // For pagination
-export const getAssociatedProjectsTotalRowByUserId = async (userId: string) => {
+export const getAssociatedProjectsTotalRowByUserId = async (
+    userId: string,
+    search: string = "",
+) => {
     const memberIds = await memberAssociatedProjectIds(userId);
     const partnerIds = await partnerAssociatedProjectIds(userId);
 
@@ -79,12 +82,15 @@ export const getAssociatedProjectsTotalRowByUserId = async (userId: string) => {
         .select({ count: count() })
         .from(projects)
         .where(
-            or(
-                // check if the user is the owner of the project
-                eq(projects.userId, userId),
-                // if not, check if the user is associated with the project
-                inArray(projects.id, memberIds),
-                inArray(projects.id, partnerIds),
+            and(
+                or(
+                    // check if the user is the owner of the project
+                    eq(projects.userId, userId),
+                    // if not, check if the user is associated with the project
+                    inArray(projects.id, memberIds),
+                    inArray(projects.id, partnerIds),
+                ),
+                like(projects.name, `%${search}%`),
             ),
         );
 
@@ -96,18 +102,22 @@ export const getAssociatedProjectsByUserId = async (
     userId: string,
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
 ) => {
     const memberIds = await memberAssociatedProjectIds(userId);
     const partnerIds = await partnerAssociatedProjectIds(userId);
 
     return db.query.projects.findMany({
-        where: (table, { or, inArray }) =>
-            or(
-                // check if the user is the owner of the project
-                eq(table.userId, userId),
-                // if not, check if the user is associated with the project
-                inArray(table.id, memberIds),
-                inArray(table.id, partnerIds),
+        where: (table, { or, inArray, and }) =>
+            and(
+                or(
+                    // check if the user is the owner of the project
+                    eq(table.userId, userId),
+                    // if not, check if the user is associated with the project
+                    inArray(table.id, memberIds),
+                    inArray(table.id, partnerIds),
+                ),
+                like(table.name, `%${search}%`),
             ),
         with: {
             projectCategories: {

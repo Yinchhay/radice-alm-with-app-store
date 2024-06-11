@@ -16,10 +16,12 @@ import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import { Permissions } from "@/types/IAM";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 import NoUser from "./no_user";
+import SearchBar from "@/components/SearchBar";
 
 type ManageUsersProps = {
     searchParams?: {
         page?: string;
+        search?: string;
     };
 };
 
@@ -35,7 +37,7 @@ export default async function ManageUsers({ searchParams }: ManageUsersProps) {
         page = 1;
     }
 
-    const result = await fetchUsers(page, ROWS_PER_PAGE);
+    const result = await fetchUsers(page, ROWS_PER_PAGE, searchParams?.search);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -57,6 +59,9 @@ export default async function ManageUsers({ searchParams }: ManageUsersProps) {
             <Suspense fallback={"loading..."}>
                 <div>
                     <h1 className="text-2xl">Manage Users</h1>
+                    <div className="mt-4">
+                        <SearchBar placeholder="Search users" />
+                    </div>
                     <Table className="my-4 w-full">
                         <TableHeader>
                             <ColumName className="text-start">Name</ColumName>

@@ -12,11 +12,12 @@ import { z } from "zod";
 export async function fetchPartners(
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
 ): ResponseJson<FetchPartnersData> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/partner?page=${page}&rowsPerPage=${rowsPerPage}`,
+            `${await getBaseUrl()}/api/internal/partner?page=${page}&rowsPerPage=${rowsPerPage}&search=${search}`,
             {
                 method: "GET",
                 headers: {

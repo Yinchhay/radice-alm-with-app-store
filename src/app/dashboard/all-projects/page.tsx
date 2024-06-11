@@ -10,9 +10,9 @@ import ChipsHolder from "@/components/ChipsHolder";
 import Tooltip from "@/components/Tooltip";
 import { fetchProjectsForManageAllProjects } from "./fetch";
 import { FetchProjectsForManageAllProjectsData } from "@/app/api/internal/project/route";
-import ProjectSearch from "./search_project";
 import ToggleProjectPublic from "./toggle_project_public";
 import NoProject from "./no_project";
+import SearchBar from "@/components/SearchBar";
 
 type ManageAllProjectsProps = {
     searchParams?: {
@@ -57,7 +57,7 @@ export default async function ManageAllProject({
             <Suspense fallback={"loading..."}>
                 <h1 className="text-2xl">Manage all projects</h1>
                 <div className="mt-4">
-                    <ProjectSearch />
+                    <SearchBar placeholder="Search projects" />
                 </div>
                 {result.data.projects.length > 0 ? (
                     <div className="my-4 w-full flex gap-4 flex-col">

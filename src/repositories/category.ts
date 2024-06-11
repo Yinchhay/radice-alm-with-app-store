@@ -1,7 +1,7 @@
 import { db } from "@/drizzle/db";
 import { categories, projectCategories, projects } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { count, eq, sql } from "drizzle-orm";
+import { count, eq, like, sql } from "drizzle-orm";
 
 export const createCategory = async (
     category: typeof categories.$inferInsert,
@@ -37,18 +37,21 @@ export type GetCategories_C_Tag = `getCategories_C`;
 export const getCategories = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
-    // search: string = "",
+    search: string = "",
 ) => {
     return await db.query.categories.findMany({
-        // where: (table, { like }) => like(table.name, `%${search}%`),
+        where: (table, { like }) => like(table.name, `%${search}%`),
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,
     });
 };
 
-export const getCategoriesTotalRow = async () => {
-    const totalRows = await db.select({ count: count() }).from(categories);
+export const getCategoriesTotalRow = async (search: string = "") => {
+    const totalRows = await db
+        .select({ count: count() })
+        .from(categories)
+        .where(like(categories.name, `%${search}%`));
     return totalRows[0].count;
 };
 

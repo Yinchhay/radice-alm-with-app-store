@@ -17,10 +17,12 @@ import { Permissions } from "@/types/IAM";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fileToUrl } from "@/lib/file";
 import NoCategory from "./no_category";
+import SearchBar from "@/components/SearchBar";
 
 type ManageCategoriesProps = {
     searchParams?: {
         page?: string;
+        search?: string;
     };
 };
 
@@ -38,7 +40,7 @@ export default async function ManageCategories({
         page = 1;
     }
 
-    const result = await fetchCategories(page, 5);
+    const result = await fetchCategories(page, 5, searchParams?.search);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -75,6 +77,9 @@ export default async function ManageCategories({
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
                 <h1 className="text-2xl">Category</h1>
+                <div className="mt-4">
+                    <SearchBar placeholder="Search categories" />
+                </div>
                 <Table className="my-4 w-full">
                     <TableHeader>
                         <ColumName>Logo</ColumName>
@@ -93,7 +98,7 @@ export default async function ManageCategories({
                     </TableBody>
                 </Table>
                 {showPagination && (
-                    <div className="float-right">
+                    <div className="float-right mb-4">
                         <Pagination page={page} maxPage={result.data.maxPage} />
                     </div>
                 )}

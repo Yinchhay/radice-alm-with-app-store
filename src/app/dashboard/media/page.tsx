@@ -13,10 +13,12 @@ import { DeleteMediaOverlay } from "./delete_media";
 import { EditMediaOverlay } from "./edit_media";
 import { dateToString } from "@/lib/utils";
 import NoMedia from "./no_media";
+import SearchBar from "@/components/SearchBar";
 
 type ManageMediaProps = {
     searchParams?: {
         page?: string;
+        search?: string;
     };
 };
 
@@ -32,7 +34,7 @@ export default async function ManageMedia({ searchParams }: ManageMediaProps) {
         page = 1;
     }
 
-    const result = await fetchMedia(page, 9);
+    const result = await fetchMedia(page, 5, searchParams?.search);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -68,6 +70,9 @@ export default async function ManageMedia({ searchParams }: ManageMediaProps) {
                 <div className="flex flex-row justify-between">
                     <h1 className="text-2xl">Media</h1>
                     {canCreateMedia && <CreateMediaOverlay />}
+                </div>
+                <div className="mt-4">
+                    <SearchBar placeholder="Search media" />
                 </div>
                 {result.data.medias.length > 0 ? (
                     <div className="my-4 w-full flex gap-4 flex-col">

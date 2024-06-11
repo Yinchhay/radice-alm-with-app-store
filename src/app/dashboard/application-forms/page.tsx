@@ -12,10 +12,12 @@ import { dateToStringDetail } from "@/lib/utils";
 import { ApproveApplicationFormOverlay } from "./approve_form";
 import { RejectApplicationFormOverlay } from "./reject_form";
 import NoApplicationForm from "./no_application_form";
+import SearchBar from "@/components/SearchBar";
 
 type ManageApplicationFormsProps = {
     searchParams?: {
         page?: string;
+        search?: string;
     };
 };
 
@@ -33,7 +35,7 @@ export default async function ManageApplicationForms({
         page = 1;
     }
 
-    const result = await fetchApplicationForms(page, 5);
+    const result = await fetchApplicationForms(page, 5, searchParams?.search);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -64,6 +66,9 @@ export default async function ManageApplicationForms({
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
                 <h1 className="text-2xl">Application Forms</h1>
+                <div className="mt-4">
+                    <SearchBar placeholder="Search application forms" />
+                </div>
                 {result.data.applicationForms.length > 0 ? (
                     <div className="my-4 w-full flex gap-4 flex-col">
                         {ApplicationFormLists}
@@ -71,8 +76,8 @@ export default async function ManageApplicationForms({
                 ) : (
                     <NoApplicationForm page={page} />
                 )}
-                {showPagination && (
-                    <div className="float-right">
+               {showPagination && (
+                    <div className="float-right mb-4">
                         <Pagination page={page} maxPage={result.data.maxPage} />
                     </div>
                 )}

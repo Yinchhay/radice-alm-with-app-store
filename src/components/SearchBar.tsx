@@ -4,9 +4,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-export default function ProjectSearch({
+export default function SearchBar({
+    placeholder = "",
     searchDelay = 250,
 }: {
+    placeholder?: string;
     searchDelay?: number;
 }) {
     const searchRef = useRef<HTMLInputElement>(null);
@@ -24,7 +26,7 @@ export default function ProjectSearch({
             defaultValue={searchParams.get("search") || ""}
             isSearch={true}
             ref={searchRef}
-            placeholder="Search projects"
+            placeholder={placeholder}
             onChange={(e) => searchDebounced(e.target.value)}
         />
     );

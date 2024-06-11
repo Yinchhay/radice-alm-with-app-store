@@ -1,7 +1,7 @@
 import { db } from "@/drizzle/db";
 import { users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
-import { eq, count, sql, and } from "drizzle-orm";
+import { eq, count, sql, and, like } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
@@ -113,21 +113,21 @@ export const getAllUsers = async () => {
     });
 };
 
-export const getUsersBySearch = async (search: string, rowsPerPage: number = ROWS_PER_PAGE) => {
+export const getUsersBySearch = async (
+    search: string,
+    rowsPerPage: number = ROWS_PER_PAGE,
+) => {
     return await db.query.users.findMany({
         columns: {
             password: false,
             createdAt: false,
             updatedAt: false,
         },
-        where: (table, { eq, and, like, or }) =>
+        where: (table, { eq, and, like }) =>
             and(
                 eq(table.type, UserType.USER),
                 eq(table.hasLinkedGithub, hasLinkedGithub),
-                or(
-                    like(table.firstName, `%${search}%`),
-                    like(table.lastName, `%${search}%`),
-                ),
+                like(table.firstName, `%${search}%`),
             ),
         limit: rowsPerPage,
     });
@@ -158,6 +158,7 @@ export const getUserById = async (userId: string) => {
 export const getUsers = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
 ) => {
     return await db.query.users.findMany({
         limit: rowsPerPage,
@@ -166,18 +167,22 @@ export const getUsers = async (
         columns: {
             password: false,
         },
-        where: (table, { eq }) => eq(table.type, UserType.USER),
+        where: (table, { eq, and, like }) =>
+            and(
+                eq(table.type, UserType.USER),
+                like(table.firstName, `%${search}%`),
+            ),
     });
 };
 
-export const getUsersTotalRow = async () => {
+export const getUsersTotalRow = async (search: string = "") => {
     const totalRows = await db
         .select({ count: count() })
         .from(users)
         .where(
             and(
                 eq(users.type, UserType.USER),
-                // eq(users.hasLinkedGithub, hasLinkedGithub),
+                like(users.firstName, `%${search}%`),
             ),
         );
     return totalRows[0].count;

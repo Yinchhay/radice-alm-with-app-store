@@ -14,13 +14,14 @@ import { DeletePartnerOverlay } from "./delete_partner";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 import NoPartner from "./no_partner";
 import Pagination from "@/components/Pagination";
+import SearchBar from "@/components/SearchBar";
 
 type ManagePartnersProps = {
     searchParams?: {
         page?: string;
+        search?: string;
     };
 };
-
 
 export default async function ManagePartners({
     searchParams,
@@ -36,7 +37,7 @@ export default async function ManagePartners({
         page = 1;
     }
 
-    const result = await fetchPartners(page, 5);
+    const result = await fetchPartners(page, 5, searchParams?.search);
     if (!result.success) {
         throw new Error(result.message);
     }
@@ -60,12 +61,15 @@ export default async function ManagePartners({
     });
 
     const showPagination =
-    result.data.maxPage >= page && result.data.maxPage > 1;
+        result.data.maxPage >= page && result.data.maxPage > 1;
 
     return (
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
                 <h1 className="text-2xl">Partner</h1>
+                <div className="mt-4">
+                    <SearchBar placeholder="Search partners" />
+                </div>
                 <Table className="my-4 w-full">
                     <TableHeader>
                         <ColumName>Name</ColumName>
@@ -78,12 +82,12 @@ export default async function ManagePartners({
                         {result.data.partners.length > 0 ? (
                             PartnerLists
                         ) : (
-                            <NoPartner page={page}/>
+                            <NoPartner page={page} />
                         )}
                     </TableBody>
                 </Table>
-                {showPagination && (
-                    <div className="float-right">
+               {showPagination && (
+                    <div className="float-right mb-4">
                         <Pagination page={page} maxPage={result.data.maxPage} />
                     </div>
                 )}

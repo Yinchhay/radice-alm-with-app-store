@@ -220,7 +220,7 @@ export default function ProjectMember({
                         className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto"
                         selectorTitle="Add members to project"
                         searchPlaceholder="Search members"
-                        checkListTitle="Users"
+                        checkListTitle="Members"
                         checkList={itemsCheckList || []}
                         onSearchChange={onSearchChange}
                         onCancel={onCloseSelector}

@@ -43,11 +43,12 @@ export async function fetchCreateProject(
 export async function fetchAssociatedProjects(
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
 ): ResponseJson<FetchAssociatedProjectsData> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/project/associate?page=${page}&rowsPerPage=${rowsPerPage}`,
+            `${await getBaseUrl()}/api/internal/project/associate?page=${page}&rowsPerPage=${rowsPerPage}&search=${search}`,
             {
                 method: "GET",
                 headers: {

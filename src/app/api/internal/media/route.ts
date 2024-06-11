@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         let rowsPerPage: number =
             Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
             ROWS_PER_PAGE;
-        const mediaSearch = request.nextUrl.searchParams.get("search") || "";
+        const search = request.nextUrl.searchParams.get("search") || "";
 
         // limit to max 100 rows per page
         if (rowsPerPage > 100) {
@@ -51,9 +51,9 @@ export async function GET(request: NextRequest) {
         const medias = await getMedias(
             page,
             rowsPerPage,
-            mediaSearch,
+            search,
         );
-        const totalRows = await getMediasTotalRow();
+        const totalRows = await getMediasTotalRow(search);
 
         return buildSuccessResponse<FetchMediasData>(successMessage, {
             medias: medias,

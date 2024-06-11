@@ -1,7 +1,7 @@
 import { db } from "@/drizzle/db";
 import { roles, userRoles, users, rolePermissions } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { count, eq, sql, and, inArray } from "drizzle-orm";
+import { count, eq, sql, and, inArray, like } from "drizzle-orm";
 
 export const createRole = async (role: typeof roles.$inferInsert) => {
     return await db.insert(roles).values(role);
@@ -37,16 +37,21 @@ export type GetRoles_C_Tag = `getRoles_C`;
 export const getRoles = async (
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
+    search: string = "",
 ) => {
     return await db.query.roles.findMany({
+        where: (table, { like }) => like(table.name, `%${search}%`),
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,
     });
 };
 
-export const getRolesTotalRow = async () => {
-    const totalRows = await db.select({ count: count() }).from(roles);
+export const getRolesTotalRow = async (search: string = "") => {
+    const totalRows = await db
+        .select({ count: count() })
+        .from(roles)
+        .where(like(roles.name, `%${search}%`));
     return totalRows[0].count;
 };
 

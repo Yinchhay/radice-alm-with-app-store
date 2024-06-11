@@ -62,6 +62,7 @@ export async function GET(request: NextRequest) {
         let rowsPerPage: number =
             Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
             ROWS_PER_PAGE;
+        const search = request.nextUrl.searchParams.get("search") || "";
 
         // limit to max 100 rows per page
         if (rowsPerPage > 100) {
@@ -72,8 +73,9 @@ export async function GET(request: NextRequest) {
             user.id,
             page,
             rowsPerPage,
+            search,
         );
-        const totalRows = await getAssociatedProjectsTotalRowByUserId(user.id);
+        const totalRows = await getAssociatedProjectsTotalRowByUserId(user.id, search);
 
         return buildSuccessResponse<FetchAssociatedProjectsData>(
             successMessage,

@@ -40,9 +40,10 @@ export async function GET(request: NextRequest) {
         const rowsPerPage: number =
             Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
             ROWS_PER_PAGE;
+        const search = request.nextUrl.searchParams.get("search") || "";
 
-        const roles = await getRoles(page, rowsPerPage);
-        const totalRows = await getRolesTotalRow();
+        const roles = await getRoles(page, rowsPerPage, search);
+        const totalRows = await getRolesTotalRow(search);
 
         return buildSuccessResponse<FetchRolesData>(successMessage, {
             roles: roles,

@@ -1,7 +1,7 @@
 import { media } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { count, eq, sql } from "drizzle-orm";
+import { count, eq, like, sql } from "drizzle-orm";
 import { editMediaSchema } from "@/app/api/internal/media/schema";
 import { z } from "zod";
 
@@ -14,7 +14,7 @@ export const getAllMedias = async () => {
         columns: {
             createdAt: false,
             updatedAt: false,
-        }
+        },
     });
 };
 
@@ -31,8 +31,11 @@ export const getMedias = async (
     });
 };
 
-export const getMediasTotalRow = async () => {
-    const totalRows = await db.select({ count: count() }).from(media);
+export const getMediasTotalRow = async (search: string = "") => {
+    const totalRows = await db
+        .select({ count: count() })
+        .from(media)
+        .where(like(media.title, `%${search}%`));
     return totalRows[0].count;
 };
 

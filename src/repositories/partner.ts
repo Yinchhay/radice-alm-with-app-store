@@ -23,7 +23,7 @@ export const getPartnersTotalRow = async (search: string = "") => {
         .where(
             and(
                 eq(users.type, UserType.PARTNER),
-                like(users.email, `%${search}%`),
+                like(users.firstName, `%${search}%`),
             ),
         );
     return totalRows[0].count;
@@ -41,7 +41,7 @@ export const getPartners = async (
         where: (table) =>
             and(
                 eq(table.type, UserType.PARTNER),
-                like(table.email, `%${search}%`),
+                like(table.firstName, `%${search}%`),
             ),
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
@@ -79,13 +79,10 @@ export const getPartnersBySearch = async (
             createdAt: false,
             updatedAt: false,
         },
-        where: (table, { eq, and, like, or }) =>
+        where: (table, { eq, and, like }) =>
             and(
                 eq(table.type, UserType.PARTNER),
-                or(
-                    like(table.firstName, `%${search}%`),
-                    like(table.lastName, `%${search}%`),
-                ),
+                like(table.firstName, `%${search}%`),
             ),
         limit: rowsPerPage,
     });

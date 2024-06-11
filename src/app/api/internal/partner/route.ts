@@ -41,15 +41,15 @@ export async function GET(request: NextRequest) {
         let rowsPerPage: number =
             Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
             ROWS_PER_PAGE;
-        // const categorySearch = request.nextUrl.searchParams.get("search") || "";
+        const search = request.nextUrl.searchParams.get("search") || "";
 
         // limit to max 100 rows per page
         if (rowsPerPage > 100) {
             rowsPerPage = 100;
         }
 
-        const partners = await getPartners(page, rowsPerPage);
-        const totalRows = await getPartnersTotalRow();
+        const partners = await getPartners(page, rowsPerPage, search);
+        const totalRows = await getPartnersTotalRow(search);
 
         return buildSuccessResponse<FetchPartnersData>(successMessage, {
             partners: partners,
