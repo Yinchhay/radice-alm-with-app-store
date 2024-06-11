@@ -32,7 +32,6 @@ function singleton<Value>(name: string, value: () => Value): Value {
     return globalAny.__singletons[name];
 }
 
-// Function to create the database connection and apply migrations if needed
 export function createDatabaseConnection() {
     const poolConnection = mysql.createPool(connectionConfig);
     return drizzle(poolConnection, {

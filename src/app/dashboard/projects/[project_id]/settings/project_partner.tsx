@@ -24,6 +24,7 @@ import { usePathname } from "next/navigation";
 import { UserWithoutPassword } from "./project_member";
 import Tooltip from "@/components/Tooltip";
 import { useSelector } from "@/hooks/useSelector";
+import { localDebug } from "@/lib/utils";
 
 export type PartnerList = {
     partner: UserWithoutPassword;
@@ -41,9 +42,16 @@ export default function ProjectPartner({
     }
 
     async function fetchPartnersBySearchCallback(search: string) {
-        const response = await fetchPartnersBySearch(search, 10);
-        if (response.success) {
-            return response.data.partners as UserWithoutPassword[];
+        try {
+            const response = await fetchPartnersBySearch(search, 10);
+            if (response.success) {
+                return response.data.partners as UserWithoutPassword[];
+            }
+        } catch (error) {
+            localDebug(
+                "Error fetching partner by search",
+                "project_partner.tsx",
+            );
         }
 
         return [];

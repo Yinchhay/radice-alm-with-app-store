@@ -22,6 +22,7 @@ import { z } from "zod";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import { useSelector } from "@/hooks/useSelector";
+import { localDebug } from "@/lib/utils";
 
 export type UserWithoutPassword = Omit<typeof users.$inferSelect, "password">;
 
@@ -45,9 +46,13 @@ export default function ProjectMember({
     const pathname = usePathname();
 
     async function fetchUsersBySearchCallback(search: string) {
-        const response = await fetchUsersBySearch(search, 10);
-        if (response.success) {
-            return response.data.users as UserWithoutPassword[];
+        try {
+            const response = await fetchUsersBySearch(search, 10);
+            if (response.success) {
+                return response.data.users as UserWithoutPassword[];
+            }
+        } catch (error) {
+            localDebug("Error fetching users by search", "project_member.tsx");
         }
 
         return [];
@@ -213,8 +218,8 @@ export default function ProjectMember({
                 {showSelectorOverlay && (
                     <Selector
                         className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto"
-                        selectorTitle="Add users to project"
-                        searchPlaceholder="Search users"
+                        selectorTitle="Add members to project"
+                        searchPlaceholder="Search members"
                         checkListTitle="Users"
                         checkList={itemsCheckList || []}
                         onSearchChange={onSearchChange}

@@ -22,6 +22,7 @@ import Chip from "@/components/Chip";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
 import { useSelector } from "@/hooks/useSelector";
+import { localDebug } from "@/lib/utils";
 
 export default function ProjectDetail({
     project,
@@ -44,9 +45,16 @@ export default function ProjectDetail({
     const projectDescription = useRef<HTMLTextAreaElement>(null);
 
     async function fetchCategoriesBySearchCallback(search: string) {
-        const response = await fetchCategoriesBySearch(search, 10);
-        if (response.success) {
-            return response.data.categories;
+        try {
+            const response = await fetchCategoriesBySearch(search, 10);
+            if (response.success) {
+                return response.data.categories;
+            }
+        } catch (error) {
+            localDebug(
+                "Error fetching categories by search",
+                "project_detail.tsx",
+            );
         }
 
         return [];

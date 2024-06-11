@@ -15,11 +15,15 @@ export function useSelector<T>(
         nameKey,
         valueKey,
     ).map((item) => ({ ...item, checked: true }));
+
     const [items, setItems] = useState<T[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>("");
 
     const [itemsCheckList, setItemsCheckList] = useState<CheckBoxElement[]>([]);
+
+    // obj store to allow he user use this variable to check for object details
     const [checkedItemsValues, setCheckedItemsValues] = useState<T[]>([]);
+
     const [checkedItems, setCheckedItems] = useState<CheckBoxElement[]>(
         originalSelectedCheckList,
     );
@@ -31,6 +35,8 @@ export function useSelector<T>(
         fetchedList: CheckBoxElement[],
         checkedList: CheckBoxElement[],
     ): CheckBoxElement[] {
+        // merge fetchedList with checkedList
+        // also prioritize checkedList over fetchedList
         const combinedList = fetchedList.map((fetchedItem) => {
             const checkedItem = checkedList.find(
                 (item) => item.value === fetchedItem.value,
@@ -40,6 +46,7 @@ export function useSelector<T>(
                 : fetchedItem;
         });
 
+        // remove duplicates
         checkedList.forEach((checkedItem) => {
             if (
                 !combinedList.find((item) => item.value === checkedItem.value)
@@ -61,12 +68,19 @@ export function useSelector<T>(
         const mergedCheckList = mergeAndRemoveDuplicates(icl, checkedItems);
         saveCheckedItemsValues(itemsFetched);
 
-        setItemsCheckList([...mergedCheckList]);
+        // if we don't filter by search, it will show the checked items as well even tho it doesn't match the search term
+        const filteredBySearch = mergedCheckList.filter((item) =>
+            item.name.toLowerCase().includes(search.toLowerCase()),
+        );
+        setItemsCheckList([...filteredBySearch]);
     }
 
     useEffect(() => {
         if (items.length === 0) {
             onSearchChange("");
+
+            // store the original selected items to checkedItemsValues in case fetch does not return selected items
+            saveCheckedItemsValues(originalSelectedItems);
         }
     }, []);
 
@@ -74,9 +88,13 @@ export function useSelector<T>(
     function saveCheckedItemsValues(fetchedItems: T[] = items) {
         // append obj value to checkedItemsValues. we basically append only, no remove
         const newCheckedItemsValues = fetchedItems
+            // filter take only the items that are checked
             .filter((item) =>
-                checkedItems.find((checkedItem) => checkedItem.value === item[valueKey]),
+                checkedItems.find(
+                    (checkedItem) => checkedItem.value === item[valueKey],
+                ),
             )
+            // filter out the items that are already in checkedItemsValues to avoid duplicates
             .filter((item) => !checkedItemsValues.includes(item));
         setCheckedItemsValues((prev) => [...prev, ...newCheckedItemsValues]);
     }
@@ -108,9 +126,6 @@ export function useSelector<T>(
     }
 
     function onConfirm() {
-        const newCheckedItems = itemsCheckList.filter((item) => item.checked);
-        setCheckedItems(newCheckedItems);
-
         setShowSelectorOverlay(false);
     }
 
@@ -127,8 +142,20 @@ export function useSelector<T>(
         );
     }
 
-    function onCheckChange(updatedList: CheckBoxElement[], updatedItem: CheckBoxElement) {
-        setCheckedItems(updatedList.filter((item) => item.checked));
+    function onCheckChange(
+        updatedList: CheckBoxElement[],
+        updatedItem: CheckBoxElement,
+    ) {
+        // using updatedItem to ensure data is updated and consistency
+        if (updatedItem.checked) {
+            setCheckedItems((prev) => [...prev, updatedItem]);
+            return;
+        }
+
+        const newCheckedItems = checkedItems.filter(
+            (item) => item.value !== updatedItem.value,
+        );
+        setCheckedItems(newCheckedItems);
     }
 
     useEffect(() => {
