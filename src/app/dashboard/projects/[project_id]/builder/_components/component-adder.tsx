@@ -16,10 +16,10 @@ export default function ComponentAdder({
     return (
         <Card>
             <h1 className="font-bold text-lg mb-2">Components</h1>
-            <div className="grid grid-cols-3 gap-4 font-bold">
+            <div className="grid grid-cols-3 gap-4">
                 <Tooltip title="Heading" className="w-full" position="bottom">
                     <Button
-                        className="w-full text-lg"
+                        className="w-full text-lg font-bold"
                         square={true}
                         onClick={onAddHeading}
                     >
@@ -28,7 +28,7 @@ export default function ComponentAdder({
                 </Tooltip>
                 <Tooltip title="Image" className="w-full" position="bottom">
                     <Button
-                        className="w-full text-lg"
+                        className="w-full text-lg font-bold"
                         square={true}
                         onClick={onAddImage}
                     >
@@ -37,7 +37,7 @@ export default function ComponentAdder({
                 </Tooltip>
                 <Tooltip title="Paragraph" className="w-full" position="bottom">
                     <Button
-                        className="w-full text-lg"
+                        className="w-full text-lg font-bold"
                         square={true}
                         onClick={onAddParagraph}
                     >
@@ -46,7 +46,7 @@ export default function ComponentAdder({
                 </Tooltip>
                 <Tooltip title="List" className="w-full" position="bottom">
                     <Button
-                        className="w-full text-lg"
+                        className="w-full text-lg font-bold"
                         square={true}
                         onClick={onAddList}
                     >

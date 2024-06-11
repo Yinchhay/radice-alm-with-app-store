@@ -101,8 +101,8 @@ export function fileToUrl(file: string | null | undefined): string {
         return "/placeholder.webp";
     }
 
-    const fileStarsWith = ["http", "/"];
-    if (fileStarsWith.some((fsw) => file.startsWith(fsw))) {
+    const fileStartsWith = ["http", "/", "blob:"];
+    if (fileStartsWith.some((fsw) => file.startsWith(fsw))) {
         return file;
     }
 

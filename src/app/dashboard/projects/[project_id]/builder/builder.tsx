@@ -140,10 +140,8 @@ export default function Builder() {
     }, []);
 
     useEffect(() => {
-        console.log(selectedChapter);
         if (chapters.length > 0 && selectedChapter !== null) {
             setComponents(chapters[selectedChapter].components);
-            setSelectedComponent("");
         }
     }, [selectedChapter]);
 
@@ -321,60 +319,67 @@ export default function Builder() {
                     }}
                 >
                     <Card className="w-[300px]">
-                        <h1 className="text-2xl font-bold capitalize text-center">
-                            Create Chapter
-                        </h1>
-                        <h2 className="mt-4 mb-1 font-bold">Chapter Name</h2>
-                        <InputField
-                            defaultValue={newChapterName}
-                            onChange={(e) => {
-                                setNewChapterName(e.target.value);
-                            }}
-                        />
-                        {errorMessage.length > 0 && (
-                            <div className="my-2 py-1 px-3 rounded-sm bg-red-100 ">
-                                <p className="text-red-500">{errorMessage}</p>
-                            </div>
-                        )}
-                        <div className="flex justify-end gap-2 mt-6">
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    setNewChapterName(defaultChapterName);
-                                    setErrorMessage("");
-                                    setShowCreateOverlay(false);
+                        <form>
+                            <h1 className="text-2xl font-bold capitalize text-center">
+                                Create Chapter
+                            </h1>
+                            <h2 className="mt-4 mb-1 font-bold">
+                                Chapter Name
+                            </h2>
+                            <InputField
+                                defaultValue={newChapterName}
+                                onChange={(e) => {
+                                    setNewChapterName(e.target.value);
                                 }}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="primary"
-                                onClick={() => {
-                                    const trimmedChapterName =
-                                        newChapterName.trim();
-                                    if (trimmedChapterName.length == 0) {
-                                        setErrorMessage(
-                                            "Chapter name must not be empty",
-                                        );
-                                    } else if (
-                                        trimmedChapterName.length >= 100
-                                    ) {
-                                        setErrorMessage(
-                                            "Chapter name must not be longer than 100 characters",
-                                        );
-                                    } else {
-                                        addChapter();
+                            />
+                            {errorMessage.length > 0 && (
+                                <div className="my-2 py-1 px-3 rounded-sm bg-red-100 ">
+                                    <p className="text-red-500">
+                                        {errorMessage}
+                                    </p>
+                                </div>
+                            )}
+                            <div className="flex justify-end gap-2 mt-6">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                        setNewChapterName(defaultChapterName);
+                                        setErrorMessage("");
                                         setShowCreateOverlay(false);
-                                    }
-                                }}
-                            >
-                                Confirm
-                            </Button>
-                        </div>
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => {
+                                        const trimmedChapterName =
+                                            newChapterName.trim();
+                                        if (trimmedChapterName.length == 0) {
+                                            setErrorMessage(
+                                                "Chapter name must not be empty",
+                                            );
+                                        } else if (
+                                            trimmedChapterName.length >= 100
+                                        ) {
+                                            setErrorMessage(
+                                                "Chapter name must not be longer than 100 characters",
+                                            );
+                                        } else {
+                                            addChapter();
+                                            setShowCreateOverlay(false);
+                                        }
+                                    }}
+                                >
+                                    Confirm
+                                </Button>
+                            </div>
+                        </form>
                     </Card>
                 </Overlay>
             )}
-            <div className="grid gap-2 w-full z-10 relative">
+            <div className="grid gap-2 w-full z-10 relative h-fit">
                 <div className="absolute ">
                     <div className="fixed w-[270px]">
                         <ChapterManager
@@ -384,6 +389,7 @@ export default function Builder() {
                             selectedChapter={selectedChapter}
                             chapters={chapters}
                             selectChapterIndex={(index) => {
+                                setSelectedComponent("");
                                 setSelectedChapter(index);
                             }}
                             onCreateChapter={() => setShowCreateOverlay(true)}
@@ -450,6 +456,9 @@ export default function Builder() {
                                                 }
                                             >
                                                 <ImageComponent
+                                                    projectId={
+                                                        params.project_id
+                                                    }
                                                     selectedComponentID={
                                                         selectedComponent
                                                     }
@@ -546,7 +555,7 @@ export default function Builder() {
                     </DndContext>
                 </div>
             </div>
-            <div className="w-full z-10 relative">
+            <div className="w-full z-10 relative h-fit">
                 <div className="absolute">
                     <div className="fixed w-[270px]">
                         <div className="grid gap-4">

@@ -41,9 +41,9 @@ export default function ListComponent({
     useEffect(() => {
         if (selectedComponentID == component.id) {
             setShowEdit(true);
-        } else {
+        } else if (showEdit) {
             setShowEdit(false);
-            handleCancel;
+            handleSave();
         }
     }, [selectedComponentID]);
 
@@ -52,6 +52,7 @@ export default function ListComponent({
         useState<Component>(component);
 
     const handleCancel = () => {
+        console.log("canceling");
         onSelected("");
         setCurrentComponent(component); // Reset to initial state
     };
@@ -138,7 +139,7 @@ export default function ListComponent({
             aria-describedby=""
             data-no-dnd="true"
             className={[
-                "outline outline-1 hover:outline-gray-400 p-4 rounded-md",
+                "outline outline-1 hover:outline-gray-400 rounded-md",
                 selectedComponentID == component.id
                     ? "outline-gray-400"
                     : "outline-transparent",
@@ -154,7 +155,7 @@ export default function ListComponent({
             >
                 <ReactTextareaAutosize
                     spellCheck={false}
-                    className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                    className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent pt-4 px-4"
                     style={{
                         fontSize:
                             component.style &&
@@ -176,27 +177,28 @@ export default function ListComponent({
                         }))
                     }
                 />
-                <ul className="list-disc ml-6">
-                    {currentComponent.rows?.map((row, i) => (
-                        <li key={"row" + i}>
-                            <div className="flex items-center">
-                                <ReactTextareaAutosize
-                                    spellCheck={false}
-                                    id={`row_${currentComponent.id}_${i}`}
-                                    className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value} w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent`}
-                                    value={row}
-                                    onChange={(e) =>
-                                        handleRowChange(i, e.target.value)
-                                    }
-                                    onKeyDown={(e) => handleKeyDown(e, i)}
-                                />
-                            </div>
-                        </li>
-                    ))}
+                <ul className="list-disc ml-6 px-4">
+                    {currentComponent.rows !== undefined &&
+                        currentComponent.rows.map((row, i) => (
+                            <li key={"row" + i}>
+                                <div className="flex items-center">
+                                    <ReactTextareaAutosize
+                                        spellCheck={false}
+                                        id={`row_${currentComponent.id}_${i}`}
+                                        className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[1].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value}  w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent ${currentComponent.rows !== undefined && i == currentComponent.rows.length - 1 ? "pb-4" : ""}`}
+                                        value={row}
+                                        onChange={(e) =>
+                                            handleRowChange(i, e.target.value)
+                                        }
+                                        onKeyDown={(e) => handleKeyDown(e, i)}
+                                    />
+                                </div>
+                            </li>
+                        ))}
                 </ul>
             </div>
             {showEdit && (
-                <div className="flex gap-3 justify-end items-center">
+                <div className="flex gap-3 justify-end items-center pb-4 pr-4">
                     <Button
                         variant="danger"
                         onClick={() => {

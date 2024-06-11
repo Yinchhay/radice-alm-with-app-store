@@ -51,7 +51,7 @@ export default function ChapterComponent({
             onClick={onClick}
         >
             <div
-                className={`flex items-center justify-between border rounded-sm ${selected ? "bg-gray-100 border-gray-300" : "border-white bg-white"} p-2 transition-all h-[46px] hover:bg-gray-100 hover:border-gray-300`}
+                className={`flex items-center justify-between border rounded-sm ${selected ? "bg-gray-100 border-gray-300" : "border-gray-300 bg-white"} p-2 transition-all h-[46px] hover:bg-gray-100 hover:border-gray-300`}
             >
                 {showDeleteOverlay && (
                     <Overlay

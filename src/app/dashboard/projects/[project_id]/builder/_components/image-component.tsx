@@ -1,13 +1,13 @@
 "use client";
-import Image from "next/image";
 import { Component } from "@/types/content";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button";
 import { getSessionCookie } from "@/lib/server_utils";
-import { fileToUrl } from "@/lib/file";
+import { deleteFile, fileToUrl, uploadFiles } from "@/lib/file";
 import { FileBelongTo } from "@/drizzle/schema";
+import ImageWithFallback from "@/components/ImageWithFallback";
 
 export default function ImageComponent({
     component,
@@ -15,12 +15,14 @@ export default function ImageComponent({
     onDelete,
     onSelected,
     selectedComponentID,
+    projectId,
 }: {
     component: Component;
     onSave: (newData: Component) => void;
     onDelete: (ID: string) => void;
     onSelected: (ID: string) => void;
     selectedComponentID: string;
+    projectId: string;
 }) {
     const {
         attributes,
@@ -45,6 +47,7 @@ export default function ImageComponent({
 
     function Cancel() {
         setImageSrc(component.text ? component.text : "/placeholder.webp");
+        setFileList(undefined);
     }
     useEffect(() => {
         if (isDragging) {
@@ -53,37 +56,63 @@ export default function ImageComponent({
     }, [isDragging]);
 
     useEffect(() => {
+        async function saveImage() {
+            setShowEdit(false);
+
+            let newData = component;
+            let newImg = await changeImage();
+            if (fileList) {
+                if (newImg) {
+                    newData.text = newImg;
+                    setImageSrc(newImg);
+                } else {
+                    newData.text = "/placeholder.webp";
+                    setImageSrc("/placeholder.webp");
+                }
+            }
+            onSave(newData);
+        }
         if (selectedComponentID == component.id) {
             setShowEdit(true);
-        } else {
-            setShowEdit(false);
-            Cancel();
+        } else if (showEdit) {
+            saveImage();
         }
     }, [selectedComponentID]);
 
     async function changeImage() {
         if (fileList) {
             const sessionId = await getSessionCookie();
-            let formData = new FormData();
-            formData.append("files", fileList[0]);
-            formData.append("belongTo", FileBelongTo.ContentBuilder);
-            const response = await fetch(`/api/file/store`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${sessionId}`,
-                },
-                body: formData,
+            if (component.text) {
+                if (component.text != "/placeholder.webp") {
+                    const deleteOldImage = await deleteFile(
+                        component.text,
+                        sessionId ?? "",
+                    );
+                    //console.log(deleteOldImage.message);
+                }
+                //console.log("Not initail iamge");
+            }
+            const files = [fileList[0]];
+            //console.log("trying to upload");
+            const newUpload = await uploadFiles(files, {
+                sessionId: sessionId ?? "",
+                projectId: Number(projectId),
+                belongTo: FileBelongTo.ContentBuilder,
             });
-            const data = await response.json();
-            console.log(fileToUrl(data.data.filenames[0]));
-            return fileToUrl(data.data.filenames[0]);
+            if (newUpload.success) {
+                //console.log(fileToUrl(newUpload.data.filenames[0]));
+                return newUpload.data.filenames[0];
+            } else {
+                console.log(newUpload.message);
+            }
+            return "/placeholder.webp";
         }
     }
 
     return (
         <div
             className={[
-                "outline outline-1 hover:outline-gray-400 p-4 rounded-md",
+                "outline outline-1 hover:outline-gray-400 rounded-md",
                 selectedComponentID == component.id
                     ? "outline-gray-400"
                     : "outline-transparent",
@@ -104,11 +133,10 @@ export default function ImageComponent({
                         onSelected(component.id);
                     }
                 }}
-                className="w-full"
+                className={`w-full p-4 ${selectedComponentID == component.id ? "pb-0" : ""}`}
             >
-                <Image
-                    onError={() => setImageSrc("/placeholder.webp")}
-                    src={imageSrc}
+                <ImageWithFallback
+                    src={fileToUrl(imageSrc)}
                     alt={""}
                     width={100}
                     height={100}
@@ -120,12 +148,28 @@ export default function ImageComponent({
                 />
             </button>
             {showEdit && (
-                <div className="flex gap-3 justify-end items-center">
+                <div className="flex gap-3 justify-end items-center  pb-4 pr-4">
                     <Button
                         variant="danger"
-                        onClick={() => {
+                        onClick={async () => {
                             onSelected("");
-                            onDelete(component.id);
+                            const sessionId = await getSessionCookie();
+                            if (component.text) {
+                                if (component.text != "/placeholder.webp") {
+                                    const deleteOldImage = await deleteFile(
+                                        component.text,
+                                        sessionId ?? "",
+                                    );
+                                    if (!deleteOldImage.success) {
+                                        console.log(deleteOldImage.message);
+                                    } else {
+                                        onDelete(component.id);
+                                    }
+                                } else {
+                                    onDelete(component.id);
+                                }
+                                //console.log("Not initail iamge");
+                            }
                         }}
                     >
                         Delete

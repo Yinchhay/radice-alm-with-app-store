@@ -64,9 +64,13 @@ export default function ParagraphComponent({
     useEffect(() => {
         if (selectedComponentID == component.id) {
             setShowEdit(true);
-        } else {
+        } else if (showEdit) {
             setShowEdit(false);
-            Cancel();
+            let newData = component;
+            if (textRef.current) {
+                newData.text = textRef.current.value;
+            }
+            onSave(newData);
         }
     }, [selectedComponentID]);
 
@@ -79,7 +83,7 @@ export default function ParagraphComponent({
             aria-describedby=""
             data-no-dnd="true"
             className={[
-                "outline outline-1 hover:outline-gray-400 p-4 rounded-md",
+                "outline outline-1 hover:outline-gray-400 rounded-md",
                 selectedComponentID == component.id
                     ? "outline-gray-400"
                     : "outline-transparent",
@@ -89,7 +93,7 @@ export default function ParagraphComponent({
             <ReactTextareaAutosize
                 spellCheck={false}
                 ref={textRef}
-                className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                className={`w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent p-4 ${selectedComponentID == component.id ? "pb-0" : ""}`}
                 style={{
                     fontSize:
                         component.style &&
@@ -115,7 +119,7 @@ export default function ParagraphComponent({
                 }}
             />
             {showEdit && (
-                <div className="flex gap-3 justify-end items-center">
+                <div className="flex gap-3 justify-end items-center pb-4 pr-4">
                     <Button
                         variant="danger"
                         onClick={() => {
