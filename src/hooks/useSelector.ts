@@ -1,147 +1,152 @@
-// hooks/useSelector.ts
-
 import { CheckBoxElement } from "@/components/CheckList";
 import { arrayToCheckList } from "@/lib/array_to_check_list";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-/**
- * Ensure that first arg is the entire data in the system, and the second arg is the selected data
- * Keep in mind this is only for small data, don't use for large data because it will be slow
- */
 export function useSelector<T>(
-    items: T[],
+    itemsCallback: (search: string) => Promise<T[]>,
     originalSelectedItems: T[],
     nameKey: keyof T,
     valueKey: keyof T,
 ) {
-    const [showSelectorOverlay, setShowSelectorOverlay] = useState(false);
-    const itemsCheckList = arrayToCheckList(items, nameKey, valueKey);
-    const originalSelectedCheckList = arrayToCheckList(
+    const [showSelectorOverlay, setShowSelectorOverlay] =
+        useState<boolean>(false);
+    const originalSelectedCheckList: CheckBoxElement[] = arrayToCheckList(
         originalSelectedItems,
         nameKey,
         valueKey,
     ).map((item) => ({ ...item, checked: true }));
+    const [items, setItems] = useState<T[]>([]);
+    const [searchTerm, setSearchTerm] = useState<string>("");
 
-    const [checkedItemsBeforeEdit, setCheckedItemsBeforeEdit] = useState<
+    const [itemsCheckList, setItemsCheckList] = useState<CheckBoxElement[]>([]);
+    const [checkedItemsValues, setCheckedItemsValues] = useState<T[]>([]);
+    const [checkedItems, setCheckedItems] = useState<CheckBoxElement[]>(
+        originalSelectedCheckList,
+    );
+    const [beforeEditCheckedItems, setBeforeEditCheckedItems] = useState<
         CheckBoxElement[]
     >([]);
-    const [checkedItems, setCheckedItems] = useState<CheckBoxElement[]>([]);
-    const [itemsCheckListDisplay, setItemsCheckListDisplay] = useState<
-        CheckBoxElement[]
-    >([]);
+
+    function mergeAndRemoveDuplicates(
+        fetchedList: CheckBoxElement[],
+        checkedList: CheckBoxElement[],
+    ): CheckBoxElement[] {
+        const combinedList = fetchedList.map((fetchedItem) => {
+            const checkedItem = checkedList.find(
+                (item) => item.value === fetchedItem.value,
+            );
+            return checkedItem
+                ? { ...fetchedItem, checked: checkedItem.checked }
+                : fetchedItem;
+        });
+
+        checkedList.forEach((checkedItem) => {
+            if (
+                !combinedList.find((item) => item.value === checkedItem.value)
+            ) {
+                combinedList.push(checkedItem);
+            }
+        });
+
+        return combinedList;
+    }
+
+    async function onSearchChange(search: string) {
+        setSearchTerm(search);
+
+        const itemsFetched = await itemsCallback(search);
+        setItems(itemsFetched);
+
+        const icl = arrayToCheckList(itemsFetched, nameKey, valueKey);
+        const mergedCheckList = mergeAndRemoveDuplicates(icl, checkedItems);
+        saveCheckedItemsValues(itemsFetched);
+
+        setItemsCheckList([...mergedCheckList]);
+    }
 
     useEffect(() => {
-        onReset();
-    }, [items, originalSelectedItems]);
-
-    function setItemsCheckListDisplayWithLimit(
-        checkListDisplay: CheckBoxElement[],
-        limit: number = 5,
-    ) {
-        // if already checked show the checked items, don't limit the checked. If not checked, limit the unchecked items
-        const checkedItems = checkListDisplay.filter((item) => item.checked);
-        const uncheckedItems = checkListDisplay.filter((item) => !item.checked);
-
-        if (checkedItems.length > limit) {
-            setItemsCheckListDisplay(checkedItems);
-        } else {
-            // example: limit = 5, checked = 3, unchecked = 10, display = 5 (3 checked + 2 unchecked)
-            setItemsCheckListDisplay(
-                checkedItems.concat(
-                    uncheckedItems.slice(0, limit - checkedItems.length),
-                ),
-            );
+        if (items.length === 0) {
+            onSearchChange("");
         }
+    }, []);
+
+    // this will be used to allow the user to check object values
+    function saveCheckedItemsValues(fetchedItems: T[] = items) {
+        // append obj value to checkedItemsValues. we basically append only, no remove
+        const newCheckedItemsValues = fetchedItems
+            .filter((item) =>
+                checkedItems.find((checkedItem) => checkedItem.value === item[valueKey]),
+            )
+            .filter((item) => !checkedItemsValues.includes(item));
+        setCheckedItemsValues((prev) => [...prev, ...newCheckedItemsValues]);
     }
 
-    function updateChecked(
-        list: CheckBoxElement[],
-        changedItem: CheckBoxElement,
-        checked: boolean,
-    ): CheckBoxElement[] {
-        return list.map((item) =>
-            item.value === changedItem.value ? { ...item, checked } : item,
-        );
-    }
-
-    function updateCheckedByTwoLists(
-        listToUpdate: CheckBoxElement[],
-        listToCheck: CheckBoxElement[],
-    ): CheckBoxElement[] {
-        return listToUpdate.map((item) => {
-            const checked = listToCheck.find(
-                (check) => check.value === item.value,
-            )?.checked;
-            return { ...item, checked: checked ?? false };
-        });
-    }
-
-    function openSelector() {
-        setCheckedItemsBeforeEdit(structuredClone(checkedItems));
+    function onOpenSelector() {
+        setBeforeEditCheckedItems([...checkedItems]);
         setShowSelectorOverlay(true);
     }
 
-    function closeSelector() {
+    function onCloseSelector() {
+        setCheckedItems([...beforeEditCheckedItems]);
+
+        const restoredList = mergeAndRemoveDuplicates(
+            arrayToCheckList(items, nameKey, valueKey),
+            beforeEditCheckedItems,
+        );
+        setItemsCheckList([...restoredList]);
         setShowSelectorOverlay(false);
     }
 
-    function onSearchChange(search: string) {
-        const filteredItems = itemsCheckList.filter((item) =>
-            item.name.toLowerCase().includes(search.toLowerCase()),
-        );
-        setItemsCheckListDisplayWithLimit(
-            updateCheckedByTwoLists(filteredItems, checkedItems),
-        );
-    }
+    function onReset() {
+        setCheckedItems([...originalSelectedCheckList]);
 
-    function onCheckChange(
-        updatedList: CheckBoxElement[],
-        changedCheckbox: CheckBoxElement,
-        updateDisplayCheckList: boolean = false,
-    ) {
-        const updateCheckedItems = updateChecked(
-            checkedItems,
-            changedCheckbox,
-            changedCheckbox.checked,
+        const resetList = mergeAndRemoveDuplicates(
+            arrayToCheckList(items, nameKey, valueKey),
+            originalSelectedCheckList,
         );
-        setCheckedItems(updateCheckedItems);
-
-        if (updateDisplayCheckList) {
-            setItemsCheckListDisplayWithLimit(updateCheckedItems);
-        }
-    }
-
-    function onCancel() {
-        setCheckedItems(checkedItemsBeforeEdit);
-        setItemsCheckListDisplayWithLimit(checkedItemsBeforeEdit);
-        closeSelector();
+        setItemsCheckList([...resetList]);
     }
 
     function onConfirm() {
-        setItemsCheckListDisplayWithLimit(checkedItems);
-        closeSelector();
+        const newCheckedItems = itemsCheckList.filter((item) => item.checked);
+        setCheckedItems(newCheckedItems);
+
+        setShowSelectorOverlay(false);
     }
 
-    function onReset() {
-        const comparedList = updateCheckedByTwoLists(
-            itemsCheckList,
-            originalSelectedCheckList,
+    function onRemoveItem(value: string) {
+        const newCheckedItems = checkedItems.filter(
+            (item) => item.value !== value,
         );
+        setCheckedItems(newCheckedItems);
 
-        setCheckedItems(comparedList);
-        setItemsCheckListDisplayWithLimit(comparedList);
+        setItemsCheckList((prevList) =>
+            prevList.map((item) =>
+                item.value === value ? { ...item, checked: false } : item,
+            ),
+        );
     }
+
+    function onCheckChange(updatedList: CheckBoxElement[], updatedItem: CheckBoxElement) {
+        setCheckedItems(updatedList.filter((item) => item.checked));
+    }
+
+    useEffect(() => {
+        saveCheckedItemsValues();
+    }, [checkedItems]);
 
     return {
         showSelectorOverlay,
-        openSelector,
-        closeSelector,
+        itemsCheckList,
+        checkedItems,
+        searchTerm,
+        checkedItemsValues,
         onSearchChange,
         onCheckChange,
-        onCancel,
-        onConfirm,
+        onOpenSelector,
+        onCloseSelector,
         onReset,
-        itemsCheckListDisplay,
-        checkedItems,
+        onConfirm,
+        onRemoveItem,
     };
 }

@@ -47,10 +47,6 @@ export const getCategories = async (
     });
 };
 
-export const getAllCategories = async () => {
-    return await db.query.categories.findMany();
-};
-
 export const getCategoriesTotalRow = async () => {
     const totalRows = await db.select({ count: count() }).from(categories);
     return totalRows[0].count;
@@ -71,4 +67,18 @@ export const getPublicCategoriesWhereItHasProjects = async () => {
         )
         .innerJoin(projects, eq(projectCategories.projectId, projects.id))
         .where(eq(projects.isPublic, true));
+};
+
+export const getCategoriesBySearch = async (
+    search: string,
+    rowsPerPage: number = ROWS_PER_PAGE,
+) => {
+    return await db.query.categories.findMany({
+        columns: {
+            createdAt: false,
+            updatedAt: false,
+        },
+        where: (table, { like }) => like(table.name, `%${search}%`),
+        limit: rowsPerPage,
+    });
 };

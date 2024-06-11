@@ -59,18 +59,15 @@ export default async function ProjectSettings({ params }: { params: Params }) {
             <div className="grid gap-4">
                 <ProjectDetail
                     project={result.data.project}
-                    categories={result.data.allCategories}
                     originalProjectCategories={originalProjectCategories}
                 />
                 <ProjectMember
                     project={result.data.project}
-                    usersInTheSystem={result.data.allUsers}
                     originalProjectMembers={originalProjectMembers}
                 />
                 <ProjectPartner
                     project={result.data.project}
                     originalProjectPartners={originalProjectPartners}
-                    partnersInTheSystem={result.data.allPartners}
                 />
                 <ProjectPipeline project={result.data.project} />
                 <ProjectFile project={result.data.project} />

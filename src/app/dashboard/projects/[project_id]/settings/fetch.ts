@@ -18,6 +18,10 @@ import { revalidatePath } from "next/cache";
 import { ProjectLink, ProjectPipelineStatus } from "@/drizzle/schema";
 import { FetchEditProjectSettingsLinks } from "@/app/api/internal/project/[project_id]/settings/update-links/route";
 import { FetchEditProjectSettingsPipelines } from "@/app/api/internal/project/[project_id]/settings/update-pipeline/route";
+import { ROWS_PER_PAGE } from "@/lib/pagination";
+import { FetchUsersBySearchData } from "@/app/api/internal/users/search/route";
+import { FetchCategoriesBySearchData } from "@/app/api/internal/category/search/route";
+import { FetchPartnersBySearchData } from "@/app/api/internal/partner/search/route";
 
 export async function fetchEditProjectSettingsDetail(
     projectId: number,
@@ -236,6 +240,72 @@ export async function fetchUpdateProjectPublicStatus(
         );
 
         revalidatePath(pathname);
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchUsersBySearch(
+    search: string = "",
+    rowsPerPage: number = ROWS_PER_PAGE,
+): ResponseJson<FetchUsersBySearchData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/users/search?search=${search}&rowsPerPage=${rowsPerPage}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+            },
+        );
+
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchCategoriesBySearch(
+    search: string = "",
+    rowsPerPage: number = ROWS_PER_PAGE,
+): ResponseJson<FetchCategoriesBySearchData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/category/search?search=${search}&rowsPerPage=${rowsPerPage}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+            },
+        );
+
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchPartnersBySearch(
+    search: string = "",
+    rowsPerPage: number = ROWS_PER_PAGE,
+): ResponseJson<FetchPartnersBySearchData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/partner/search?search=${search}&rowsPerPage=${rowsPerPage}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+            },
+        );
+
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

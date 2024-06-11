@@ -59,16 +59,6 @@ export const deletePartnerById = async (partnerId: string) => {
     });
 };
 
-// since user type is partner, we don't need to specify hasLinkedGithub
-export const getAllPartners = async () => {
-    return await db.query.users.findMany({
-        columns: {
-            password: false,
-        },
-        where: (table, { and, eq }) => and(eq(table.type, UserType.PARTNER)),
-    });
-};
-
 export const getPartnerById = async (userId: string) => {
     return await db.query.users.findFirst({
         columns: {
@@ -76,5 +66,27 @@ export const getPartnerById = async (userId: string) => {
         },
         where: (table, { eq, and }) =>
             and(eq(table.id, userId), eq(table.type, UserType.PARTNER)),
+    });
+};
+
+export const getPartnersBySearch = async (
+    search: string,
+    rowsPerPage: number = ROWS_PER_PAGE,
+) => {
+    return await db.query.users.findMany({
+        columns: {
+            password: false,
+            createdAt: false,
+            updatedAt: false,
+        },
+        where: (table, { eq, and, like, or }) =>
+            and(
+                eq(table.type, UserType.PARTNER),
+                or(
+                    like(table.firstName, `%${search}%`),
+                    like(table.lastName, `%${search}%`),
+                ),
+            ),
+        limit: rowsPerPage,
     });
 };

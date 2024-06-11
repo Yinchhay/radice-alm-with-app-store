@@ -12,17 +12,16 @@ import ToggleSwitch from "@/components/ToggleSwitch";
 import { users } from "@/drizzle/schema";
 import { useFormStatus } from "react-dom";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { useSelector } from "../../../../../hooks/useSelector";
 import Selector from "@/components/Selector";
 import InputField from "@/components/InputField";
-import { CheckBoxElement } from "@/components/CheckList";
 import { useEffect, useState } from "react";
-import { fetchEditProjectSettingsMembers } from "./fetch";
+import { fetchEditProjectSettingsMembers, fetchUsersBySearch } from "./fetch";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { editMemberArray } from "@/app/api/internal/project/[project_id]/schema";
 import { z } from "zod";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
+import { useSelector } from "@/hooks/useSelector";
 
 export type UserWithoutPassword = Omit<typeof users.$inferSelect, "password">;
 
@@ -34,11 +33,9 @@ export type MemberList = {
 
 export default function ProjectMember({
     project,
-    usersInTheSystem,
     originalProjectMembers,
 }: {
     project: FetchOneAssociatedProjectData["project"];
-    usersInTheSystem: UserWithoutPassword[];
     originalProjectMembers: UserWithoutPassword[];
 }) {
     if (!project) {
@@ -46,18 +43,31 @@ export default function ProjectMember({
     }
 
     const pathname = usePathname();
+
+    async function fetchUsersBySearchCallback(search: string) {
+        const response = await fetchUsersBySearch(search, 10);
+        if (response.success) {
+            return response.data.users as UserWithoutPassword[];
+        }
+
+        return [];
+    }
+
     const {
         showSelectorOverlay,
-        openSelector,
+        itemsCheckList,
+        checkedItems,
+        checkedItemsValues: usersInTheSystem,
+        searchTerm,
         onSearchChange,
         onCheckChange,
-        onCancel,
-        onConfirm,
+        onOpenSelector,
+        onCloseSelector,
+        onRemoveItem,
         onReset,
-        itemsCheckListDisplay,
-        checkedItems,
+        onConfirm,
     } = useSelector(
-        usersInTheSystem,
+        fetchUsersBySearchCallback,
         originalProjectMembers,
         "firstName",
         "id",
@@ -80,15 +90,7 @@ export default function ProjectMember({
     }
 
     function removeMemberById(id: string) {
-        const toBeRemoved = {
-            name:
-                usersInTheSystem.find((user) => user.id === id)?.firstName ||
-                "",
-            checked: false,
-            value: id,
-        } satisfies CheckBoxElement;
-
-        onCheckChange([], toBeRemoved, true);
+        onRemoveItem(id);
     }
 
     const MemberLists = membersList.map((member) => (
@@ -110,6 +112,7 @@ export default function ProjectMember({
                 const memberDetail = usersInTheSystem.find(
                     (user) => user.id === member.value,
                 );
+
                 const memberAlreadyInProject = project?.projectMembers.find(
                     (projectMember) => projectMember.user.id === member.value,
                 );
@@ -176,7 +179,7 @@ export default function ProjectMember({
     useEffect(() => {
         const members = constructMemberLists();
         setMembersList(members);
-    }, [checkedItems]);
+    }, [checkedItems, usersInTheSystem, project?.projectMembers]);
 
     return (
         <Card>
@@ -193,7 +196,7 @@ export default function ProjectMember({
                                 className="font-normal"
                             >
                                 <Button
-                                    onClick={openSelector}
+                                    onClick={onOpenSelector}
                                     square={true}
                                     variant="primary"
                                     type="button"
@@ -213,11 +216,12 @@ export default function ProjectMember({
                         selectorTitle="Add users to project"
                         searchPlaceholder="Search users"
                         checkListTitle="Users"
-                        checkList={itemsCheckListDisplay || []}
+                        checkList={itemsCheckList || []}
                         onSearchChange={onSearchChange}
-                        onCheckChange={onCheckChange}
-                        onCancel={onCancel}
+                        onCancel={onCloseSelector}
                         onConfirm={onConfirm}
+                        onCheckChange={onCheckChange}
+                        searchTerm={searchTerm}
                     />
                 )}
                 <div className="flex justify-end">

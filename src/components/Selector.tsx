@@ -5,7 +5,7 @@ import InputField from "./InputField";
 import Overlay from "./Overlay";
 import Button from "./Button";
 import { useDebouncedCallback } from "use-debounce";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 
 interface CheckBoxElement {
     name: string;
@@ -17,9 +17,10 @@ export default function Selector({
     className = "",
     selectorTitle,
     searchPlaceholder,
-    searchDelay = 500,
+    searchDelay = 300,
     checkListTitle,
     checkList,
+    searchTerm,
     onSearchChange,
     onCheckChange,
     onConfirm,
@@ -31,8 +32,12 @@ export default function Selector({
     searchDelay?: number;
     checkListTitle: string;
     checkList: CheckBoxElement[];
+    searchTerm?: string;
     onSearchChange?: (searchText: string) => void;
-    onCheckChange?: (updatedList: CheckBoxElement[], changedCheckbox: CheckBoxElement) => void;
+    onCheckChange?: (
+        updatedList: CheckBoxElement[],
+        changedCheckbox: CheckBoxElement,
+    ) => void;
     onConfirm?: () => void;
     onCancel?: () => void;
 }) {
@@ -57,6 +62,7 @@ export default function Selector({
                     {selectorTitle}
                 </h1>
                 <InputField
+                    defaultValue={searchTerm}
                     isSearch={true}
                     placeholder={searchPlaceholder}
                     onChange={(e) => searchDebounced(e.target.value)}

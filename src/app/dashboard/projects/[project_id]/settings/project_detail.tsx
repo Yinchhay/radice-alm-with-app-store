@@ -9,24 +9,25 @@ import Selector from "@/components/Selector";
 import { IconPlus } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { fetchEditProjectSettingsDetail } from "./fetch";
+import {
+    fetchCategoriesBySearch,
+    fetchEditProjectSettingsDetail,
+} from "./fetch";
 import { categories as categoriesSchema } from "@/drizzle/schema";
 import { ACCEPTED_IMAGE_TYPES, fileToUrl } from "@/lib/file";
-import { useSelector } from "../../../../../hooks/useSelector";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import ChipsHolder from "@/components/ChipsHolder";
 import Chip from "@/components/Chip";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
+import { useSelector } from "@/hooks/useSelector";
 
 export default function ProjectDetail({
     project,
-    categories,
     originalProjectCategories,
 }: {
     project: FetchOneAssociatedProjectData["project"];
-    categories: (typeof categoriesSchema.$inferSelect)[];
     originalProjectCategories: (typeof categoriesSchema.$inferSelect)[];
 }) {
     if (!project) {
@@ -42,17 +43,32 @@ export default function ProjectDetail({
     const projectName = useRef<HTMLInputElement>(null);
     const projectDescription = useRef<HTMLTextAreaElement>(null);
 
+    async function fetchCategoriesBySearchCallback(search: string) {
+        const response = await fetchCategoriesBySearch(search, 10);
+        if (response.success) {
+            return response.data.categories;
+        }
+
+        return [];
+    }
+
     const {
         showSelectorOverlay,
-        openSelector,
-        onSearchChange,
-        onCheckChange,
-        onCancel,
-        onConfirm,
-        onReset: onResetCategories,
-        itemsCheckListDisplay,
+        itemsCheckList,
         checkedItems: checkedCategories,
-    } = useSelector(categories, originalProjectCategories, "name", "id");
+        searchTerm,
+        onSearchChange,
+        onOpenSelector,
+        onCheckChange,
+        onCloseSelector,
+        onReset,
+        onConfirm,
+    } = useSelector(
+        fetchCategoriesBySearchCallback,
+        originalProjectCategories,
+        "name",
+        "id",
+    );
 
     function onResetClick() {
         if (!project) return;
@@ -65,7 +81,7 @@ export default function ProjectDetail({
         if (projectDescription.current) {
             projectDescription.current.value = project.description ?? "";
         }
-        onResetCategories();
+        onReset();
         setResult(undefined);
     }
 
@@ -187,7 +203,7 @@ export default function ProjectDetail({
                             </ChipsHolder>
                             <Tooltip title={"Add categories"}>
                                 <Button
-                                    onClick={openSelector}
+                                    onClick={onOpenSelector}
                                     square={true}
                                     variant="primary"
                                     type="button"
@@ -202,11 +218,12 @@ export default function ProjectDetail({
                                 selectorTitle="Add categories to project"
                                 searchPlaceholder="Search categories"
                                 checkListTitle="Categories"
-                                checkList={itemsCheckListDisplay || []}
+                                checkList={itemsCheckList || []}
                                 onSearchChange={onSearchChange}
-                                onCheckChange={onCheckChange}
-                                onCancel={onCancel}
+                                onCancel={onCloseSelector}
                                 onConfirm={onConfirm}
+                                onCheckChange={onCheckChange}
+                                searchTerm={searchTerm}
                             />
                         )}
                     </div>

@@ -113,6 +113,26 @@ export const getAllUsers = async () => {
     });
 };
 
+export const getUsersBySearch = async (search: string, rowsPerPage: number = ROWS_PER_PAGE) => {
+    return await db.query.users.findMany({
+        columns: {
+            password: false,
+            createdAt: false,
+            updatedAt: false,
+        },
+        where: (table, { eq, and, like, or }) =>
+            and(
+                eq(table.type, UserType.USER),
+                eq(table.hasLinkedGithub, hasLinkedGithub),
+                or(
+                    like(table.firstName, `%${search}%`),
+                    like(table.lastName, `%${search}%`),
+                ),
+            ),
+        limit: rowsPerPage,
+    });
+};
+
 export const getUserById = async (userId: string) => {
     return await db.query.users.findFirst({
         with: {

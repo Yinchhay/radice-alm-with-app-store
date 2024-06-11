@@ -9,31 +9,17 @@ import {
 } from "@/lib/response";
 import { HttpStatusCode } from "@/types/http";
 import { getOneAssociatedProjectSchema } from "./schema";
-import { NextRequest } from "next/server";
 import { z } from "zod";
 import { getOneAssociatedProject } from "@/repositories/project";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
-import { getAllCategories } from "@/repositories/category";
-import { getAllUsers } from "@/repositories/users";
-import { getAllPartners } from "@/repositories/partner";
 
 const successMessage = "Successfully get a internal project by id";
 const unsuccessMessage = "Failed to get a internal project by id";
 
 type Params = { params: { project_id: string } };
 
-export type GetAllCategoriesReturn = Awaited<
-    ReturnType<typeof getAllCategories>
->;
-export type GetAllPartnersReturn = Awaited<
-    ReturnType<typeof getAllPartners>
->;
-export type GetAllUsersReturn = Awaited<ReturnType<typeof getAllUsers>>;
 export type FetchOneAssociatedProjectData = {
     project: Awaited<ReturnType<typeof getOneAssociatedProject>>;
-    allCategories: GetAllCategoriesReturn;
-    allUsers: GetAllUsersReturn;
-    allPartners: GetAllPartnersReturn;
 };
 
 export async function GET(request: Request, { params }: Params) {
@@ -88,17 +74,10 @@ export async function GET(request: Request, { params }: Params) {
             );
         }
 
-        const allCategories = await getAllCategories();
-        const allUsers = await getAllUsers();
-        const allPartners = await getAllPartners();
-
         return buildSuccessResponse<FetchOneAssociatedProjectData>(
             successMessage,
             {
                 project,
-                allCategories,
-                allUsers,
-                allPartners,
             },
         );
     } catch (error: any) {

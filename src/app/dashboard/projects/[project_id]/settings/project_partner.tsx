@@ -1,7 +1,6 @@
 "use client";
 import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
 import { editPartnerArray } from "@/app/api/internal/project/[project_id]/schema";
-import { useSelector } from "../../../../../hooks/useSelector";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import { CheckBoxElement } from "@/components/CheckList";
@@ -11,18 +10,20 @@ import Table from "@/components/table/Table";
 import TableBody from "@/components/table/TableBody";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
-import ToggleSwitch from "@/components/ToggleSwitch";
-import { projectPartners, users } from "@/drizzle/schema";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { z } from "zod";
-import { fetchEditProjectSettingsPartners } from "./fetch";
+import {
+    fetchEditProjectSettingsPartners,
+    fetchPartnersBySearch,
+} from "./fetch";
 import Selector from "@/components/Selector";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { usePathname } from "next/navigation";
 import { UserWithoutPassword } from "./project_member";
 import Tooltip from "@/components/Tooltip";
+import { useSelector } from "@/hooks/useSelector";
 
 export type PartnerList = {
     partner: UserWithoutPassword;
@@ -30,30 +31,40 @@ export type PartnerList = {
 
 export default function ProjectPartner({
     project,
-    partnersInTheSystem,
     originalProjectPartners,
 }: {
     project: FetchOneAssociatedProjectData["project"];
-    partnersInTheSystem: (UserWithoutPassword)[];
-    originalProjectPartners: (UserWithoutPassword)[];
+    originalProjectPartners: UserWithoutPassword[];
 }) {
     if (!project) {
         throw new Error("Project not found");
     }
 
+    async function fetchPartnersBySearchCallback(search: string) {
+        const response = await fetchPartnersBySearch(search, 10);
+        if (response.success) {
+            return response.data.partners as UserWithoutPassword[];
+        }
+
+        return [];
+    }
+
     const pathname = usePathname();
     const {
         showSelectorOverlay,
-        openSelector,
-        onSearchChange,
-        onCheckChange,
-        onCancel,
-        onConfirm,
-        onReset,
-        itemsCheckListDisplay,
+        itemsCheckList,
         checkedItems,
+        checkedItemsValues: partnersInTheSystem,
+        searchTerm,
+        onSearchChange,
+        onOpenSelector,
+        onCheckChange,
+        onCloseSelector,
+        onRemoveItem,
+        onReset,
+        onConfirm,
     } = useSelector(
-        partnersInTheSystem,
+        fetchPartnersBySearchCallback,
         originalProjectPartners,
         "firstName",
         "id",
@@ -66,15 +77,7 @@ export default function ProjectPartner({
     const [partnersList, setPartnersList] = useState<PartnerList[]>([]);
 
     function removePartnerById(id: string) {
-        const toBeRemoved = {
-            name:
-                partnersInTheSystem.find((user) => user.id === id)?.firstName ||
-                "",
-            checked: false,
-            value: id,
-        } satisfies CheckBoxElement;
-
-        onCheckChange([], toBeRemoved, true);
+        onRemoveItem(id);
     }
 
     const PartnerLists = partnersList.map((partner) => (
@@ -148,7 +151,7 @@ export default function ProjectPartner({
     useEffect(() => {
         const partners = constructPartnerLists();
         setPartnersList(partners);
-    }, [checkedItems]);
+    }, [checkedItems, partnersInTheSystem, project.projectPartners]);
 
     return (
         <Card>
@@ -159,14 +162,14 @@ export default function ProjectPartner({
                         <ColumName>Name</ColumName>
                         <ColumName className="flex justify-end font-normal">
                             <Tooltip title="Add partner to project">
-                            <Button
-                                onClick={openSelector}
-                                square={true}
-                                variant="primary"
-                                type="button"
-                            >
-                                <IconPlus></IconPlus>
-                            </Button>
+                                <Button
+                                    onClick={onOpenSelector}
+                                    square={true}
+                                    variant="primary"
+                                    type="button"
+                                >
+                                    <IconPlus></IconPlus>
+                                </Button>
                             </Tooltip>
                         </ColumName>
                     </TableHeader>
@@ -177,14 +180,15 @@ export default function ProjectPartner({
                 {showSelectorOverlay && (
                     <Selector
                         className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto"
-                        selectorTitle="Add users to project"
-                        searchPlaceholder="Search users"
-                        checkListTitle="Users"
-                        checkList={itemsCheckListDisplay || []}
+                        selectorTitle="Add partners to project"
+                        searchPlaceholder="Search partners"
+                        checkListTitle="Partners"
+                        checkList={itemsCheckList || []}
                         onSearchChange={onSearchChange}
-                        onCheckChange={onCheckChange}
-                        onCancel={onCancel}
+                        onCancel={onCloseSelector}
                         onConfirm={onConfirm}
+                        onCheckChange={onCheckChange}
+                        searchTerm={searchTerm}
                     />
                 )}
                 <div className="flex justify-end">
