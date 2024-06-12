@@ -1,7 +1,7 @@
 import { db } from "@/drizzle/db";
 import { users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
-import { eq, count, sql, and, like } from "drizzle-orm";
+import { eq, count, sql, and, like, or } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
@@ -123,11 +123,14 @@ export const getUsersBySearch = async (
             createdAt: false,
             updatedAt: false,
         },
-        where: (table, { eq, and, like }) =>
+        where: (table, { eq, and, like, or }) =>
             and(
                 eq(table.type, UserType.USER),
                 eq(table.hasLinkedGithub, hasLinkedGithub),
-                like(table.firstName, `%${search}%`),
+                or(
+                    like(table.firstName, `%${search}%`),
+                    like(table.lastName, `%${search}%`),
+                ),
             ),
         limit: rowsPerPage,
     });
@@ -170,7 +173,10 @@ export const getUsers = async (
         where: (table, { eq, and, like }) =>
             and(
                 eq(table.type, UserType.USER),
-                like(table.firstName, `%${search}%`),
+                or(
+                    like(table.firstName, `%${search}%`),
+                    like(table.lastName, `%${search}%`),
+                ),
             ),
     });
 };
@@ -182,7 +188,10 @@ export const getUsersTotalRow = async (search: string = "") => {
         .where(
             and(
                 eq(users.type, UserType.USER),
-                like(users.firstName, `%${search}%`),
+                or(
+                    like(users.firstName, `%${search}%`),
+                    like(users.lastName, `%${search}%`),
+                ),
             ),
         );
     return totalRows[0].count;

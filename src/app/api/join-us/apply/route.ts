@@ -113,10 +113,6 @@ export async function POST(request: Request) {
                 case ApplicationFormStatus.APPROVED:
                     message = "You have already joined us.";
                     break;
-                case ApplicationFormStatus.REJECTED:
-                    message =
-                        "You have already applied to join us but your application was rejected.";
-                    break;
                 default:
                     message =
                         "You have already applied to join us. Please wait for our response.";

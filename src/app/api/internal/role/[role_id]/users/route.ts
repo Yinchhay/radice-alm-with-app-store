@@ -6,8 +6,9 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import { getUsersInRole } from "@/repositories/role";
+import { Permissions } from "@/types/IAM";
 
-type GetUsersByRoleReturnType = Awaited<ReturnType<typeof getUsersInRole>>;
+export type GetUsersByRoleReturnType = Awaited<ReturnType<typeof getUsersInRole>>;
 
 export type FetchUsersInRole = {
     users: GetUsersByRoleReturnType;
@@ -22,7 +23,7 @@ export async function GET(request: Request, { params }: Params) {
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(
                 request,
-                RouteRequiredPermissions.get("manageRoles")!,
+                new Set([Permissions.EDIT_ROLES])!,
             );
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();

@@ -111,7 +111,7 @@ export const editProjectSettingsLinks = z.object({
                     message: "Link is required",
                 })
                 .url({
-                    message: "Invalid URL",
+                    message: "URL is invalid",
                 }),
         }),
     ),

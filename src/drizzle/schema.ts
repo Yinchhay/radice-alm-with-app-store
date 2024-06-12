@@ -275,7 +275,6 @@ export const codeVerificationsRelations = relations(
 export enum ApplicationFormStatus {
     PENDING = "Pending",
     APPROVED = "Approved",
-    REJECTED = "Rejected",
 }
 export const applicationForms = mysqlTable("application_forms", {
     id: int("id").primaryKey().autoincrement(),

@@ -76,6 +76,7 @@ export default function ProjectPartner({
         originalProjectPartners,
         "firstName",
         "id",
+        "lastName",
     );
 
     const [result, setResult] =

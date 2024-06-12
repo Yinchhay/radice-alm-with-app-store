@@ -54,6 +54,9 @@ export default async function ManageUsers({ searchParams }: ManageUsersProps) {
         return <User key={user.id} user={user} canDeleteUser={canDeleteUser} />;
     });
 
+    const showPagination =
+        result.data.maxPage >= page && result.data.maxPage > 1;
+
     return (
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
@@ -78,7 +81,7 @@ export default async function ManageUsers({ searchParams }: ManageUsersProps) {
                             )}
                         </TableBody>
                     </Table>
-                    {result.data.maxPage > 1 && (
+                    {showPagination && (
                         <div className="float-right">
                             <Pagination
                                 page={page}

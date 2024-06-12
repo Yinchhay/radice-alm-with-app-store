@@ -7,24 +7,25 @@ import {
 } from "@/lib/response";
 
 import { getRoleById } from "@/repositories/role";
+import { Permissions } from "@/types/IAM";
 
-type GetRoleReturnType = Awaited<ReturnType<typeof getRoleById>>;
+export type GetRoleByIdReturnType = Awaited<ReturnType<typeof getRoleById>>;
 
-export type FetchRoleData = {
-    role: GetRoleReturnType;
+export type FetchRoleByIdData = {
+    role: GetRoleByIdReturnType;
 };
 
 type Params = { params: { role_id: number } };
 
-const successMessage = "Get role successfully";
-const unsuccessMessage = "Get role failed";
+const successMessage = "Get role by id successfully";
+const unsuccessMessage = "Get role by id failed";
 
 export async function GET(request: Request, { params }: Params) {
     try {
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(
                 request,
-                RouteRequiredPermissions.get("manageRoles")!,
+                new Set([Permissions.EDIT_ROLES])!,
             );
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();
@@ -35,7 +36,7 @@ export async function GET(request: Request, { params }: Params) {
 
         const role = await getRoleById(Number(params.role_id));
 
-        return buildSuccessResponse<FetchRoleData>(successMessage, {
+        return buildSuccessResponse<FetchRoleByIdData>(successMessage, {
             role: role,
         });
     } catch (error: any) {

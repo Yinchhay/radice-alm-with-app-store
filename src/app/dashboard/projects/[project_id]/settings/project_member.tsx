@@ -76,6 +76,7 @@ export default function ProjectMember({
         originalProjectMembers,
         "firstName",
         "id",
+        "lastName",
     );
 
     const [result, setResult] =
@@ -112,22 +113,20 @@ export default function ProjectMember({
     function constructMemberLists() {
         const memberLists: MemberList[] = [];
 
-        checkedItems.forEach((member) => {
-            if (member.checked) {
-                const memberDetail = usersInTheSystem.find(
-                    (user) => user.id === member.value,
-                );
+        checkedItems.forEach((checkedItem) => {
+            const memberDetail = usersInTheSystem.find(
+                (user) => user.id === checkedItem.value,
+            );
 
-                const memberAlreadyInProject = project?.projectMembers.find(
-                    (projectMember) => projectMember.user.id === member.value,
-                );
-                if (memberDetail) {
-                    memberLists.push({
-                        member: memberDetail,
-                        title: memberAlreadyInProject?.title || "",
-                        canEdit: memberAlreadyInProject?.canEdit || false,
-                    });
-                }
+            const memberAlreadyInProject = project?.projectMembers.find(
+                (projectMember) => projectMember.user.id === checkedItem.value,
+            );
+            if (memberDetail) {
+                memberLists.push({
+                    member: memberDetail,
+                    title: memberAlreadyInProject?.title || "",
+                    canEdit: memberAlreadyInProject?.canEdit || false,
+                });
             }
         });
 

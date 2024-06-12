@@ -68,6 +68,9 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
         );
     });
 
+    const showPagination =
+        result.data.maxPage >= page && result.data.maxPage > 1;
+
     return (
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
@@ -91,8 +94,8 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
                             )}
                         </TableBody>
                     </Table>
-                    {result.data.maxPage > 1 && (
-                        <div className="float-right">
+                    {showPagination && (
+                        <div className="float-right  mb-4">
                             <Pagination
                                 page={page}
                                 maxPage={result.data.maxPage}

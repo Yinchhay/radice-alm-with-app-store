@@ -1,6 +1,7 @@
 import { db } from "@/drizzle/db";
 import { roles, userRoles, users, rolePermissions } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
+import { UserType } from "@/types/user";
 import { count, eq, sql, and, inArray, like } from "drizzle-orm";
 
 export const createRole = async (role: typeof roles.$inferInsert) => {
@@ -59,6 +60,7 @@ export const getRoleById = async (roleId: number) => {
     return await db.query.roles.findFirst({
         columns: {
             name: true,
+            id: true,
         },
         with: {
             rolePermissions: {
@@ -77,41 +79,59 @@ export const getRoleById = async (roleId: number) => {
     });
 };
 
+const usersInRoleSubQuery = (roleId: number) => {
+    return db
+        .selectDistinct({
+            userId: userRoles.userId,
+        })
+        .from(userRoles)
+        .where(
+            and(eq(userRoles.roleId, roleId), eq(users.id, userRoles.userId)),
+        );
+};
+
 export const getUsersInRole = async (roleId: number) => {
-    return await db.query.userRoles.findMany({
+    return await db.query.users.findMany({
         columns: {
-            id: false,
-            userId: false,
-            roleId: false,
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            profileUrl: true,
+            hasLinkedGithub: true,
         },
-        with: {
-            user: {
-                columns: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                    email: true,
-                },
-            },
-        },
-        where: eq(userRoles.roleId, roleId),
+        where: (table, { exists, and }) =>
+            and(
+                exists(usersInRoleSubQuery(roleId)),
+                eq(table.type, UserType.USER),
+            ),
     });
 };
 
-export function filterGetOnlyUserNotInRole(
-    usersInARole: Pick<
-        typeof users.$inferSelect,
-        "id" | "firstName" | "lastName" | "email"
-    >[],
-    usersInTheSystem: Pick<
-        typeof users.$inferSelect,
-        "id" | "firstName" | "lastName" | "email"
-    >[],
-) {
-    return usersInTheSystem.filter((user) => {
-        return !usersInARole.some((userInRole) => userInRole.id === user.id);
+export const getUsersNotInRole = async (
+    roleId: number,
+    search: string = "",
+) => {
+    return await db.query.users.findMany({
+        columns: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            profileUrl: true,
+            hasLinkedGithub: true,
+        },
+        where: (table, { exists, not, and, eq, or }) =>
+            and(
+                not(exists(usersInRoleSubQuery(roleId))),
+                or(
+                    like(table.firstName, `%${search}%`),
+                    like(table.lastName, `%${search}%`),
+                ),
+                eq(table.type, UserType.USER),
+            ),
     });
-}
+};
 
 export const editRoleById = async (body: {
     name: string;

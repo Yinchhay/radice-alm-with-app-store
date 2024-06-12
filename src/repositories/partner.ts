@@ -4,7 +4,7 @@ import { SALT_ROUNDS } from "@/lib/IAM";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 import bcrypt from "bcrypt";
-import { and, count, eq, like, sql } from "drizzle-orm";
+import { and, count, eq, like, or, sql } from "drizzle-orm";
 
 export const createPartner = async (user: typeof users.$inferInsert) => {
     const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
@@ -23,7 +23,10 @@ export const getPartnersTotalRow = async (search: string = "") => {
         .where(
             and(
                 eq(users.type, UserType.PARTNER),
-                like(users.firstName, `%${search}%`),
+                or(
+                    like(users.firstName, `%${search}%`),
+                    like(users.lastName, `%${search}%`),
+                ),
             ),
         );
     return totalRows[0].count;
@@ -41,7 +44,10 @@ export const getPartners = async (
         where: (table) =>
             and(
                 eq(table.type, UserType.PARTNER),
-                like(table.firstName, `%${search}%`),
+                or(
+                    like(table.firstName, `%${search}%`),
+                    like(table.lastName, `%${search}%`),
+                ),
             ),
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
@@ -79,10 +85,13 @@ export const getPartnersBySearch = async (
             createdAt: false,
             updatedAt: false,
         },
-        where: (table, { eq, and, like }) =>
+        where: (table, { eq, and, like, or }) =>
             and(
                 eq(table.type, UserType.PARTNER),
-                like(table.firstName, `%${search}%`),
+                or(
+                    like(table.firstName, `%${search}%`),
+                    like(table.lastName, `%${search}%`),
+                ),
             ),
         limit: rowsPerPage,
     });

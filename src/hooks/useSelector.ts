@@ -7,6 +7,7 @@ export function useSelector<T>(
     originalSelectedItems: T[],
     nameKey: keyof T,
     valueKey: keyof T,
+    secondKey?: keyof T,
 ) {
     const [showSelectorOverlay, setShowSelectorOverlay] =
         useState<boolean>(false);
@@ -14,6 +15,7 @@ export function useSelector<T>(
         originalSelectedItems,
         nameKey,
         valueKey,
+        secondKey,
     ).map((item) => ({ ...item, checked: true }));
 
     const [items, setItems] = useState<T[]>([]);
@@ -64,15 +66,16 @@ export function useSelector<T>(
         const itemsFetched = await itemsCallback(search);
         setItems(itemsFetched);
 
-        const icl = arrayToCheckList(itemsFetched, nameKey, valueKey);
-        const mergedCheckList = mergeAndRemoveDuplicates(icl, checkedItems);
+        const icl = arrayToCheckList(
+            itemsFetched,
+            nameKey,
+            valueKey,
+            secondKey,
+        );
+        let mergedCheckList = mergeAndRemoveDuplicates(icl, checkedItems);
         saveCheckedItemsValues(itemsFetched);
 
-        // if we don't filter by search, it will show the checked items as well even tho it doesn't match the search term
-        const filteredBySearch = mergedCheckList.filter((item) =>
-            item.name.toLowerCase().includes(search.toLowerCase()),
-        );
-        setItemsCheckList([...filteredBySearch]);
+        setItemsCheckList([...mergedCheckList]);
     }
 
     useEffect(() => {
@@ -108,9 +111,10 @@ export function useSelector<T>(
         setCheckedItems([...beforeEditCheckedItems]);
 
         const restoredList = mergeAndRemoveDuplicates(
-            arrayToCheckList(items, nameKey, valueKey),
+            arrayToCheckList(items, nameKey, valueKey, secondKey),
             beforeEditCheckedItems,
         );
+
         setItemsCheckList([...restoredList]);
         setShowSelectorOverlay(false);
     }
@@ -119,9 +123,10 @@ export function useSelector<T>(
         setCheckedItems([...originalSelectedCheckList]);
 
         const resetList = mergeAndRemoveDuplicates(
-            arrayToCheckList(items, nameKey, valueKey),
+            arrayToCheckList(items, nameKey, valueKey, secondKey),
             originalSelectedCheckList,
         );
+
         setItemsCheckList([...resetList]);
     }
 
@@ -157,6 +162,22 @@ export function useSelector<T>(
         );
         setCheckedItems(newCheckedItems);
     }
+
+    useEffect(() => {
+        // if we don't filter by search, it will show the checked items as well even tho it doesn't match the search term
+        const filteredBySearch = itemsCheckList.filter((item) =>
+            item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+
+        // if the filtered list is the same as the current itemsCheckList, don't update
+        if (
+            JSON.stringify(filteredBySearch) === JSON.stringify(itemsCheckList)
+        ) {
+            return;
+        }
+
+        setItemsCheckList([...filteredBySearch]);
+    }, [itemsCheckList]);
 
     useEffect(() => {
         saveCheckedItemsValues();

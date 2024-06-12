@@ -19,10 +19,15 @@ export function CreateRoleOverlay() {
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateRole>>>();
 
+    function onCancel() {
+        setResult(undefined);
+        setShowOverlay(false);
+    }
+
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            onCancel();
         }
     }, [result]);
 
@@ -40,11 +45,7 @@ export function CreateRoleOverlay() {
             </Tooltip>
             {showOverlay && (
                 <div className="font-normal">
-                    <Overlay
-                        onClose={() => {
-                            setShowOverlay(false);
-                        }}
-                    >
+                    <Overlay onClose={onCancel}>
                         <Card className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto">
                             <div className="flex flex-col items-center gap-2">
                                 <h1 className="text-2xl font-bold capitalize">
@@ -53,9 +54,14 @@ export function CreateRoleOverlay() {
                             </div>
                             <form
                                 action={async (formData: FormData) => {
-                                    const result = await fetchCreateRole({
-                                        name: formData.get("name") as string,
-                                    }, pathname);
+                                    const result = await fetchCreateRole(
+                                        {
+                                            name: formData.get(
+                                                "name",
+                                            ) as string,
+                                        },
+                                        pathname,
+                                    );
                                     setResult(result);
                                 }}
                             >
@@ -78,9 +84,7 @@ export function CreateRoleOverlay() {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() => {
-                                            setShowOverlay(false);
-                                        }}
+                                        onClick={onCancel}
                                     >
                                         Cancel
                                     </Button>

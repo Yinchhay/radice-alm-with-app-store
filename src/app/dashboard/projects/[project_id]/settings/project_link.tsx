@@ -52,7 +52,11 @@ export default function ProjectSettingLink({
         value: any,
     ) {
         const newLinks = [...links];
-        newLinks[index] = { ...newLinks[index], [key]: value };
+        newLinks[index] = {
+            ...newLinks[index],
+            [key]: value,
+        };
+
         setLinks(newLinks);
     }
 
@@ -69,7 +73,7 @@ export default function ProjectSettingLink({
         return (
             <LinkCell
                 onOneLinkChange={onOneLinkChange}
-                key={link.link}
+                key={index}
                 link={link}
                 onRemove={removeLink}
                 index={index}
@@ -227,6 +231,19 @@ function AddLinkOverlay({ addLink }: { addLink: (link: ProjectLink) => void }) {
     const titleRef = useRef<HTMLInputElement>(null);
     const linkRef = useRef<HTMLInputElement>(null);
 
+    function onCancel() {
+        if (titleRef.current) {
+            titleRef.current.value = "";
+        }
+
+        if (linkRef.current) {
+            linkRef.current.value = "";
+        }
+
+        setErrors(undefined);
+        setShowOverlay(false);
+    }
+
     function validateLink(link: string): boolean {
         try {
             return !!new URL(link);
@@ -240,18 +257,18 @@ function AddLinkOverlay({ addLink }: { addLink: (link: ProjectLink) => void }) {
         const link = linkRef.current;
         const title = titleRef.current;
 
-        if (!link) {
+        if (!link?.value) {
             setErrors(generateAndFormatZodError("link", "Link is required"));
             return;
         }
 
-        if (!title) {
+        if (!title?.value) {
             setErrors(generateAndFormatZodError("title", "Title is required"));
             return;
         }
 
         if (!validateLink(link.value)) {
-            setErrors(generateAndFormatZodError("link", "Invalid URL"));
+            setErrors(generateAndFormatZodError("link", "URL is invalid"));
             return;
         }
 
@@ -260,7 +277,7 @@ function AddLinkOverlay({ addLink }: { addLink: (link: ProjectLink) => void }) {
             title: title.value,
         });
 
-        setShowOverlay(false);
+        onCancel();
     }
 
     return (
@@ -276,11 +293,7 @@ function AddLinkOverlay({ addLink }: { addLink: (link: ProjectLink) => void }) {
                 </Button>
             </Tooltip>
             {showOverlay && (
-                <Overlay
-                    onClose={() => {
-                        setShowOverlay(false);
-                    }}
-                >
+                <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal flex flex-col gap-4 max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
@@ -314,9 +327,7 @@ function AddLinkOverlay({ addLink }: { addLink: (link: ProjectLink) => void }) {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => {
-                                    setShowOverlay(false);
-                                }}
+                                onClick={onCancel}
                             >
                                 Cancel
                             </Button>

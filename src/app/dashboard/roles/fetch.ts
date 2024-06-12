@@ -4,7 +4,7 @@
 "use server";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchRolesData } from "@/app/api/internal/role/route";
-import { FetchRoleData } from "@/app/api/internal/role/[role_id]/route";
+import { FetchRoleByIdData } from "@/app/api/internal/role/[role_id]/route";
 import {
     getBaseUrl,
     getSessionCookie,
@@ -49,7 +49,7 @@ export async function fetchRoles(
 
 export async function fetchRoleById(
     roleId: number,
-): ResponseJson<FetchRoleData> {
+): ResponseJson<FetchRoleByIdData> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
@@ -135,11 +135,13 @@ export async function fetchUsersInRole(
 
 export async function fetchUsersNotInRole(
     roleId: number,
+    search: string = "",
+    rowsPerPage: number = ROWS_PER_PAGE,
 ): ResponseJson<FetchUsersNotInRole> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/role/${roleId}/users-not-in-role`,
+            `${await getBaseUrl()}/api/internal/role/${roleId}/users-not-in-role?search=${search}&rowsPerPage=${rowsPerPage}`,
             {
                 method: "GET",
                 headers: {

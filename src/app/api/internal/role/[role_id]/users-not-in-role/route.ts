@@ -5,27 +5,28 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { filterGetOnlyUserNotInRole } from "@/repositories/role";
+import { getUsersNotInRole } from "@/repositories/role";
+import { Permissions } from "@/types/IAM";
+import { NextRequest } from "next/server";
 
-import { getUsersInRole } from "@/repositories/role";
-import { getAllUsers } from "@/repositories/users";
-
-type GetUsersNotInRoleReturnType = Awaited<ReturnType<typeof filterGetOnlyUserNotInRole>>;
+export type GetUsersNotInRoleReturnType = Awaited<
+    ReturnType<typeof getUsersNotInRole>
+>;
 
 export type FetchUsersNotInRole = {
-    users: GetUsersNotInRoleReturnType;
+    usersNotInRole: GetUsersNotInRoleReturnType;
 };
 
 type Params = { params: { role_id: number } };
 const successMessage = "Get users not in role successfully";
 const unsuccessMessage = "Get users not in role failed";
 
-export async function GET(request: Request, { params }: Params) {
+export async function GET(request: NextRequest, { params }: Params) {
     try {
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(
                 request,
-                RouteRequiredPermissions.get("manageRoles")!,
+                new Set([Permissions.EDIT_ROLES])!,
             );
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();
@@ -34,20 +35,12 @@ export async function GET(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const usersInRole = await getUsersInRole(params.role_id);
-        const data = usersInRole.map((user) => {
-            return {
-                id: user.user.id,
-                firstName: user.user.firstName,
-                lastName: user.user.lastName,
-                email: user.user.email,
-            };
-        });
+        const search = request.nextUrl.searchParams.get("search") ?? "";
 
-        const usersNotInRole = filterGetOnlyUserNotInRole(data, await getAllUsers());
+        const usersNotInRole = await getUsersNotInRole(params.role_id, search);
 
         return buildSuccessResponse<FetchUsersNotInRole>(successMessage, {
-            users: usersNotInRole,
+            usersNotInRole: usersNotInRole,
         });
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);
