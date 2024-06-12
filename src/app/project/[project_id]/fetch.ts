@@ -1,29 +1,21 @@
 "use server";
+import { FetchPublicProjectByIdData } from "@/app/api/public/projects/[project_id]/route";
+import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { getBaseUrl } from "@/lib/server_utils";
 
-import { db } from "@/drizzle/db";
-
-//TODO: change isPublic to true, now is false
-export async function getProjectByIdForPublic(project_id: number) {
-    return await db.query.projects.findFirst({
-        where: (table, { eq, and }) =>
-            and(eq(table.isPublic, true), eq(table.id, project_id)),
-        with: {
-            projectCategories: {
-                with: {
-                    category: true,
-                },
+export async function getProjectByIdForPublic(
+    project_id: number,
+): ResponseJson<FetchPublicProjectByIdData> {
+    try {
+        const response = await fetch(
+            `${await getBaseUrl()}/api/public/projects/${project_id}`,
+            {
+                method: "GET",
+                cache: "no-cache",
             },
-            projectMembers: {
-                with: {
-                    user: true,
-                },
-            },
-            projectPartners: {
-                with: {
-                    partner: true,
-                },
-            },
-            user: true,
-        },
-    });
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
 }
