@@ -155,7 +155,7 @@ export default function ListComponent({
             >
                 <ReactTextareaAutosize
                     spellCheck={false}
-                    className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent pt-4 px-4"
+                    className="w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent pt-4 px-4 mb-[-4px]"
                     style={{
                         fontSize:
                             component.style &&
@@ -185,7 +185,28 @@ export default function ListComponent({
                                     <ReactTextareaAutosize
                                         spellCheck={false}
                                         id={`row_${currentComponent.id}_${i}`}
-                                        className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[1].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value}  w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent ${currentComponent.rows !== undefined && i == currentComponent.rows.length - 1 ? "pb-4" : ""}`}
+                                        style={{
+                                            fontSize:
+                                                component.style &&
+                                                component.style.fontSize !==
+                                                    undefined
+                                                    ? paragraphFontSizes[
+                                                          component.style
+                                                              .fontSize
+                                                      ].value
+                                                    : paragraphFontSizes[1]
+                                                          .value,
+                                            fontWeight:
+                                                component.style &&
+                                                component.style.fontWeight !==
+                                                    undefined
+                                                    ? fontWeights[
+                                                          component.style
+                                                              .fontWeight
+                                                      ].value
+                                                    : fontWeights[1].value,
+                                        }}
+                                        className={`w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent ${currentComponent.rows !== undefined && i == currentComponent.rows.length - 1 ? "pb-4" : ""}`}
                                         value={row}
                                         onChange={(e) =>
                                             handleRowChange(i, e.target.value)

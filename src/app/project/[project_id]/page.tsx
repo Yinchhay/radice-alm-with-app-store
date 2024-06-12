@@ -4,7 +4,9 @@ import Footer from "@/components/Footer";
 import Image from "next/image";
 import { fileToUrl } from "@/lib/file";
 import {
+    Chapter,
     Component,
+    TextAlign,
     fontAligns,
     fontWeights,
     headingFontSizes,
@@ -21,9 +23,7 @@ export default async function ProjectPage({
     params: { project_id: string };
 }) {
     const project = await getProjectByIdForPublic(Number(params.project_id));
-    const content = JSON.parse(
-        project?.projectContent as string,
-    ) as Component[];
+    const chapters = JSON.parse(project?.projectContent as string) as Chapter[];
     console.log(project);
 
     return (
@@ -52,75 +52,241 @@ export default async function ProjectPage({
                                 </Chip>
                             ))}
                         </ChipsHolder>
-                        {content && (
+                        {chapters && (
                             <div className="grid gap-8 border-t border-gray-300 py-8">
-                                {content.map((component, i) => {
-                                    let componentBlock;
-                                    switch (component.type) {
-                                        case "heading":
-                                            componentBlock = (
-                                                <h1
-                                                    key={i}
-                                                    className={`${component.style && component.style.fontSize !== undefined ? headingFontSizes[component.style.fontSize].value : headingFontSizes[2].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[2].value} ${component.style && component.style.fontAlign !== undefined ? fontAligns[component.style.fontAlign].value : fontAligns[1].value} w-full resize-none focus:outline-none overflow-hidden bg-transparent`}
-                                                >
-                                                    {component.text}
-                                                </h1>
-                                            );
-                                            break;
-                                        case "image":
-                                            componentBlock = (
-                                                <Image
-                                                    key={i}
-                                                    src={
-                                                        component.text ||
-                                                        "placeholder.webp"
-                                                    }
-                                                    alt={""}
-                                                    width={100}
-                                                    height={100}
-                                                    layout="responsive"
-                                                    style={{
-                                                        width: "100%",
-                                                        height: "auto",
-                                                    }}
-                                                />
-                                            );
-                                            break;
-                                        case "paragraph":
-                                            componentBlock = (
-                                                <p
-                                                    className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value} ${component.style && component.style.fontAlign !== undefined ? fontAligns[component.style.fontAlign].value : fontAligns[0].value} w-full resize-none focus:outline-none overflow-hidden bg-transparent`}
-                                                >
-                                                    {component.text}
-                                                </p>
-                                            );
-                                            break;
-                                        case "list":
-                                            componentBlock = (
-                                                <div>
-                                                    <h3
-                                                        className={`${component.style && component.style.fontSize !== undefined ? paragraphFontSizes[component.style.fontSize].value : paragraphFontSizes[0].value} ${component.style && component.style.fontWeight !== undefined ? fontWeights[component.style.fontWeight].value : fontWeights[1].value} w-full resize-none focus:outline-none overflow-hidden bg-transparent mb-1`}
-                                                    >
-                                                        {component.text}
-                                                    </h3>
-                                                    <ul className="list-disc pl-6">
-                                                        {component.rows?.map(
-                                                            (row, i) => {
-                                                                return (
-                                                                    <li
-                                                                        key={`row-${component.id}-${i}`}
+                                {chapters.map((chapter, j) => {
+                                    return (
+                                        <>
+                                            {chapter.components.map(
+                                                (component, i) => {
+                                                    let componentBlock;
+                                                    switch (component.type) {
+                                                        case "heading":
+                                                            componentBlock = (
+                                                                <h1
+                                                                    key={i}
+                                                                    className="w-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                                                    style={{
+                                                                        fontSize:
+                                                                            component.style &&
+                                                                            component
+                                                                                .style
+                                                                                .fontSize !==
+                                                                                undefined
+                                                                                ? headingFontSizes[
+                                                                                      component
+                                                                                          .style
+                                                                                          .fontSize
+                                                                                  ]
+                                                                                      .value
+                                                                                : headingFontSizes[2]
+                                                                                      .value,
+                                                                        fontWeight:
+                                                                            component.style &&
+                                                                            component
+                                                                                .style
+                                                                                .fontWeight !==
+                                                                                undefined
+                                                                                ? fontWeights[
+                                                                                      component
+                                                                                          .style
+                                                                                          .fontWeight
+                                                                                  ]
+                                                                                      .value
+                                                                                : fontWeights[2]
+                                                                                      .value,
+                                                                        textAlign:
+                                                                            component.style &&
+                                                                            component
+                                                                                .style
+                                                                                .fontAlign !==
+                                                                                undefined
+                                                                                ? (fontAligns[
+                                                                                      component
+                                                                                          .style
+                                                                                          .fontAlign
+                                                                                  ]
+                                                                                      .value as TextAlign)
+                                                                                : (fontAligns[1]
+                                                                                      .value as TextAlign),
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        component.text
+                                                                    }
+                                                                </h1>
+                                                            );
+                                                            break;
+                                                        case "image":
+                                                            componentBlock = (
+                                                                <Image
+                                                                    key={i}
+                                                                    src={fileToUrl(
+                                                                        component.text,
+                                                                    )}
+                                                                    alt={""}
+                                                                    width={100}
+                                                                    height={100}
+                                                                    layout="responsive"
+                                                                    style={{
+                                                                        width: "100%",
+                                                                        height: "auto",
+                                                                    }}
+                                                                />
+                                                            );
+                                                            break;
+                                                        case "paragraph":
+                                                            componentBlock = (
+                                                                <p
+                                                                    className="w-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                                                    style={{
+                                                                        fontSize:
+                                                                            component.style &&
+                                                                            component
+                                                                                .style
+                                                                                .fontSize !==
+                                                                                undefined
+                                                                                ? paragraphFontSizes[
+                                                                                      component
+                                                                                          .style
+                                                                                          .fontSize
+                                                                                  ]
+                                                                                      .value
+                                                                                : paragraphFontSizes[1]
+                                                                                      .value,
+                                                                        fontWeight:
+                                                                            component.style &&
+                                                                            component
+                                                                                .style
+                                                                                .fontWeight !==
+                                                                                undefined
+                                                                                ? fontWeights[
+                                                                                      component
+                                                                                          .style
+                                                                                          .fontWeight
+                                                                                  ]
+                                                                                      .value
+                                                                                : fontWeights[1]
+                                                                                      .value,
+                                                                        textAlign:
+                                                                            component.style &&
+                                                                            component
+                                                                                .style
+                                                                                .fontAlign !==
+                                                                                undefined
+                                                                                ? (fontAligns[
+                                                                                      component
+                                                                                          .style
+                                                                                          .fontAlign
+                                                                                  ]
+                                                                                      .value as TextAlign)
+                                                                                : (fontAligns[0]
+                                                                                      .value as TextAlign),
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        component.text
+                                                                    }
+                                                                </p>
+                                                            );
+                                                            break;
+                                                        case "list":
+                                                            componentBlock = (
+                                                                <div>
+                                                                    <h3
+                                                                        className="w-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                                                        style={{
+                                                                            fontSize:
+                                                                                component.style &&
+                                                                                component
+                                                                                    .style
+                                                                                    .fontSize !==
+                                                                                    undefined
+                                                                                    ? paragraphFontSizes[
+                                                                                          component
+                                                                                              .style
+                                                                                              .fontSize
+                                                                                      ]
+                                                                                          .value
+                                                                                    : paragraphFontSizes[1]
+                                                                                          .value,
+                                                                            fontWeight:
+                                                                                component.style &&
+                                                                                component
+                                                                                    .style
+                                                                                    .fontWeight !==
+                                                                                    undefined
+                                                                                    ? fontWeights[
+                                                                                          component
+                                                                                              .style
+                                                                                              .fontWeight
+                                                                                      ]
+                                                                                          .value
+                                                                                    : fontWeights[1]
+                                                                                          .value,
+                                                                        }}
                                                                     >
-                                                                        {row}
-                                                                    </li>
-                                                                );
-                                                            },
-                                                        )}
-                                                    </ul>
-                                                </div>
-                                            );
-                                            break;
-                                    }
-                                    return componentBlock;
+                                                                        {
+                                                                            component.text
+                                                                        }
+                                                                    </h3>
+                                                                    <ul className="list-disc pl-6">
+                                                                        {component.rows?.map(
+                                                                            (
+                                                                                row,
+                                                                                i,
+                                                                            ) => {
+                                                                                return (
+                                                                                    <li
+                                                                                        style={{
+                                                                                            fontSize:
+                                                                                                component.style &&
+                                                                                                component
+                                                                                                    .style
+                                                                                                    .fontSize !==
+                                                                                                    undefined
+                                                                                                    ? paragraphFontSizes[
+                                                                                                          component
+                                                                                                              .style
+                                                                                                              .fontSize
+                                                                                                      ]
+                                                                                                          .value
+                                                                                                    : paragraphFontSizes[1]
+                                                                                                          .value,
+                                                                                            fontWeight:
+                                                                                                component.style &&
+                                                                                                component
+                                                                                                    .style
+                                                                                                    .fontWeight !==
+                                                                                                    undefined
+                                                                                                    ? fontWeights[
+                                                                                                          component
+                                                                                                              .style
+                                                                                                              .fontWeight
+                                                                                                      ]
+                                                                                                          .value
+                                                                                                    : fontWeights[1]
+                                                                                                          .value,
+                                                                                        }}
+                                                                                        key={`row-${component.id}-${i}`}
+                                                                                    >
+                                                                                        {
+                                                                                            row
+                                                                                        }
+                                                                                    </li>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                    </ul>
+                                                                </div>
+                                                            );
+                                                            break;
+                                                    }
+                                                    return componentBlock;
+                                                },
+                                            )}
+                                        </>
+                                    );
                                 })}
                             </div>
                         )}
