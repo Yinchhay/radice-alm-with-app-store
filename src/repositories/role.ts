@@ -9,19 +9,19 @@ export const createRole = async (role: typeof roles.$inferInsert) => {
 };
 
 export const deleteRoleById = async (roleId: number) => {
-    return await db.transaction(async (trx) => {
+    return await db.transaction(async (tx) => {
         // Delete role_permissions
-        const deleteRolePermissionsResult = await trx
+        const deleteRolePermissionsResult = await tx
             .delete(rolePermissions)
             .where(eq(rolePermissions.roleId, roleId));
 
         // Delete user_roles
-        const deleteUserRolesResult = await trx
+        const deleteUserRolesResult = await tx
             .delete(userRoles)
             .where(eq(userRoles.roleId, roleId));
 
         // Delete role
-        const deleteRoleResult = await trx
+        const deleteRoleResult = await tx
             .delete(roles)
             .where(eq(roles.id, roleId));
 
@@ -111,6 +111,7 @@ export const getUsersInRole = async (roleId: number) => {
 export const getUsersNotInRole = async (
     roleId: number,
     search: string = "",
+    rowsPerPage: number = ROWS_PER_PAGE,
 ) => {
     return await db.query.users.findMany({
         columns: {
@@ -133,40 +134,44 @@ export const getUsersNotInRole = async (
     });
 };
 
-export const editRoleById = async (body: {
-    name: string;
-    users: { id: string; firstName: string; lastName: string }[];
-    roleId: number;
-    permissions: { id: number; name: string }[];
-}) => {
-    const { name, users, roleId, permissions } = body;
-
-    await db.transaction(async (trx) => {
+export const editRoleById = async (
+    roleId: number,
+    usersToAdd: string[],
+    usersToRemove: string[],
+    permissionsToAdd: number[],
+    permissionsToRemove: number[],
+    roleName?: string,
+) => {
+    await db.transaction(async (tx) => {
         // Update role name
-        await trx.update(roles).set({ name }).where(eq(roles.id, roleId));
+        if (roleName) {
+            await tx
+                .update(roles)
+                .set({ name: roleName })
+                .where(eq(roles.id, roleId));
+        }
 
-        // Get current users in the role
-        const currentUsersInRole = await trx
-            .select({ userId: userRoles.userId })
-            .from(userRoles)
-            .where(eq(userRoles.roleId, roleId));
+        // Add users to role
+        if (Array.isArray(usersToAdd) && usersToAdd.length > 0) {
+            const tempUsers = await tx.query.users.findMany({
+                where: inArray(users.id, usersToAdd),
+            });
 
-        const currentUserIds = currentUsersInRole.map(
-            (userRole) => userRole.userId,
-        );
-        const userIds = users.map((user) => user.id);
+            if (!tempUsers.some((user) => user.type === UserType.USER)) {
+                throw new Error("Only users type user can be added to role");
+            }
 
-        // Filter users to add and remove
-        const usersToAdd = userIds.filter(
-            (userId) => !currentUserIds.includes(userId),
-        );
-        const usersToRemove = currentUserIds.filter(
-            (userId) => !userIds.includes(userId),
-        );
+            await tx.insert(userRoles).values(
+                usersToAdd.map((userId) => ({
+                    userId,
+                    roleId,
+                })),
+            );
+        }
 
         // Remove users from role
-        if (usersToRemove.length > 0) {
-            await trx
+        if (Array.isArray(usersToRemove) && usersToRemove.length > 0) {
+            await tx
                 .delete(userRoles)
                 .where(
                     and(
@@ -176,40 +181,22 @@ export const editRoleById = async (body: {
                 );
         }
 
-        // Add users to role
-        if (usersToAdd.length > 0) {
-            await trx
-                .insert(userRoles)
-                .values(usersToAdd.map((userId) => ({ userId, roleId })));
+        // Add permissions to role
+        if (Array.isArray(permissionsToAdd) && permissionsToAdd.length > 0) {
+            await tx.insert(rolePermissions).values(
+                permissionsToAdd.map((permissionId) => ({
+                    roleId,
+                    permissionId,
+                })),
+            );
         }
 
-        // Get current role permissions
-        const currentRolePermissions = await trx
-            .select({ permissionId: rolePermissions.permissionId })
-            .from(rolePermissions)
-            .where(eq(rolePermissions.roleId, roleId));
-
-        const currentPermissionIds = currentRolePermissions.map(
-            (rolePermission) => rolePermission.permissionId,
-        );
-
-        // Filter permissions to add and remove
-        const permissionsToAdd = permissions
-            .filter(
-                (permission) => !currentPermissionIds.includes(permission.id),
-            )
-            .map((permission) => permission.id);
-
-        const permissionsToRemove = currentPermissionIds.filter(
-            (permissionId) =>
-                !permissions.some(
-                    (permission) => permission.id === permissionId,
-                ),
-        );
-
         // Remove permissions from role
-        if (permissionsToRemove.length > 0) {
-            await trx
+        if (
+            Array.isArray(permissionsToRemove) &&
+            permissionsToRemove.length > 0
+        ) {
+            await tx
                 .delete(rolePermissions)
                 .where(
                     and(
@@ -220,16 +207,6 @@ export const editRoleById = async (body: {
                         ),
                     ),
                 );
-        }
-
-        // Add permissions to role
-        if (permissionsToAdd.length > 0) {
-            await trx.insert(rolePermissions).values(
-                permissionsToAdd.map((permissionId) => ({
-                    roleId,
-                    permissionId,
-                })),
-            );
         }
     });
 };

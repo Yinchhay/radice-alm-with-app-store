@@ -130,6 +130,7 @@ function VerifyCodeForm({
                     newPassword: formData.get("newPassword") as string,
                     code: formData.get("code") as string,
                     captchaToken: captchaRef.current?.getValue() || "",
+                    newConfirmPassword: formData.get("confirmNewPassword") as string,
                 });
 
                 captchaRef.current?.reset();
@@ -155,6 +156,15 @@ function VerifyCodeForm({
                 <InputField
                     name="newPassword"
                     id="newPassword"
+                    type="password"
+                    required
+                />
+            </div>
+            <div>
+                <label htmlFor="confirmNewPassword">Confirm new password</label>
+                <InputField
+                    name="confirmNewPassword"
+                    id="confirmNewPassword"
                     type="password"
                     required
                 />

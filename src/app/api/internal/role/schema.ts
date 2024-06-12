@@ -29,22 +29,17 @@ export const addUserToRoleFormSchema = z.object({
 });
 
 export const editRoleByIdSchema = z.object({
-    name: z.string().trim().min(1, {
-        message: "Role name is required",
-    }),
-    permissions: z.array(
-        z.object({
-            id: z.number(),
-            name: z.string().trim(),
+    name: z
+        .string()
+        .trim()
+        .min(1, {
+            message: "Role name is required",
+        })
+        .max(50, {
+            message: "Role name must not exceed 50 characters",
         }),
-    ),
-    users: z.array(
-        z.object({
-            id: z.string().trim(),
-            firstName: z.string().trim(),
-            lastName: z.string().trim(),
-        }),
-    ),
+    userIds: z.array(z.string().trim().optional()),
+    permissionIds: z.array(z.number()),
     roleId: z
         .number({
             required_error: "Role id is required",

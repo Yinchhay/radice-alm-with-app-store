@@ -1,4 +1,5 @@
 import { checkBearerAndPermission, RouteRequiredPermissions } from "@/lib/IAM";
+import { ROWS_PER_PAGE } from "@/lib/pagination";
 import {
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
@@ -35,9 +36,17 @@ export async function GET(request: NextRequest, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const search = request.nextUrl.searchParams.get("search") ?? "";
+        let rowsPerPage: number =
+            Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
+            ROWS_PER_PAGE;
+        const search = request.nextUrl.searchParams.get("search") || "";
 
-        const usersNotInRole = await getUsersNotInRole(params.role_id, search);
+        // limit to max 100 rows per page
+        if (rowsPerPage > 100) {
+            rowsPerPage = 100;
+        }
+
+        const usersNotInRole = await getUsersNotInRole(params.role_id, search, rowsPerPage);
 
         return buildSuccessResponse<FetchUsersNotInRole>(successMessage, {
             usersNotInRole: usersNotInRole,

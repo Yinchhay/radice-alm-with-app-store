@@ -67,6 +67,19 @@ export const hasPermission = cache(
                 };
             }
 
+            if (!user.hasLinkedGithub) {
+                localDebug(
+                    "User has not linked Github account, it's mandatory to link a github account to access the system.",
+                    "hasPermission()",
+                );
+                return {
+                    canAccess: false,
+                    message:
+                        "User has not linked Github account, it's mandatory to link a github account to access the system.",
+                    userPermissions,
+                };
+            }
+
             for (const userRole of user?.userRoles ?? []) {
                 if (!userRole.role.isActive) {
                     continue;
@@ -185,7 +198,6 @@ export const checkBearerAndPermission = async (
     };
 };
 
-
 /**
  * I believe since this is often used for internal users,
  * the data structure for this should be Map so that it will improve performance
@@ -203,12 +215,7 @@ type RouteKey =
     | "manageUsers"
     | "manageMedia";
 export const RouteRequiredPermissions = new Map<RouteKey, Set<Permissions>>([
-    [
-        "manageAllProjects",
-        new Set([
-            Permissions.CHANGE_PROJECT_STATUS,
-        ]),
-    ],
+    ["manageAllProjects", new Set([Permissions.CHANGE_PROJECT_STATUS])],
     [
         "manageApplicationForms",
         new Set([Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS]),

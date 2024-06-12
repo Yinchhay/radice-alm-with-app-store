@@ -3,18 +3,38 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { fetchRoleById, fetchUsersInRole } from "../../fetch";
 import EditRole from "./edit_role";
+import { getAuthUser } from "@/auth/lucia";
+import { redirect } from "next/navigation";
+import { hasPermission } from "@/lib/IAM";
+import { Permissions } from "@/types/IAM";
+import { IconArrowLeft } from "@tabler/icons-react";
+import Tooltip from "@/components/Tooltip";
 
 type Params = {
     role_id: string;
 };
 
 export default async function EditRoleById({ params }: { params: Params }) {
-    const roleResult = await fetchRoleById(Number(params.role_id));
+    const users = await getAuthUser();
+    if (!users) {
+        redirect("/login");
+    }
+
+    const [roleResult, usersInRoleResult, editRolePermission] =
+        await Promise.all([
+            await fetchRoleById(Number(params.role_id)),
+            await fetchUsersInRole(Number(params.role_id)),
+            await hasPermission(users.id, new Set([Permissions.EDIT_ROLES])),
+        ]);
+
+    if (!editRolePermission.canAccess) {
+        redirect("/dashboard/roles");
+    }
+
     if (!roleResult.success) {
         throw new Error(roleResult.message);
     }
 
-    const usersInRoleResult = await fetchUsersInRole(Number(params.role_id));
     if (!usersInRoleResult.success) {
         throw new Error(usersInRoleResult.message);
     }
@@ -24,13 +44,18 @@ export default async function EditRoleById({ params }: { params: Params }) {
             <Suspense fallback={"loading..."}>
                 {roleResult.data.role ? (
                     <div className="flex gap-4 flex-col">
-                        <Link href="/dashboard/roles">Back</Link>
+                        <Tooltip title="Go back">
+                            <Link href="/dashboard/roles">
+                                <IconArrowLeft />
+                            </Link>
+                        </Tooltip>
                         <h1 className="text-2xl">Edit role</h1>
                         <Card>
                             <EditRole
                                 key={roleResult.data.role.id}
                                 role={roleResult.data.role}
                                 usersInRole={usersInRoleResult.data.users}
+                                user={users}
                             />
                         </Card>
                     </div>

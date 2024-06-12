@@ -8,10 +8,7 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import { revalidateTags } from "@/lib/server_utils";
-import {
-    deleteRoleById,
-    GetRoles_C_Tag,
-} from "@/repositories/role";
+import { deleteRoleById } from "@/repositories/role";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
@@ -60,7 +57,6 @@ export async function DELETE(request: Request, { params }: Params) {
             );
         }
 
-        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         return buildSuccessResponse<FetchDeleteRole>(successMessage, {});
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);

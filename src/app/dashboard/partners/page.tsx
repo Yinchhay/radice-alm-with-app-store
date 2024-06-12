@@ -86,7 +86,7 @@ export default async function ManagePartners({
                         )}
                     </TableBody>
                 </Table>
-               {showPagination && (
+                {showPagination && (
                     <div className="float-right mb-4">
                         <Pagination page={page} maxPage={result.data.maxPage} />
                     </div>
@@ -106,7 +106,7 @@ function Partner({
     return (
         <TableRow className="text-center align-middle">
             <Cell data-test={`partnerName-${partner.firstName}`}>
-                {partner.firstName}
+                {`${partner.firstName} ${partner.lastName}`}
             </Cell>
             <Cell data-test={`partnerEmail-${partner.email}`}>
                 {partner.email}

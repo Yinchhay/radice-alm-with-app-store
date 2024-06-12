@@ -7,8 +7,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { revalidateTags } from "@/lib/server_utils";
-import { createRole, GetRoles_C_Tag } from "@/repositories/role";
+import { createRole } from "@/repositories/role";
 
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
@@ -50,7 +49,6 @@ export async function POST(request: Request) {
             throw new Error(ErrorMessage.SomethingWentWrong);
         }
 
-        await revalidateTags<GetRoles_C_Tag>("getRoles_C");
         return buildSuccessResponse<FetchCreateRole>(successMessage, {});
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);

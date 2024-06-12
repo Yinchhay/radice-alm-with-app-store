@@ -1,3 +1,5 @@
+import { Permissions } from "@/types/IAM";
+
 export function findItemsToBeCreated<T, K>(
     items: K[],
     existingItems: T[],
@@ -21,3 +23,9 @@ export function findItemsToBeDeleted<T, K extends keyof T>(
             !items.includes(existingItem[key]),
     );
 }
+
+export const PermissionsToFilterIfNotSuperAdmin = [
+    Permissions.EDIT_ROLES,
+    Permissions.DELETE_ROLES,
+    Permissions.CREATE_ROLES,
+];

@@ -10,33 +10,39 @@ import { useSelector } from "@/hooks/useSelector";
 import { PermissionNames } from "@/lib/client_IAM";
 import { fileToUrl } from "@/lib/file";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { fetchUsersNotInRole } from "../../fetch";
+import { fetchEditRoleById, fetchUsersNotInRole } from "../../fetch";
 import { localDebug } from "@/lib/utils";
 import Selector from "@/components/Selector";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { usePathname } from "next/navigation";
+import FormErrorMessages from "@/components/FormErrorMessages";
+import { User as UserLuciaType } from "lucia";
+import { UserType } from "@/types/user";
+import { PermissionsToFilterIfNotSuperAdmin } from "@/lib/filter";
 
 type Permission = {
     id: number;
     name: string;
+    state: boolean;
 };
 
 export default function EditRole({
     role,
     usersInRole,
+    user,
 }: {
     role: GetRoleByIdReturnType;
     usersInRole: GetUsersByRoleReturnType;
+    user: UserLuciaType;
 }) {
     if (!role) {
         throw new Error("Role not found");
     }
 
-    const permissions = [...PermissionNames.entries()].map(([id, name]) => ({
-        id: Number(id),
-        name,
-    })) satisfies Permission[];
-
+    const pathname = usePathname();
+    const [result, setResult] =
+        useState<Awaited<ReturnType<typeof fetchEditRoleById>>>();
     async function fetchUsersNotInRoleBySearchCallback(search: string) {
         try {
             const response = await fetchUsersNotInRole(
@@ -61,7 +67,7 @@ export default function EditRole({
         showSelectorOverlay,
         itemsCheckList,
         checkedItems,
-        checkedItemsValues: usersInTheSystem,
+        checkedItemsValues: usersDetail,
         searchTerm,
         onSearchChange,
         onCheckChange,
@@ -78,21 +84,26 @@ export default function EditRole({
         "lastName",
     );
 
-    function onResetClick() {
-        onReset();
-    }
-
     // users to be add, remove from role
     const [newUsersInRole, setNewUsersInRole] =
         useState<GetUsersByRoleReturnType>([]);
+    const [permissions, setPermissions] = useState<Permission[]>(
+        constructPermissions(),
+    );
+
+    function onPermissionChange(id: number, state: boolean) {
+        setPermissions((prev) =>
+            prev.map((permission) =>
+                permission.id === id ? { ...permission, state } : permission,
+            ),
+        );
+    }
 
     function constructUserLists() {
         const usersList: GetUsersByRoleReturnType = [];
 
         checkedItems.forEach((checkedItem) => {
-            const user = usersInTheSystem.find(
-                (u) => u.id === checkedItem.value,
-            );
+            const user = usersDetail.find((u) => u.id === checkedItem.value);
             if (user) {
                 usersList.push(user);
             }
@@ -101,11 +112,51 @@ export default function EditRole({
         return usersList;
     }
 
+    function constructPermissions() {
+        if (!role) {
+            return [];
+        }
+
+        const permissionsState = [...PermissionNames.entries()].map(
+            ([id, name]) => ({
+                id: Number(id),
+                name,
+                state: role.rolePermissions.some(
+                    (rp) => rp.permission.id === Number(id),
+                ),
+            }),
+        ) satisfies Permission[];
+
+        if (user.type === UserType.SUPER_ADMIN) {
+            return permissionsState;
+        }
+
+        // only allow super admin to edit permissions related to roles
+        return permissionsState.filter(
+            (permission) =>
+                !PermissionsToFilterIfNotSuperAdmin.includes(permission.id),
+        );
+    }
+
+    function onResetClick() {
+        setPermissions(constructPermissions());
+        setResult(undefined);
+        onReset();
+    }
+
     const Users = newUsersInRole.map((user) => (
         <User
             key={user.id}
             user={user}
             onRemove={() => onRemoveItem(user.id)}
+        />
+    ));
+
+    const RolePermissions = permissions.map((permission) => (
+        <RolePermission
+            key={permission.id}
+            permission={permission}
+            onChange={onPermissionChange}
         />
     ));
 
@@ -118,10 +169,33 @@ export default function EditRole({
         }
 
         setNewUsersInRole(usersList);
-    }, [checkedItems, usersInTheSystem, usersInRole]);
+    }, [checkedItems, usersDetail, usersInRole]);
+
+    async function onSubmit(formData: FormData) {
+        if (!role) {
+            return;
+        }
+
+        const usersInRoleIds = newUsersInRole.map((user) => user.id);
+        const permissionsIds = permissions
+            .filter((permission) => permission.state)
+            .map((permission) => permission.id);
+
+        const result = await fetchEditRoleById(
+            {
+                name: formData.get("roleName") as string,
+                permissionIds: permissionsIds,
+                roleId: role.id,
+                userIds: usersInRoleIds,
+            },
+            pathname,
+        );
+
+        setResult(result);
+    }
 
     return (
-        <div className="grid gap-4">
+        <form className="grid gap-4" action={onSubmit}>
             <div className="flex flex-col gap-2">
                 <label htmlFor="roleName" className="font-semibold">
                     Role name:
@@ -139,20 +213,7 @@ export default function EditRole({
                 <label htmlFor="roleName" className="font-semibold">
                     Role permissions:
                 </label>
-                <div className="grid gap-2">
-                    {permissions.map((permission) => {
-                        const dbPermission = role?.rolePermissions.find(
-                            (rp) => rp.permission.id === permission.id,
-                        )?.permission;
-                        return (
-                            <RolePermission
-                                key={permission.id}
-                                permission={permission}
-                                dbPermission={dbPermission}
-                            />
-                        );
-                    })}
-                </div>
+                <div className="grid gap-2">{RolePermissions}</div>
             </div>
             <div className="flex flex-col gap-2">
                 <div className="flex flex-row justify-between">
@@ -174,6 +235,9 @@ export default function EditRole({
                     {newUsersInRole.length > 0 ? Users : <NoUser />}
                 </div>
             </div>
+            {!result?.success && result?.errors && (
+                <FormErrorMessages errors={result?.errors} />
+            )}
             <div className="flex justify-end">
                 <div className="flex gap-4">
                     <Button
@@ -200,21 +264,24 @@ export default function EditRole({
                     searchTerm={searchTerm}
                 />
             )}
-        </div>
+        </form>
     );
 }
 
 function RolePermission({
     permission,
-    dbPermission,
+    onChange,
 }: {
     permission: Permission;
-    dbPermission: Permission | undefined;
+    onChange: (id: number, state: boolean) => void;
 }) {
     return (
         <div className="flex justify-between">
             <p>{permission.name}</p>
-            <ToggleSwitch defaultState={dbPermission?.id === permission.id} />
+            <ToggleSwitch
+                defaultState={permission.state}
+                onChange={(state) => onChange(permission.id, state)}
+            />
         </div>
     );
 }
@@ -239,12 +306,21 @@ function User({
                 <p>{`${user.firstName} ${user.lastName}`}</p>
             </div>
             <Tooltip title="Remove user">
-                <Button square={true} variant="danger" onClick={onRemove}>
+                <Button
+                    type="button"
+                    square={true}
+                    variant="danger"
+                    onClick={onRemove}
+                >
                     <IconX></IconX>
                 </Button>
             </Tooltip>
         </div>
     );
+}
+
+function NoUser() {
+    return <p>No user in this role</p>;
 }
 
 function SaveChangesBtn() {
@@ -254,8 +330,4 @@ function SaveChangesBtn() {
             {formStatus.pending ? "Saving changes" : "Save changes"}
         </Button>
     );
-}
-
-function NoUser() {
-    return <p>No user in this role</p>;
 }
