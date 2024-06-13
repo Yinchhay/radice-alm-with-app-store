@@ -9,4 +9,9 @@ export enum MysqlErrorCodes {
      * Check when "Delete"
      */
     ER_ROW_IS_REFERENCED_2 = "ER_ROW_IS_REFERENCED_2",
+    /**
+     * When we try to insert data that has a reference to another table but the reference is not
+     * found.
+     */
+    ER_NO_REFERENCED_ROW_2 = "ER_NO_REFERENCED_ROW_2",
 }

@@ -104,7 +104,7 @@ export async function GET(request: Request): Promise<Response> {
         }
 
         return Response.redirect(
-            `${await getBaseUrl()}/link_oauth/github?message=Linked github successfully`,
+            `${await getBaseUrl()}/link_oauth/github?message=Linked github successfully&success=1`,
         );
     } catch (e) {
         // the specific error message depends on the provider

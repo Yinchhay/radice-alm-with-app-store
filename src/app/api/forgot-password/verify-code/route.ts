@@ -3,17 +3,13 @@ import {
     buildSuccessResponse,
     buildErrorResponse,
 } from "@/lib/response";
-import { isWithinExpirationDate } from "oslo";
 import { getUserByEmail, updateUserPassword } from "@/repositories/users";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { verifyForgotPasswordCodeSchema } from "..//schema";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { HttpStatusCode } from "@/types/http";
-import {
-    getVerificationCodeByUserIdAndType,
-    verifyCodeByCodeAndType,
-} from "@/repositories/code_verifications";
+import { verifyCodeByCodeAndType } from "@/repositories/code_verifications";
 import { CodeVerificationType } from "@/drizzle/schema";
 import { sendMail } from "@/smtp/mail";
 import { ErrorMessage } from "@/types/error";
@@ -24,7 +20,7 @@ export type FetchVerifyForgotPasswordCodeData = Record<never, never>;
 const successMessage = "Verify forgot password code successfully";
 const unsuccessMessage = "Verify forgot password code failed";
 
-export async function POST(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
     try {
         let body: z.infer<typeof verifyForgotPasswordCodeSchema> =
             await request.json();
@@ -48,9 +44,11 @@ export async function POST(request: NextRequest) {
 
         const userExists = await getUserByEmail(body.email);
         if (!userExists) {
-            return buildErrorResponse(unsuccessMessage, {
-                message: "User not found",
-            });
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("email", "User not found"),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
         }
 
         const verifiedCode = await verifyCodeByCodeAndType(
@@ -60,9 +58,11 @@ export async function POST(request: NextRequest) {
         );
 
         if (!verifiedCode.success) {
-            return buildErrorResponse(unsuccessMessage, {
-                message: verifiedCode.message,
-            });
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("code", verifiedCode.message),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
         }
 
         const updateResult = await updateUserPassword(

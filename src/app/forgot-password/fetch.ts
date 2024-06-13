@@ -35,7 +35,7 @@ export async function fetchVerifyForgotPasswordCode(
         const response = await fetch(
             `${await getBaseUrl()}/api/forgot-password/verify-code`,
             {
-                method: "POST",
+                method: "PATCH",
                 body: JSON.stringify(body),
             },
         );

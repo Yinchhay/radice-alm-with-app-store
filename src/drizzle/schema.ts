@@ -236,7 +236,8 @@ export const oauthProvidersRelations = relations(oauthProviders, ({ one }) => ({
 }));
 
 export enum CodeVerificationType {
-    CHANGE_EMAIL = "change_email",
+    CHANGE_EMAIL  = "change_email",
+    VERIFY_NEW_EMAIL = "verify_new_email",
     FORGOT_PASSWORD = "forgot_password",
 }
 export const codeVerifications = mysqlTable("code_verifications", {
@@ -259,6 +260,10 @@ export const codeVerifications = mysqlTable("code_verifications", {
     })
         .notNull()
         .$type<CodeVerificationType>(),
+    // store the pending change, for example, if the code is for change email, store the new email here
+    pendingChange: varchar("pending_change", {
+        length: 255,
+    }),
     expiresAt: datetime("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),

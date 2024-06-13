@@ -96,7 +96,93 @@ export const changePasswordSchema = z
     .refine((value) => value.newPassword === value.newConfirmPassword, {
         message: "New password and confirm new password does not match",
         path: ["newConfirmPassword"],
-    }).refine((value) => value.oldPassword !== value.newPassword, {
+    })
+    .refine((value) => value.oldPassword !== value.newPassword, {
         message: "Old password and new password must be different",
         path: ["newPassword"],
+    });
+
+export const changeEmailSchema = z.object({
+    currentEmail: z
+        .string()
+        .email({
+            message: "Current Email is invalid",
+        })
+        .trim()
+        .min(1, {
+            message: "Current Email is required",
+        })
+        .max(255, {
+            message:
+                "Current Email must be less than or equal to 255 characters",
+        }),
+});
+
+export const verifyCurrentEmailCodeSchema = z
+    .object({
+        code: z
+            .string()
+            .trim()
+            .min(8, {
+                message: "Verification code must be 8 characters",
+            })
+            .max(8, {
+                message: "Verification code must be 8 characters",
+            }),
+        newEmail: z
+            .string()
+            .email({
+                message: "New Email is invalid",
+            })
+            .trim()
+            .min(1, {
+                message: "New Email is required",
+            })
+            .max(255, {
+                message:
+                    "New Email must be less than or equal to 255 characters",
+            }),
+        currentEmail: z
+            .string()
+            .email({
+                message: "Current Email is invalid",
+            })
+            .trim()
+            .min(1, {
+                message: "Current Email is required",
+            })
+            .max(255, {
+                message:
+                    "Current Email must be less than or equal to 255 characters",
+            }),
+    })
+    .refine((value) => value.newEmail !== value.currentEmail, {
+        message: "New email and current email must be different",
+    });
+
+export const verifyNewEmailCodeSchema = z.object({
+    code: z
+        .string()
+        .trim()
+        .min(8, {
+            message: "Verification code must be 8 characters",
+        })
+        .max(8, {
+            message: "Verification code must be 8 characters",
+        }),
+});
+
+export const validateNewEmailSchema = z
+    .string({
+        required_error: "New Email is required",
+    })
+    .email({
+        message: "New Email is invalid",
+    })
+    .trim()
+    .min(1, {
+        message: "New Email is required",
+    })
+    .max(255, {
+        message: "New Email must be less than or equal to 255 characters",
     });

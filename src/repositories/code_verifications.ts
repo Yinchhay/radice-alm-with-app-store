@@ -32,10 +32,12 @@ export const verifyCodeByCodeAndType = async (
                 and(eq(table.code, code), eq(table.type, type)),
         });
 
+        console.log(codeVerification);
+
         if (!codeVerification) {
             return {
                 success: false,
-                message: "Verification code not found",
+                message: "Verification code is invalid",
             };
         }
 
@@ -65,6 +67,7 @@ export const verifyCodeByCodeAndType = async (
         return {
             success: true,
             message: "Verification code is valid",
+            pendingChange: codeVerification.pendingChange,
         };
     });
 };
@@ -72,6 +75,7 @@ export const verifyCodeByCodeAndType = async (
 export async function generateVerificationCode(
     userId: string,
     type: CodeVerificationType,
+    pending_change?: string | null,
 ): Promise<string> {
     return await db.transaction(async (tx) => {
         const eightDigitCode = getRandom8DigitCode();
@@ -90,6 +94,7 @@ export async function generateVerificationCode(
             userId,
             type,
             code: eightDigitCode,
+            pendingChange: pending_change,
         });
 
         return eightDigitCode;

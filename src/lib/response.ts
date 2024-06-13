@@ -95,6 +95,12 @@ export const checkErrorForResponse = (
                     "Cannot delete this record because it is being referenced by another record.",
                 code: HttpStatusCode.CONFLICT_409,
             };
+        case MysqlErrorCodes.ER_NO_REFERENCED_ROW_2:
+            return {
+                message:
+                    "Cannot find the referenced record because the record you try to insert/update doesn't exist.",
+                code: HttpStatusCode.NOT_FOUND_404,
+            };
         default:
             return {
                 message: ErrorMessage.SomethingWentWrong,

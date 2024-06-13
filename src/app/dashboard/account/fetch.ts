@@ -1,8 +1,14 @@
 "use server";
+import { FetchChangeEmailSendEmailData } from "@/app/api/internal/account/change-email/route";
+import { FetchVerifyCurrentEmailCodeData } from "@/app/api/internal/account/change-email/verify-current-email-code/route";
+import { FetchVerifyNewEmailCodeData } from "@/app/api/internal/account/change-email/verify-new-email-code/route";
 import { FetchChangePasswordData } from "@/app/api/internal/account/change-password/route";
 import {
+    changeEmailSchema,
     changePasswordSchema,
     updateProfileInformationFormSchema,
+    verifyCurrentEmailCodeSchema,
+    verifyNewEmailCodeSchema,
 } from "@/app/api/internal/account/schema";
 import { FetchUpdateProfileInformation } from "@/app/api/internal/account/update-profile-information/route";
 import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
@@ -58,6 +64,74 @@ export async function fetchChangePassword(
         const sessionId = await getSessionCookie();
         const response = await fetch(
             `${await getBaseUrl()}/api/internal/account/change-password`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+
+        revalidatePath(pathname);
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchChangeEmailSendEmail(
+    body: z.infer<typeof changeEmailSchema>,
+): ResponseJson<FetchChangeEmailSendEmailData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/account/change-email`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchVerifyCurrentEmailCode(
+    body: z.infer<typeof verifyCurrentEmailCodeSchema>,
+): ResponseJson<FetchVerifyCurrentEmailCodeData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/account/change-email/verify-current-email-code`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+export async function fetchVerifyNewEmailCode(
+    body: z.infer<typeof verifyNewEmailCodeSchema>,
+    pathname: string,
+): ResponseJson<FetchVerifyNewEmailCodeData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/account/change-email/verify-new-email-code`,
             {
                 method: "PATCH",
                 headers: {

@@ -65,8 +65,8 @@ export default async function ManageAccount() {
                                 </ChipsHolder>
                             </div>
                         )}
-                        <div className="">
-                            {/* <ChangeEmailOverlay /> */}
+                        <div className="flex gap-4">
+                            <ChangeEmailOverlay user={user} />
                             <ChangePasswordOverlay />
                         </div>
                     </div>

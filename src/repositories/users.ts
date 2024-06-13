@@ -35,6 +35,15 @@ export const updateUserPassword = async (
         .where(eq(users.id, userId));
 };
 
+export const updateUserEmail = async (userId: string, newEmail: string) => {
+    return await db
+        .update(users)
+        .set({
+            email: newEmail,
+        })
+        .where(eq(users.id, userId));
+};
+
 export const createUser = async (user: typeof users.$inferInsert) => {
     const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
 
