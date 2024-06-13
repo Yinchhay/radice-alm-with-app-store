@@ -279,7 +279,7 @@ function ChangeEmailForm({
         >
             <div className="flex flex-col items-start">
                 <p className="text-sm my-2">
-                    Once you enter your new email, we will send a verification
+                    Once you click send code, we will send a verification
                     code to your current email: <strong>{userEmail}</strong>
                 </p>
                 <label htmlFor="currentEmail" className="font-normal">
