@@ -14,8 +14,10 @@ const roboto_condensed = Roboto_Condensed({
 });
 
 export default async function page() {
-    const members = await getMembers();
+    const fetchNembers = await getMembers();
 
+    if (!fetchNembers.success) return;
+    const members = fetchNembers.data.members;
     const executive: MemberProfileType[] = [
         {
             firstName: "Bradley Jensen",

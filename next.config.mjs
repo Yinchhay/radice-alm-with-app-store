@@ -5,7 +5,7 @@ const nextConfig = {
     },
     images: {
         // temporary
-
+        dangerouslyAllowSVG: true,
         remotePatterns: [{ protocol: "https", hostname: "*", port: "" }],
     },
     typescript: {
@@ -19,8 +19,8 @@ const nextConfig = {
     logging: {
         fetches: {
             fullUrl: true,
-        }
-    }
+        },
+    },
     // If using Dockerfile, uncomment this
     // output: "standalone",
 };

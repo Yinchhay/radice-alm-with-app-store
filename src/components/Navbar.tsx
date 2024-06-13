@@ -29,6 +29,9 @@ export default function Navbar() {
                         <Link href={"/about"} className="uppercase">
                             Who we are
                         </Link>
+                        <Link href={"/media"} className="uppercase">
+                            Media
+                        </Link>
                         <Link href={"/join-us"} className="uppercase">
                             Join Us
                         </Link>

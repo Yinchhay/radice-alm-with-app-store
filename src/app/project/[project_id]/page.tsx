@@ -60,9 +60,9 @@ export default async function ProjectPage({
                     <p>{fetchProject.data.project.description}</p>
                     <ChipsHolder className="mb-4">
                         {fetchProject.data.project.projectCategories.map(
-                            (categoryJoin) => (
-                                <Chip key={categoryJoin.id}>
-                                    {categoryJoin.category.name}
+                            (category, i) => (
+                                <Chip key={`category-${category.id}}`}>
+                                    {category.category.name}
                                 </Chip>
                             ),
                         )}

@@ -198,7 +198,7 @@ export default function CategorySectionNew({
                                         <div className="ml-1 relative w-[720px] h-[398px]">
                                             <div
                                                 className={[
-                                                    "absolute w-[720px] h-[398px] top-3 left-3",
+                                                    "absolute w-[720px] h-[398px] top-3 left-3 select-none pointer-events-none",
                                                 ].join(" ")}
                                             >
                                                 <Image

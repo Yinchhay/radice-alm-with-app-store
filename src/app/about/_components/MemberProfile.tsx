@@ -44,7 +44,7 @@ export default function MemberProfile({
                 <div className="flex flex-col items-center w-[400px]">
                     <Link
                         href={`/${userType}/${member.id}`}
-                        className="w-[180px] h-[220px] relative"
+                        className="w-[180px] h-[240px] relative"
                     >
                         <ScrollReveal
                             onReveal={() => {
@@ -56,13 +56,14 @@ export default function MemberProfile({
                                 variant="light"
                                 isAlphabet={false}
                                 canReveal={reveal}
-                                src={
-                                    fileToUrl(member.profileUrl) || "/wrath.jpg"
-                                }
+                                src={fileToUrl(
+                                    member.profileUrl,
+                                    "/missing-profile.png",
+                                )}
                                 cols={9}
                                 rows={11}
                                 width={180}
-                                height={220}
+                                height={240}
                                 revealDelay={6}
                                 fill
                                 className="object-cover"
@@ -89,7 +90,7 @@ export default function MemberProfile({
         case "dark":
             return (
                 <div className="flex flex-col items-center w-[400px]">
-                    <div className="w-[180px] h-[220px] relative">
+                    <div className="w-[180px] h-[240px] relative">
                         <ScrollReveal
                             onReveal={() => {
                                 console.log("reveal");
@@ -100,13 +101,14 @@ export default function MemberProfile({
                                 variant="light"
                                 isAlphabet={false}
                                 canReveal={reveal}
-                                src={
-                                    fileToUrl(member.profileUrl) || "/wrath.jpg"
-                                }
+                                src={fileToUrl(
+                                    member.profileUrl,
+                                    "/missing-profile.png",
+                                )}
                                 cols={9}
                                 rows={11}
                                 width={180}
-                                height={220}
+                                height={240}
                                 revealDelay={6}
                                 fill
                                 className="object-cover"

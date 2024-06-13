@@ -1,12 +1,22 @@
 "use server";
 
-import { db } from "@/drizzle/db";
-import { UserType } from "@/types/user";
+import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { getBaseUrl } from "@/lib/server_utils";
+import { FetchPublicMemberData } from "../api/public/members/route";
 
 export type getMembersReturnType = Awaited<ReturnType<typeof getMembers>>;
 
-export const getMembers = async () => {
-    return await db.query.users.findMany({
-        where: (table, { and, eq }) => and(eq(table.type, UserType.USER)),
-    });
-};
+export async function getMembers(): ResponseJson<FetchPublicMemberData> {
+    try {
+        const response = await fetch(
+            `${await getBaseUrl()}/api/public/members`,
+            {
+                method: "GET",
+                cache: "no-cache",
+            },
+        );
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}

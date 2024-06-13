@@ -96,9 +96,12 @@ export async function deleteFile(
     }
 }
 
-export function fileToUrl(file: string | null | undefined): string {
+export function fileToUrl(
+    file: string | null | undefined,
+    fallbackSrc?: string | undefined,
+): string {
     if (!file) {
-        return "/placeholder.webp";
+        return fallbackSrc || "/placeholder.webp";
     }
 
     const fileStartsWith = ["http", "/", "blob:"];

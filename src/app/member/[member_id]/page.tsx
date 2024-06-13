@@ -44,15 +44,16 @@ export default async function MemberPublicProfilePage({
             {member && (
                 <div className="container min-h-[70vh] mx-auto py-8 grid grid-cols-2 gap-8">
                     <div className="flex flex-col gap-2">
-                        <div className="w-[180px] h-[220px] relative">
+                        <div className="w-[175px] h-[225px] relative">
                             <GridRevealImage
                                 variant="light"
                                 canReveal
-                                width={180}
-                                height={220}
-                                src={
-                                    fileToUrl(member.profileUrl) || "/wrath.jpg"
-                                }
+                                width={175}
+                                height={225}
+                                src={fileToUrl(
+                                    member.profileUrl,
+                                    "/missing-profile.png",
+                                )}
                                 fill
                                 className="object-cover"
                                 alt=""
@@ -90,7 +91,7 @@ export default async function MemberPublicProfilePage({
                                 })}
                             </ChipsHolder>
                         )}
-                        <p>{member.description}</p>
+                        {member.description && <p>{member.description}</p>}
                         {member.hasLinkedGithub && fetchGithub && (
                             <>
                                 <div className="flex">
