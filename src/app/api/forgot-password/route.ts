@@ -46,9 +46,13 @@ export async function POST(request: NextRequest) {
 
         const userExists = await getUserByEmail(body.email);
         if (!userExists) {
-            return buildErrorResponse(unsuccessMessage, {
-                message: "User not found, skip sending email",
-            });
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "email",
+                    "User not found, skip sending email",
+                ),
+            );
         }
         const existingCode = await getVerificationCodeByUserIdAndType(
             userExists.id,
@@ -57,9 +61,13 @@ export async function POST(request: NextRequest) {
 
         // normally we set expire date 5min, if the code exist and not expired yet. skip sending email to user to avoid spamming
         if (existingCode && isWithinExpirationDate(existingCode.expiresAt)) {
-            return buildErrorResponse(unsuccessMessage, {
-                message: "Verification code is still valid, skip sending email",
-            });
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "code",
+                    "Verification code is still valid, skip sending email",
+                ),
+            );
         }
 
         const eightDigitCode = await generateVerificationCode(
@@ -68,9 +76,13 @@ export async function POST(request: NextRequest) {
         );
 
         if (!eightDigitCode) {
-            return buildErrorResponse(unsuccessMessage, {
-                message: "Failed to generate verification code",
-            });
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "code",
+                    "Failed to generate verification code",
+                ),
+            );
         }
 
         // remember in development, the email will be sent to default email (not the actual email user). check sendMail function in src/smtp/mail.ts

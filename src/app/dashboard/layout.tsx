@@ -36,7 +36,7 @@ export default async function DashboardManageLayout({
     }
 
     if (user.type === UserType.USER && !user.hasLinkedGithub) {
-        redirect("/link_oauth/github");
+        redirect("/link-oauth/github");
     }
 
     const { userPermissions } = await hasPermission(

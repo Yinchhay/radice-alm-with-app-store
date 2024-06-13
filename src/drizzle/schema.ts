@@ -239,6 +239,7 @@ export enum CodeVerificationType {
     CHANGE_EMAIL  = "change_email",
     VERIFY_NEW_EMAIL = "verify_new_email",
     FORGOT_PASSWORD = "forgot_password",
+    CHANGE_GITHUB = "change_github",
 }
 export const codeVerifications = mysqlTable("code_verifications", {
     id: int("id").primaryKey().autoincrement(),

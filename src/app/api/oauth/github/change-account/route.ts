@@ -6,9 +6,9 @@ import { generateState } from "arctic";
 import { cookies } from "next/headers";
 
 /**
- * Flow: /api/oauth/github/link_account -> (redirect to github) -> (successfully authorized by github)
- *  -> (github redirect to /api/oauth/github/callback/link_account)
- *  -> /api/oauth/github/callback/link_account (handle callback logic)
+ * Flow: /api/oauth/github/change-account -> (redirect to github) -> (successfully authorized by github)
+ *  -> (github redirect to /api/oauth/github/callback/change-account)
+ *  -> /api/oauth/github/callback/change-account (handle callback logic)
  */
 
 export async function GET(request: Request) {
@@ -19,15 +19,15 @@ export async function GET(request: Request) {
             return Response.redirect(`${await getBaseUrl()}/login`);
         }
 
-        if (user.hasLinkedGithub) {
+        if (!user.hasLinkedGithub) {
             return Response.redirect(
-                `${await getBaseUrl()}/link_oauth/github?error_message="User already linked github account`,
+                `${await getBaseUrl()}/dashboard/account?error_message="You are required to link your github account"`,
             );
         }
 
         if (user.type !== UserType.USER) {
             return Response.redirect(
-                `${await getBaseUrl()}/link_oauth/github?error_message="Your account type cannot link to github account"`,
+                `${await getBaseUrl()}/dashboard/account?error_message="Your account type cannot change to github account"`,
             );
         }
 
@@ -37,13 +37,13 @@ export async function GET(request: Request) {
         /**
          * NOTE: since github callback can only be set to one URL but we can have sub callback URL
          * we need to set the redirect_uri to the sub callback URL to handle different logic in this
-         * case we set the redirect_uri to /api/oauth/github/callback/link_account
+         * case we set the redirect_uri to /api/oauth/github/callback/change-account
          *
          * - callback is what github will redirect to after user authorize the app
          */
         url.searchParams.set(
             "redirect_uri",
-            `${await getBaseUrl()}/api/oauth/github/callback/link_account`,
+            `${await getBaseUrl()}/api/oauth/github/callback/change-account`,
         );
 
         cookies().set("github_oauth_state", state, {

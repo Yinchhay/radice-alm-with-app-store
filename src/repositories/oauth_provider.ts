@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { oauthProviders } from "@/drizzle/schema";
+import { oauthProviders, users } from "@/drizzle/schema";
 import { OAuthProviderId } from "@/types/oauth";
 import { eq } from "drizzle-orm";
 
@@ -15,6 +15,13 @@ export const getOAuthProviderByGithubId = async (githubId: string) => {
 
 export const getOAuthProviderByUserId = async (userId: string) => {
     return await db.query.oauthProviders.findFirst({
+        with: {
+            user: {
+                columns: {
+                    email: true,
+                },
+            },
+        },
         where: (oauthProviders, { eq, and }) =>
             and(
                 eq(oauthProviders.providerId, OAuthProviderId.Github),
@@ -35,8 +42,29 @@ export const updateOAuthProviderAccessTokenById = async (
         .where(eq(oauthProviders.id, oauthProvidersId));
 };
 
+export const updateOAuthProviderById = async (
+    oauthProvidersId: number,
+    githubId: string,
+    accessToken: string,
+) => {
+    return await db
+        .update(oauthProviders)
+        .set({
+            providerUserId: githubId,
+            accessToken: accessToken,
+        })
+        .where(eq(oauthProviders.id, oauthProvidersId));
+};
+
 export const createOauthProvider = async (
     oauthProvider: typeof oauthProviders.$inferInsert,
 ) => {
-    return await db.insert(oauthProviders).values(oauthProvider);
+    return await db.transaction(async (tx) => {
+        await tx
+            .update(users)
+            .set({ hasLinkedGithub: true })
+            .where(eq(users.id, oauthProvider.userId));
+
+        return await tx.insert(oauthProviders).values(oauthProvider);
+    });
 };

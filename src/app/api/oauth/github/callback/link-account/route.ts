@@ -26,7 +26,7 @@ export async function GET(request: Request): Promise<Response> {
 
     if (!code || !state || !storedState || state !== storedState) {
         return Response.redirect(
-            `${await getBaseUrl()}/link_oauth/github?error_message=Bad request"`,
+            `${await getBaseUrl()}/link-oauth/github?error_message=Bad request"`,
         );
     }
 
@@ -48,7 +48,7 @@ export async function GET(request: Request): Promise<Response> {
 
         if (user.type !== UserType.USER) {
             return Response.redirect(
-                `${await getBaseUrl()}/link_oauth/github?error_message=Your account type cannot link to github account`,
+                `${await getBaseUrl()}/link-oauth/github?error_message=Your account type cannot link to github account`,
             );
         }
 
@@ -68,14 +68,14 @@ export async function GET(request: Request): Promise<Response> {
                 }
 
                 return Response.redirect(
-                    `${await getBaseUrl()}/link_oauth/github?error_message=The github account has already linked to your account`,
+                    `${await getBaseUrl()}/link-oauth/github?error_message=The github account has already linked to your account`,
                 );
             }
 
             // check if the github account is linked to another user
             if (userHasLinkedGithubOAuth.providerUserId != githubUser.id) {
                 return Response.redirect(
-                    `${await getBaseUrl()}/link_oauth/github?error_message=The github account has already linked to another user's account`,
+                    `${await getBaseUrl()}/link-oauth/github?error_message=The github account has already linked to another user's account`,
                 );
             }
         }
@@ -89,33 +89,23 @@ export async function GET(request: Request): Promise<Response> {
         });
         if (oauthProvider[0].affectedRows < 1) {
             return Response.redirect(
-                `${await getBaseUrl()}/link_oauth/github?error_message=Failed to link github`,
-            );
-        }
-
-        const updateUserHasLinkedGithub =
-            await updateUserHasLinkedGithubByUserId(user.id, {
-                hasLinkedGithub: true,
-            });
-        if (updateUserHasLinkedGithub[0].affectedRows < 1) {
-            return Response.redirect(
-                `${await getBaseUrl()}/link_oauth/github?error_message=Failed to link github`,
+                `${await getBaseUrl()}/link-oauth/github?error_message=Failed to link github`,
             );
         }
 
         return Response.redirect(
-            `${await getBaseUrl()}/link_oauth/github?message=Linked github successfully&success=1`,
+            `${await getBaseUrl()}/link-oauth/github?message=Linked github successfully&success=1`,
         );
     } catch (e) {
         // the specific error message depends on the provider
         if (e instanceof OAuth2RequestError) {
             return Response.redirect(
-                `${await getBaseUrl()}/link_oauth/github?error_message=Invalid code`,
+                `${await getBaseUrl()}/link-oauth/github?error_message=Invalid code`,
             );
         }
 
         return Response.redirect(
-            `${await getBaseUrl()}/link_oauth/github?error_message=Failed to link github`,
+            `${await getBaseUrl()}/link-oauth/github?error_message=Failed to link github`,
         );
     }
 }
