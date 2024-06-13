@@ -22,7 +22,7 @@ const unsuccessMessage = "Get role by id failed";
 
 export async function GET(request: Request, { params }: Params) {
     try {
-        const { errorNoBearerToken, errorNoPermission } =
+        const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(
                 request,
                 new Set([Permissions.EDIT_ROLES])!,
@@ -34,7 +34,7 @@ export async function GET(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const role = await getRoleById(Number(params.role_id));
+        const role = await getRoleById(Number(params.role_id), user.type);
 
         return buildSuccessResponse<FetchRoleByIdData>(successMessage, {
             role: role,

@@ -185,7 +185,7 @@ export default function EditRole({
             {
                 name: formData.get("roleName") as string,
                 permissionIds: permissionsIds,
-                roleId: role.id,
+                roleId: role.id as number,
                 userIds: usersInRoleIds,
             },
             pathname,

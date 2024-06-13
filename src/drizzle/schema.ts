@@ -150,7 +150,9 @@ export const rolePermissions = mysqlTable("role_permissions", {
     id: int("id").primaryKey().autoincrement(),
     roleId: int("role_id")
         .notNull()
-        .references(() => roles.id),
+        .references(() => roles.id, {
+            onDelete: "cascade",
+        }),
     permissionId: int("permission_id")
         .notNull()
         .references(() => permissions.id, {

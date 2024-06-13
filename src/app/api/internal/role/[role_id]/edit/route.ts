@@ -53,7 +53,7 @@ export async function PATCH(request: Request, { params }: Params) {
         body = validationResult.data;
 
         const [role, usersInRole] = await Promise.all([
-            getRoleById(body.roleId),
+            getRoleById(body.roleId, user.type),
             getUsersInRole(body.roleId),
         ]);
 

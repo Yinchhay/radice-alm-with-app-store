@@ -1,5 +1,12 @@
 import { db } from "@/drizzle/db";
-import { roles, userRoles, users, rolePermissions } from "@/drizzle/schema";
+import {
+    roles,
+    userRoles,
+    users,
+    rolePermissions,
+    permissions,
+} from "@/drizzle/schema";
+import { PermissionsToFilterIfNotSuperAdmin } from "@/lib/filter";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 import { count, eq, sql, and, inArray, like } from "drizzle-orm";
@@ -9,29 +16,7 @@ export const createRole = async (role: typeof roles.$inferInsert) => {
 };
 
 export const deleteRoleById = async (roleId: number) => {
-    return await db.transaction(async (tx) => {
-        // Delete role_permissions
-        const deleteRolePermissionsResult = await tx
-            .delete(rolePermissions)
-            .where(eq(rolePermissions.roleId, roleId));
-
-        // Delete user_roles
-        const deleteUserRolesResult = await tx
-            .delete(userRoles)
-            .where(eq(userRoles.roleId, roleId));
-
-        // Delete role
-        const deleteRoleResult = await tx
-            .delete(roles)
-            .where(eq(roles.id, roleId));
-
-        return {
-            rolePermissionsAffectedRows:
-                deleteRolePermissionsResult[0].affectedRows,
-            userRolesAffectedRows: deleteUserRolesResult[0].affectedRows,
-            rolesAffectedRows: deleteRoleResult[0].affectedRows,
-        };
-    });
+    return await db.delete(roles).where(eq(roles.id, roleId));
 };
 
 export type GetRoles_C_Tag = `getRoles_C`;
@@ -56,7 +41,7 @@ export const getRolesTotalRow = async (search: string = "") => {
     return totalRows[0].count;
 };
 
-export const getRoleById = async (roleId: number) => {
+export const getRoleByIdNoFilter = async (roleId: number) => {
     return await db.query.roles.findFirst({
         columns: {
             name: true,
@@ -75,13 +60,31 @@ export const getRoleById = async (roleId: number) => {
                 },
             },
         },
-        where: eq(roles.id, roleId),
+        where: (table, { eq }) => eq(table.id, roleId),
     });
+};
+
+export const getRoleById = async (roleId: number, userType: UserType) => {
+    const role = await getRoleByIdNoFilter(roleId);
+
+    if (userType === UserType.SUPER_ADMIN) {
+        return role;
+    }
+
+    const rolePermissions = role?.rolePermissions.filter(
+        (rp) => !PermissionsToFilterIfNotSuperAdmin.includes(rp.permission.id),
+    );
+
+    return {
+        ...role,
+        rolePermissions: rolePermissions || [],
+    };
 };
 
 const usersInRoleSubQuery = (roleId: number) => {
     return db
         .selectDistinct({
+            // doesn't matter what we select, at least select 1 column
             userId: userRoles.userId,
         })
         .from(userRoles)
@@ -122,9 +125,9 @@ export const getUsersNotInRole = async (
             profileUrl: true,
             hasLinkedGithub: true,
         },
-        where: (table, { exists, not, and, eq, or }) =>
+        where: (table, { notExists, and, eq, or }) =>
             and(
-                not(exists(usersInRoleSubQuery(roleId))),
+                notExists(usersInRoleSubQuery(roleId)),
                 or(
                     like(table.firstName, `%${search}%`),
                     like(table.lastName, `%${search}%`),
