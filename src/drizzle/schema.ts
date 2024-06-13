@@ -253,8 +253,7 @@ export const codeVerifications = mysqlTable("code_verifications", {
         .notNull()
         .references(() => users.id, {
             onDelete: "cascade",
-        })
-        .unique(),
+        }),
     type: varchar("type", {
         length: 100,
     })
