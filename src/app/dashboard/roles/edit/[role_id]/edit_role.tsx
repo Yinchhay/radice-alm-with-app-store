@@ -13,7 +13,7 @@ import { IconPlus, IconX } from "@tabler/icons-react";
 import { fetchEditRoleById, fetchUsersNotInRole } from "../../fetch";
 import { localDebug } from "@/lib/utils";
 import Selector from "@/components/Selector";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import FormErrorMessages from "@/components/FormErrorMessages";
@@ -48,7 +48,7 @@ export default function EditRole({
             const response = await fetchUsersNotInRole(
                 role?.id as number,
                 search,
-                1,
+                10,
             );
             if (response.success) {
                 return response.data.usersNotInRole;
@@ -62,6 +62,10 @@ export default function EditRole({
 
         return [];
     }
+
+    const [initialFormState, setInitialFormState] = useState<string>();
+    const [isFormModified, setIsFormModified] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
 
     const {
         showSelectorOverlay,
@@ -194,8 +198,50 @@ export default function EditRole({
         setResult(result);
     }
 
+    function updateInitialFormState() {
+        if (!role) {
+            return;
+        }
+
+        setInitialFormState(
+            JSON.stringify({
+                name: role.name,
+                permissions: constructPermissions(),
+                usersInRole: usersInRole,
+            }),
+        );
+    }
+
+    function detectChanges() {
+        if (!formRef.current) {
+            return;
+        }
+
+        const formData = new FormData(formRef.current);
+        const formState = JSON.stringify({
+            name: formData.get("roleName"),
+            permissions: permissions,
+            usersInRole: newUsersInRole,
+        });
+
+        setIsFormModified(initialFormState !== formState);
+    }
+
+    useEffect(() => {
+        detectChanges();
+    }, [permissions, newUsersInRole, initialFormState]);
+
+    useEffect(() => {
+        updateInitialFormState();
+    }, [role, usersInRole]);
+
     return (
-        <form className="grid gap-4" action={onSubmit}>
+        <form
+            className="grid gap-4"
+            action={onSubmit}
+            ref={formRef}
+            onChange={detectChanges}
+        >
             <div className="flex flex-col gap-2">
                 <label htmlFor="roleName" className="font-semibold">
                     Role name:
@@ -239,16 +285,18 @@ export default function EditRole({
                 <FormErrorMessages errors={result?.errors} />
             )}
             <div className="flex justify-end">
-                <div className="flex gap-4">
-                    <Button
-                        onClick={onResetClick}
-                        variant="secondary"
-                        type="button"
-                    >
-                        Reset
-                    </Button>
-                    <SaveChangesBtn />
-                </div>
+                {isFormModified && (
+                    <div className="flex gap-4">
+                        <Button
+                            onClick={onResetClick}
+                            variant="secondary"
+                            type="button"
+                        >
+                            Reset
+                        </Button>
+                        <SaveChangesBtn />
+                    </div>
+                )}
             </div>
             {showSelectorOverlay && (
                 <Selector
@@ -260,7 +308,9 @@ export default function EditRole({
                     onSearchChange={onSearchChange}
                     onCancel={onCloseSelector}
                     onConfirm={onConfirm}
-                    onCheckChange={onCheckChange}
+                    onCheckChange={(updatedList, changedCheckbox) => {
+                        onCheckChange(updatedList, changedCheckbox);
+                    }}
                     searchTerm={searchTerm}
                 />
             )}

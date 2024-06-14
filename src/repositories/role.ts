@@ -4,12 +4,19 @@ import {
     userRoles,
     users,
     rolePermissions,
-    permissions,
 } from "@/drizzle/schema";
 import { PermissionsToFilterIfNotSuperAdmin } from "@/lib/filter";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
-import { count, eq, sql, and, inArray, like } from "drizzle-orm";
+import {
+    count,
+    eq,
+    sql,
+    and,
+    inArray,
+    like,
+    asc,
+} from "drizzle-orm";
 
 export const createRole = async (role: typeof roles.$inferInsert) => {
     return await db.insert(roles).values(role);
@@ -94,21 +101,30 @@ const usersInRoleSubQuery = (roleId: number) => {
 };
 
 export const getUsersInRole = async (roleId: number) => {
-    return await db.query.users.findMany({
+    const uRoles = await db.query.userRoles.findMany({
         columns: {
             id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            profileUrl: true,
-            hasLinkedGithub: true,
         },
-        where: (table, { exists, and }) =>
-            and(
-                exists(usersInRoleSubQuery(roleId)),
-                eq(table.type, UserType.USER),
-            ),
+        with: {
+            user: {
+                columns: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    profileUrl: true,
+                    hasLinkedGithub: true,
+                    type: true,
+                },
+            },
+        },
+        where: (table, { eq }) => eq(table.roleId, roleId),
+        orderBy: asc(userRoles.id),
     });
+
+    return uRoles
+        .filter((ur) => ur.user.type === UserType.USER)
+        .map((ur) => ur.user);
 };
 
 export const getUsersNotInRole = async (
@@ -124,6 +140,7 @@ export const getUsersNotInRole = async (
             email: true,
             profileUrl: true,
             hasLinkedGithub: true,
+            type: true,
         },
         where: (table, { notExists, and, eq, or }) =>
             and(
@@ -134,6 +151,7 @@ export const getUsersNotInRole = async (
                 ),
                 eq(table.type, UserType.USER),
             ),
+        limit: rowsPerPage,
     });
 };
 
