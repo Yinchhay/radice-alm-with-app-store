@@ -10,7 +10,17 @@ import Cell from "@/components/table/Cell";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
 import { Suspense, useState } from "react";
-import { IconEdit, IconPlus, IconX } from "@tabler/icons-react";
+import {
+    IconBread,
+    IconBreadFilled,
+    IconCheck,
+    IconCircleCheck,
+    IconCircleCheckFilled,
+    IconCross,
+    IconEdit,
+    IconPlus,
+    IconX,
+} from "@tabler/icons-react";
 import Pagination from "@/components/Pagination";
 import CheckList from "@/components/CheckList";
 import { arrayToCheckList } from "@/lib/array_to_check_list";
@@ -20,6 +30,8 @@ import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
 import Tooltip from "@/components/Tooltip";
+import Toaster, { useToast } from "@/components/Toaster";
+import Toast from "@/components/Toast";
 
 export default function Home({
     searchParams,
@@ -84,6 +96,7 @@ export default function Home({
     );
 
     const [showSelectorOverlay, setShowSelectorOverlay] = useState(false);
+    const { addToast } = useToast();
     return (
         <div>
             <DashboardPageTitle
@@ -352,6 +365,82 @@ export default function Home({
                     >
                         <Button>Bottom</Button>
                     </Tooltip>
+                </div>
+                <div className="flex flex-col gap-2">
+                    <h1 className="font-bold">Toast:</h1>
+                    <div>
+                        <Button
+                            variant="primary"
+                            onClick={() => addToast(<div>New Toast</div>, 3500)}
+                        >
+                            Show Toast
+                        </Button>
+                    </div>
+                    <div>
+                        <Button
+                            variant="primary"
+                            onClick={() =>
+                                addToast(
+                                    <div>
+                                        Lorem ipsum dolor sit amet consectetur,
+                                        adipisicing elit. Error, reprehenderit
+                                        possimus asperiores esse.
+                                    </div>,
+                                    3500,
+                                )
+                            }
+                        >
+                            Show Long Toast
+                        </Button>
+                    </div>
+                    <div>
+                        <Button
+                            variant="primary"
+                            onClick={() =>
+                                addToast(<div> 🍞 Toast Emoji 🍞</div>, 3500)
+                            }
+                        >
+                            Show 🍞 Toast
+                        </Button>
+                    </div>
+                    <div>
+                        <Button
+                            variant="primary"
+                            onClick={() =>
+                                addToast(
+                                    <div className="flex gap-2">
+                                        <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                                        This is a check mark
+                                    </div>,
+                                    3500,
+                                )
+                            }
+                        >
+                            <span className="flex gap-2 py-2">
+                                Show Icon
+                                <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                            </span>
+                        </Button>
+                    </div>
+                    <div>
+                        <Button
+                            variant="primary"
+                            onClick={() =>
+                                addToast(
+                                    <div className="flex gap-2">
+                                        <IconX className="text-white bg-red-500 rounded-full" />
+                                        This is a cross mark
+                                    </div>,
+                                    6000,
+                                )
+                            }
+                        >
+                            <span className="flex gap-2 py-2">
+                                Show Icon
+                                <IconX className="text-white text-sm p-1 bg-red-500 rounded-full" />
+                            </span>
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
