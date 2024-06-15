@@ -2,9 +2,11 @@
 import { FetchChangeEmailSendEmailData } from "@/app/api/internal/account/change-email/route";
 import { FetchVerifyCurrentEmailCodeData } from "@/app/api/internal/account/change-email/verify-current-email-code/route";
 import { FetchVerifyNewEmailCodeData } from "@/app/api/internal/account/change-email/verify-new-email-code/route";
+import { FetchChangeGithubAccountData } from "@/app/api/internal/account/change-github-account/route";
 import { FetchChangePasswordData } from "@/app/api/internal/account/change-password/route";
 import {
     changeEmailSchema,
+    changeGithubSchema,
     changePasswordSchema,
     updateProfileInformationFormSchema,
     verifyCurrentEmailCodeSchema,
@@ -142,6 +144,29 @@ export async function fetchVerifyNewEmailCode(
         );
 
         revalidatePath(pathname);
+        return await response.json();
+    } catch (error: any) {
+        return fetchErrorSomethingWentWrong;
+    }
+}
+
+// this api won't return success message
+export async function fetchChangeGithubAccount(
+    body: z.infer<typeof changeGithubSchema>,
+): ResponseJson<FetchChangeGithubAccountData> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/account/change-github-account`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+
         return await response.json();
     } catch (error: any) {
         return fetchErrorSomethingWentWrong;

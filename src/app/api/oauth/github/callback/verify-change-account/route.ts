@@ -38,7 +38,7 @@ export async function GET(request: Request): Promise<Response> {
         !verifyCode
     ) {
         return Response.redirect(
-            `${await getBaseUrl()}/dashboard/account/change-github?error_message=Bad request, failed to change github account"`,
+            `${await getBaseUrl()}/dashboard/account?error_message=Bad request, failed to change github account"`,
         );
     }
 
@@ -60,7 +60,7 @@ export async function GET(request: Request): Promise<Response> {
 
         if (user.type !== UserType.USER) {
             return Response.redirect(
-                `${await getBaseUrl()}/dashboard/account/change-github?error_message=Your account type cannot change github account`,
+                `${await getBaseUrl()}/dashboard/account?error_message=Your account type cannot change github account`,
             );
         }
 
@@ -71,14 +71,14 @@ export async function GET(request: Request): Promise<Response> {
         // check if the user has linked github account before
         if (!userHasLinkedGithubOAuth) {
             return Response.redirect(
-                `${await getBaseUrl()}/dashboard/account/change-github?error_message=You are required to link your github account`,
+                `${await getBaseUrl()}/dashboard/account?error_message=You are required to link your github account`,
             );
         }
 
         // check if the github account is not the same
         if (userHasLinkedGithubOAuth.providerUserId == githubUser.id) {
             return Response.redirect(
-                `${await getBaseUrl()}/dashboard/account/change-github?error_message=The github account is the same as the current linked account`,
+                `${await getBaseUrl()}/dashboard/account?error_message=The github account is the same as the current linked account`,
             );
         }
 
@@ -90,7 +90,7 @@ export async function GET(request: Request): Promise<Response> {
 
         if (!verifiedCode.success) {
             return Response.redirect(
-                `${await getBaseUrl()}/dashboard/account/change-github?error_message=${verifiedCode.message}`,
+                `${await getBaseUrl()}/dashboard/account?error_message=${verifiedCode.message}`,
             );
         }
 
@@ -101,23 +101,23 @@ export async function GET(request: Request): Promise<Response> {
         );
         if (updatedResult[0].affectedRows < 1) {
             return Response.redirect(
-                `${await getBaseUrl()}/dashboard/account/change-github?error_message=Failed to change github account`,
+                `${await getBaseUrl()}/dashboard/account?error_message=Failed to change github account`,
             );
         }
 
         return Response.redirect(
-            `${await getBaseUrl()}/dashboard/account/change-github?success_message=Successfully changed github account&success=1`,
+            `${await getBaseUrl()}/dashboard/account?success_message=Successfully changed github account&success=1`,
         );
     } catch (e) {
         // the specific error message depends on the provider
         if (e instanceof OAuth2RequestError) {
             return Response.redirect(
-                `${await getBaseUrl()}/dashboard/account/change-github?error_message=Invalid code`,
+                `${await getBaseUrl()}/dashboard/account?error_message=Invalid code`,
             );
         }
 
         return Response.redirect(
-            `${await getBaseUrl()}/dashboard/account/change-github?error_message=Failed to change github`,
+            `${await getBaseUrl()}/dashboard/account?error_message=Failed to change github`,
         );
     }
 }

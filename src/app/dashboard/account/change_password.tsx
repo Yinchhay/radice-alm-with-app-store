@@ -57,7 +57,7 @@ export function ChangePasswordOverlay() {
                                     htmlFor="oldPassword"
                                     className="font-normal"
                                 >
-                                    Old password
+                                    Current password
                                 </label>
                                 <InputField
                                     type="password"

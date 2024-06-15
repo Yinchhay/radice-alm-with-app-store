@@ -14,7 +14,7 @@ import { UserSkillSetLevel } from "@/drizzle/schema";
 import { ChangeEmailOverlay } from "./change_email";
 import { ChangePasswordOverlay } from "./change_password";
 import { UserType } from "@/types/user";
-import ChangeGithubButton from "./change_github_";
+import ChangeGithub from "./change_github_";
 
 export default async function ManageAccount() {
     const user = await getAuthUser();
@@ -69,7 +69,7 @@ export default async function ManageAccount() {
                         <div className="flex gap-4">
                             <ChangeEmailOverlay user={user} />
                             <ChangePasswordOverlay />
-                            <ChangeGithubButton />
+                            {user.hasLinkedGithub && <ChangeGithub />}
                         </div>
                     </div>
                 </Card>

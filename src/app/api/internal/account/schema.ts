@@ -186,3 +186,15 @@ export const validateNewEmailSchema = z
     .max(255, {
         message: "New Email must be less than or equal to 255 characters",
     });
+
+export const changeGithubSchema = z.object({
+    oldPassword: z
+        .string()
+        .trim()
+        .min(8, {
+            message: "Password must be at least 8 characters long",
+        })
+        .max(255, {
+            message: "Password must be less than 255 characters",
+        }),
+});
