@@ -10,3 +10,6 @@
         opacity: 0;
     }
 }
+.album-title {
+    clip-path: polygon(calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%, 0 0);
+}

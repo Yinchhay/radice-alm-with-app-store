@@ -242,7 +242,7 @@ export default function Collage({
                             <div></div>
                         )}
                     </div>
-                    <div className="grid gap-8">
+                    <div className="flex flex-col gap-8">
                         {collage[2] ? (
                             <Album aspectRatio="1/1" media={collage[2]} />
                         ) : (

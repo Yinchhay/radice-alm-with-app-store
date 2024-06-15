@@ -18,9 +18,9 @@ const roboto_condensed = Roboto_Condensed({
 });
 
 export default async function MediaPage() {
-    // const fetchMedia = await getMedia();
-    // if (!fetchMedia.success) return;
-    // const media = fetchMedia.data.medias;
+    const fetchMedia = await getMedia();
+    if (!fetchMedia.success) return;
+    //let medias = fetchMedia.data.medias;
     const generateMediaArray = (num: number): PublicMedias[] => {
         const mediaArray: PublicMedias[] = [];
         for (let i = 1; i <= num; i++) {
