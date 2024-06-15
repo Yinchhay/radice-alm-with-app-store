@@ -7,14 +7,25 @@ export default function Album({
     col = 1,
     media,
     aspectRatio = "1/1",
+    onClick,
 }: {
     col?: number;
-    media: PublicMedias;
+    media?: PublicMedias;
     aspectRatio?: string;
+    onClick: () => void;
 }) {
+    if (!media) {
+        return (
+            <div
+                style={{ aspectRatio, gridColumn: `span ${col} / span ${col}` }}
+                className="select-none pointer-events-none"
+            ></div>
+        );
+    }
     return (
         <button
             className={`w-full col-span-${col} relative group overflow-hidden`}
+            onClick={onClick}
         >
             <div className="bg-black/50 w-full h-full absolute top-0 left-0 duration-200 ease-out translate-x-[-110%] group-hover:translate-x-0 pointer-events-none z-10"></div>
             <h1 className="bg-black pl-4 pr-5 py-2 absolute bottom-0 left-0 text-white z-20 album-title max-w-[90%] flex gap-2 items-center">
@@ -29,7 +40,7 @@ export default function Album({
                 width="0"
                 height="0"
                 sizes="100vw"
-                className="w-full h-auto object-cover group-hover:scale-125 duration-500 ease-out"
+                className="w-full h-full object-cover group-hover:scale-125 duration-500 ease-out"
                 style={{ aspectRatio }}
             />
         </button>
