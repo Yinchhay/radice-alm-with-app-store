@@ -9,7 +9,7 @@ import TableBody from "@/components/table/TableBody";
 import Cell from "@/components/table/Cell";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
     IconBread,
     IconBreadFilled,
@@ -40,6 +40,7 @@ export default function Home({
         page?: string;
     };
 }) {
+    const [clickToast, setClickToast] = useState(0);
     const [showOverlay, setShowOverlay] = useState(false);
     const [fieldValue, setFieldValue] = useState("");
     const [fieldSearchValue, setFieldSearchValue] = useState("");
@@ -97,6 +98,10 @@ export default function Home({
 
     const [showSelectorOverlay, setShowSelectorOverlay] = useState(false);
     const { addToast } = useToast();
+
+    useEffect(() => {
+        addToast(<div>Clicked Toast {clickToast} times</div>, 3500);
+    }, [clickToast]);
     return (
         <div>
             <DashboardPageTitle
@@ -374,6 +379,16 @@ export default function Home({
                             onClick={() => addToast(<div>New Toast</div>, 3500)}
                         >
                             Show Toast
+                        </Button>
+                    </div>
+                    <div>
+                        <Button
+                            variant="danger"
+                            onClick={() => {
+                                setClickToast(clickToast + 1);
+                            }}
+                        >
+                            Show Toast With useEffect
                         </Button>
                     </div>
                     <div>
