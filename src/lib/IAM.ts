@@ -176,6 +176,14 @@ export const checkBearerAndPermission = async (
         };
     }
 
+    if (user.type !== UserType.SUPER_ADMIN && !user.hasLinkedGithub) {
+        return {
+            errorNoBearerToken: false,
+            errorNoPermission: true,
+            user: null,
+        };
+    }
+
     // if no required permission passed, skip the permission check
     if (requiredPermissions.size > 0) {
         const userPermission = await hasPermission(

@@ -6,10 +6,11 @@ import Overlay from "@/components/Overlay";
 import { media } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { fetchDeleteMediaById } from "./fetch";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export function DeleteMediaOverlay({
     mediaOne,
@@ -20,6 +21,7 @@ export function DeleteMediaOverlay({
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteMediaById>>>();
+    const { addToast } = useToast();
 
     function onCancel() {
         setResult(undefined);
@@ -29,6 +31,15 @@ export function DeleteMediaOverlay({
     useEffect(() => {
         // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>
+                        Successfully deleted{" "}
+                        <strong className="capitalize">{mediaOne.title}</strong>
+                    </p>
+                </div>,
+            );
             onCancel();
         }
     }, [result]);
@@ -37,7 +48,9 @@ export function DeleteMediaOverlay({
         <>
             <Tooltip className="group" title="Delete media">
                 <Button
-                    onClick={onCancel}
+                    onClick={() => {
+                        setShowOverlay(true);
+                    }}
                     square
                     variant="outline"
                     className="outline-0"

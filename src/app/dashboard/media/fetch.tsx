@@ -81,19 +81,20 @@ export async function fetchDeleteMediaById(
 }
 
 export async function fetchEditMediaById(
-    body: z.infer<typeof editMediaSchema>,
+    mediaId: number,
+    formData: FormData,
     pathname: string,
 ): ResponseJson<FetchEditMedia> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/media/${body.mediaId}/edit`,
+            `${await getBaseUrl()}/api/internal/media/${mediaId}/edit`,
             {
                 method: "PATCH",
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
-                body: JSON.stringify(body),
+                body: formData,
             },
         );
 

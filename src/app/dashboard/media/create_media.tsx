@@ -5,13 +5,15 @@ import Overlay from "@/components/Overlay";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconPlus, IconUpload, IconX } from "@tabler/icons-react";
+import { IconCheck, IconPlus, IconUpload, IconX } from "@tabler/icons-react";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fetchCreateMedia } from "./fetch";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
+import { ACCEPTED_IMAGE_TYPES } from "@/lib/file";
+import { useToast } from "@/components/Toaster";
 
 export function CreateMediaOverlay() {
     const pathname = usePathname();
@@ -20,6 +22,7 @@ export function CreateMediaOverlay() {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateMedia>>>();
+    const { addToast } = useToast();
 
     function removeFile(index: number) {
         setFiles((prev) => {
@@ -36,14 +39,19 @@ export function CreateMediaOverlay() {
         // add only new file from the event. keep the files the same
         const newFiles = event.target.files;
         if (newFiles) {
+            const newFilesArray = Array.from(newFiles);
+
             setFiles((prev) => {
                 if (prev) {
                     // convert newFiles to array and add new files
-                    return [...prev, ...Array.from(newFiles)];
+                    return [...prev, ...newFilesArray];
                 }
-                return Array.from(newFiles);
+                return newFilesArray;
             });
         }
+
+        // clear the input value to allow adding the same file again
+        fileInputRef.current!.value = "";
     }
 
     async function onSubmit(formData: FormData) {
@@ -68,6 +76,12 @@ export function CreateMediaOverlay() {
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully created media</p>
+                </div>,
+            );
             onCancel();
         }
     }, [result]);
@@ -97,7 +111,7 @@ export function CreateMediaOverlay() {
                                 <label htmlFor="title" className="font-normal">
                                     Title
                                 </label>
-                                <InputField name="title" id="title" />
+                                <InputField name="title" id="title" required />
                             </div>
                             <div className="flex flex-col items-start">
                                 <label
@@ -117,7 +131,12 @@ export function CreateMediaOverlay() {
                                 <label htmlFor="date" className="font-normal">
                                     Date
                                 </label>
-                                <InputField type="date" name="date" id="date" />
+                                <InputField
+                                    type="date"
+                                    name="date"
+                                    id="date"
+                                    required
+                                />
                             </div>
                             <div className="flex flex-col items-start gap-4">
                                 <div className="flex gap-2 justify-center items-center">
@@ -153,7 +172,7 @@ export function CreateMediaOverlay() {
                                         multiple
                                         name="mediaLogo"
                                         id="mediaLogo"
-                                        accept="image/*"
+                                        accept={ACCEPTED_IMAGE_TYPES.join(",")}
                                     />
                                 </div>
                                 <div className="grid grid-cols-3 gap-4">
@@ -163,9 +182,9 @@ export function CreateMediaOverlay() {
                                                 <div
                                                     className="relative"
                                                     key={
+                                                        file.lastModified +
                                                         file.name +
-                                                        file.size +
-                                                        file.type
+                                                        file.size + crypto.randomUUID()
                                                     }
                                                 >
                                                     <div className="absolute top-0 right-0">
@@ -191,7 +210,6 @@ export function CreateMediaOverlay() {
                                                             file,
                                                         )}
                                                         alt="media photo"
-                                                        // on hover, i want to show x red button to remove the image
                                                         className="aspect-square object-cover rounded-sm"
                                                         width={128}
                                                         height={128}

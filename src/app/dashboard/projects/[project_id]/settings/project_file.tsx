@@ -18,7 +18,7 @@ import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import Link from "next/link";
 
-export type FileList = {
+type FileLists = {
     file?: File;
     filename: string;
     size: string;
@@ -35,7 +35,7 @@ export default function ProjectFile({
     const pathname = usePathname();
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchEditProjectSettingsFiles>>>();
-    const [fileLists, setFileLists] = useState<FileList[]>(project.files);
+    const [fileLists, setFileLists] = useState<FileLists[]>(project.files);
     const imageRef = useRef<HTMLInputElement>(null);
 
     function handleUploadFilesClick() {
@@ -56,7 +56,7 @@ export default function ProjectFile({
             return;
         }
 
-        const newFileLists: FileList[] = [];
+        const newFileLists: FileLists[] = [];
         for (const file of files) {
             if (fileLists.find((f) => f.filename === file.name)) {
                 continue;
@@ -206,7 +206,7 @@ function FileRow({
     file,
     onDeleteClick,
 }: {
-    file: FileList;
+    file: FileLists;
     onDeleteClick: () => void;
 }) {
     const fileSizeToString = (size: string) => {

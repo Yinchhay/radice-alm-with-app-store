@@ -1,4 +1,4 @@
-import { media } from "@/drizzle/schema";
+import { media, MediaFile } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { count, eq, like, sql } from "drizzle-orm";
@@ -52,6 +52,7 @@ export const deleteMediaById = async (mediaId: number) => {
 export const editMediaById = async (
     mediaId: number,
     mediaValue: z.infer<typeof editMediaSchema>,
+    mediaFiles: MediaFile[],
 ) => {
     return await db
         .update(media)
@@ -59,6 +60,7 @@ export const editMediaById = async (
             title: mediaValue.title,
             description: mediaValue.description,
             date: mediaValue.date,
+            files: mediaFiles,
         })
         .where(eq(media.id, mediaId));
 };

@@ -28,6 +28,20 @@ export const deleteMediaSchema = z.object({
         }),
 });
 
+export const existingMediaFilesSchema = z.array(
+    z.object({
+        order: z
+            .number({
+                required_error: "Order is required",
+            })
+            .nonnegative({
+                message: "Order must be non-negative",
+            }),
+        filename: z.string().trim().min(1, {
+            message: "Filename is required",
+        }),
+    }),
+);
 export const editMediaSchema = z.object({
     title: z
         .string()
@@ -49,4 +63,17 @@ export const editMediaSchema = z.object({
         .positive({
             message: "Media id must be positive",
         }),
+    existingMediaFiles: existingMediaFilesSchema,
+    imagesToUpload: z.array(imageOnlyValidation).optional(),
+    imagesToUploadOrder: z
+        .array(
+            z
+                .number({
+                    required_error: "Image order is required",
+                })
+                .nonnegative({
+                    message: "Image order must be non-negative",
+                }),
+        )
+        .optional(),
 });

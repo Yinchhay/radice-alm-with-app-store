@@ -7,7 +7,7 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import InputField from "@/components/InputField";
 import Selector from "@/components/Selector";
 import { IconPlus } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
     fetchCategoriesBySearch,
@@ -34,54 +34,15 @@ export default function ProjectDetail({
     if (!project) {
         throw new Error("Project not found");
     }
-
     const pathname = usePathname();
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchEditProjectSettingsDetail>>>();
 
+    // Variables for resetting the form
     const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(project.logoUrl));
     const fileInputRef = useRef<HTMLInputElement>(null);
     const projectName = useRef<HTMLInputElement>(null);
     const projectDescription = useRef<HTMLTextAreaElement>(null);
-
-    const initialFormState = {
-        logoUrl: project.logoUrl,
-        name: project.name,
-        description: project.description,
-        categories: originalProjectCategories,
-    };
-
-    const [isChanged, setIsChanged] = useState(false);
-
-    useEffect(() => {
-        const handleFormChange = () => {
-            const currentFormState = {
-                logoUrl: logoSrc,
-                name: projectName.current?.value ?? project.name,
-                description: projectDescription.current?.value ?? "",
-                categories: checkedCategories.map((cate) => cate.id),
-            };
-            setIsChanged(
-                JSON.stringify(initialFormState) !==
-                    JSON.stringify(currentFormState),
-            );
-        };
-
-        const formElements = [
-            fileInputRef.current,
-            projectName.current,
-            projectDescription.current,
-        ];
-        formElements.forEach((el) =>
-            el?.addEventListener("change", handleFormChange),
-        );
-
-        return () => {
-            formElements.forEach((el) =>
-                el?.removeEventListener("change", handleFormChange),
-            );
-        };
-    }, [logoSrc, checkedCategories]);
 
     async function fetchCategoriesBySearchCallback(search: string) {
         try {
@@ -121,6 +82,7 @@ export default function ProjectDetail({
         if (!project) return;
 
         setLogoSrc(fileToUrl(project.logoUrl));
+
         if (projectName.current) {
             projectName.current.value = project.name;
         }
@@ -129,7 +91,6 @@ export default function ProjectDetail({
         }
         onReset();
         setResult(undefined);
-        setIsChanged(false);
     }
 
     return (
@@ -152,7 +113,6 @@ export default function ProjectDetail({
                         formData,
                     );
                     setResult(result);
-                    setIsChanged(false);
                 }}
                 className="grid gap-4"
             >
@@ -276,20 +236,18 @@ export default function ProjectDetail({
                         )}
                     </div>
                 </div>
-                {isChanged && (
-                    <div className="flex justify-end">
-                        <div className="flex gap-4">
-                            <Button
-                                onClick={onResetClick}
-                                variant="secondary"
-                                type="button"
-                            >
-                                Reset
-                            </Button>
-                            <SaveChangesBtn />
-                        </div>
+                <div className="flex justify-end">
+                    <div className="flex gap-4">
+                        <Button
+                            onClick={onResetClick}
+                            variant="secondary"
+                            type="button"
+                        >
+                            Reset
+                        </Button>
+                        <SaveChangesBtn />
                     </div>
-                )}
+                </div>
                 {!result?.success && result?.errors && (
                     <FormErrorMessages errors={result?.errors} />
                 )}
