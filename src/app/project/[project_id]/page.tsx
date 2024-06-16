@@ -16,6 +16,7 @@ import MemberProfile from "@/app/about/_components/MemberProfile";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import ChipsHolder from "@/components/ChipsHolder";
 import Chip from "@/components/Chip";
+import { redirect } from "next/navigation";
 
 export default async function ProjectPage({
     params,
@@ -26,10 +27,14 @@ export default async function ProjectPage({
         Number(params.project_id),
     );
     if (!fetchProject.success) {
-        return;
+        redirect("/");
+    }
+    if (JSON.stringify(fetchProject.data) === "{}") {
+        console.log("project does not exist");
+        redirect("/");
     }
     if (!fetchProject.data.project) {
-        return;
+        redirect("/");
     }
     let chapters: Chapter[] = [];
     try {
