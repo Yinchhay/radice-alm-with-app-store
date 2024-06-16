@@ -68,6 +68,10 @@ export async function GET(request: NextRequest) {
 
         return new Response(file, {
             status: HttpStatusCode.OK_200,
+            headers: {
+                "Content-Type": "application/octet-stream",
+                "Content-Disposition": `attachment; filename="${filename}"`,
+            },
         });
     } catch (error) {
         return new Response("Failed to read file", {

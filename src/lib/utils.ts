@@ -54,3 +54,33 @@ export function splitArray<T>(array: T[], size: number): T[][] {
     }
     return result;
 }
+export interface FileDetails {
+    name: string;
+    extension: string;
+}
+
+export function extractFileDetails(filename: string): FileDetails {
+    // Assuming the UUID length is fixed at 36 characters
+    const UUID_LENGTH = 36;
+
+    // Find the position of the last dot which separates the extension
+    const lastDotIndex = filename.lastIndexOf(".");
+
+    if (lastDotIndex === -1) {
+        throw new Error("Filename does not contain an extension");
+    }
+
+    const extension = filename.substring(lastDotIndex);
+    const filenameWithoutExtension = filename.substring(0, lastDotIndex);
+
+    // Get the filename without the UUID and remove the trailing hyphen if it exists
+    const nameWithoutUUID = filenameWithoutExtension.slice(0, -UUID_LENGTH);
+    const cleanName = nameWithoutUUID.endsWith("-")
+        ? nameWithoutUUID.slice(0, -1)
+        : nameWithoutUUID;
+
+    return {
+        name: cleanName,
+        extension: extension,
+    };
+}

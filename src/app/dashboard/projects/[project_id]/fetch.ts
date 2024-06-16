@@ -10,7 +10,7 @@ export async function getOneAssociatedProjectData(
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/projects/${project_id}`,
+            `${await getBaseUrl()}/api/internal/project/${project_id}`,
             {
                 method: "GET",
                 cache: "no-cache",

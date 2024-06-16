@@ -17,6 +17,7 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import Link from "next/link";
+import { extractFileDetails } from "@/lib/utils";
 
 type FileLists = {
     file?: File;
@@ -218,7 +219,7 @@ function FileRow({
         return readableFileSize(Number(size));
     };
     const fileIsStoredInStorage = file.file instanceof File;
-
+    const fileDetail = extractFileDetails(file.filename);
     return (
         <TableRow className="align-middle">
             <Cell className="text-center">
@@ -227,11 +228,11 @@ function FileRow({
                         href={URL.createObjectURL(file?.file!)}
                         target="_blank"
                     >
-                        {file.filename}
+                        {fileDetail.name + fileDetail.extension}
                     </Link>
                 ) : (
                     <Link href={fileToUrl(file.filename)} target="_blank">
-                        {file.filename}
+                        {fileDetail.name + fileDetail.extension}
                     </Link>
                 )}
             </Cell>

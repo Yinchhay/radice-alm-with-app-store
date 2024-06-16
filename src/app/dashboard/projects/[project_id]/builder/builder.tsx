@@ -307,9 +307,7 @@ export default function Builder() {
         }
     };
     return (
-        <div
-            className={`relative grid grid-cols-[270px_minmax(auto,920px)_270px] w-full max-w-[1500px] mx-auto ${roboto.className}`}
-        >
+        <div className="relative grid grid-cols-[270px_minmax(auto,920px)_270px] w-full max-w-[1500px] mx-auto">
             {showCreateOverlay && (
                 <Overlay
                     onClose={() => {
