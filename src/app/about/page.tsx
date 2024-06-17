@@ -14,10 +14,10 @@ const roboto_condensed = Roboto_Condensed({
 });
 
 export default async function page() {
-    const fetchNembers = await getMembers();
+    const fetchMembers = await getMembers();
 
-    if (!fetchNembers.success) return;
-    const members = fetchNembers.data.members;
+    if (!fetchMembers.success) return;
+    const members = fetchMembers.data.members;
     const executive: MemberProfileType[] = [
         {
             firstName: "Bradley Jensen",
@@ -81,7 +81,7 @@ export default async function page() {
                 <h1
                     className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
                 >
-                    Executive
+                    Executive Board
                 </h1>
                 <div className="flex justify-center gap-8 mt-4">
                     {executive.map((member, i) => {

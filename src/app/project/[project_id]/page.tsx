@@ -61,12 +61,13 @@ export default async function ProjectPage({
                         <div className="fixed w-[270px]">
                             <div className="grid gap-2 w-full px-6 pb-4">
                                 <h2 className="font-bold text-xl">Content</h2>
-                                <div className="grid gap-2">
+                                <div className="grid">
                                     {chapters.map((chapter, i) => {
                                         return (
                                             <Link
                                                 key={`chapter-${i}`}
                                                 href={`#${chapter.name}-${i}`}
+                                                className="text-gray-500 hover:text-black transition-all py-1"
                                             >
                                                 {chapter.name}
                                             </Link>
@@ -74,13 +75,23 @@ export default async function ProjectPage({
                                     })}
                                     {(project.projectPartners.length > 0 ||
                                         project.projectMembers.length > 0) && (
-                                        <div className="w-[50%] h-[1px] bg-gray-300 my-2"></div>
+                                        <div className="w-[50%] h-[1px] bg-gray-300 my-4"></div>
                                     )}
                                     {project.projectPartners.length > 0 && (
-                                        <Link href={"#partners"}>Partners</Link>
+                                        <Link
+                                            href={"#partners"}
+                                            className="text-gray-500 hover:text-black transition-all py-1"
+                                        >
+                                            Partners
+                                        </Link>
                                     )}
                                     {project.projectMembers.length > 0 && (
-                                        <Link href={"#members"}>Members</Link>
+                                        <Link
+                                            href={"#members"}
+                                            className="text-gray-500 hover:text-black transition-all py-1"
+                                        >
+                                            Members
+                                        </Link>
                                     )}
                                 </div>
                             </div>
