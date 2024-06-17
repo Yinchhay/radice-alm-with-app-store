@@ -66,12 +66,16 @@ export function extractFileDetails(filename: string): FileDetails {
     // Find the position of the last dot which separates the extension
     const lastDotIndex = filename.lastIndexOf(".");
 
-    if (lastDotIndex === -1) {
-        throw new Error("Filename does not contain an extension");
-    }
+    let extension: string = "";
+    let filenameWithoutExtension: string;
 
-    const extension = filename.substring(lastDotIndex);
-    const filenameWithoutExtension = filename.substring(0, lastDotIndex);
+    if (lastDotIndex === -1) {
+        // No dot found, hence no extension
+        filenameWithoutExtension = filename;
+    } else {
+        extension = filename.substring(lastDotIndex);
+        filenameWithoutExtension = filename.substring(0, lastDotIndex);
+    }
 
     // Get the filename without the UUID and remove the trailing hyphen if it exists
     const nameWithoutUUID = filenameWithoutExtension.slice(0, -UUID_LENGTH);
@@ -83,4 +87,45 @@ export function extractFileDetails(filename: string): FileDetails {
         name: cleanName,
         extension: extension,
     };
+}
+
+export type ProjectStatusElement = {
+    name: string;
+    value: boolean;
+};
+
+const ALL_STATUSES = [
+    "requirements",
+    "definition",
+    "analysis",
+    "approved",
+    "chartered",
+    "design",
+    "development",
+    "build",
+    "test",
+    "release",
+    "live",
+    "retired",
+    "retiring",
+];
+
+function capitalize(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function convertToProjectStatusElements(
+    statusObj: { [key: string]: boolean } | null,
+): ProjectStatusElement[] {
+    if (statusObj === null) {
+        return ALL_STATUSES.map((status) => ({
+            name: capitalize(status),
+            value: false,
+        }));
+    }
+
+    return ALL_STATUSES.map((status) => ({
+        name: capitalize(status),
+        value: statusObj[status] !== undefined ? statusObj[status] : false,
+    }));
 }

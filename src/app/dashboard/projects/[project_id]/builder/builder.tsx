@@ -30,6 +30,8 @@ import InputField from "@/components/InputField";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import { Roboto } from "next/font/google";
+import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
+import { getOneAssociatedProject } from "@/repositories/project";
 
 const roboto = Roboto({
     weight: ["300", "400", "700"],
@@ -37,7 +39,11 @@ const roboto = Roboto({
     display: "swap",
 });
 
-export default function Builder() {
+export default function Builder({
+    project,
+}: {
+    project: Awaited<ReturnType<typeof getOneAssociatedProject>>;
+}) {
     const params = useParams<{ project_id: string }>();
     const mouseSensor = useSensor(MouseSensor, {
         activationConstraint: {
@@ -106,36 +112,14 @@ export default function Builder() {
     }
 
     useEffect(() => {
-        async function loadProjectData() {
-            const result = await fetchOneAssociatedProject(params.project_id);
-            if (result.success) {
-                console.log(result.data);
-                if (result.data.project) {
-                    if (result.data.project.projectContent) {
-                        setDataLoaded(true);
-                        if (result.data.project.projectContent) {
-                            try {
-                                setChapters(
-                                    JSON.parse(
-                                        result.data.project
-                                            .projectContent as string,
-                                    ),
-                                );
-                                setSelectedChapter(0);
-                            } catch {
-                                setChapters([]);
-                            }
-                        }
-                    } else {
-                        setDataLoaded(true);
-                    }
-                }
-            } else {
-                console.log(result.errors);
+        if (project) {
+            try {
+                setChapters(JSON.parse(project.projectContent as string));
+                setSelectedChapter(0);
+            } catch {
+                setChapters([]);
             }
-        }
-        if (!dataLoaded) {
-            loadProjectData();
+            setDataLoaded(true);
         }
     }, []);
 
@@ -377,7 +361,7 @@ export default function Builder() {
                     </Card>
                 </Overlay>
             )}
-            <div className="grid gap-2 w-full z-10 relative h-fit">
+            <div className="grid gap-2 w-full z-[11] relative h-fit">
                 <div className="absolute ">
                     <div className="fixed w-[270px]">
                         <ChapterManager

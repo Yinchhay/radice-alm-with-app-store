@@ -15,14 +15,26 @@ import ImageWithFallback from "@/components/ImageWithFallback";
 import ChipsHolder from "@/components/ChipsHolder";
 import Chip from "@/components/Chip";
 import Link from "next/link";
-import ResearchFiles from "./_components/ResearchFiles";
+import { convertToProjectStatusElements } from "@/lib/utils";
+import Stepper from "@/components/Stepper";
+import ResearchFilesAndLinks from "./_components/ResearchFilesAndLinks";
+import Button from "@/components/Button";
+import { IconHammer, IconSettings } from "@tabler/icons-react";
+import { getAuthUser } from "@/auth/lucia";
+import { ProjectRole, checkProjectRole } from "@/lib/project";
+import { redirect } from "next/navigation";
 
 export default async function PreviewProjectPage({
     params,
 }: {
     params: { project_id: string };
 }) {
-    console.log("called");
+    const user = await getAuthUser();
+
+    if (!user) {
+        throw new Error("Unauthorized to access this page");
+    }
+
     const fetchProject = await getOneAssociatedProjectData(
         Number(params.project_id),
     );
@@ -39,32 +51,75 @@ export default async function PreviewProjectPage({
         return;
     }
     const project = fetchProject.data.project;
+
+    const { canEdit, projectRole } = checkProjectRole(
+        user.id,
+        project,
+        user.type,
+    );
+
+    if (projectRole === ProjectRole.NONE) {
+        redirect("/");
+    }
     let chapters: Chapter[] = [];
     try {
         chapters = JSON.parse(project.projectContent as string) as Chapter[];
     } catch {
         chapters = [];
     }
+    const projectStatusElements = convertToProjectStatusElements(
+        project.pipelineStatus,
+    );
     return (
         <div>
+            {canEdit && (
+                <div className="fixed bottom-8 right-8 z-30 grid gap-2">
+                    {projectRole == ProjectRole.OWNER && (
+                        <Link
+                            href={`/dashboard/projects/${params.project_id}/settings`}
+                        >
+                            <Button square>
+                                <IconSettings size={32} stroke={1.5} />
+                            </Button>
+                        </Link>
+                    )}
+                    <Link
+                        href={`/dashboard/projects/${params.project_id}/builder`}
+                    >
+                        <Button square>
+                            <IconHammer size={32} stroke={1.5} />
+                        </Button>
+                    </Link>
+                </div>
+            )}
             <div className="relative grid grid-cols-[270px_minmax(auto,920px)_270px] w-full max-w-[1500px] mx-auto">
                 <div className="grid gap-2 w-full z-10 relative h-fit">
                     <div className="absolute ">
                         <div className="fixed w-[270px]">
-                            <div className="grid gap-2 px-4">
-                                {chapters.map((chapter, i) => {
-                                    return (
-                                        <Link
-                                            key={`chapter-${i}`}
-                                            href={`#${chapter.name}-${i}`}
-                                        >
-                                            {chapter.name}
-                                        </Link>
-                                    );
-                                })}
-                                <div className="w-[50%] h-[1px] bg-gray-300 my-2"></div>
-                                <Link href={"#partners"}>Partners</Link>
-                                <Link href={"#members"}>Members</Link>
+                            <div className="grid gap-2 w-full px-6 pb-4">
+                                <h2 className="font-bold text-xl">Content</h2>
+                                <div className="grid gap-2">
+                                    {chapters.map((chapter, i) => {
+                                        return (
+                                            <Link
+                                                key={`chapter-${i}`}
+                                                href={`#${chapter.name}-${i}`}
+                                            >
+                                                {chapter.name}
+                                            </Link>
+                                        );
+                                    })}
+                                    {(project.projectPartners.length > 0 ||
+                                        project.projectMembers.length > 0) && (
+                                        <div className="w-[50%] h-[1px] bg-gray-300 my-2"></div>
+                                    )}
+                                    {project.projectPartners.length > 0 && (
+                                        <Link href={"#partners"}>Partners</Link>
+                                    )}
+                                    {project.projectMembers.length > 0 && (
+                                        <Link href={"#members"}>Members</Link>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -332,7 +387,7 @@ export default async function PreviewProjectPage({
                                 })}
                             </div>
                         )}
-                        {project.projectPartners && (
+                        {project.projectPartners.length > 0 && (
                             <div
                                 className="py-8 border-t border-gray-300"
                                 id="partners"
@@ -358,7 +413,7 @@ export default async function PreviewProjectPage({
                                 </div>
                             </div>
                         )}
-                        {project.projectMembers && (
+                        {project.projectMembers.length && (
                             <div
                                 className="py-8 border-t border-gray-300"
                                 id="members"
@@ -368,6 +423,17 @@ export default async function PreviewProjectPage({
                                 </h1>
                                 <div className="flex justify-center gap-8">
                                     {project.projectMembers.map((member, i) => {
+                                        if (member.title.length > 0) {
+                                            return (
+                                                <MemberProfile
+                                                    useTitle
+                                                    customTitle={member.title}
+                                                    key={`member-${member.user.id}-${i}`}
+                                                    member={member.user}
+                                                    variant="light"
+                                                />
+                                            );
+                                        }
                                         return (
                                             <MemberProfile
                                                 key={`member-${member.user.id}-${i}`}
@@ -382,11 +448,11 @@ export default async function PreviewProjectPage({
                     </div>
                 </div>
                 <div className="w-full z-10 relative h-fit">
-                    <div className="absolute">
-                        <div className="fixed w-[270px]">
-                            <ResearchFiles files={project.files} />
-                        </div>
-                    </div>
+                    <ResearchFilesAndLinks
+                        files={project.files}
+                        links={project.links}
+                    />
+                    <Stepper projectStatus={projectStatusElements} />
                 </div>
             </div>
         </div>
