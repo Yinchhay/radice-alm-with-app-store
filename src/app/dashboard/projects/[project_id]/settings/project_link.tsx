@@ -17,13 +17,14 @@ import {
     generateAndFormatZodError,
     T_ZodErrorFormatted,
 } from "@/lib/form";
-import { IconPlus, IconX } from "@tabler/icons-react";
+import { IconCheck, IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsLinks } from "./fetch";
 import { usePathname } from "next/navigation";
 import { editProjectSettingsLinks } from "@/app/api/internal/project/[project_id]/schema";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export default function ProjectSettingLink({
     project,
@@ -37,6 +38,12 @@ export default function ProjectSettingLink({
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchEditProjectSettingsLinks>>>();
     const pathname = usePathname();
+
+    const { addToast } = useToast();
+
+    const [initialFormState, setInitialFormState] = useState<string>();
+    const [isFormModified, setIsFormModified] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
 
     function addLink(link: ProjectLink) {
         setLinks([...links, link]);
@@ -65,6 +72,9 @@ export default function ProjectSettingLink({
             return;
         }
 
+        if (formRef.current) {
+            formRef.current.reset();
+        }
         setLinks(project.links || []);
         setResult(undefined);
     }
@@ -98,24 +108,62 @@ export default function ProjectSettingLink({
             });
         }
 
-        const result = await fetchEditProjectSettingsLinks(
+        const res = await fetchEditProjectSettingsLinks(
             project.id,
             links,
             pathname,
         );
 
-        setResult(result);
+        setResult(res);
+
+        if (res.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully updated project link</p>
+                </div>,
+            );
+        }
     }
 
     useEffect(() => {
         setLinks(project.links || []);
     }, [project.links]);
 
+    function detectChanges() {
+        if (!initialFormState) {
+            return;
+        }
+
+        const formState = JSON.stringify(links);
+
+        setIsFormModified(formState !== initialFormState);
+    }
+
+    function updateInitialFormState() {
+        if (!project) {
+            return;
+        }
+
+        setInitialFormState(JSON.stringify(project.links || []));
+    }
+
+    useEffect(() => {
+        detectChanges();
+    }, [links, initialFormState]);
+
+    useEffect(() => {
+        updateInitialFormState();
+    }, [project]);
+
     return (
         <>
             <Card>
                 <h1 className="text-2xl">Project links</h1>
-                <form action={onSaveChanges}>
+                <form action={onSaveChanges}
+                    ref={formRef}
+                    onChange={detectChanges}
+                >
                     <Table className="my-4 w-full">
                         <TableHeader>
                             <ColumName>Link title</ColumName>
@@ -129,16 +177,18 @@ export default function ProjectSettingLink({
                         </TableBody>
                     </Table>
                     <div className="flex justify-end">
-                        <div className="flex gap-4">
-                            <Button
-                                onClick={onReset}
-                                variant="secondary"
-                                type="button"
-                            >
-                                Reset
-                            </Button>
-                            <SaveChangesBtn />
-                        </div>
+                        {isFormModified && (
+                            <div className="flex gap-4">
+                                <Button
+                                    onClick={onReset}
+                                    variant="secondary"
+                                    type="button"
+                                >
+                                    Reset
+                                </Button>
+                                <SaveChangesBtn />
+                            </div>
+                        )}
                     </div>
                     {!result?.success && result?.errors && (
                         <FormErrorMessages errors={result?.errors} />

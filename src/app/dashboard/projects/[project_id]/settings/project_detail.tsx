@@ -6,8 +6,8 @@ import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import InputField from "@/components/InputField";
 import Selector from "@/components/Selector";
-import { IconPlus } from "@tabler/icons-react";
-import { useRef, useState } from "react";
+import { IconCheck, IconPlus } from "@tabler/icons-react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
     fetchCategoriesBySearch,
@@ -23,6 +23,7 @@ import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
 import { useSelector } from "@/hooks/useSelector";
 import { localDebug } from "@/lib/utils";
+import { useToast } from "@/components/Toaster";
 
 export default function ProjectDetail({
     project,
@@ -43,6 +44,12 @@ export default function ProjectDetail({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const projectName = useRef<HTMLInputElement>(null);
     const projectDescription = useRef<HTMLTextAreaElement>(null);
+
+    const { addToast } = useToast();
+
+    const [initialFormState, setInitialFormState] = useState<string>();
+    const [isFormModified, setIsFormModified] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
 
     async function fetchCategoriesBySearchCallback(search: string) {
         try {
@@ -93,9 +100,57 @@ export default function ProjectDetail({
         setResult(undefined);
     }
 
+    function detectChanges() {
+        if (!initialFormState) {
+            return;
+        }
+
+        const formState = JSON.stringify({
+            projectName: projectName.current?.value,
+            projectDescription: projectDescription.current?.value,
+            projectCategories: checkedCategories.map((cate) => cate.value),
+            logoSrc: logoSrc,
+        });
+
+        setIsFormModified(formState !== initialFormState);
+    }
+
+    function updateInitialFormState() {
+        if (!project) {
+            return;
+        }
+
+        setInitialFormState(
+            JSON.stringify({
+                projectName: project.name,
+                projectDescription: project.description,
+                projectCategories: project.projectCategories.map(
+                    (cate) => cate.categoryId,
+                ),
+                logoSrc: fileToUrl(project.logoUrl),
+            }),
+        );
+    }
+
+    useEffect(() => {
+        detectChanges();
+    }, [
+        logoSrc,
+        projectName,
+        projectDescription,
+        checkedCategories,
+        initialFormState,
+    ]);
+
+    useEffect(() => {
+        updateInitialFormState();
+    }, [project, originalProjectCategories]);
+
     return (
         <Card>
             <form
+                ref={formRef}
+                onChange={detectChanges}
                 action={async (formData: FormData) => {
                     const result = await fetchEditProjectSettingsDetail(
                         project.id,
@@ -113,6 +168,15 @@ export default function ProjectDetail({
                         formData,
                     );
                     setResult(result);
+
+                    if (result.success) {
+                        addToast(
+                            <div className="flex gap-2">
+                                <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                                <p>Successfully updated project details</p>
+                            </div>,
+                        );
+                    }
                 }}
                 className="grid gap-4"
             >
@@ -237,16 +301,18 @@ export default function ProjectDetail({
                     </div>
                 </div>
                 <div className="flex justify-end">
-                    <div className="flex gap-4">
-                        <Button
-                            onClick={onResetClick}
-                            variant="secondary"
-                            type="button"
-                        >
-                            Reset
-                        </Button>
-                        <SaveChangesBtn />
-                    </div>
+                    {isFormModified && (
+                        <div className="flex gap-4">
+                            <Button
+                                onClick={onResetClick}
+                                variant="secondary"
+                                type="button"
+                            >
+                                Reset
+                            </Button>
+                            <SaveChangesBtn />
+                        </div>
+                    )}
                 </div>
                 {!result?.success && result?.errors && (
                     <FormErrorMessages errors={result?.errors} />

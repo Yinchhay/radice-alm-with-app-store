@@ -6,10 +6,12 @@ import CheckList, { CheckBoxElement } from "@/components/CheckList";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { ProjectPipelineStatus } from "@/drizzle/schema";
 import { arrayToCheckList } from "@/lib/array_to_check_list";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsPipeline } from "./fetch";
 import { usePathname } from "next/navigation";
+import { useToast } from "@/components/Toaster";
+import { IconCheck } from "@tabler/icons-react";
 
 /**
  * Any change to the pipeline type please change in
@@ -86,6 +88,12 @@ export function ProjectPipeline({
             Awaited<ReturnType<typeof fetchEditProjectSettingsPipeline>>
         >();
 
+    const { addToast } = useToast();
+
+    const [initialFormState, setInitialFormState] = useState<string>();
+    const [isFormModified, setIsFormModified] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
+
     function onResetClick() {
         setPipelineStatusCheckList(pipeLineToCheckList());
     }
@@ -103,23 +111,60 @@ export function ProjectPipeline({
 
     async function onSubmit(formData: FormData) {
         if (!project) return;
-        
+
         const projectPipelineStatus = checkListToObject(
             pipelineStatusCheckList,
         ) as ProjectPipelineStatus;
 
-        const response = await fetchEditProjectSettingsPipeline(
+        const res = await fetchEditProjectSettingsPipeline(
             project.id,
             projectPipelineStatus,
             pathname,
         );
-        setResult(response);
+        setResult(res);
+
+        if (res.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully updated project pipeline</p>
+                </div>,
+            );
+        }
     }
+
+    function updateInitialFormState() {
+        if (!project) {
+            return;
+        }
+
+        setInitialFormState(JSON.stringify(getPipelineStatus()));
+    }
+
+    function detectChanges() {
+        if (!initialFormState) {
+            return;
+        }
+
+        const formState = JSON.stringify(
+            checkListToObject(pipelineStatusCheckList),
+        );
+
+        setIsFormModified(formState !== initialFormState);
+    }
+
+    useEffect(() => {
+        detectChanges();
+    }, [pipelineStatusCheckList]);
+
+    useEffect(() => {
+        updateInitialFormState();
+    }, [project]);
 
     return (
         <Card>
             <h1 className="text-2xl">Project pipeline</h1>
-            <form action={onSubmit}>
+            <form action={onSubmit} ref={formRef} onChange={detectChanges}>
                 <div className="my-4">
                     <CheckList
                         title={"Status"}
@@ -130,16 +175,18 @@ export function ProjectPipeline({
                     />
                 </div>
                 <div className="flex justify-end">
-                    <div className="flex gap-4">
-                        <Button
-                            onClick={onResetClick}
-                            variant="secondary"
-                            type="button"
-                        >
-                            Reset
-                        </Button>
-                        <SaveChangesBtn />
-                    </div>
+                    {isFormModified && (
+                        <div className="flex gap-4">
+                            <Button
+                                onClick={onResetClick}
+                                variant="secondary"
+                                type="button"
+                            >
+                                Reset
+                            </Button>
+                            <SaveChangesBtn />
+                        </div>
+                    )}
                 </div>
                 {!result?.success && result?.errors && (
                     <FormErrorMessages errors={result?.errors} />

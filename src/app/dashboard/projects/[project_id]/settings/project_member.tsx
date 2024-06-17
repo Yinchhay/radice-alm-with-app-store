@@ -11,10 +11,10 @@ import TableRow from "@/components/table/TableRow";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import { users } from "@/drizzle/schema";
 import { useFormStatus } from "react-dom";
-import { IconPlus, IconX } from "@tabler/icons-react";
+import { IconCheck, IconPlus, IconX } from "@tabler/icons-react";
 import Selector from "@/components/Selector";
 import InputField from "@/components/InputField";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchEditProjectSettingsMembers, fetchUsersBySearch } from "./fetch";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import { editMemberArray } from "@/app/api/internal/project/[project_id]/schema";
@@ -23,6 +23,7 @@ import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import { useSelector } from "@/hooks/useSelector";
 import { localDebug } from "@/lib/utils";
+import { useToast } from "@/components/Toaster";
 
 export type UserWithoutPassword = Omit<typeof users.$inferSelect, "password">;
 
@@ -83,16 +84,26 @@ export default function ProjectMember({
         useState<Awaited<ReturnType<typeof fetchEditProjectSettingsMembers>>>();
     const [membersList, setMembersList] = useState<MemberList[]>([]);
 
+    const { addToast } = useToast();
+
+    const [initialFormState, setInitialFormState] = useState<string>();
+    const [isFormModified, setIsFormModified] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
+
     // update the memberList to enforce switch to reset
     function onCanEditChange(id: string, canEdit: boolean) {
-        setMembersList((prevMembersList) =>
-            prevMembersList.map((member) => {
-                if (member.member.id === id) {
-                    return { ...member, canEdit };
-                }
-                return member;
-            }),
-        );
+        const updatedMembersList = membersList.map((member) => {
+            if (member.member.id === id) {
+                return {
+                    ...member,
+                    canEdit,
+                };
+            }
+
+            return member;
+        });
+
+        setMembersList([...updatedMembersList]);
     }
 
     function removeMemberById(id: string) {
@@ -125,7 +136,7 @@ export default function ProjectMember({
                 memberLists.push({
                     member: memberDetail,
                     title: memberAlreadyInProject?.title || "",
-                    canEdit: memberAlreadyInProject?.canEdit || false,
+                    canEdit: Boolean(memberAlreadyInProject?.canEdit),
                 });
             }
         });
@@ -134,6 +145,10 @@ export default function ProjectMember({
     }
 
     function onResetClick() {
+        if (formRef.current) {
+            formRef.current.reset();
+        }
+
         onReset();
         setResult(undefined);
     }
@@ -168,7 +183,7 @@ export default function ProjectMember({
                 ),
         );
 
-        const response = await fetchEditProjectSettingsMembers(
+        const res = await fetchEditProjectSettingsMembers(
             project.id,
             {
                 membersToAdd,
@@ -177,18 +192,79 @@ export default function ProjectMember({
             },
             pathname,
         );
-        setResult(response);
+        setResult(res);
+
+        if (res.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully updated project members</p>
+                </div>,
+            );
+        }
     }
 
     useEffect(() => {
         const members = constructMemberLists();
+
+        if (JSON.stringify(members) === JSON.stringify(membersList)) {
+            return;
+        }
+
         setMembersList(members);
-    }, [checkedItems, usersInTheSystem, project?.projectMembers]);
+    }, [usersInTheSystem, project?.projectMembers]);
+
+    function detectChanges() {
+        if (!initialFormState || !formRef.current) {
+            return;
+        }
+
+        const formData = new FormData(formRef.current);
+        const formState = JSON.stringify({
+            members: membersList.map((member) => ({
+                id: member.member.id,
+                title: formData.get(`members[${member.member.id}].title`),
+                canEdit: Boolean(
+                    formData.get(`members[${member.member.id}].canEdit`),
+                ),
+            })),
+        });
+
+        setIsFormModified(formState !== initialFormState);
+    }
+
+    function updateInitialFormState() {
+        if (!project) {
+            return;
+        }
+
+        setInitialFormState(
+            JSON.stringify({
+                members: project.projectMembers.map((member) => ({
+                    id: member.user.id,
+                    title: member.title,
+                    canEdit: member.canEdit,
+                })),
+            }),
+        );
+    }
+
+    useEffect(() => {
+        detectChanges();
+    }, [membersList, initialFormState]);
+
+    useEffect(() => {
+        updateInitialFormState();
+    }, [project, originalProjectMembers]);
 
     return (
         <Card>
             <h1 className="text-2xl">Project members</h1>
-            <form action={handleFormSubmit}>
+            <form
+                ref={formRef}
+                onChange={detectChanges}
+                action={handleFormSubmit}
+            >
                 <Table className="my-4 w-full">
                     <TableHeader>
                         <ColumName>Name</ColumName>
@@ -229,16 +305,18 @@ export default function ProjectMember({
                     />
                 )}
                 <div className="flex justify-end">
-                    <div className="flex gap-4">
-                        <Button
-                            onClick={onResetClick}
-                            variant="secondary"
-                            type="button"
-                        >
-                            Reset
-                        </Button>
-                        <SaveChangesBtn />
-                    </div>
+                    {isFormModified && (
+                        <div className="flex gap-4">
+                            <Button
+                                onClick={onResetClick}
+                                variant="secondary"
+                                type="button"
+                            >
+                                Reset
+                            </Button>
+                            <SaveChangesBtn />
+                        </div>
+                    )}
                 </div>
                 {!result?.success && result?.errors && (
                     <FormErrorMessages errors={result?.errors} />
@@ -278,12 +356,6 @@ function Member({
     onRemove: (id: string) => void;
     onCanEditChange: (id: string, canEdit: boolean) => void;
 }) {
-    const [canEditState, setCanEditState] = useState(canEdit);
-
-    useEffect(() => {
-        setCanEditState(canEdit);
-    }, [canEdit]);
-
     return (
         <TableRow className="align-middle">
             <Cell className="text-center">{`${member.firstName} ${member.lastName}`}</Cell>
@@ -296,7 +368,7 @@ function Member({
             <Cell className="text-center">
                 <div className="flex items-center justify-center">
                     <ToggleSwitch
-                        defaultState={canEditState}
+                        defaultState={canEdit}
                         onChange={(checked) => {
                             onCanEditChange(member.id, checked);
                         }}
@@ -307,7 +379,7 @@ function Member({
                     hidden
                     className="hidden"
                     type="checkbox"
-                    checked={canEditState}
+                    checked={canEdit}
                     name={`members[${member.id}].canEdit`}
                 />
             </Cell>

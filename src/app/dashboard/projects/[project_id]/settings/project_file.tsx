@@ -9,7 +9,7 @@ import TableBody from "@/components/table/TableBody";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
 import { fileToUrl, readableFileSize } from "@/lib/file";
-import { IconPlus, IconX } from "@tabler/icons-react";
+import { IconCheck, IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchEditProjectSettingsFiles } from "./fetch";
@@ -18,6 +18,7 @@ import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import Link from "next/link";
 import { extractFileDetails } from "@/lib/utils";
+import { useToast } from "@/components/Toaster";
 
 type FileLists = {
     file?: File;
@@ -39,6 +40,11 @@ export default function ProjectFile({
     const [fileLists, setFileLists] = useState<FileLists[]>(project.files);
     const imageRef = useRef<HTMLInputElement>(null);
 
+    const { addToast } = useToast();
+
+    const [initialFormState, setInitialFormState] = useState<string>();
+    const [isFormModified, setIsFormModified] = useState<boolean>(false);
+
     function handleUploadFilesClick() {
         if (!imageRef.current) {
             return;
@@ -59,10 +65,6 @@ export default function ProjectFile({
 
         const newFileLists: FileLists[] = [];
         for (const file of files) {
-            if (fileLists.find((f) => f.filename === file.name)) {
-                continue;
-            }
-
             newFileLists.push({
                 file,
                 filename: file.name,
@@ -71,6 +73,9 @@ export default function ProjectFile({
         }
 
         setFileLists([...fileLists, ...newFileLists]);
+
+        // clear input file to allow upload same file
+        imageRef.current.value = "";
     }
 
     function handleDeleteFile(index: number) {
@@ -112,12 +117,21 @@ export default function ProjectFile({
                 }
             });
 
-        const response = await fetchEditProjectSettingsFiles(
+        const res = await fetchEditProjectSettingsFiles(
             project.id,
             formData,
             pathname,
         );
-        setResult(response);
+        setResult(res);
+
+        if (res.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully updated project file</p>
+                </div>,
+            );
+        }
     }
 
     function onResetClick() {
@@ -132,6 +146,32 @@ export default function ProjectFile({
     useEffect(() => {
         setFileLists(project.files);
     }, [project.files]);
+
+    function detectChanges() {
+        if (!initialFormState) {
+            return;
+        }
+
+        const formState = JSON.stringify(fileLists);
+
+        setIsFormModified(formState !== initialFormState);
+    }
+
+    function updateInitialFormState() {
+        if (!project) {
+            return;
+        }
+
+        setInitialFormState(JSON.stringify(project.files));
+    }
+
+    useEffect(() => {
+        detectChanges();
+    }, [fileLists, initialFormState]);
+
+    useEffect(() => {
+        updateInitialFormState();
+    }, [project]);
 
     return (
         <Card>
@@ -167,16 +207,18 @@ export default function ProjectFile({
                     </TableBody>
                 </Table>
                 <div className="flex justify-end">
-                    <div className="flex gap-4">
-                        <Button
-                            onClick={onResetClick}
-                            variant="secondary"
-                            type="button"
-                        >
-                            Reset
-                        </Button>
-                        <SaveChangesBtn />
-                    </div>
+                    {isFormModified && (
+                        <div className="flex gap-4">
+                            <Button
+                                onClick={onResetClick}
+                                variant="secondary"
+                                type="button"
+                            >
+                                Reset
+                            </Button>
+                            <SaveChangesBtn />
+                        </div>
+                    )}
                 </div>
                 {!result?.success && result?.errors && (
                     <FormErrorMessages errors={result?.errors} />
@@ -228,7 +270,7 @@ function FileRow({
                         href={URL.createObjectURL(file?.file!)}
                         target="_blank"
                     >
-                        {fileDetail.name + fileDetail.extension}
+                        {file.file?.name}
                     </Link>
                 ) : (
                     <Link href={fileToUrl(file.filename)} target="_blank">

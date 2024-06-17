@@ -84,6 +84,28 @@ export async function PATCH(request: Request, { params }: Params) {
         ).map((permission) => permission.id);
 
         if (user.type !== UserType.SUPER_ADMIN) {
+            if (usersToAdd.some((userId) => userId === user.id)) {
+                return buildErrorResponse(
+                    unsuccessMessage,
+                    generateAndFormatZodError(
+                        "userIds",
+                        "You are not allowed to add yourself to the role",
+                    ),
+                    HttpStatusCode.FORBIDDEN_403,
+                );
+            }
+
+            if (usersToRemove.some((userId) => userId === user.id)) {
+                return buildErrorResponse(
+                    unsuccessMessage,
+                    generateAndFormatZodError(
+                        "userIds",
+                        "You are not allowed to remove yourself from the role",
+                    ),
+                    HttpStatusCode.FORBIDDEN_403,
+                );
+            }
+
             const hasForbiddenPermissionToAdd = permissionsToAdd.some(
                 (permissionId) =>
                     PermissionsToFilterIfNotSuperAdmin.includes(permissionId),

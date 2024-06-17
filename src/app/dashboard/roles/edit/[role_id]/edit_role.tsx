@@ -173,7 +173,7 @@ export default function EditRole({
         }
 
         setNewUsersInRole(usersList);
-    }, [checkedItems, usersDetail, usersInRole]);
+    }, [usersDetail, usersInRole]);
 
     async function onSubmit(formData: FormData) {
         if (!role) {
@@ -213,7 +213,7 @@ export default function EditRole({
     }
 
     function detectChanges() {
-        if (!formRef.current) {
+        if (!formRef.current || !initialFormState) {
             return;
         }
 
@@ -308,9 +308,7 @@ export default function EditRole({
                     onSearchChange={onSearchChange}
                     onCancel={onCloseSelector}
                     onConfirm={onConfirm}
-                    onCheckChange={(updatedList, changedCheckbox) => {
-                        onCheckChange(updatedList, changedCheckbox);
-                    }}
+                    onCheckChange={onCheckChange}
                     searchTerm={searchTerm}
                 />
             )}

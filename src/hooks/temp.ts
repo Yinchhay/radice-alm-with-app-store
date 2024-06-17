@@ -62,8 +62,8 @@ export function useSelector<T>(
         setSearchTerm(search);
 
         const itemsFetched = await itemsCallback(search);
-
         setItems(itemsFetched);
+
         const icl = arrayToCheckList(
             itemsFetched,
             nameKey,
@@ -83,20 +83,18 @@ export function useSelector<T>(
     }, []);
 
     const saveCheckedItemsValues = (fetchedItems: T[] = items) => {
-        // append obj value to checkedItemsValues. we basically append only, no remove
-        const newCheckedItemsValues = fetchedItems
-            // filter take only the items that are checked
-            .filter((item) =>
-                checkedItems.find(
-                    (checkedItem) => checkedItem.value === item[valueKey],
-                ),
-            )
-            // filter out the items that are already in checkedItemsValues to avoid duplicates
-            .filter((item) => !checkedItemsValues.includes(item));
-        setCheckedItemsValues([
+        const newCheckedItemsValues = [
             ...checkedItemsValues,
-            ...newCheckedItemsValues,
-        ]);
+            ...fetchedItems
+                .filter((item) =>
+                    checkedItems.some(
+                        (checkedItem) => checkedItem.value === item[valueKey],
+                    ),
+                )
+                .filter((item) => !checkedItemsValues.includes(item)),
+        ];
+
+        setCheckedItemsValues(newCheckedItemsValues);
     };
 
     const onOpenSelector = () => {

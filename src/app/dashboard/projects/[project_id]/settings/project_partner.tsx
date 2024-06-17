@@ -10,8 +10,8 @@ import Table from "@/components/table/Table";
 import TableBody from "@/components/table/TableBody";
 import TableHeader from "@/components/table/TableHeader";
 import TableRow from "@/components/table/TableRow";
-import { IconPlus, IconX } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { IconCheck, IconPlus, IconX } from "@tabler/icons-react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { z } from "zod";
 import {
@@ -25,6 +25,7 @@ import { UserWithoutPassword } from "./project_member";
 import Tooltip from "@/components/Tooltip";
 import { useSelector } from "@/hooks/useSelector";
 import { localDebug } from "@/lib/utils";
+import { useToast } from "@/components/Toaster";
 
 export type PartnerList = {
     partner: UserWithoutPassword;
@@ -84,6 +85,11 @@ export default function ProjectPartner({
             Awaited<ReturnType<typeof fetchEditProjectSettingsPartners>>
         >();
     const [partnersList, setPartnersList] = useState<PartnerList[]>([]);
+
+    const { addToast } = useToast();
+
+    const [initialFormState, setInitialFormState] = useState<string>();
+    const [isFormModified, setIsFormModified] = useState<boolean>(false);
 
     function removePartnerById(id: string) {
         onRemoveItem(id);
@@ -146,7 +152,7 @@ export default function ProjectPartner({
                 ),
         );
 
-        const response = await fetchEditProjectSettingsPartners(
+        const res = await fetchEditProjectSettingsPartners(
             project.id,
             {
                 partnersToAdd,
@@ -154,13 +160,61 @@ export default function ProjectPartner({
             },
             pathname,
         );
-        setResult(response);
+        setResult(res);
+
+        if (res.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully updated project partner</p>
+                </div>,
+            );
+        }
     }
 
     useEffect(() => {
         const partners = constructPartnerLists();
+
+        if (JSON.stringify(partners) === JSON.stringify(partnersList)) {
+            return;
+        }
+
         setPartnersList(partners);
-    }, [checkedItems, partnersInTheSystem, project.projectPartners]);
+    }, [partnersInTheSystem, project.projectPartners]);
+
+    function detectChanges() {
+        if (!initialFormState) {
+            return;
+        }
+
+        const formState = JSON.stringify({
+            projectPartners: partnersList.map((partner) => partner.partner.id),
+        });
+
+        setIsFormModified(formState !== initialFormState);
+    }
+
+    function updateInitialFormState() {
+        if (!project) {
+            return;
+        }
+
+        setInitialFormState(
+            JSON.stringify({
+                projectPartners: project.projectPartners.map(
+                    (partner) => partner.partner.id,
+                ),
+            }),
+        );
+    }
+
+    useEffect(() => {
+        detectChanges();
+    }, [partnersList, initialFormState]);
+
+    useEffect(() => {
+        updateInitialFormState();
+    }, [project, originalProjectPartners]);
 
     return (
         <Card>
@@ -201,16 +255,18 @@ export default function ProjectPartner({
                     />
                 )}
                 <div className="flex justify-end">
-                    <div className="flex gap-4">
-                        <Button
-                            onClick={onResetClick}
-                            variant="secondary"
-                            type="button"
-                        >
-                            Reset
-                        </Button>
-                        <SaveChangesBtn />
-                    </div>
+                    {isFormModified && (
+                        <div className="flex gap-4">
+                            <Button
+                                onClick={onResetClick}
+                                variant="secondary"
+                                type="button"
+                            >
+                                Reset
+                            </Button>
+                            <SaveChangesBtn />
+                        </div>
+                    )}
                 </div>
                 {!result?.success && result?.errors && (
                     <FormErrorMessages errors={result?.errors} />
