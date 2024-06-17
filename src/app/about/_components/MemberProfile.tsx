@@ -47,6 +47,7 @@ export default function MemberProfile({
                     <Link
                         href={`/${userType}/${member.id}`}
                         className="w-[180px] h-[240px] relative"
+                        target="_blank"
                     >
                         <ScrollReveal
                             onReveal={() => {
@@ -96,7 +97,11 @@ export default function MemberProfile({
         case "dark":
             return (
                 <div className="flex flex-col items-center w-[400px]">
-                    <div className="w-[180px] h-[240px] relative">
+                    <Link
+                        href={`/${userType}/${member.id}`}
+                        className="w-[180px] h-[240px] relative"
+                        target="_blank"
+                    >
                         <ScrollReveal
                             onReveal={() => {
                                 console.log("reveal");
@@ -120,7 +125,7 @@ export default function MemberProfile({
                                 className="object-cover"
                             />
                         </ScrollReveal>
-                    </div>
+                    </Link>
                     <h1
                         className={`font-bold text-xl mt-2 ${roboto_flex.className}`}
                     >

@@ -11,6 +11,7 @@ import Card from "@/components/Card";
 import Chip from "@/components/Chip";
 import ChipsHolder from "@/components/ChipsHolder";
 import GridRevealImage from "@/components/effects/GridRevealImage";
+import { redirect } from "next/navigation";
 import { fileToUrl } from "@/lib/file";
 
 export default async function MemberPublicProfilePage({
@@ -19,25 +20,29 @@ export default async function MemberPublicProfilePage({
     params: { member_id: string };
 }) {
     const fetchMembers = await getPublicMemberById(params.member_id);
-    const fetchProjects = await getPublicProjectByMemberId(params.member_id);
 
     if (!fetchMembers.success) {
-        return;
+        redirect("/");
     }
+
+    const fetchProjects = await getPublicProjectByMemberId(params.member_id);
+
     if (!fetchProjects.success) {
-        return;
+        redirect("/");
     }
-    const member = fetchMembers.data.member;
     const projects = fetchProjects.data.projects;
+    const member = fetchMembers.data.member;
     let fetchGithub;
     if (member) {
         if (member.oauthProviders.length > 0) {
             fetchGithub = await getGithubProfileURL(
                 member.oauthProviders[0].providerUserId,
-                member.oauthProviders[0].accessToken,
             );
+        } else {
+            redirect("/");
         }
     }
+
     return (
         <div>
             <Navbar />
@@ -92,24 +97,26 @@ export default async function MemberPublicProfilePage({
                             </ChipsHolder>
                         )}
                         {member.description && <p>{member.description}</p>}
-                        {member.hasLinkedGithub && fetchGithub && (
-                            <>
-                                <div className="flex">
-                                    <Link
-                                        href={fetchGithub.html_url}
-                                        className="text-white rounded-full flex items-end justify-center bg-white"
-                                        target="_blank"
-                                    >
-                                        <Image
-                                            src="/github-mark.svg"
-                                            width={36}
-                                            height={36}
-                                            alt="Github Icon"
-                                        />
-                                    </Link>
-                                </div>
-                            </>
-                        )}
+                        {member.hasLinkedGithub &&
+                            fetchGithub &&
+                            fetchGithub.html_url && (
+                                <>
+                                    <div className="flex">
+                                        <Link
+                                            href={fetchGithub.html_url}
+                                            className="text-white rounded-full flex items-end justify-center bg-white"
+                                            target="_blank"
+                                        >
+                                            <Image
+                                                src="/github-mark.svg"
+                                                width={36}
+                                                height={36}
+                                                alt="Github Icon"
+                                            />
+                                        </Link>
+                                    </div>
+                                </>
+                            )}
                     </div>
                     <div>
                         <h2 className="font-bold mb-2">Researches:</h2>

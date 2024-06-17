@@ -27,7 +27,7 @@ export default function ResearchFilesAndLinks({
 }) {
     const { addToast } = useToast();
     return (
-        <Card className="grid gap-2 w-full px-0 py-4" overWritePadding>
+        <Card className="grid gap-2 w-full px-0 py-4 mb-4" overWritePadding>
             <h2 className="font-bold text-xl px-6">Research Files</h2>
             <ul className="flex flex-col w-ful">
                 {files.map((file, i) => {

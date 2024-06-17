@@ -8,7 +8,7 @@ export default function Stepper({
     projectStatus: ProjectStatusElement[];
 }) {
     return (
-        <Card className="grid mt-4">
+        <Card className="grid">
             <h2 className="font-bold text-xl mb-4">Project Status</h2>
             {projectStatus.map((status, i) => {
                 return (
