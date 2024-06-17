@@ -9,6 +9,7 @@ import ChipsHolder from "@/components/ChipsHolder";
 import GridRevealImage from "@/components/effects/GridRevealImage";
 import { fileToUrl } from "@/lib/file";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import { redirect } from "next/navigation";
 
 export default async function PartnerPublicProfilePage({
     params,
@@ -16,15 +17,15 @@ export default async function PartnerPublicProfilePage({
     params: { partner_id: string };
 }) {
     const fetchPartners = await getPublicPartnerById(params.partner_id);
-    const fetchProjects = await getPublicProjectByPartnerId(params.partner_id);
-
     if (!fetchPartners.success) {
-        return;
-    }
-    if (!fetchProjects.success) {
-        return;
+        redirect("/");
     }
     const partner = fetchPartners.data.partner;
+
+    const fetchProjects = await getPublicProjectByPartnerId(params.partner_id);
+    if (!fetchProjects.success) {
+        redirect("/");
+    }
     const projects = fetchProjects.data.projects;
     return (
         <div>

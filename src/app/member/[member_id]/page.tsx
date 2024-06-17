@@ -24,14 +24,14 @@ export default async function MemberPublicProfilePage({
     if (!fetchMembers.success) {
         redirect("/");
     }
-
+    const member = fetchMembers.data.member;
     const fetchProjects = await getPublicProjectByMemberId(params.member_id);
 
     if (!fetchProjects.success) {
         redirect("/");
     }
     const projects = fetchProjects.data.projects;
-    const member = fetchMembers.data.member;
+
     let fetchGithub;
     if (member) {
         if (member.oauthProviders.length > 0) {
