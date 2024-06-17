@@ -5,6 +5,8 @@ import Tooltip from "@/components/Tooltip";
 import { SuccessResponse } from "@/lib/response";
 import { usePathname } from "next/navigation";
 import { fetchUpdateProjectPublicStatus } from "../projects/[project_id]/settings/fetch";
+import { useToast } from "@/components/Toaster";
+import { IconCheck } from "@tabler/icons-react";
 
 export default function ToggleProjectPublic({
     project,
@@ -12,19 +14,29 @@ export default function ToggleProjectPublic({
     project: SuccessResponse<FetchProjectsForManageAllProjectsData>["data"]["projects"][number];
 }) {
     const pathname = usePathname();
+    const { addToast } = useToast();
 
     return (
         <Tooltip title="Toggle project public state" position="top">
             <ToggleSwitch
                 defaultState={Boolean(project.isPublic)}
                 onChange={async (state: boolean) => {
-                    await fetchUpdateProjectPublicStatus(
+                    const res = await fetchUpdateProjectPublicStatus(
                         project.id,
                         {
                             status: state,
                         },
                         pathname,
                     );
+
+                    if (res.success) {
+                        addToast(
+                            <div className="flex gap-2">
+                                <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                                <p>Successfully updated project public status</p>
+                            </div>,
+                        );
+                    }
                 }}
             />
         </Tooltip>

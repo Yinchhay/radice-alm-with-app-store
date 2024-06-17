@@ -3,19 +3,21 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
-import { IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import { fetchDeleteUserById } from "./fetch";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export function DeleteUserOverlay({ user }: { user: UserWithoutPassword }) {
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteUserById>>>();
+    const { addToast } = useToast();
 
     function onCancel() {
         setResult(undefined);
@@ -25,6 +27,13 @@ export function DeleteUserOverlay({ user }: { user: UserWithoutPassword }) {
     useEffect(() => {
         // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully deleted user</p>
+                </div>,
+            );
+
             onCancel();
         }
     }, [result]);

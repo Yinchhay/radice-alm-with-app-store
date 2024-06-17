@@ -94,9 +94,8 @@ export async function PATCH(request: Request, { params }: Params) {
         }
 
         if (
-            !transferToUser.hasLinkedGithub ||
-            (transferToUser.type !== UserType.USER &&
-                transferToUser.type !== UserType.SUPER_ADMIN)
+            transferToUser.type !== UserType.SUPER_ADMIN &&
+            transferToUser.type !== UserType.USER
         ) {
             return buildErrorResponse(
                 unsuccessMessage,

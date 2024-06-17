@@ -5,11 +5,12 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { fetchDeletePartnerById } from "./fetch";
 import { usePathname } from "next/navigation";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export function DeletePartnerOverlay({
     partner,
@@ -20,6 +21,7 @@ export function DeletePartnerOverlay({
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeletePartnerById>>>();
+    const { addToast } = useToast();
 
     function onCancel() {
         setResult(undefined);
@@ -29,6 +31,13 @@ export function DeletePartnerOverlay({
     useEffect(() => {
         // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully deleted partner</p>
+                </div>,
+            );
+
             onCancel();
         }
     }, [result]);

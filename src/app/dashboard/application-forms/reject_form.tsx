@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { fetchRejectApplicationFormById } from "./fetch";
 import { usePathname } from "next/navigation";
+import { useToast } from "@/components/Toaster";
+import { IconCheck } from "@tabler/icons-react";
 
 export function RejectApplicationFormOverlay({
     applicationForm,
@@ -18,11 +20,19 @@ export function RejectApplicationFormOverlay({
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchRejectApplicationFormById>>>();
+    const { addToast } = useToast();
+    
 
     useEffect(() => {
-        // close the overlay after reject successfully
         if (showOverlay && result?.success) {
-            // setShowOverlay(false);
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully rejected application form</p>
+                </div>,
+            );
+
+            setShowOverlay(false);
         }
     }, [result]);
 

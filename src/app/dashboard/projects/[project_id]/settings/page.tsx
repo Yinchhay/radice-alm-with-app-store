@@ -9,6 +9,10 @@ import ProjectFile from "./project_file";
 import ProjectLink from "./project_link";
 import { ProjectControl } from "./project_control";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import Button from "@/components/Button";
+import { IconEye, IconHammer } from "@tabler/icons-react";
+import Tooltip from "@/components/Tooltip";
 
 type Params = {
     project_id: string;
@@ -74,6 +78,26 @@ export default async function ProjectSettings({ params }: { params: Params }) {
                 <ProjectLink project={result.data.project} />
                 <ProjectControl project={result.data.project} />
             </div>
+            {projectRole == ProjectRole.OWNER && (
+                <div className="fixed bottom-8 right-8 z-30 grid gap-2">
+                    <Tooltip title="Preview" position="top">
+                        <Link href={`/dashboard/projects/${params.project_id}`}>
+                            <Button square>
+                                <IconEye size={32} stroke={1.5} />
+                            </Button>
+                        </Link>
+                    </Tooltip>
+                    <Tooltip title="Project content builder" position="top">
+                        <Link
+                            href={`/dashboard/projects/${params.project_id}/builder`}
+                        >
+                            <Button square>
+                                <IconHammer size={32} stroke={1.5} />
+                            </Button>
+                        </Link>
+                    </Tooltip>
+                </div>
+            )}
         </div>
     );
 }

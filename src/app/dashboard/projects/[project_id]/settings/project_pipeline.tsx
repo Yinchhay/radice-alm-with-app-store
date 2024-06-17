@@ -155,7 +155,7 @@ export function ProjectPipeline({
 
     useEffect(() => {
         detectChanges();
-    }, [pipelineStatusCheckList]);
+    }, [pipelineStatusCheckList, initialFormState]);
 
     useEffect(() => {
         updateInitialFormState();
@@ -163,7 +163,7 @@ export function ProjectPipeline({
 
     return (
         <Card>
-            <h1 className="text-2xl">Project pipeline</h1>
+            <h1 className="text-2xl">Project status</h1>
             <form action={onSubmit} ref={formRef} onChange={detectChanges}>
                 <div className="my-4">
                     <CheckList

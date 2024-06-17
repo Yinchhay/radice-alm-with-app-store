@@ -5,7 +5,7 @@ import Overlay from "@/components/Overlay";
 import { useEffect, useRef, useState } from "react";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconPlus } from "@tabler/icons-react";
+import { IconCheck, IconPlus } from "@tabler/icons-react";
 import { fetchCreateCategory } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
@@ -13,6 +13,7 @@ import ImageWithFallback from "@/components/ImageWithFallback";
 import { ACCEPTED_IMAGE_TYPES } from "@/lib/file";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export function CreateCategoryOverlay() {
     const pathname = usePathname();
@@ -21,6 +22,7 @@ export function CreateCategoryOverlay() {
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateCategory>>>();
+    const { addToast } = useToast();
 
     function onCancel() {
         if (fileInputRef.current) {
@@ -35,6 +37,13 @@ export function CreateCategoryOverlay() {
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully created category</p>
+                </div>,
+            );
+
             onCancel();
         }
     }, [result]);

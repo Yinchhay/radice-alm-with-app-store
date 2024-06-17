@@ -6,10 +6,11 @@ import Overlay from "@/components/Overlay";
 import { categories } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { fetchDeleteCategoryById } from "./fetch";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export function DeleteCategoryOverlay({
     category,
@@ -20,6 +21,8 @@ export function DeleteCategoryOverlay({
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteCategoryById>>>();
+    const { addToast } = useToast();
+
 
     function onCancel() {
         setResult(undefined);
@@ -29,6 +32,13 @@ export function DeleteCategoryOverlay({
     useEffect(() => {
         // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully deleted category</p>
+                </div>,
+            );
+
             onCancel();
         }
     }, [result]);

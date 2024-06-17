@@ -32,8 +32,6 @@ export const verifyCodeByCodeAndType = async (
                 and(eq(table.code, code), eq(table.type, type)),
         });
 
-        console.log(codeVerification);
-
         if (!codeVerification) {
             return {
                 success: false,

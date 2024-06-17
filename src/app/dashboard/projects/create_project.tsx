@@ -5,17 +5,19 @@ import Overlay from "@/components/Overlay";
 import { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconPlus } from "@tabler/icons-react";
+import { IconCheck, IconPlus } from "@tabler/icons-react";
 import { fetchCreateProject } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export function CreateProjectOverlay() {
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchCreateProject>>>();
+    const { addToast } = useToast();
 
     function onCancel() {
         setResult(undefined);
@@ -25,6 +27,13 @@ export function CreateProjectOverlay() {
     useEffect(() => {
         // close the overlay after creating successfully
         if (showOverlay && result?.success) {
+
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully created project</p>
+                </div>,
+            );
             onCancel();
         }
     }, [result]);

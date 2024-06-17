@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconEdit, IconPlus, IconX } from "@tabler/icons-react";
+import { IconCheck, IconEdit, IconPlus, IconX } from "@tabler/icons-react";
 import { redirect, usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { ACCEPTED_IMAGE_TYPES, fileToUrl } from "@/lib/file";
@@ -24,6 +24,7 @@ import { fetchUpdateProfileInformation } from "./fetch";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
 import { UserType } from "@/types/user";
+import { useToast } from "@/components/Toaster";
 
 type UserSkillSetWithId = UserSkillSet & { id: string };
 
@@ -41,6 +42,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
     );
     const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(user.profileUrl));
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { addToast } = useToast();
 
     // convert enum to 2d array, but take only its key and value
     const skillSetValues = Object.entries(UserSkillSetLevel).filter(
@@ -173,7 +175,14 @@ export function EditProfileOverlay({ user }: { user: User }) {
     useEffect(() => {
         // close the overlay after editing successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully updated profile information</p>
+                </div>,
+            );
+
+            onCancel();
         }
     }, [result]);
 

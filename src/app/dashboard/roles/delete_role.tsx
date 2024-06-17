@@ -4,7 +4,7 @@ import Card from "@/components/Card";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import Overlay from "@/components/Overlay";
 import { roles } from "@/drizzle/schema";
-import { IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 
 import { fetchDeleteRoleById } from "./fetch";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export function DeleteRoleOverlay({
     role,
@@ -22,6 +23,7 @@ export function DeleteRoleOverlay({
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] =
         useState<Awaited<ReturnType<typeof fetchDeleteRoleById>>>();
+    const { addToast } = useToast();
 
     function onCancel() {
         setResult(undefined);
@@ -31,6 +33,13 @@ export function DeleteRoleOverlay({
     useEffect(() => {
         // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully deleted role</p>
+                </div>,
+            );
+
             onCancel();
         }
     }, [result]);

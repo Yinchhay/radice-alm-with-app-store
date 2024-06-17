@@ -9,7 +9,7 @@ import Tooltip from "@/components/Tooltip";
 import { useSelector } from "@/hooks/useSelector";
 import { PermissionNames } from "@/lib/client_IAM";
 import { fileToUrl } from "@/lib/file";
-import { IconPlus, IconX } from "@tabler/icons-react";
+import { IconCheck, IconPlus, IconX } from "@tabler/icons-react";
 import { fetchEditRoleById, fetchUsersNotInRole } from "../../fetch";
 import { localDebug } from "@/lib/utils";
 import Selector from "@/components/Selector";
@@ -20,6 +20,7 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { User as UserLuciaType } from "lucia";
 import { UserType } from "@/types/user";
 import { PermissionsToFilterIfNotSuperAdmin } from "@/lib/filter";
+import { useToast } from "@/components/Toaster";
 
 type Permission = {
     id: number;
@@ -67,6 +68,7 @@ export default function EditRole({
     const [isFormModified, setIsFormModified] = useState<boolean>(false);
     const formRef = useRef<HTMLFormElement>(null);
 
+    const { addToast } = useToast();
     const {
         showSelectorOverlay,
         itemsCheckList,
@@ -196,6 +198,15 @@ export default function EditRole({
         );
 
         setResult(result);
+
+        if (result.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully edited role</p>
+                </div>,
+            );
+        }
     }
 
     function updateInitialFormState() {

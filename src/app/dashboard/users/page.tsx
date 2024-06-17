@@ -37,7 +37,7 @@ export default async function ManageUsers({ searchParams }: ManageUsersProps) {
         page = 1;
     }
 
-    const result = await fetchUsers(page, ROWS_PER_PAGE, searchParams?.search);
+    const result = await fetchUsers(page, 8, searchParams?.search);
     if (!result.success) {
         throw new Error(result.message);
     }

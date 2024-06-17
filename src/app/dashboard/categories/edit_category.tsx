@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconEdit } from "@tabler/icons-react";
+import { IconCheck, IconEdit } from "@tabler/icons-react";
 import { categories } from "@/drizzle/schema";
 import { fetchEditCategoryById } from "./fetch";
 import { usePathname } from "next/navigation";
@@ -14,6 +14,7 @@ import ImageWithFallback from "@/components/ImageWithFallback";
 import { ACCEPTED_IMAGE_TYPES, fileToUrl } from "@/lib/file";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
+import { useToast } from "@/components/Toaster";
 
 export function EditCategoryOverlay({
     category,
@@ -26,6 +27,7 @@ export function EditCategoryOverlay({
         useState<Awaited<ReturnType<typeof fetchEditCategoryById>>>();
     const [logoSrc, setLogoSrc] = useState<string>(fileToUrl(category.logo));
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { addToast } = useToast();
 
     function onCancel() {
         if (fileInputRef.current) {
@@ -40,6 +42,13 @@ export function EditCategoryOverlay({
     useEffect(() => {
         // close the overlay after editing successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>Successfully edited category</p>
+                </div>,
+            );
+
             onCancel();
         }
     }, [result]);

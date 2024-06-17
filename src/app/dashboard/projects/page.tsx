@@ -141,7 +141,7 @@ function Project({
                 <div className="absolute bottom-0 right-0 flex gap-2">
                     {/* TODO: update link url to preview */}
                     <Tooltip title="Preview" position="top">
-                        <Link href={`/dashboard/projects/${project.id}`}>
+                        <Link href={`/dashboard/projects/${project.id}`} prefetch>
                             <Button
                                 square
                                 variant="outline"

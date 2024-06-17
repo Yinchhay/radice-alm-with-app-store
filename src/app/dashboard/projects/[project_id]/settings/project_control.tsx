@@ -13,6 +13,8 @@ import {
     fetchTransferProjectOwnerShip,
     fetchUpdateProjectPublicStatus,
 } from "./fetch";
+import { useToast } from "@/components/Toaster";
+import { IconCheck } from "@tabler/icons-react";
 
 export function ProjectControl({
     project,
@@ -23,6 +25,7 @@ export function ProjectControl({
         throw new Error("Project does not exist");
     }
 
+    const { addToast } = useToast();
     const pathname = usePathname();
 
     return (
@@ -34,13 +37,25 @@ export function ProjectControl({
                     <ToggleSwitch
                         defaultState={Boolean(project.isPublic)}
                         onChange={async (state: boolean) => {
-                            await fetchUpdateProjectPublicStatus(
+                            const res = await fetchUpdateProjectPublicStatus(
                                 project.id,
                                 {
                                     status: state,
                                 },
                                 pathname,
                             );
+
+                            if (res.success) {
+                                addToast(
+                                    <div className="flex gap-2">
+                                        <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                                        <p>
+                                            Successfully updated project public
+                                            status
+                                        </p>
+                                    </div>,
+                                );
+                            }
                         }}
                     />
                 </div>
@@ -61,6 +76,7 @@ function TransferProject({
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] = useState<Awaited<ReturnType<any>>>();
+    const { addToast } = useToast();
 
     async function onSubmit(formData: FormData) {
         if (!project) {
@@ -80,6 +96,13 @@ function TransferProject({
     useEffect(() => {
         // close the overlay after transferring successfully
         if (showOverlay && result?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully transferred project</p>
+                </div>,
+            );
+
             setShowOverlay(false);
             window.location.reload();
         }

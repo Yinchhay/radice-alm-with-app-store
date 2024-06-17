@@ -13,6 +13,8 @@ import {
     fetchVerifyCurrentEmailCode,
     fetchVerifyNewEmailCode,
 } from "./fetch";
+import { useToast } from "@/components/Toaster";
+import { IconCheck } from "@tabler/icons-react";
 
 enum FormPhase {
     NewEmail,
@@ -103,6 +105,7 @@ function VerifyNewEmailCodeForm({
     const pathname = usePathname();
     const [verifyNewEmailCodeResult, setVerifyNewEmailCodeResult] =
         useState<Awaited<ReturnType<any>>>();
+    const { addToast } = useToast();
 
     function back() {
         setVerifyNewEmailCodeResult(undefined);
@@ -110,8 +113,16 @@ function VerifyNewEmailCodeForm({
     }
 
     useEffect(() => {
-        // close the overlay after editing successfully
         if (showOverlay && verifyNewEmailCodeResult?.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                    <p>
+                        Successfully changed email to{" "}
+                        <strong>{newEmail}</strong>
+                    </p>
+                </div>,
+            );
             onCancel();
         }
     }, [verifyNewEmailCodeResult]);
@@ -279,8 +290,8 @@ function ChangeEmailForm({
         >
             <div className="flex flex-col items-start">
                 <p className="text-sm my-2">
-                    Once you click send code, we will send a verification
-                    code to your current email: <strong>{userEmail}</strong>
+                    Once you click send code, we will send a verification code
+                    to your current email: <strong>{userEmail}</strong>
                 </p>
                 <label htmlFor="currentEmail" className="font-normal">
                     Current Email

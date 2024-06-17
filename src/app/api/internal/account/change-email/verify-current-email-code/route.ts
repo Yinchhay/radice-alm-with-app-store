@@ -83,9 +83,10 @@ export async function PATCH(request: NextRequest) {
         );
 
         if (existingCode && isWithinExpirationDate(existingCode.expiresAt)) {
-            return buildErrorResponse(unsuccessMessage, {
-                message: "Verification code is still valid, skip sending email",
-            });
+            return buildSuccessResponse<FetchVerifyCurrentEmailCodeData>(
+                successMessage,
+                {},
+            );
         }
 
         const eightDigitCode = await generateVerificationCode(
@@ -95,9 +96,9 @@ export async function PATCH(request: NextRequest) {
         );
 
         if (!eightDigitCode) {
-            return buildErrorResponse(unsuccessMessage, {
-                message: "Failed to generate verification code",
-            });
+            return buildErrorResponse(unsuccessMessage, 
+                generateAndFormatZodError("code", "Failed to generate verification code")
+            );
         }
 
         const mailResult = sendMail({

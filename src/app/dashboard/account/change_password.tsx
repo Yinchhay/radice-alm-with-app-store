@@ -8,11 +8,14 @@ import FormErrorMessages from "@/components/FormErrorMessages";
 import { fetchChangePassword } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
+import { useToast } from "@/components/Toaster";
+import { IconCheck } from "@tabler/icons-react";
 
 export function ChangePasswordOverlay() {
     const pathname = usePathname();
     const [showOverlay, setShowOverlay] = useState<boolean>(false);
     const [result, setResult] = useState<Awaited<ReturnType<any>>>();
+    const { addToast } = useToast();
 
     function onCancel() {
         setResult(undefined);
@@ -24,7 +27,9 @@ export function ChangePasswordOverlay() {
             {
                 oldPassword: formData.get("oldPassword") as string,
                 newPassword: formData.get("newPassword") as string,
-                newConfirmPassword: formData.get("newConfirmPassword") as string,
+                newConfirmPassword: formData.get(
+                    "newConfirmPassword",
+                ) as string,
             },
             pathname,
         );
@@ -32,9 +37,15 @@ export function ChangePasswordOverlay() {
     }
 
     useEffect(() => {
-        // close the overlay after creating successfully
         if (showOverlay && result?.success) {
-            setShowOverlay(false);
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully changed password</p>
+                </div>,
+            );
+
+            onCancel();
         }
     }, [result]);
 
