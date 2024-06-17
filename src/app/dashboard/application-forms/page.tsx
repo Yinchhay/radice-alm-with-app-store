@@ -127,6 +127,7 @@ function ApplicationForm({
                             <Link
                                 href={fileToUrl(applicationForm.cv)}
                                 target="_blank"
+                                prefetch={false}
                             >
                                 <p className="font-normal">
                                     {applicationForm.cv}

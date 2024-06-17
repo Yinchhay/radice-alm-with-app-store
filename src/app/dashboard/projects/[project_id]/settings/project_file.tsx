@@ -269,11 +269,12 @@ function FileRow({
                     <Link
                         href={URL.createObjectURL(file?.file!)}
                         target="_blank"
+                        prefetch={false}
                     >
                         {file.file?.name}
                     </Link>
                 ) : (
-                    <Link href={fileToUrl(file.filename)} target="_blank">
+                    <Link href={fileToUrl(file.filename)} target="_blank" prefetch={false}>
                         {fileDetail.name + fileDetail.extension}
                     </Link>
                 )}

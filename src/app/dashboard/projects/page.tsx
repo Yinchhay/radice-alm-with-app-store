@@ -44,7 +44,6 @@ export default async function ManageAssociatedProject({
 
     const result = await fetchAssociatedProjects(page, 4, searchParams?.search);
     if (!result.success) {
-        console.error(result.message);
         throw new Error(result.message);
     }
 
