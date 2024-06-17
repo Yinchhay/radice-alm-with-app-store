@@ -103,7 +103,7 @@ export default function ProjectMember({
             return member;
         });
 
-        setMembersList([...updatedMembersList]);
+        setMembersList(updatedMembersList);
     }
 
     function removeMemberById(id: string) {
