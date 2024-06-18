@@ -33,31 +33,37 @@ export default function ResearchFilesAndLinks({
                 {files.map((file, i) => {
                     const fileDetail = extractFileDetails(file.filename);
                     return (
-                        <Link
-                            key={"file-" + file.filename}
-                            onClick={() => {
-                                addToast(
-                                    <div>
-                                        Downloaded{" "}
-                                        {fileDetail.name + fileDetail.extension}
-                                    </div>,
-                                    3500,
-                                );
-                            }}
-                            href={fileToUrl(file.filename)}
-                            download
-                            prefetch={false}
-                            className="flex px-6 gap-2 items-center hover:bg-gray-200/40 transition-all py-2"
+                        <Tooltip
+                            title={fileDetail.name + fileDetail.extension}
+                            position="left"
                         >
-                            <IconFileDescription
-                                className="shrink-0"
-                                size={28}
-                                stroke={1}
-                            />
-                            <h3 className="break-words w-[180px]">
-                                {fileDetail.name + fileDetail.extension}
-                            </h3>
-                        </Link>
+                            <Link
+                                key={"file-" + file.filename}
+                                onClick={() => {
+                                    addToast(
+                                        <div>
+                                            Downloaded{" "}
+                                            {fileDetail.name +
+                                                fileDetail.extension}
+                                        </div>,
+                                        3500,
+                                    );
+                                }}
+                                href={fileToUrl(file.filename)}
+                                download
+                                prefetch={false}
+                                className="flex px-6 gap-2 items-center hover:bg-gray-200/40 transition-all py-2"
+                            >
+                                <IconFileDescription
+                                    className="shrink-0"
+                                    size={28}
+                                    stroke={1}
+                                />
+                                <h3 className="break-words w-[180px] line-clamp-1">
+                                    {fileDetail.name + fileDetail.extension}
+                                </h3>
+                            </Link>
+                        </Tooltip>
                     );
                 })}
             </ul>
