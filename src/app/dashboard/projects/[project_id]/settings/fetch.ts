@@ -8,7 +8,7 @@ import {
     updateProjectPublicStatusSchema,
 } from "@/app/api/internal/project/[project_id]/schema";
 import { FetchEditProjectSettingsDetail } from "@/app/api/internal/project/[project_id]/settings/update-detail/route";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { z } from "zod";
 import { FetchEditProjectSettingsMembers } from "@/app/api/internal/project/[project_id]/settings/update-members/route";
@@ -58,7 +58,7 @@ export async function fetchEditProjectSettingsDetail(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -83,7 +83,7 @@ export async function fetchEditProjectSettingsMembers(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -108,7 +108,7 @@ export async function fetchEditProjectSettingsPartners(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -138,7 +138,7 @@ export async function fetchEditProjectSettingsFiles(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -165,7 +165,7 @@ export async function fetchEditProjectSettingsLinks(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -192,7 +192,7 @@ export async function fetchEditProjectSettingsPipeline(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -217,7 +217,7 @@ export async function fetchTransferProjectOwnerShip(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -242,7 +242,7 @@ export async function fetchUpdateProjectPublicStatus(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -264,7 +264,7 @@ export async function fetchUsersBySearch(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -286,7 +286,7 @@ export async function fetchCategoriesBySearch(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -308,6 +308,6 @@ export async function fetchPartnersBySearch(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

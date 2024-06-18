@@ -3,7 +3,7 @@ import { FetchAssociatedProjectsData } from "@/app/api/internal/project/associat
 import { FetchCreateProject } from "@/app/api/internal/project/create/route";
 import { createProjectFormSchema } from "@/app/api/internal/project/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import {
     getBaseUrl,
     getSessionCookie,
@@ -36,7 +36,7 @@ export async function fetchCreateProject(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -59,6 +59,6 @@ export async function fetchAssociatedProjects(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

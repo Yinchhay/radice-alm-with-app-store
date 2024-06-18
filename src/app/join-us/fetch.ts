@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchCreateApplicationForm } from "../api/join-us/apply/route";
 import { getBaseUrl } from "@/lib/server_utils";
 
@@ -18,6 +18,6 @@ export async function fetchCreateApplicationForm(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

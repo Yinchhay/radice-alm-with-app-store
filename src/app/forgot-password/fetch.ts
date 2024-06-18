@@ -5,7 +5,7 @@ import {
     forgotPasswordSchema,
     verifyForgotPasswordCodeSchema,
 } from "../api/forgot-password/schema";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchForgotPasswordSendEmail } from "../api/forgot-password/route";
 import { getBaseUrl } from "@/lib/server_utils";
 import { FetchVerifyForgotPasswordCodeData } from "../api/forgot-password/verify-code/route";
@@ -24,7 +24,7 @@ export async function fetchForgotPasswordSendEmail(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -42,6 +42,6 @@ export async function fetchVerifyForgotPasswordCode(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

@@ -2,7 +2,7 @@
 // instead of client side.
 // Note: adding 'use server' require proper testing to ensure nothing break
 "use server";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchUsersData } from "@/app/api/internal/users/route";
 import {
     getBaseUrl,
@@ -34,7 +34,7 @@ export async function fetchUsers(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -57,7 +57,7 @@ export async function fetchCreateUser(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -79,7 +79,7 @@ export async function fetchDeleteUserById(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -97,6 +97,6 @@ export async function fetchAllUsers(): ResponseJson<FetchUsersData> {
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

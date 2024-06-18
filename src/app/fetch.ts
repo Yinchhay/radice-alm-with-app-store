@@ -1,5 +1,5 @@
 "use server";
-import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { ResponseJson, returnFetchErrorSomethingWentWrong } from "@/lib/response";
 import { getBaseUrl } from "@/lib/server_utils";
 import { FetchPublicCategoriesData } from "./api/public/categories/route";
 import { FetchPublicProjectsByCategoryIdData } from "./api/public/categories/[category_id]/projects/route";
@@ -22,7 +22,7 @@ export async function fetchPublicCategories(): ResponseJson<FetchPublicCategorie
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -39,7 +39,7 @@ export async function fetchPublicProjectsByCategory(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -54,6 +54,6 @@ export async function fetchPublicProjectsAndCategories(): ResponseJson<FetchPubl
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

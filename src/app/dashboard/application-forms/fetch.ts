@@ -1,7 +1,7 @@
 "use server"
 import { FetchApplicationFormsData } from "@/app/api/internal/application-forms/route";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { revalidatePath } from "next/cache";
 
@@ -24,7 +24,7 @@ export async function fetchApplicationForms(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -47,7 +47,7 @@ export async function fetchRejectApplicationFormById(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -70,6 +70,6 @@ export async function fetchApproveApplicationFormById(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

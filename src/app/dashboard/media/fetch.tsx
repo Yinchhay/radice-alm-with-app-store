@@ -5,7 +5,7 @@ import { FetchCreateMedia } from "@/app/api/internal/media/create/route";
 import { FetchMediasData } from "@/app/api/internal/media/route";
 import { editMediaSchema } from "@/app/api/internal/media/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -29,7 +29,7 @@ export async function fetchMedia(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -53,7 +53,7 @@ export async function fetchCreateMedia(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -76,7 +76,7 @@ export async function fetchDeleteMediaById(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -101,6 +101,6 @@ export async function fetchEditMediaById(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

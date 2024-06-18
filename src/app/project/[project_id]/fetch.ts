@@ -1,6 +1,6 @@
 "use server";
 import { FetchPublicProjectByIdData } from "@/app/api/public/projects/[project_id]/route";
-import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { ResponseJson, returnFetchErrorSomethingWentWrong } from "@/lib/response";
 import { getBaseUrl } from "@/lib/server_utils";
 
 export async function getProjectByIdForPublic(
@@ -16,6 +16,6 @@ export async function getProjectByIdForPublic(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

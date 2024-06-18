@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { loginCredentialSchema } from "../api/login/schema";
 import { FetchLoginCredential } from "../api/login/route";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl } from "@/lib/server_utils";
 import { lucia } from "@/auth/lucia";
 import { cookies } from "next/headers";
@@ -33,6 +33,6 @@ export async function fetchLoginCredential(
 
         return result;
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

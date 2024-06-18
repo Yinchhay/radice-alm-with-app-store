@@ -13,7 +13,7 @@ import {
     verifyNewEmailCodeSchema,
 } from "@/app/api/internal/account/schema";
 import { FetchUpdateProfileInformation } from "@/app/api/internal/account/update-profile-information/route";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -54,7 +54,7 @@ export async function fetchUpdateProfileInformation(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -78,7 +78,7 @@ export async function fetchChangePassword(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -100,7 +100,7 @@ export async function fetchChangeEmailSendEmail(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -122,7 +122,7 @@ export async function fetchVerifyCurrentEmailCode(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -146,7 +146,7 @@ export async function fetchVerifyNewEmailCode(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -169,6 +169,6 @@ export async function fetchChangeGithubAccount(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

@@ -3,7 +3,7 @@
 import { FetchPublicProjectsByIdData } from "@/app/api/public/partners/[partner_id]/projects/route";
 import { FetchPublicPartnerByIdData } from "@/app/api/public/partners/[partner_id]/route";
 import { db } from "@/drizzle/db";
-import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { ResponseJson, returnFetchErrorSomethingWentWrong } from "@/lib/response";
 import { getBaseUrl } from "@/lib/server_utils";
 import { UserType } from "@/types/user";
 
@@ -21,7 +21,7 @@ export async function getPublicPartnerById(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 export async function getPublicProjectByPartnerId(
@@ -37,6 +37,6 @@ export async function getPublicProjectByPartnerId(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

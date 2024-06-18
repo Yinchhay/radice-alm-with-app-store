@@ -2,7 +2,7 @@
 // instead of client side.
 // Note: adding 'use server' require proper testing to ensure nothing break
 "use server";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchRolesData } from "@/app/api/internal/role/route";
 import { FetchRoleByIdData } from "@/app/api/internal/role/[role_id]/route";
 import {
@@ -43,7 +43,7 @@ export async function fetchRoles(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -63,7 +63,7 @@ export async function fetchRoleById(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -86,7 +86,7 @@ export async function fetchCreateRole(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -109,7 +109,7 @@ export async function fetchDeleteRoleById(
         await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>("getUserRolesAndRolePermissions_C");
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -129,7 +129,7 @@ export async function fetchUsersInRole(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -151,7 +151,7 @@ export async function fetchUsersNotInRole(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -175,6 +175,6 @@ export async function fetchEditRoleById(
         await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>("getUserRolesAndRolePermissions_C");
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

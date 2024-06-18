@@ -1,5 +1,5 @@
 import path from "path";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "./response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "./response";
 import { FetchFileStore } from "@/app/api/file/store/route";
 import { getBaseUrl } from "./server_utils";
 import { FileBelongTo } from "@/drizzle/schema";
@@ -70,7 +70,7 @@ export async function uploadFiles(
 
         return await response.json();
     } catch (error) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -92,7 +92,7 @@ export async function deleteFile(
 
         return await response.json();
     } catch (error) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 

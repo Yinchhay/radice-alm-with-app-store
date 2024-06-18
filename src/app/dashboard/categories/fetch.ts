@@ -2,7 +2,7 @@
 // add 'use server' on top of the file if u want to make api request on the server
 // instead of client side.
 // Note: adding 'use server' require proper testing to ensure nothing break
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { FetchCategoriesData } from "@/app/api/internal/category/route";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { FetchDeleteCategory } from "@/app/api/internal/category/[category_id]/delete/route";
@@ -35,7 +35,7 @@ export async function fetchCategories(
         
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -69,7 +69,7 @@ export async function fetchCreateCategory(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -92,7 +92,7 @@ export async function fetchDeleteCategoryById(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -127,6 +127,6 @@ export async function fetchEditCategoryById(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

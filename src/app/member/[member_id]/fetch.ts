@@ -3,7 +3,7 @@
 import { FetchPublicProjectsByIdData } from "@/app/api/public/members/[member_id]/projects/route";
 import { FetchPublicMemberByIdData } from "@/app/api/public/members/[member_id]/route";
 import { db } from "@/drizzle/db";
-import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { ResponseJson, returnFetchErrorSomethingWentWrong } from "@/lib/response";
 import { getBaseUrl } from "@/lib/server_utils";
 import { UserType } from "@/types/user";
 
@@ -21,7 +21,7 @@ export async function getPublicMemberById(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 export async function getPublicProjectByMemberId(
@@ -37,7 +37,7 @@ export async function getPublicProjectByMemberId(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -52,6 +52,6 @@ export async function getGithubProfileURL(githubID: string) {
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

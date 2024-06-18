@@ -1,7 +1,7 @@
 "use server";
 import { FetchEditProjectContent } from "@/app/api/internal/project/[project_id]/edit/route";
 import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
-import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { ResponseJson, returnFetchErrorSomethingWentWrong } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { Chapter } from "@/types/content";
 
@@ -22,7 +22,7 @@ export async function fetchOneAssociatedProject(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 export async function fetchEditProjectContentById(
@@ -43,6 +43,6 @@ export async function fetchEditProjectContentById(
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

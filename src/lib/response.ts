@@ -46,12 +46,21 @@ export type ResponseJson<T, E = unknown> = Promise<
 >;
 
 // fetch catch error return to ensure consistency
-export const fetchErrorSomethingWentWrong: ErrorResponse<{}> = {
-    success: false,
-    message: ErrorMessage.SomethingWentWrong,
-    errors: {
-        unknown: ErrorMessage.SomethingWentWrong,
-    },
+export const returnFetchErrorSomethingWentWrong = (
+    error: any,
+): ErrorResponse<{}> => {
+    localDebug(
+        error,
+        "returnFetchErrorSomethingWentWrong (come from fetch api catch error)",
+    );
+
+    return {
+        success: false,
+        message: ErrorMessage.SomethingWentWrong,
+        errors: {
+            unknown: ErrorMessage.SomethingWentWrong,
+        },
+    };
 };
 
 // Frequently used error responses

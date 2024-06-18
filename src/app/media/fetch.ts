@@ -1,6 +1,6 @@
 "use server";
 
-import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { ResponseJson, returnFetchErrorSomethingWentWrong } from "@/lib/response";
 import { FetchMediasData } from "../api/internal/media/route";
 import { getBaseUrl } from "@/lib/server_utils";
 
@@ -12,6 +12,6 @@ export async function getMedia(): ResponseJson<FetchMediasData> {
         });
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

@@ -1,4 +1,4 @@
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl } from "@/lib/server_utils";
 import { FetchLogoutUser } from "@/app/api/logout/route";
 
@@ -10,6 +10,6 @@ export async function logout(): ResponseJson<FetchLogoutUser> {
         });
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

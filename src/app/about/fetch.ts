@@ -1,6 +1,6 @@
 "use server";
 
-import { ResponseJson, fetchErrorSomethingWentWrong } from "@/lib/response";
+import { ResponseJson, returnFetchErrorSomethingWentWrong } from "@/lib/response";
 import { getBaseUrl } from "@/lib/server_utils";
 import { FetchPublicMemberData } from "../api/public/members/route";
 
@@ -17,6 +17,6 @@ export async function getMembers(): ResponseJson<FetchPublicMemberData> {
         );
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

@@ -4,7 +4,7 @@ import { FetchCreatePartner } from "@/app/api/internal/partner/create/route";
 import { FetchPartnersData } from "@/app/api/internal/partner/route";
 import { createPartnerFormSchema } from "@/app/api/internal/partner/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -29,7 +29,7 @@ export async function fetchPartners(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -53,7 +53,7 @@ export async function fetchCreatePartner(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
 
@@ -76,6 +76,6 @@ export async function fetchDeletePartnerById(
         revalidatePath(pathname);
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }

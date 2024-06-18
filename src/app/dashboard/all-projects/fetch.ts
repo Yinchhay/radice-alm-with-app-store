@@ -2,7 +2,7 @@
 
 import { FetchProjectsForManageAllProjectsData } from "@/app/api/internal/project/route";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { fetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
+import { returnFetchErrorSomethingWentWrong, ResponseJson } from "@/lib/response";
 import { getBaseUrl, getSessionCookie } from "@/lib/server_utils";
 
 export async function fetchProjectsForManageAllProjects(
@@ -24,6 +24,6 @@ export async function fetchProjectsForManageAllProjects(
 
         return await response.json();
     } catch (error: any) {
-        return fetchErrorSomethingWentWrong;
+        return returnFetchErrorSomethingWentWrong(error);
     }
 }
