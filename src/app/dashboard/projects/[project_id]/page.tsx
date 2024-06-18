@@ -23,6 +23,7 @@ import { IconHammer, IconSettings } from "@tabler/icons-react";
 import { getAuthUser } from "@/auth/lucia";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { redirect } from "next/navigation";
+import Tooltip from "@/components/Tooltip";
 
 export default async function PreviewProjectPage({
     params,
@@ -75,21 +76,25 @@ export default async function PreviewProjectPage({
             {canEdit && (
                 <div className="fixed bottom-8 right-8 z-30 grid gap-2">
                     {projectRole == ProjectRole.OWNER && (
+                        <Tooltip title="Settings" position="left">
+                            <Link
+                                href={`/dashboard/projects/${params.project_id}/settings`}
+                            >
+                                <Button square>
+                                    <IconSettings size={32} stroke={1.5} />
+                                </Button>
+                            </Link>
+                        </Tooltip>
+                    )}
+                    <Tooltip title="Builder" position="left">
                         <Link
-                            href={`/dashboard/projects/${params.project_id}/settings`}
+                            href={`/dashboard/projects/${params.project_id}/builder`}
                         >
                             <Button square>
-                                <IconSettings size={32} stroke={1.5} />
+                                <IconHammer size={32} stroke={1.5} />
                             </Button>
                         </Link>
-                    )}
-                    <Link
-                        href={`/dashboard/projects/${params.project_id}/builder`}
-                    >
-                        <Button square>
-                            <IconHammer size={32} stroke={1.5} />
-                        </Button>
-                    </Link>
+                    </Tooltip>
                 </div>
             )}
             <div className="relative grid grid-cols-[270px_minmax(auto,920px)_270px] w-full max-w-[1500px] mx-auto">

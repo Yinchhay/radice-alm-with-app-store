@@ -80,14 +80,14 @@ export default async function ProjectSettings({ params }: { params: Params }) {
             </div>
             {projectRole == ProjectRole.OWNER && (
                 <div className="fixed bottom-8 right-8 z-30 grid gap-2">
-                    <Tooltip title="Preview" position="top">
+                    <Tooltip title="Preview" position="left">
                         <Link href={`/dashboard/projects/${params.project_id}`}>
                             <Button square>
                                 <IconEye size={32} stroke={1.5} />
                             </Button>
                         </Link>
                     </Tooltip>
-                    <Tooltip title="Project content builder" position="top">
+                    <Tooltip title="Project content builder" position="left">
                         <Link
                             href={`/dashboard/projects/${params.project_id}/builder`}
                         >

@@ -6,6 +6,7 @@ import { getAuthUser } from "@/auth/lucia";
 import { redirect } from "next/navigation";
 import { fetchOneAssociatedProject } from "./fetch";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
+import Tooltip from "@/components/Tooltip";
 
 type Params = {
     project_id: string;
@@ -47,19 +48,23 @@ export default async function ProjectBuilderPage({
             {canEdit && (
                 <div className="fixed bottom-8 right-8 z-[60] grid gap-2">
                     {projectRole == ProjectRole.OWNER && (
-                        <Link
-                            href={`/dashboard/projects/${params.project_id}/settings`}
-                        >
+                        <Tooltip title="Settings" position="left">
+                            <Link
+                                href={`/dashboard/projects/${params.project_id}/settings`}
+                            >
+                                <Button square>
+                                    <IconSettings size={32} stroke={1.5} />
+                                </Button>
+                            </Link>
+                        </Tooltip>
+                    )}
+                    <Tooltip title="Preview" position="left">
+                        <Link href={`/dashboard/projects/${params.project_id}`}>
                             <Button square>
-                                <IconSettings size={32} stroke={1.5} />
+                                <IconEye size={32} stroke={1.5} />
                             </Button>
                         </Link>
-                    )}
-                    <Link href={`/dashboard/projects/${params.project_id}`}>
-                        <Button square>
-                            <IconEye size={32} stroke={1.5} />
-                        </Button>
-                    </Link>
+                    </Tooltip>
                 </div>
             )}
             <Builder project={project} />
