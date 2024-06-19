@@ -11,7 +11,7 @@ import Tooltip from "@/components/Tooltip";
 type Params = {
     project_id: string;
 };
-
+export const dynamic = "force-dynamic";
 export default async function ProjectBuilderPage({
     params,
 }: {

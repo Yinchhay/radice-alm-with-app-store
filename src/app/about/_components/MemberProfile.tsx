@@ -43,7 +43,7 @@ export default function MemberProfile({
     switch (variant) {
         case "light":
             return (
-                <div className="flex flex-col items-center w-[400px]">
+                <div className="flex flex-col items-center w-[250px]">
                     <Link
                         href={`/${userType}/${member.id}`}
                         className="w-[180px] h-[240px] relative"
@@ -96,7 +96,7 @@ export default function MemberProfile({
             );
         case "dark":
             return (
-                <div className="flex flex-col items-center w-[400px]">
+                <div className="flex flex-col items-center w-[250px]">
                     <Link
                         href={`/${userType}/${member.id}`}
                         className="w-[180px] h-[240px] relative"

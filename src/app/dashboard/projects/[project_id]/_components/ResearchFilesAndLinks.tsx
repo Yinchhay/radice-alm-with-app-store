@@ -36,9 +36,9 @@ export default function ResearchFilesAndLinks({
                         <Tooltip
                             title={fileDetail.name + fileDetail.extension}
                             position="left"
+                            key={"file-" + file.filename}
                         >
                             <Link
-                                key={"file-" + file.filename}
                                 onClick={() => {
                                     addToast(
                                         <div>

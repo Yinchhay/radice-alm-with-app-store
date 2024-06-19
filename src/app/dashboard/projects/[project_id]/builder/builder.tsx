@@ -112,14 +112,34 @@ export default function Builder({
     }
 
     useEffect(() => {
-        if (project) {
-            try {
-                setChapters(JSON.parse(project.projectContent as string));
-                setSelectedChapter(0);
-            } catch {
-                setChapters([]);
+        async function loadProjectData() {
+            const result = await fetchOneAssociatedProject(params.project_id);
+            if (result.success) {
+                console.log(result.data);
+                if (result.data.project) {
+                    if (result.data.project.projectContent) {
+                        setDataLoaded(true);
+                        try {
+                            setChapters(
+                                JSON.parse(
+                                    result.data.project
+                                        .projectContent as string,
+                                ),
+                            );
+                            setSelectedChapter(0);
+                        } catch {
+                            setChapters([]);
+                        }
+                    } else {
+                        setDataLoaded(true);
+                    }
+                }
+            } else {
+                console.log(result.errors);
             }
-            setDataLoaded(true);
+        }
+        if (!dataLoaded) {
+            loadProjectData();
         }
     }, []);
 

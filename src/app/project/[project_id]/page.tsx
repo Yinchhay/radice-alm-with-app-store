@@ -46,7 +46,11 @@ export default async function ProjectPage({
         chapters = JSON.parse(
             fetchProject.data.project.projectContent as string,
         ) as Chapter[];
+        console.log(chapters);
     } catch {
+        chapters = [];
+    }
+    if (chapters == null) {
         chapters = [];
     }
     const projectStatusElements = convertToProjectStatusElements(
@@ -369,7 +373,7 @@ export default async function ProjectPage({
                                 <h1 className="text-center font-bold text-4xl mb-8">
                                     Our Partners
                                 </h1>
-                                <div className="flex justify-center gap-8">
+                                <div className="flex justify-center gap-8 flex-wrap">
                                     {project.projectPartners.map(
                                         (projectPartner, i) => {
                                             return (
@@ -387,7 +391,7 @@ export default async function ProjectPage({
                                 </div>
                             </div>
                         )}
-                        {project.projectMembers.length && (
+                        {project.projectMembers.length > 0 && (
                             <div
                                 className="py-8 border-t border-gray-300"
                                 id="members"
@@ -395,7 +399,7 @@ export default async function ProjectPage({
                                 <h1 className="text-center font-bold text-4xl mb-8">
                                     Our Members
                                 </h1>
-                                <div className="flex justify-center gap-8">
+                                <div className="flex justify-center gap-8 flex-wrap">
                                     {project.projectMembers.map((member, i) => {
                                         if (member.title.length > 0) {
                                             return (
