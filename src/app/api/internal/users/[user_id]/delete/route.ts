@@ -7,17 +7,13 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { revalidateTags } from "@/lib/server_utils";
-import {
-    deleteUserById,
-    GetUsers_C_Tag,
-} from "@/repositories/users";
+import { deleteUserById, getUserById } from "@/repositories/users";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { deleteUserFormSchema } from "../../schema";
-import { GetProjects_C_Tag, OneAssociatedProject_C_Tag } from "@/repositories/project";
+import { UserType } from "@/types/user";
 
 // update type if we were to return any data back to the response
 export type FetchDeleteUser = Record<string, never>;
@@ -29,7 +25,7 @@ const unsuccessMessage = "Delete user failed";
 export async function DELETE(request: Request, { params }: Params) {
     try {
         const requiredPermission = new Set([Permissions.DELETE_USERS]);
-        const { errorNoBearerToken, errorNoPermission } =
+        const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(request, requiredPermission);
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();
@@ -51,6 +47,40 @@ export async function DELETE(request: Request, { params }: Params) {
         }
         data = validationResult.data;
 
+        const existingUser = await getUserById(data.userId);
+        if (!existingUser) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("unknown", ErrorMessage.NotFound),
+                HttpStatusCode.NOT_FOUND_404,
+            );
+        }
+
+        if (user.id === data.userId) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "unknown",
+                    "You are not allowed to delete your own account",
+                ),
+                HttpStatusCode.NOT_ACCEPTABLE_406,
+            );
+        }
+
+        if (
+            user.type !== UserType.SUPER_ADMIN &&
+            existingUser.type === UserType.SUPER_ADMIN
+        ) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "unknown",
+                    "You are not allowed to delete super admin account",
+                ),
+                HttpStatusCode.NOT_ACCEPTABLE_406,
+            );
+        }
+
         const deleteResult = await deleteUserById(data.userId);
         // if no row is affected, meaning that the user didn't get deleted
         if (deleteResult[0].affectedRows < 1) {
@@ -61,7 +91,6 @@ export async function DELETE(request: Request, { params }: Params) {
             );
         }
 
-        await revalidateTags<GetUsers_C_Tag | OneAssociatedProject_C_Tag | GetProjects_C_Tag>("getUsers_C", "OneAssociatedProject_C_Tag", "getProjects_C_Tag");
         return buildSuccessResponse<FetchDeleteUser>(successMessage, {});
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);
