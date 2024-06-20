@@ -3,10 +3,9 @@ import LoginForm from "./login_form";
 import { getAuthUser } from "@/auth/lucia";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Button from "@/components/Button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { IconBrandGithub } from "@tabler/icons-react";
+import LoginGithubButton from "./login_github";
 
 export const metadata: Metadata = {
     title: "Login into your account | Radi Center",
@@ -26,12 +25,7 @@ export default async function Page() {
                 <div className="flex gap-4 flex-col">
                     <LoginForm />
                     <Link href={"/forgot-password"}>Forgot password</Link>
-                    <Link href="/api/oauth/github/login" prefetch={false}>
-                        <Button className="flex gap-2">
-                            <IconBrandGithub />
-                            Sign in with GitHub
-                        </Button>
-                    </Link>
+                    <LoginGithubButton />
                 </div>
             </div>
             <Footer />

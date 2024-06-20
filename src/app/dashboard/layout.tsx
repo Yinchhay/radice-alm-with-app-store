@@ -6,7 +6,6 @@ import { AllPermissionsInTheSystem, userCanAccessRoute } from "@/lib/IAM";
 import { hasPermission } from "@/lib/IAM";
 import { cache } from "react";
 import { UserType } from "@/types/user";
-import Toaster from "@/components/Toaster";
 
 export const metadata: Metadata = {
     title: "Dashboard | Radi Center",
@@ -74,7 +73,7 @@ export default async function DashboardManageLayout({
 
     return (
         <DashboardLayout user={user} canAccessRoutes={canAccessRoutes()}>
-            <Toaster>{children}</Toaster>
+            {children}
         </DashboardLayout>
     );
 }

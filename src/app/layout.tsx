@@ -1,6 +1,7 @@
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import type { Metadata } from "next";
+import Toaster from "@/components/Toaster";
 export const metadata: Metadata = {
     title: "Radi Center",
     description: "Radi center",
@@ -19,7 +20,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" className="scroll-smooth">
-            <body className={roboto.className}>{children}</body>
+            <body className={roboto.className}>
+                <Toaster>{children}</Toaster>
+            </body>
         </html>
     );
 }

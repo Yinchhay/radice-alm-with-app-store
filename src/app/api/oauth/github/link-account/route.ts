@@ -21,13 +21,13 @@ export async function GET(request: Request) {
 
         if (user.hasLinkedGithub) {
             return Response.redirect(
-                `${await getBaseUrl()}/link-oauth/github?error_message="User already linked github account`,
+                `${await getBaseUrl()}/link-oauth/github?error_message=User already linked github account`,
             );
         }
 
         if (user.type !== UserType.USER) {
             return Response.redirect(
-                `${await getBaseUrl()}/link-oauth/github?error_message="Your account type cannot link to github account"`,
+                `${await getBaseUrl()}/link-oauth/github?error_message=Your account type cannot link to github account`,
             );
         }
 
