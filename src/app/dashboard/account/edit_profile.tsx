@@ -186,6 +186,10 @@ export function EditProfileOverlay({ user }: { user: User }) {
         }
     }, [result]);
 
+    useEffect(() => {
+        onCancel();
+    }, [user]);
+
     return (
         <>
             <Tooltip title="Edit profile">

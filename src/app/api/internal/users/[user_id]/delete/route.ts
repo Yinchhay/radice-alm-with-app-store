@@ -14,6 +14,8 @@ import { Permissions } from "@/types/IAM";
 import { z } from "zod";
 import { deleteUserFormSchema } from "../../schema";
 import { UserType } from "@/types/user";
+import { lucia } from "@/auth/lucia";
+import { deleteFile } from "@/lib/file";
 
 // update type if we were to return any data back to the response
 export type FetchDeleteUser = Record<string, never>;
@@ -79,6 +81,12 @@ export async function DELETE(request: Request, { params }: Params) {
                 ),
                 HttpStatusCode.NOT_ACCEPTABLE_406,
             );
+        }
+
+        if (existingUser.profileUrl) {
+            const authorizationHeader = request.headers.get("Authorization");
+            const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+            await deleteFile(existingUser.profileUrl, sessionId ?? "");
         }
 
         const deleteResult = await deleteUserById(data.userId);
