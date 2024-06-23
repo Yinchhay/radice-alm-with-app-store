@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import LoginGithubButton from "./login_github";
 
 export const metadata: Metadata = {
-    title: "Login into your account | Radi Center",
+    title: "Login - Radice",
     description: "Login into your account to access your dashboard",
 };
 

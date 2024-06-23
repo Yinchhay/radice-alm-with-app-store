@@ -20,6 +20,12 @@ import ChipsHolder from "@/components/ChipsHolder";
 import Tooltip from "@/components/Tooltip";
 import NoAssociatedProject from "./no_associated_project";
 import SearchBar from "@/components/SearchBar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Dashboard - Projects - Radice",
+    description: "Dashboard",
+};
 
 type ManageAssociatedProps = {
     searchParams?: {
@@ -140,7 +146,10 @@ function Project({
                 <div className="absolute bottom-0 right-0 flex gap-2">
                     {/* TODO: update link url to preview */}
                     <Tooltip title="Preview" position="top">
-                        <Link href={`/dashboard/projects/${project.id}`} prefetch>
+                        <Link
+                            href={`/dashboard/projects/${project.id}`}
+                            prefetch
+                        >
                             <Button
                                 square
                                 variant="outline"

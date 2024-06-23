@@ -4,8 +4,8 @@ import JoinUsForm from "./join_us";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Join Us | Radi Center",
-    description: "Join us at Radi Center to learn and grow with us.",
+    title: "Join Us - Radice",
+    description: "Join us at Radice to learn and grow with us.",
 };
 
 export default function JoinUsPage() {

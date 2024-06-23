@@ -1,0 +1,16 @@
+{
+    "name": "Radice",
+    "short_name": "Radice",
+    "start_url": "/",
+    "background_color": "#fff",
+    "theme_color": "#fff",
+    "display": "standalone",
+    "description": "Radice is a Center for applied research and development initiatives of Paragon International University. We are a hub of creativity and discovery, where ideas take flight and possibilities are endless. Radice is passionate about innovation and creativity, and strives to deliver high-quality results.",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "16x16",
+            "type": "image/x-icon"
+        }
+    ]
+}

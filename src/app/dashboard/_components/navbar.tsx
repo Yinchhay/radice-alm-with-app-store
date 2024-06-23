@@ -1,11 +1,8 @@
 "use client";
-
-import { IconArrowLeft, IconMenu2 } from "@tabler/icons-react";
+import { IconMenu2 } from "@tabler/icons-react";
 import { User } from "lucia";
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { profile } from "console";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fileToUrl } from "@/lib/file";
 
@@ -17,14 +14,11 @@ export default function Navbar({
     user: User;
 }) {
     return (
-        <nav className="sticky h-[70px] z-40 top-0 left-0 px-4 py-2 bg-gray-950 flex justify-between">
+        <nav className="sticky h-[100px] z-40 top-0 left-0 px-4 py-2 bg-gray-950 flex justify-between">
             <div className="flex items-center gap-2">
                 <button onClick={onClick} className="p-2 hover:bg-gray-800">
                     <IconMenu2 size={28} className="text-gray-200" />
                 </button>
-                <Link href={"/"} className="text-white text-lg font-bold">
-                    Radice
-                </Link>
             </div>
             <Link
                 href={"/dashboard/account"}

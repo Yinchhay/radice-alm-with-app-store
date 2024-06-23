@@ -4,9 +4,13 @@ import MemberProfile, { MemberProfileType } from "./_components/MemberProfile";
 import { getMembers } from "./fetch";
 import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
 import SpecialEffectSentence from "@/components/effects/SpecialEffectSentence";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-
+export const metadata: Metadata = {
+    title: "Who we are - Radice",
+    description: "Radice About Page",
+};
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -26,7 +30,7 @@ export default async function page() {
             title: "Rector",
             email: "bmurg@paragoniu.edu.kh",
             description:
-                "Dr. Bradley J. Murg is Interim Rector and Provost at Paragon International University. He first visited Cambodia in 2000 when he was a Henry Luce Scholar working at the Asian Development Bank.",
+                "Dr. Bradley J. Murg is Interim Rector and Provost at Paragon International University.",
         },
     ];
 
@@ -38,16 +42,16 @@ export default async function page() {
             title: "Consultant",
             email: "nuy@paragoniu.edu.kh",
             description:
-                "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University, Dumaguete City, Philippines.",
+                "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University. He is also a co-founder of Radice and professor at Paragon International University.",
         },
         {
             firstName: "Ratana",
             lastName: "Soth",
-            profileUrl: "/ratana.jpg",
+            profileUrl: "/ratana_soth.png",
             email: "rsoth@paragoniu.edu.kh",
             title: "Director",
             description:
-                "Neil Ian Cadungog-Uy graduated with a Bachelor of Science Degree in Information Technology at Negros Oriental State University, Dumaguete City, Philippines. ",
+                "Ratana Soth is the director and co-founder of Radice. He is also a professor at Paragon International University.",
         },
     ];
 
@@ -56,7 +60,7 @@ export default async function page() {
             <Navbar />
             <div className="container mx-auto py-12">
                 <h1
-                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                    className={`text-center font-bold text-6xl pb-8 ${roboto_condensed.className}`}
                 >
                     Who We Are
                 </h1>
@@ -79,7 +83,7 @@ export default async function page() {
             </div>
             <div className="bg-black text-white py-12">
                 <h1
-                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                    className={`text-center font-bold text-6xl pb-8 ${roboto_condensed.className}`}
                 >
                     Executive Board
                 </h1>
@@ -97,7 +101,7 @@ export default async function page() {
             </div>
             <div className="mx-auto py-12 max-w-[1200px]">
                 <h1
-                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                    className={`text-center font-bold text-6xl pb-8 ${roboto_condensed.className}`}
                 >
                     Co-Founders
                 </h1>
@@ -115,7 +119,7 @@ export default async function page() {
             </div>
             <div className="mx-auto pb-12 max-w-[1200px]">
                 <h1
-                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                    className={`text-center font-bold text-6xl pb-8 ${roboto_condensed.className}`}
                 >
                     Our Members
                 </h1>

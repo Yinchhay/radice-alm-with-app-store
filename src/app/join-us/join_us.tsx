@@ -11,6 +11,7 @@ import { useFormStatus } from "react-dom";
 import FormErrorMessages from "@/components/FormErrorMessages";
 import ReCAPTCHA from "react-google-recaptcha";
 import { RECAPTCHA_KEY } from "@/lib/utils";
+import TechButton from "@/components/TechButton";
 
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -40,9 +41,7 @@ export default function JoinUsForm() {
                         </p>
                         <div className="flex justify-center">
                             <Link href={"/"}>
-                                <Button variant="primary">
-                                    Go To Home Page
-                                </Button>
+                                <TechButton variant="dark" text="Home Page" />
                             </Link>
                         </div>
                     </div>
@@ -63,10 +62,10 @@ export default function JoinUsForm() {
                             setSuccess(true);
                         }
                     }}
-                    className="w-[400px] mx-auto flex flex-col gap-4 mt-16 min-h-[60vh]"
+                    className="w-[400px] mx-auto flex flex-col gap-4 mt-8 min-h-[60vh]"
                 >
                     <h1
-                        className={`${roboto_condensed.className} text-center font-bold text-5xl pb-4`}
+                        className={`${roboto_condensed.className} text-center font-bold text-6xl pb-4`}
                     >
                         Join Us
                     </h1>
@@ -129,8 +128,10 @@ export default function JoinUsForm() {
 function ApplyBtn() {
     const formStatus = useFormStatus();
     return (
-        <Button disabled={formStatus.pending} variant="primary">
-            {formStatus.pending ? "Applying" : "Apply"}
-        </Button>
+        <TechButton
+            disabled={formStatus.pending}
+            variant="dark"
+            text={formStatus.pending ? "Applying" : "Apply"}
+        />
     );
 }

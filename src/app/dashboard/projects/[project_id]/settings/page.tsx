@@ -87,7 +87,7 @@ export default async function ProjectSettings({ params }: { params: Params }) {
                             </Button>
                         </Link>
                     </Tooltip>
-                    <Tooltip title="Project content builder" position="left">
+                    <Tooltip title="Builder" position="left">
                         <Link
                             href={`/dashboard/projects/${params.project_id}/builder`}
                         >

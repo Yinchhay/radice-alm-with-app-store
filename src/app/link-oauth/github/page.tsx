@@ -9,9 +9,8 @@ import { IconHome } from "@tabler/icons-react";
 import LinkGithubButton from "./link_github_button";
 
 export const metadata: Metadata = {
-    title: "Link Github | Radi Center",
-    description:
-        "Link your github account to Radi Center to get more features.",
+    title: "Link Github - Radice",
+    description: "Link your github account to Radice to get more features.",
 };
 
 type Props = {

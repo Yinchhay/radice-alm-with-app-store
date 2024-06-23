@@ -260,6 +260,8 @@ export default function Builder({
             setLastComponentId(newComponent.id); // Set last component ID
             setSelectedComponent(newComponent.id);
             setInitializing(false); // Component initialization is complete
+        } else {
+            setShowCreateOverlay(true);
         }
     };
 
@@ -277,6 +279,8 @@ export default function Builder({
             setLastComponentId(newComponent.id); // Set last component ID
             setSelectedComponent(newComponent.id);
             setInitializing(false); // Component initialization is complete
+        } else {
+            setShowCreateOverlay(true);
         }
     };
 
@@ -291,6 +295,8 @@ export default function Builder({
             setLastComponentId(newComponent.id); // Set last component ID
             setSelectedComponent(newComponent.id);
             setInitializing(false); // Component initialization is complete
+        } else {
+            setShowCreateOverlay(true);
         }
     };
 
@@ -308,6 +314,8 @@ export default function Builder({
             setLastComponentId(newComponent.id); // Set last component ID
             setSelectedComponent(newComponent.id);
             setInitializing(false); // Component initialization is complete
+        } else {
+            setShowCreateOverlay(true);
         }
     };
     return (

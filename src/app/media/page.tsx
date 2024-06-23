@@ -62,7 +62,7 @@ export default async function MediaPage() {
             <Navbar />
             <div className="w-full max-w-[1100px] min-h-[70vh] mx-auto py-8">
                 <h1
-                    className={`text-center font-bold text-5xl pb-8 ${roboto_condensed.className}`}
+                    className={`text-center font-bold text-6xl pb-8 ${roboto_condensed.className}`}
                 >
                     Media
                 </h1>

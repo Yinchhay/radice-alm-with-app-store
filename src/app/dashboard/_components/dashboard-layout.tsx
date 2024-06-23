@@ -21,20 +21,16 @@ export default function DashboardLayout({
     }
     return (
         <div className="relative bg-slate-50 min-h-screen">
-            <Navbar onClick={toggleSideNav} user={user} />
-            <div className="relative">
-                <SideNav
-                    showSideNav={showSideNav}
-                    canAccessRoutes={canAccessRoutes}
-                />
-                <main
-                    className={[
-                        "p-8 transition-all",
-                        showSideNav ? "ml-[300px]" : "",
-                    ].join(" ")}
-                >
-                    {children}
-                </main>
+            <SideNav
+                showSideNav={showSideNav}
+                canAccessRoutes={canAccessRoutes}
+            />
+
+            <div
+                className={`relative transition-all ${showSideNav ? "ml-[300px]" : ""}`}
+            >
+                <Navbar onClick={toggleSideNav} user={user} />
+                <main className="p-8 transition-all">{children}</main>
             </div>
         </div>
     );

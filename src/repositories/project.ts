@@ -409,9 +409,12 @@ export async function getPublicProjectsByCategoryId(categoryId: number) {
     });
 }
 
-type Temp = Omit<typeof projects.$inferSelect, "updatedAt" | "createdAt">;
+export type ProjectFromCategory = Omit<
+    typeof projects.$inferSelect,
+    "updatedAt" | "createdAt"
+>;
 type Temp1 = Omit<typeof categories.$inferSelect, "updatedAt" | "createdAt">;
-export type CategoryAndProjects = Temp1 & { projects: Temp[] };
+export type CategoryAndProjects = Temp1 & { projects: ProjectFromCategory[] };
 // get public categories that have project is public true. get at least 1 project, if doesn't have, don't return the category
 export async function getPublicProjectsByCategories() {
     const { createdAt, updatedAt, ...project } = getTableColumns(projects);

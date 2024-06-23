@@ -15,6 +15,8 @@ import { Logout } from "./logout";
 import { Permissions } from "@/types/IAM";
 import { userCanAccessRoute } from "@/lib/IAM";
 import { CanAccessRoutes } from "../layout";
+import Image from "next/image";
+import Link from "next/link";
 export default function SideNav({
     showSideNav,
     canAccessRoutes,
@@ -25,10 +27,20 @@ export default function SideNav({
     return (
         <aside
             className={[
-                "fixed top-70 left-0 bg-gray-900 h-screen z-40 transition-all w-[300px]",
+                "fixed top-70 left-0 bg-gray-950 h-screen z-40 transition-all w-[300px]",
                 showSideNav ? "translate-x-0" : "translate-x-[-100%]",
             ].join(" ")}
         >
+            <div className="p-6">
+                <Link href={"/"} className="text-white text-lg font-bold">
+                    <Image
+                        src={"/RadiceLogo_dark.png"}
+                        width={200}
+                        height={200}
+                        alt="Radice Logo"
+                    />
+                </Link>
+            </div>
             <h1 className="text-gray-200 text-lg font-bold ml-6 mt-4">
                 Dashboard
             </h1>

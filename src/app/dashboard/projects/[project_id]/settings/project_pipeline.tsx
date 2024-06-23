@@ -40,8 +40,8 @@ export function ProjectPipeline({
                 test: project.pipelineStatus?.test ?? false,
                 release: project.pipelineStatus?.release ?? false,
                 live: project.pipelineStatus?.live ?? false,
-                retired: project.pipelineStatus?.retired ?? false,
                 retiring: project.pipelineStatus?.retiring ?? false,
+                retired: project.pipelineStatus?.retired ?? false,
             };
         }
 
@@ -57,8 +57,8 @@ export function ProjectPipeline({
             test: false,
             release: false,
             live: false,
-            retired: false,
             retiring: false,
+            retired: false,
         };
     }
 

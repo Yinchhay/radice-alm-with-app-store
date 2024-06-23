@@ -13,7 +13,7 @@ export default function GridRevealImage({
     cols = 10,
     cellFadeSpeed = 200,
     revealDelay = 5,
-    variant = "hacker",
+    variant = "light",
     isAlphabet = true,
     canReveal = false,
     fill = false,
@@ -27,7 +27,7 @@ export default function GridRevealImage({
     cols?: number;
     cellFadeSpeed?: number;
     revealDelay?: number;
-    variant?: "hacker" | "light" | "dark";
+    variant?: "light" | "dark";
     isAlphabet?: boolean;
     canReveal?: boolean;
     fill?: boolean;
@@ -70,8 +70,6 @@ export default function GridRevealImage({
 
     const getVariantClasses = () => {
         switch (variant) {
-            case "hacker":
-                return "bg-black text-green-500";
             case "light":
             case "dark":
                 return "bg-black text-white";

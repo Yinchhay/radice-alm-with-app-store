@@ -18,7 +18,7 @@ import "./commands";
 
 Cypress.Commands.add("login", (email, password) => {
     cy.visit("/");
-    // click on 'Into Radi Center'
+    // click on 'Into Radice'
     cy.get('a[href="/login"]').click();
 
     // fill in the form

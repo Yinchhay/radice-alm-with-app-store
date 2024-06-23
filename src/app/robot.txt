@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /media
+Allow: /member/
+Allow: /project/
+Allow: /partner/
+Allow: /login
+Allow: /join-us
+Disallow: /dashboard/
+Disallow: /link-oauth
+Disallow: /test
+Disallow: /forgot-password
+
+Sitemap: https://radice.paragoniu.app/sitemap.xml

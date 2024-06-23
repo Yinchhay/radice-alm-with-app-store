@@ -59,7 +59,7 @@ export default function CheckList({
             <ul>
                 {checkboxElements.map((checkboxElement, index) => (
                     <li
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 capitalize"
                         key={checkboxElement.name + checkboxElement.value}
                     >
                         <input

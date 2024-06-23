@@ -1,16 +1,10 @@
 import { getAuthUser } from "@/auth/lucia";
-import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import DashboardLayout from "./_components/dashboard-layout";
 import { AllPermissionsInTheSystem, userCanAccessRoute } from "@/lib/IAM";
 import { hasPermission } from "@/lib/IAM";
 import { cache } from "react";
 import { UserType } from "@/types/user";
-
-export const metadata: Metadata = {
-    title: "Dashboard | Radi Center",
-    description: "Dashboard",
-};
 
 export type CanAccessRoutes = {
     manageUsers: boolean;

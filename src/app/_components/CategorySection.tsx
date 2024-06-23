@@ -7,8 +7,8 @@ import CategoryProjectLogo from "./CategoryProjectLogo";
 import SpecialEffectText from "../../components/effects/SpecialEffectText";
 import SpecialEffectSentence from "../../components/effects/SpecialEffectSentence";
 import { PublicCategory } from "../api/public/categories/route";
-import { GetPublicProjectsByCategoryIdReturnType } from "../api/public/categories/[category_id]/projects/route";
 import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
+import { CategoryAndProjects } from "@/repositories/project";
 const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -21,21 +21,10 @@ export default function CategorySection({
     category,
 }: {
     variant: string;
-    category: PublicCategory;
+    category: CategoryAndProjects;
 }) {
     const [selectedProject, setSelectedProject] = useState<number>(0);
-    const [projects, setProjects] =
-        useState<GetPublicProjectsByCategoryIdReturnType>();
-
-    useEffect(() => {
-        async function loadProjects() {
-            const results = await fetchPublicProjectsByCategory(category.id);
-            if (results.success) {
-                setProjects(results.data.projects);
-            }
-        }
-        loadProjects();
-    }, []);
+    const [projects, setProjects] = useState(category.projects);
 
     switch (variant) {
         case "light":
@@ -43,7 +32,7 @@ export default function CategorySection({
                 <>
                     {projects && projects.length > 0 && (
                         <div
-                            className="bg-white py-16 min-h-[620px]"
+                            className="bg-white py-16 min-h-[660px]"
                             id={`${category.name}`}
                         >
                             <div className="container mx-auto">
@@ -212,7 +201,7 @@ export default function CategorySection({
                 <>
                     {projects && projects.length > 0 && (
                         <div
-                            className="bg-black py-16 text-white min-h-[620px]"
+                            className="bg-black py-16 text-white min-h-[660px]"
                             id={`${category.name}`}
                         >
                             <div className="container mx-auto">

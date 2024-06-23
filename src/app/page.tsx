@@ -16,6 +16,8 @@ import {
     fetchPublicProjectsAndCategories,
 } from "./fetch";
 import CategorySectionNew from "./_components/CategorySectionNew";
+import ProjectPipeline from "./_components/ProjectPipeline";
+import { Metadata } from "next";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -29,7 +31,10 @@ const roboto = Roboto({
 });
 
 export const dynamic = "force-dynamic";
-
+export const metadata: Metadata = {
+    title: "Home - Radice",
+    description: "Radice Home Page",
+};
 export default async function Home() {
     const result = await fetchPublicProjectsAndCategories();
 
@@ -85,10 +90,13 @@ export default async function Home() {
                     </div>
                     <div className={roboto.className}>
                         <p className="text mt-4">
-                            At Radice, innovation is our heartbeat. We are a hub
-                            of creativity and discovery, where ideas take flight
-                            and possibilities are endless. Join us in shaping
-                            the future. Welcome to Radice.
+                            Radice is a Center for applied research and
+                            development initiatives of Paragon International
+                            University. We are a hub of creativity and
+                            discovery, where ideas take flight and possibilities
+                            are endless. Radice is passionate about innovation
+                            and creativity, and strives to deliver high-quality
+                            results.
                         </p>
                     </div>
                     <div className={roboto_flex.className}>
@@ -137,13 +145,16 @@ export default async function Home() {
             </div>
             {categoriesAndProjects.map((category, i) => {
                 return (
-                    <CategorySectionNew
+                    <CategorySection
                         variant={i % 2 === 0 ? "light" : "dark"}
                         category={category}
                         key={`category-section-${i}`}
                     />
                 );
             })}
+            {categoriesAndProjects.length > 0 && (
+                <ProjectPipeline category={categoriesAndProjects} />
+            )}
             <Footer />
         </div>
     );

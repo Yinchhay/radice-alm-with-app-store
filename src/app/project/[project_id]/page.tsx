@@ -77,10 +77,12 @@ export default async function ProjectPage({
                                             </Link>
                                         );
                                     })}
-                                    {(project.projectPartners.length > 0 ||
-                                        project.projectMembers.length > 0) && (
-                                        <div className="w-[50%] h-[1px] bg-gray-300 my-4"></div>
-                                    )}
+                                    {chapters.length > 0 &&
+                                        (project.projectPartners.length > 0 ||
+                                            project.projectMembers.length >
+                                                0) && (
+                                            <div className="w-[50%] h-[1px] bg-gray-300 my-4"></div>
+                                        )}
                                     {project.projectPartners.length > 0 && (
                                         <Link
                                             href={"#partners"}
@@ -124,7 +126,7 @@ export default async function ProjectPage({
                                 </Chip>
                             ))}
                         </ChipsHolder>
-                        {chapters && (
+                        {chapters.length > 0 && (
                             <div className="grid gap-8 border-t border-gray-300 py-8">
                                 {chapters.map((chapter, j) => {
                                     return (
