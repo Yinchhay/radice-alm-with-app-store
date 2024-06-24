@@ -117,20 +117,25 @@ export default async function page() {
                     })}
                 </div>
             </div>
-            <div className="mx-auto pb-12 max-w-[1200px]">
-                <h1
-                    className={`text-center font-bold text-6xl pb-8 ${roboto_condensed.className}`}
-                >
-                    Our Members
-                </h1>
-                <div className="flex justify-center gap-8 mt-4">
-                    {members.map((member, i) => {
-                        return (
-                            <MemberProfile member={member} variant="light" />
-                        );
-                    })}
+            {members.length > 0 && (
+                <div className="mx-auto pb-12 max-w-[1200px]">
+                    <h1
+                        className={`text-center font-bold text-6xl pb-8 ${roboto_condensed.className}`}
+                    >
+                        Our Members
+                    </h1>
+                    <div className="flex justify-center gap-8 mt-4">
+                        {members.map((member, i) => {
+                            return (
+                                <MemberProfile
+                                    member={member}
+                                    variant="light"
+                                />
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
             <Footer />
         </div>
     );
