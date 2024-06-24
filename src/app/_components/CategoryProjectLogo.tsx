@@ -9,7 +9,7 @@ export default function CategoryProjectLogo({
     variant = "light",
 }: {
     src: string;
-    variant?: "light" | "dark" | "hacker";
+    variant?: "light" | "dark";
 }) {
     const [canReveal, setCanReveal] = useState(false);
     return (
