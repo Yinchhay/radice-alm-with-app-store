@@ -9,6 +9,7 @@ const roboto = Roboto({
 });
 
 export const metadata = {
+    metadataBase: new URL("https://radice.paragoniu.app/"),
     title: "Radice",
     description:
         "Radice is a Center for applied research and development initiatives of Paragon International University. We are a hub of creativity and discovery, where ideas take flight and possibilities are endless. Radice is passionate about innovation and creativity, and strives to deliver high-quality results.",

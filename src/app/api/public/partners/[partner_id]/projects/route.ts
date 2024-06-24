@@ -20,7 +20,7 @@ const unsuccessMessage = "Get public projects by partner  id failed";
 export async function GET(request: NextRequest, { params }: Params) {
     try {
         const projects = await getPublicProjectsByPartnerId(params.partner_id);
-        console.log(projects);
+        //console.log(projects);
         return buildSuccessResponse<FetchPublicProjectsByIdData>(
             successMessage,
             {

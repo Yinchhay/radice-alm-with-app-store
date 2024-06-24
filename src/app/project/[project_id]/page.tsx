@@ -181,6 +181,7 @@ export default async function ProjectPage({
                                 {chapters.map((chapter, j) => {
                                     return (
                                         <div
+                                            key={`${chapter.name}-${j}`}
                                             className="grid gap-8"
                                             id={`${chapter.name}-${j}`}
                                         >
