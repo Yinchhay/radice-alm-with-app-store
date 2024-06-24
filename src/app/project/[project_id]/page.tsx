@@ -33,7 +33,7 @@ export default async function ProjectPage({
         redirect("/");
     }
     if (JSON.stringify(fetchProject.data) === "{}") {
-        console.log("project does not exist");
+        //console.log("project does not exist");
         redirect("/");
     }
     if (!fetchProject.data.project) {
@@ -46,7 +46,7 @@ export default async function ProjectPage({
         chapters = JSON.parse(
             fetchProject.data.project.projectContent as string,
         ) as Chapter[];
-        console.log(chapters);
+        //console.log(chapters);
     } catch {
         chapters = [];
     }

@@ -43,7 +43,7 @@ export default async function Home() {
     }
 
     const categoriesAndProjects = result.data.categories;
-    console.log(categoriesAndProjects);
+    //console.log(categoriesAndProjects);
     return (
         <div>
             <Navbar />
@@ -56,29 +56,6 @@ export default async function Home() {
                     className="absolute left-0 mt-[58px]"
                 />
             </div>
-            {/* <div className="container mx-auto overflow-hidden max-w-[80vw]">
-                <div className={roboto.className}>
-                    <div
-                        className="absolute top-[100px] font-bold text-[300px] text-transparent select-none"
-                        style={{
-                            WebkitTextStroke: "3px rgba(0,0,0,.08)",
-                            WebkitTextFillColor: "transparent",
-                            WebkitFontSmoothing: "antialiased",
-                        }}
-                    >
-                        <RandomText originalText={"WE ARE"} />
-                    </div>
-                    <div
-                        className="absolute top-[400px] left-[800px] font-bold text-[300px] text-transparent select-none"
-                        style={{
-                            WebkitTextStroke: "3px rgba(0,0,0,.08)",
-                            WebkitFontSmoothing: "antialiased",
-                        }}
-                    >
-                        <RandomText originalText={"RADICE"} />
-                    </div>
-                </div>
-            </div> */}
             <div className="h-[690px] container m-auto grid grid-cols-2">
                 <div className="w-[560px] flex flex-col justify-end h-full pb-16">
                     <div className={roboto_condensed.className}>
@@ -119,20 +96,6 @@ export default async function Home() {
                 <div className="relative mt-[300px]">
                     <Eye />
                 </div>
-                {/* <div className="relative flex justify-center">
-                    <div className="grid absolute top-[-80px]">
-                        <div
-                            style={{
-                                maskImage: "url(/root.png)",
-                                WebkitMaskImage: "url(/root.png)",
-                                WebkitMaskSize: "382px 650px",
-                                WebkitMaskRepeat: "no-repeat",
-                            }}
-                        >
-                            <div className="bg-black w-[382px] h-[0] animate-grow"></div>
-                        </div>
-                    </div>
-                </div> */}
             </div>
             <div className="relative bg-black pt-4 pb-8" id="r&d">
                 <div

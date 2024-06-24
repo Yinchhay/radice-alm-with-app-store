@@ -52,7 +52,7 @@ export default function ListComponent({
         useState<Component>(component);
 
     const handleCancel = () => {
-        console.log("canceling");
+        //console.log("canceling");
         onSelected("");
         setCurrentComponent(component); // Reset to initial state
     };
@@ -98,7 +98,7 @@ export default function ListComponent({
             ...prevComponent,
             rows: updatedRows,
         }));
-        console.log(`row_${currentComponent.id}_${index}`);
+        //console.log(`row_${currentComponent.id}_${index}`);
         setTimeout(() => {
             const textArea = document.getElementById(
                 `row_${currentComponent.id}_${index}`,

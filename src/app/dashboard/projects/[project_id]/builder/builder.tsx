@@ -115,7 +115,7 @@ export default function Builder({
         async function loadProjectData() {
             const result = await fetchOneAssociatedProject(params.project_id);
             if (result.success) {
-                console.log(result.data);
+                //console.log(result.data);
                 if (result.data.project) {
                     if (result.data.project.projectContent) {
                         setDataLoaded(true);
@@ -135,7 +135,7 @@ export default function Builder({
                     }
                 }
             } else {
-                console.log(result.errors);
+                //console.log(result.errors);
             }
         }
         if (!dataLoaded) {
@@ -156,9 +156,9 @@ export default function Builder({
                 chapters,
             );
             if (result.success) {
-                console.log(result.data);
+                //console.log(result.data);
             } else {
-                console.log(result.errors);
+                //console.log(result.errors);
             }
         }
         if (dataLoaded) {
@@ -439,7 +439,7 @@ export default function Builder({
                                                         selectedComponent
                                                     }
                                                     onSelected={(id) => {
-                                                        console.log("Selected");
+                                                        //console.log("Selected");
                                                         setSelectedComponent(
                                                             id,
                                                         );
@@ -473,7 +473,7 @@ export default function Builder({
                                                         selectedComponent
                                                     }
                                                     onSelected={(id) => {
-                                                        console.log("Selected");
+                                                        //console.log("Selected");
                                                         setSelectedComponent(
                                                             id,
                                                         );
@@ -504,7 +504,7 @@ export default function Builder({
                                                         selectedComponent
                                                     }
                                                     onSelected={(id) => {
-                                                        console.log("Selected");
+                                                        //console.log("Selected");
                                                         setSelectedComponent(
                                                             id,
                                                         );
@@ -535,7 +535,7 @@ export default function Builder({
                                                         selectedComponent
                                                     }
                                                     onSelected={(id) => {
-                                                        console.log("Selected");
+                                                        //console.log("Selected");
                                                         setSelectedComponent(
                                                             id,
                                                         );

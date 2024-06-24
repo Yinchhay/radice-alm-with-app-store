@@ -31,90 +31,89 @@ export default function Carousel({
 
     return (
         <div>
-            <div className="container grid grid-cols-5 m-auto pt-24 gap-10">
-                <div className="relative col-span-3">
-                    <div className="absolute w-full h-[400px] flex items-center justify-between z-20">
-                        <button
-                            className="ml-4 text-white -scale-100 hover:-scale-75 duration-200 p-4"
-                            onClick={() => changeSlide(-1)}
-                        >
-                            <Image
-                                src={"/arrow.svg"}
-                                width={32}
-                                height={58}
-                                alt=""
-                            />
-                        </button>
-                        <button
-                            className="ml-4 text-white hover:scale-75 duration-200 p-4"
-                            onClick={() => changeSlide(1)}
-                        >
-                            <Image
-                                src={"/arrow.svg"}
-                                width={32}
-                                height={58}
-                                alt=""
-                            />
-                        </button>
-                    </div>
-                    <ul className="relative h-[400px]">
-                        {categories.map((category, i) => {
-                            return (
-                                <CarouselCard
-                                    active={currentSlide == i}
-                                    src={fileToUrl(category.logo)}
-                                    key={`carousel-card-${i}`}
-                                    index={i}
-                                    currentSlide={currentSlide}
-                                    maxSlides={categories.length}
+            {categories.length > 0 && (
+                <div className="container grid grid-cols-5 m-auto pt-24 gap-10">
+                    <div className="relative col-span-3">
+                        <div className="absolute w-full h-[400px] flex items-center justify-between z-20">
+                            <button
+                                className="ml-4 text-white -scale-100 hover:-scale-75 duration-200 p-4"
+                                onClick={() => changeSlide(-1)}
+                            >
+                                <Image
+                                    src={"/arrow.svg"}
+                                    width={32}
+                                    height={58}
+                                    alt=""
                                 />
-                            );
-                        })}
-                    </ul>
-                    <h2
-                        className={[
-                            "text-white text-6xl font-bold leading-[0.90] translate-y-[100%] animate-reveal text-center mt-8",
-                            roboto_condensed.className,
-                        ].join(" ")}
-                    >
-                        {categories.length > 0
-                            ? categories[currentSlide].name
-                            : ""}
-                    </h2>
-                </div>
-                <div className="col-span-2 relative ">
-                    <div className="overflow-hidden">
+                            </button>
+                            <button
+                                className="ml-4 text-white hover:scale-75 duration-200 p-4"
+                                onClick={() => changeSlide(1)}
+                            >
+                                <Image
+                                    src={"/arrow.svg"}
+                                    width={32}
+                                    height={58}
+                                    alt=""
+                                />
+                            </button>
+                        </div>
+                        <ul className="relative h-[400px]">
+                            {categories.map((category, i) => {
+                                return (
+                                    <CarouselCard
+                                        active={currentSlide == i}
+                                        src={fileToUrl(category.logo)}
+                                        key={`carousel-card-${i}`}
+                                        index={i}
+                                        currentSlide={currentSlide}
+                                        maxSlides={categories.length}
+                                    />
+                                );
+                            })}
+                        </ul>
                         <h2
                             className={[
-                                "w-[580px] uppercase text-white text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal",
+                                "text-white text-6xl font-bold leading-[0.90] translate-y-[100%] animate-reveal text-center mt-8",
                                 roboto_condensed.className,
                             ].join(" ")}
                         >
-                            Research & Development
+                            {categories.length > 0
+                                ? categories[currentSlide].name
+                                : ""}
                         </h2>
                     </div>
-                    <p className="text-white mt-4">
-                        <SpecialEffectSentence
-                            delay={50}
-                            shuffleSpeed={20}
-                            randomAmount={8}
-                            originalText={
-                                categories[currentSlide].description ||
-                                "This category does not have a description."
-                            }
+                    <div className="col-span-2 relative ">
+                        <div className="overflow-hidden">
+                            <h2
+                                className={[
+                                    "w-[580px] uppercase text-white text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal",
+                                    roboto_condensed.className,
+                                ].join(" ")}
+                            >
+                                Research & Development
+                            </h2>
+                        </div>
+                        <p className="text-white mt-4">
+                            <SpecialEffectSentence
+                                delay={50}
+                                shuffleSpeed={20}
+                                randomAmount={8}
+                                originalText={
+                                    categories[currentSlide].description ||
+                                    "This category does not have a description."
+                                }
+                            />
+                        </p>
+                        <TechButton
+                            link={`#${categories[currentSlide].name}`}
+                            variant="light"
+                            className="mt-12"
+                            text="VIEW"
                         />
-                    </p>
-                    <TechButton
-                        link={`#${categories[currentSlide].name}`}
-                        variant="light"
-                        className="mt-12"
-                        text="VIEW"
-                        onClick={() => {
-                            console.log("click");
-                        }}
-                    />
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

@@ -103,7 +103,7 @@ export default function ImageComponent({
                 //console.log(fileToUrl(newUpload.data.filenames[0]));
                 return newUpload.data.filenames[0];
             } else {
-                console.log(newUpload.message);
+                //console.log(newUpload.message);
             }
             return "/placeholder.webp";
         }
@@ -161,7 +161,7 @@ export default function ImageComponent({
                                         sessionId ?? "",
                                     );
                                     if (!deleteOldImage.success) {
-                                        console.log(deleteOldImage.message);
+                                        //console.log(deleteOldImage.message);
                                     } else {
                                         onDelete(component.id);
                                     }
@@ -197,15 +197,12 @@ export default function ImageComponent({
                             className="hidden"
                             accept="image/*"
                             id={"image_" + component.id}
-                            onFocus={() => {
-                                console.log("focus");
-                            }}
                             onChange={(e) => {
                                 if (e.target.files && e.target.files[0]) {
-                                    console.log(
-                                        "File type:",
-                                        e.target.files[0].type,
-                                    );
+                                    //console.log(
+                                    //     "File type:",
+                                    //     e.target.files[0].type,
+                                    // );
                                     setFileList(e.target.files);
                                     setImageSrc(
                                         URL.createObjectURL(e.target.files[0]),

@@ -9,7 +9,7 @@ export default function PipelineProjectLogo({ src }: { src: string }) {
     return (
         <ScrollReveal
             onReveal={() => {
-                console.log("reveal");
+                //console.log("reveal");
                 setCanReveal(true);
             }}
         >

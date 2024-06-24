@@ -58,7 +58,7 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                     }
                 }
             } else {
-                console.log(result.errors);
+                //console.log(result.errors);
             }
         }
         if (!dataLoaded) {
