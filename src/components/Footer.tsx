@@ -25,7 +25,7 @@ export default function Footer() {
                         Radice
                     </h1>
                     <p className="text-gray-200 mt-4">
-                        Radice is a Center for applied research and development
+                        Radice is a center for applied research and development
                         initiatives of Paragon International University. We are
                         a hub of creativity and discovery, where ideas take
                         flight and possibilities are endless. Radice is
