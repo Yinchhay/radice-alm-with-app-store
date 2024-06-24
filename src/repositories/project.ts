@@ -469,7 +469,6 @@ export async function getPublicProjectsByUserId(userId: string) {
                     category: true,
                 },
             },
-            user: true,
         },
         where: (table, { or, exists, and }) =>
             and(
@@ -485,8 +484,6 @@ export async function getPublicProjectsByUserId(userId: string) {
 }
 
 export async function getPublicProjectsByPartnerId(userId: string) {
-    const partnerIds = await partnerAssociatedProjectIds(userId);
-
     return db.query.projects.findMany({
         with: {
             projectCategories: {
@@ -494,7 +491,6 @@ export async function getPublicProjectsByPartnerId(userId: string) {
                     category: true,
                 },
             },
-            user: true,
         },
         where: (table, { or, exists, and }) =>
             and(
@@ -503,7 +499,7 @@ export async function getPublicProjectsByPartnerId(userId: string) {
                     // check if the user is the owner of the project
                     eq(table.userId, userId),
                     // if not, check if the user is associated with the project
-                    exists(memberAssociatedProjectSubQuery(userId)),
+                    exists(partnerAssociatedProjectIds(userId)),
                 ),
             ),
     });

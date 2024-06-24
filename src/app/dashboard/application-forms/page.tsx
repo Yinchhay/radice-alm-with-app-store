@@ -13,7 +13,10 @@ import { ApproveApplicationFormOverlay } from "./approve_form";
 import { RejectApplicationFormOverlay } from "./reject_form";
 import NoApplicationForm from "./no_application_form";
 import SearchBar from "@/components/SearchBar";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Manage Application Forms - Dashboard - Radice",
+};
 type ManageApplicationFormsProps = {
     searchParams?: {
         page?: string;
@@ -76,7 +79,7 @@ export default async function ManageApplicationForms({
                 ) : (
                     <NoApplicationForm page={page} />
                 )}
-               {showPagination && (
+                {showPagination && (
                     <div className="float-right mb-4">
                         <Pagination page={page} maxPage={result.data.maxPage} />
                     </div>

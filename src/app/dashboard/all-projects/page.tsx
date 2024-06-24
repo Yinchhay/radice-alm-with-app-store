@@ -13,7 +13,10 @@ import { FetchProjectsForManageAllProjectsData } from "@/app/api/internal/projec
 import ToggleProjectPublic from "./toggle_project_public";
 import NoProject from "./no_project";
 import SearchBar from "@/components/SearchBar";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Manage All Projects - Dashboard - Radice",
+};
 type ManageAllProjectsProps = {
     searchParams?: {
         page?: string;

@@ -1,11 +1,9 @@
 import { getAuthUser } from "@/auth/lucia";
-import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Chip from "@/components/Chip";
 import ChipsHolder from "@/components/ChipsHolder";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { fileToUrl } from "@/lib/file";
-import { IconEdit } from "@tabler/icons-react";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { EditProfileOverlay } from "./edit_profile";
@@ -15,7 +13,10 @@ import { ChangeEmailOverlay } from "./change_email";
 import { ChangePasswordOverlay } from "./change_password";
 import { UserType } from "@/types/user";
 import ChangeGithub from "./change_github_";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Manage Account - Dashboard - Radice",
+};
 export default async function ManageAccount() {
     const user = await getAuthUser();
 

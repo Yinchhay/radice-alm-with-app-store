@@ -17,7 +17,10 @@ import { Permissions } from "@/types/IAM";
 import { UserWithoutPassword } from "../projects/[project_id]/settings/project_member";
 import NoUser from "./no_user";
 import SearchBar from "@/components/SearchBar";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Manage Users - Dashboard - Radice",
+};
 type ManageUsersProps = {
     searchParams?: {
         page?: string;

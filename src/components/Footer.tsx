@@ -18,9 +18,12 @@ export default function Footer() {
                             src={"/RadiceLogo_dark.png"}
                             width={200}
                             height={200}
-                            alt="Radice Logo"
+                            alt="Radice"
                         />
                     </Link>
+                    <h1 className="opacity-0 fixed pointer-events-none">
+                        Radice
+                    </h1>
                     <p className="text-gray-200 mt-4">
                         Radice is a Center for applied research and development
                         initiatives of Paragon International University. We are
@@ -33,7 +36,7 @@ export default function Footer() {
                         className={`mt-8 text-white font-bold ${roboto_condensed.className}`}
                     >
                         <p>Powered By ParagonIU Cloud</p>
-                        <p>Copyright (C) All Rights Reserved. 2024 RaDICe</p>
+                        <p>Copyright &copy; All Rights Reserved. 2024 RaDICe</p>
                     </div>
                 </div>
                 <div>

@@ -21,7 +21,7 @@ export default function FollowEye() {
             let disX = event.clientX - centerX;
             let disY = event.clientY - centerY;
             let angle = Math.atan2(disY, disX) * (180 / Math.PI);
-            console.log(`Angle: ${angle}`);
+            //console.log(`Angle: ${angle}`);
 
             let distance = Math.sqrt(disX ** 2 + disY ** 2);
             let posX: number = 0,

@@ -14,7 +14,10 @@ import { EditMediaOverlay } from "./edit_media";
 import { dateToString } from "@/lib/utils";
 import NoMedia from "./no_media";
 import SearchBar from "@/components/SearchBar";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Manage Media - Dashboard - Radice",
+};
 type ManageMediaProps = {
     searchParams?: {
         page?: string;

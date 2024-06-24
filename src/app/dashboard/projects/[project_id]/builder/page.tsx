@@ -7,7 +7,10 @@ import { redirect } from "next/navigation";
 import { fetchOneAssociatedProject } from "./fetch";
 import { ProjectRole, checkProjectRole } from "@/lib/project";
 import Tooltip from "@/components/Tooltip";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Project Builder - Dashboard - Radice",
+};
 type Params = {
     project_id: string;
 };

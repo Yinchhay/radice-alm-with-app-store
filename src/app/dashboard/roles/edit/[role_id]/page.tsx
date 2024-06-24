@@ -9,7 +9,10 @@ import { hasPermission } from "@/lib/IAM";
 import { Permissions } from "@/types/IAM";
 import { IconArrowLeft } from "@tabler/icons-react";
 import Tooltip from "@/components/Tooltip";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Edit Role - Dashboard - Radice",
+};
 type Params = {
     role_id: string;
 };

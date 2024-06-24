@@ -5,7 +5,6 @@ import Image from "next/image";
 import { fileToUrl } from "@/lib/file";
 import {
     Chapter,
-    Component,
     TextAlign,
     fontAligns,
     fontWeights,
@@ -20,6 +19,57 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { convertToProjectStatusElements } from "@/lib/utils";
 import Stepper from "@/components/Stepper";
+import { Metadata, ResolvingMetadata } from "next";
+export const dynamic = "force-dynamic";
+type Props = {
+    params: { project_id: string };
+};
+export async function generateMetadata(
+    { params }: Props,
+    parent: ResolvingMetadata,
+): Promise<Metadata> {
+    const fetchProject = await getProjectByIdForPublic(
+        Number(params.project_id),
+    );
+    if (!fetchProject.success) {
+        redirect("/");
+    }
+    if (JSON.stringify(fetchProject.data) === "{}") {
+        //console.log("project does not exist");
+        redirect("/");
+    }
+    if (!fetchProject.data.project) {
+        redirect("/");
+    }
+    const project = fetchProject.data.project;
+
+    return {
+        title: project.name + " - Radice",
+        description: project.description,
+        openGraph: {
+            images: [
+                {
+                    url: fileToUrl(project.logoUrl) + " - Radice",
+                    alt: project.name,
+                    type: "image/png",
+                    width: 100,
+                    height: 100,
+                },
+            ],
+        },
+        twitter: {
+            images: [
+                {
+                    url: fileToUrl(project.logoUrl) + " - Radice",
+                    alt: project.name,
+                    type: "image/png",
+                    width: 100,
+                    height: 100,
+                },
+            ],
+        },
+    };
+}
 
 export default async function ProjectPage({
     params,

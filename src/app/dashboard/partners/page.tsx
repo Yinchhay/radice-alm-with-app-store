@@ -15,7 +15,10 @@ import { UserWithoutPassword } from "../projects/[project_id]/settings/project_m
 import NoPartner from "./no_partner";
 import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Manage Partners - Dashboard - Radice",
+};
 type ManagePartnersProps = {
     searchParams?: {
         page?: string;

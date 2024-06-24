@@ -33,7 +33,8 @@ const roboto = Roboto({
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
     title: "Home - Radice",
-    description: "Radice Home Page",
+    description:
+        "Radice is a Center for applied research and development initiatives of Paragon International University. We are a hub of creativity and discovery, where ideas take flight and possibilities are endless. Radice is passionate about innovation and creativity, and strives to deliver high-quality results.",
 };
 export default async function Home() {
     const result = await fetchPublicProjectsAndCategories();
@@ -49,7 +50,7 @@ export default async function Home() {
             <Navbar />
             <div className="relative">
                 <Image
-                    alt=""
+                    alt="Radice"
                     src={"/paragon.svg"}
                     width={240}
                     height={784}
@@ -66,6 +67,9 @@ export default async function Home() {
                         </div>
                     </div>
                     <div className={roboto.className}>
+                        <h1 className="opacity-0 fixed pointer-events-none">
+                            Radice
+                        </h1>
                         <p className="text mt-4">
                             Radice is a Center for applied research and
                             development initiatives of Paragon International

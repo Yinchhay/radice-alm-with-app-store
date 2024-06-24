@@ -21,7 +21,10 @@ import Link from "next/link";
 import Tooltip from "@/components/Tooltip";
 import NoRole from "./no_role";
 import SearchBar from "@/components/SearchBar";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Manage Roles - Dashboard - Radice",
+};
 type ManageRolesProps = {
     searchParams?: {
         page?: string;

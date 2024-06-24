@@ -1,8 +1,6 @@
 import { getOneAssociatedProjectData } from "./fetch";
-import { Chapter } from "@/types/content";
 
 import Link from "next/link";
-import { convertToProjectStatusElements } from "@/lib/utils";
 
 import Button from "@/components/Button";
 import { IconHammer, IconSettings } from "@tabler/icons-react";
@@ -11,6 +9,12 @@ import { ProjectRole, checkProjectRole } from "@/lib/project";
 import { redirect } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import PreviewProject from "./_components/PreviewProject";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Preview Project - Dashboard - Radice",
+};
+
 export default async function PreviewProjectPage({
     params,
 }: {
@@ -25,13 +29,13 @@ export default async function PreviewProjectPage({
     const fetchProject = await getOneAssociatedProjectData(
         Number(params.project_id),
     );
-    console.log(fetchProject);
+    //console.log(fetchProject);
     if (!fetchProject.success) {
         return;
     }
 
     if (JSON.stringify(fetchProject.data) === "{}") {
-        console.log("no info");
+        //console.log("no info");
         return;
     }
     if (!fetchProject.data.project) {

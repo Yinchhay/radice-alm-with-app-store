@@ -25,7 +25,7 @@ export default function Navbar() {
                             src={"/RadiceLogo_light.png"}
                             width={200}
                             height={200}
-                            alt="Radice Logo"
+                            alt="Radice"
                         />
                     </Link>
                 </div>

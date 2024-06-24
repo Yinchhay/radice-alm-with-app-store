@@ -18,7 +18,10 @@ import ImageWithFallback from "@/components/ImageWithFallback";
 import { fileToUrl } from "@/lib/file";
 import NoCategory from "./no_category";
 import SearchBar from "@/components/SearchBar";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Manage Categories - Dashboard - Radice",
+};
 type ManageCategoriesProps = {
     searchParams?: {
         page?: string;

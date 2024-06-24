@@ -23,8 +23,7 @@ import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Dashboard - Projects - Radice",
-    description: "Dashboard",
+    title: "Manage Projects - Dashboard - Radice",
 };
 
 type ManageAssociatedProps = {

@@ -13,7 +13,10 @@ import Link from "next/link";
 import Button from "@/components/Button";
 import { IconEye, IconHammer } from "@tabler/icons-react";
 import Tooltip from "@/components/Tooltip";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+    title: "Project Setting - Dashboard - Radice",
+};
 type Params = {
     project_id: string;
 };

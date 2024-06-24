@@ -13,6 +13,66 @@ import ChipsHolder from "@/components/ChipsHolder";
 import GridRevealImage from "@/components/effects/GridRevealImage";
 import { redirect } from "next/navigation";
 import { fileToUrl } from "@/lib/file";
+import { Metadata, ResolvingMetadata } from "next";
+export const dynamic = "force-dynamic";
+type Props = {
+    params: { member_id: string };
+};
+export async function generateMetadata(
+    { params }: Props,
+    parent: ResolvingMetadata,
+): Promise<Metadata> {
+    const fetchMembers = await getPublicMemberById(params.member_id);
+
+    if (!fetchMembers.success) {
+        redirect("/");
+    }
+    const member = fetchMembers.data.member;
+    if (member) {
+        return {
+            title: member.firstName + "" + member.lastName + " - Radice",
+            description: member.description,
+            openGraph: {
+                images: [
+                    {
+                        url: fileToUrl(
+                            member.profileUrl,
+                            "/missing-profile.png",
+                        ),
+                        alt:
+                            member.firstName +
+                            "" +
+                            member.lastName +
+                            " - Radice",
+                        type: "image/png",
+                        width: 180,
+                        height: 240,
+                    },
+                ],
+            },
+            twitter: {
+                images: [
+                    {
+                        url: fileToUrl(
+                            member.profileUrl,
+                            "/missing-profile.png",
+                        ),
+                        alt:
+                            member.firstName +
+                            "" +
+                            member.lastName +
+                            " - Radice",
+                        type: "image/png",
+                        width: 180,
+                        height: 240,
+                    },
+                ],
+            },
+        };
+    } else {
+        return {};
+    }
+}
 
 export default async function MemberPublicProfilePage({
     params,
@@ -119,11 +179,15 @@ export default async function MemberPublicProfilePage({
                             )}
                     </div>
                     <div>
-                        <h2 className="font-bold mb-2">Researches:</h2>
+                        <h2 className="font-bold mb-2 text-lg">Researches:</h2>
+                        {projects.length <= 0 && <p>No researches yet</p>}
                         <div className="flex flex-col gap-4">
                             {projects.map((project, i) => {
                                 return (
-                                    <Card square>
+                                    <Card
+                                        square
+                                        key={`researches-${project.id}`}
+                                    >
                                         <Link
                                             href={`/project/${project.id}`}
                                             className="flex"

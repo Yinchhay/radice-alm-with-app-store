@@ -51,7 +51,7 @@ export default function MemberProfile({
                     >
                         <ScrollReveal
                             onReveal={() => {
-                                console.log("reveal");
+                                //console.log("reveal");
                                 setReveal(true);
                             }}
                         >
@@ -69,7 +69,11 @@ export default function MemberProfile({
                                 height={240}
                                 revealDelay={6}
                                 fill
-                                className="object-cover"
+                                className={
+                                    userType == "member"
+                                        ? "object-cover"
+                                        : "object-contain"
+                                }
                             />
                         </ScrollReveal>
                     </Link>
@@ -104,7 +108,7 @@ export default function MemberProfile({
                     >
                         <ScrollReveal
                             onReveal={() => {
-                                console.log("reveal");
+                                //console.log("reveal");
                                 setReveal(true);
                             }}
                         >
