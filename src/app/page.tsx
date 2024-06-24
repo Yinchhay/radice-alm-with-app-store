@@ -68,10 +68,12 @@ export default async function Home() {
                     </div>
                     <div className={roboto.className}>
                         <h1 className="opacity-0 fixed pointer-events-none">
-                            Radice
+                            RADICE: a center for applied research and
+                            development initiatives of Paragon International
+                            University.
                         </h1>
                         <p className="text mt-4">
-                            Radice is a Center for applied research and
+                            Radice is a center for applied research and
                             development initiatives of Paragon International
                             University. We are a hub of creativity and
                             discovery, where ideas take flight and possibilities
