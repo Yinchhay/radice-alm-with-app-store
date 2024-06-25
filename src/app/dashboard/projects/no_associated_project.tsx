@@ -14,7 +14,7 @@ export default function NoAssociatedProject({ page }: { page: number }) {
     return (
         <>
             <div className="flex flex-col items-center justify-between gap-4 my-8">
-                <h1 className="text-lg">
+                <h1 className="dark:text-white">
                     You are not associated with any project.
                 </h1>
             </div>
