@@ -71,7 +71,9 @@ export default function Pagination({ page, maxPage }: PaginationProps) {
                     <div>{currentPage + 1}</div>
                 </Button>
             )}
-            {currentPage + 2 < maxPage && <IconDots />}
+            {currentPage + 2 < maxPage && (
+                <IconDots className="dark:text-white" />
+            )}
             {currentPage != maxPage && (
                 <Button
                     square={true}

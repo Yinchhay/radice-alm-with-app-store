@@ -53,7 +53,7 @@ export default async function PreviewProjectPage({
         redirect("/");
     }
     return (
-        <div>
+        <div className="dark:text-white">
             {canEdit && (
                 <div className="fixed bottom-8 right-8 z-30 grid gap-2">
                     {projectRole == ProjectRole.OWNER && (

@@ -22,6 +22,7 @@ import Tooltip from "@/components/Tooltip";
 import NoRole from "./no_role";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
+import DashboardPageTitle from "@/components/DashboardPageTitle";
 export const metadata: Metadata = {
     title: "Manage Roles - Dashboard - Radice",
 };
@@ -78,7 +79,7 @@ export default async function ManageRoles({ searchParams }: ManageRolesProps) {
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
                 <div>
-                    <h1 className="text-2xl">Manage Roles</h1>
+                    <DashboardPageTitle title="Roles" />
                     <div className="mt-4">
                         <SearchBar placeholder="Search roles" />
                     </div>

@@ -21,6 +21,7 @@ import Tooltip from "@/components/Tooltip";
 import NoAssociatedProject from "./no_associated_project";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
+import DashboardPageTitle from "@/components/DashboardPageTitle";
 
 export const metadata: Metadata = {
     title: "Manage Projects - Dashboard - Radice",
@@ -68,21 +69,21 @@ export default async function ManageAssociatedProject({
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
                 <div className="flex flex-row justify-between">
-                    <h1 className="text-2xl">Projects</h1>
+                    <DashboardPageTitle title="Projects" />
                     {canCreateProject && <CreateProjectOverlay />}
                 </div>
                 <div className="mt-4">
                     <SearchBar placeholder="Search associated projects" />
                 </div>
                 {result.data.projects.length > 0 ? (
-                    <div className="my-4 w-full flex gap-4 flex-col">
+                    <div className="py-4 w-full flex gap-4 flex-col">
                         {ProjectLists}
                     </div>
                 ) : (
                     <NoAssociatedProject page={page} />
                 )}
                 {showPagination && (
-                    <div className="float-right mb-4">
+                    <div className="flex justify-end pb-4">
                         <Pagination page={page} maxPage={result.data.maxPage} />
                     </div>
                 )}

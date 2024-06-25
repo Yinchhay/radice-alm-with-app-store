@@ -39,7 +39,7 @@ export default function Dropdown({
             <button
                 type="button"
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="w-full bg-white text-black rounded-md outline outline-1 outline-gray-300 pl-3 pr-2 py-1 text-start flex items-center justify-between"
+                className="w-full bg-white text-black rounded-md outline outline-1 outline-gray-300 pl-3 pr-2 py-1 text-start flex items-center justify-between dark:bg-gray-700 dark:outline-gray-600 dark:text-white"
             >
                 <h4>{selectedElement?.name}</h4>
                 <IconChevronDown size={20} />
@@ -52,7 +52,7 @@ export default function Dropdown({
                     onMouseLeave={() => {
                         setIsHovering(false);
                     }}
-                    className="absolute w-full bg-white rounded-md outline outline-1 outline-gray-300 p-1 mt-1 z-[1]"
+                    className="absolute w-full bg-white rounded-md outline outline-1 outline-gray-300 p-1 mt-1 z-[1] dark:bg-gray-700 dark:outline-gray-600 dark:text-white"
                 >
                     {dropdownList.map((item, index) => {
                         return (
@@ -65,7 +65,7 @@ export default function Dropdown({
                                     if (onChangeIndex) onChangeIndex(index);
                                     setShowDropdown(false);
                                 }}
-                                className="w-full px-1 rounded-md py-1 bg-white hover:brightness-90 text-start flex items-center gap-2"
+                                className="w-full px-1 rounded-md py-1 bg-white hover:brightness-90 text-start flex items-center gap-2 dark:bg-gray-700 dark:outline-gray-600 dark:text-white"
                             >
                                 <IconCheck
                                     size={16}

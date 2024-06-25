@@ -60,7 +60,7 @@ export function ProjectControl({
                     />
                 </div>
                 <div className="flex flex-row justify-between items-center">
-                    <p className="text-lg">Transfer project</p>
+                    <p>Transfer project</p>
                     <TransferProject project={project} />
                 </div>
             </div>
@@ -135,7 +135,7 @@ function TransferProject({
                             className="flex flex-col gap-2 my-4"
                             action={onSubmit}
                         >
-                            <div className="flex flex-col items-start">
+                            <div className="flex flex-col items-start gap-2">
                                 <label htmlFor="email" className="font-normal">
                                     Transfer to email
                                 </label>

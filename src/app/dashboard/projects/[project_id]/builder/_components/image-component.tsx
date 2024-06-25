@@ -184,7 +184,7 @@ export default function ImageComponent({
                     </Button>
                     <label
                         htmlFor={"image_" + component.id}
-                        className="hover:brightness-90 bg-white text-black rounded-sm outline outline-1 outline-gray-300 px-3 py-1 cursor-pointer transition-all duration-150"
+                        className="hover:brightness-90 bg-white text-black rounded-sm outline outline-1 outline-gray-300 px-3 py-1 cursor-pointer transition-all duration-150  dark:bg-gray-700 dark:outline-gray-500 dark:text-white"
                         onClick={() => {
                             if (buttonRef.current) {
                                 buttonRef.current.focus();

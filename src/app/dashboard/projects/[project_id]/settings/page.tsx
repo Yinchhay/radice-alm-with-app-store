@@ -14,6 +14,7 @@ import Button from "@/components/Button";
 import { IconEye, IconHammer } from "@tabler/icons-react";
 import Tooltip from "@/components/Tooltip";
 import { Metadata } from "next";
+import DashboardPageTitle from "@/components/DashboardPageTitle";
 export const metadata: Metadata = {
     title: "Project Setting - Dashboard - Radice",
 };
@@ -61,8 +62,8 @@ export default async function ProjectSettings({ params }: { params: Params }) {
     );
 
     return (
-        <div className="w-full max-w-[700px] mx-auto bg-transparent z-10 relative">
-            <h1 className="text-3xl font-medium mb-4">Project Settings</h1>
+        <div className="w-full max-w-[1000px] mx-auto bg-transparent z-10 relative">
+            <DashboardPageTitle title="Project Settings" className="mb-4" />
             <div className="grid gap-4">
                 <ProjectDetail
                     project={result.data.project}

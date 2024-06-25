@@ -11,7 +11,7 @@ const TextareaField = forwardRef<HTMLTextAreaElement, InputProps>(
             <textarea
                 ref={ref}
                 className={[
-                    "w-full bg-white text-black px-3 py-1 rounded-sm outline outline-1 outline-gray-300 focus:outline-2 focus:outline-blue-400",
+                    "w-full bg-white text-black px-3 py-1 rounded-sm outline outline-1 outline-gray-300 focus:outline-2 focus:outline-blue-400 dark:bg-gray-700 dark:outline-gray-600 dark:text-white",
                     className,
                     props.disabled ? "brightness-90" : "",
                 ].join(" ")}

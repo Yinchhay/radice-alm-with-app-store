@@ -1,3 +1,4 @@
+"use client";
 import {
     IconCategory,
     IconChecklist,
@@ -17,6 +18,8 @@ import { userCanAccessRoute } from "@/lib/IAM";
 import { CanAccessRoutes } from "../layout";
 import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 export default function SideNav({
     showSideNav,
     canAccessRoutes,
@@ -24,10 +27,18 @@ export default function SideNav({
     showSideNav: boolean;
     canAccessRoutes: CanAccessRoutes;
 }) {
+    const { theme, setTheme } = useTheme();
+    const [darkMode, setDarkMode] = useState(theme == "dark" ? true : false);
+    useEffect(() => {
+        console.log(darkMode);
+    }, []);
+    useEffect(() => {
+        console.log(theme);
+    }, [theme]);
     return (
         <aside
             className={[
-                "fixed top-70 left-0 bg-gray-950 h-screen z-40 transition-all w-[300px]",
+                "fixed top-70 left-0 bg-gray-900 dark:bg-gray-950/50 h-screen z-40 transition-all w-[300px]",
                 showSideNav ? "translate-x-0" : "translate-x-[-100%]",
             ].join(" ")}
         >
@@ -102,7 +113,19 @@ export default function SideNav({
                         <IconMoon size={28} />
                         <h2>Dark Mode</h2>
                     </div>
-                    <ToggleSwitch variant="secondary" />
+                    <ToggleSwitch
+                        variant="secondary"
+                        onChange={(state) => {
+                            if (state) {
+                                setDarkMode(true);
+                                setTheme("dark");
+                            } else {
+                                setDarkMode(false);
+                                setTheme("light");
+                            }
+                        }}
+                        defaultState={darkMode}
+                    />
                 </div>
                 <Logout />
             </NavGroup>

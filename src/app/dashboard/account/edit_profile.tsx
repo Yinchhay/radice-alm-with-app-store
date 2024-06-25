@@ -232,7 +232,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                 />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <div className="flex flex-col items-start">
+                                <div className="flex flex-col items-start gap-2">
                                     <label
                                         htmlFor="firstName"
                                         className="font-normal"
@@ -245,7 +245,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                         defaultValue={user.firstName ?? ""}
                                     />
                                 </div>
-                                <div className="flex flex-col items-start">
+                                <div className="flex flex-col items-start gap-2">
                                     <label
                                         htmlFor="lastName"
                                         className="font-normal"
@@ -258,7 +258,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                         defaultValue={user.lastName ?? ""}
                                     />
                                 </div>
-                                <div className="flex flex-col items-start">
+                                <div className="flex flex-col items-start gap-2">
                                     <label
                                         htmlFor="description"
                                         className="font-normal"
@@ -275,7 +275,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                 {user.type === UserType.USER && (
                                     <div className="flex flex-col gap-2">
                                         <div className="flex justify-between items-center w-full">
-                                            <h2 className="text-lg font-semibold min-w-fit">
+                                            <h2 className="text-lg min-w-fit">
                                                 Skill sets:
                                             </h2>
                                             <Button

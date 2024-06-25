@@ -13,7 +13,7 @@ export default function Chip({
 }) {
     return (
         <div
-            className={`text-sm py-1 px-3 rounded-full  transition-all ${className} ${textClassName} ${bgClassName}`}
+            className={`text-sm py-1 px-3 rounded-full  transition-all dark:bg-gray-600 dark:text-white ${className} ${textClassName} ${bgClassName}`}
         >
             {children}
         </div>

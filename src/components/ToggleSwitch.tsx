@@ -11,10 +11,17 @@ export default function ToggleSwitch({
     onChange?: (state: boolean) => void;
 }) {
     const [toggleOn, setToggleOn] = useState<boolean>(defaultState);
+    const [hydrated, setHydrated] = useState(false);
 
     useEffect(() => {
         setToggleOn(defaultState);
+        setHydrated(true);
     }, [defaultState]);
+
+    if (!hydrated) {
+        // Render nothing or some skeleton while hydration is in process
+        return null;
+    }
 
     switch (variant) {
         case "secondary":

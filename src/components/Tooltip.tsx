@@ -34,7 +34,7 @@ export default function Tooltip({
             {children}
             <div
                 style={{ zIndex }}
-                className={`absolute pointer-events-none text-nowrap opacity-0 transition-all ${positionClassName} group-hover:opacity-100 bg-white rounded-sm p-2 border shadow-sm`}
+                className={`absolute pointer-events-none text-nowrap opacity-0 transition-all ${positionClassName} group-hover:opacity-100 bg-white rounded-sm p-2 border shadow-sm dark:bg-gray-800 dark:text-white dark:border-gray-600`}
             >
                 {title}
             </div>

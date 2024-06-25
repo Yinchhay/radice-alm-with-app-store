@@ -48,7 +48,7 @@ export default async function ManageAccount() {
                         <h3 className="text-sm">{user.description}</h3>
                         {user.type === UserType.USER && (
                             <div className="flex gap-2">
-                                <h2 className="text-lg font-semibold min-w-fit">
+                                <h2 className="text-lg font-bold min-w-fit">
                                     Skill sets:
                                 </h2>
                                 <ChipsHolder>
@@ -67,10 +67,18 @@ export default async function ManageAccount() {
                                 </ChipsHolder>
                             </div>
                         )}
-                        <div className="flex gap-4">
-                            <ChangeEmailOverlay user={user} />
-                            <ChangePasswordOverlay />
-                            {user.hasLinkedGithub && <ChangeGithub />}
+                        <div className="flex gap-4 flex-col">
+                            <div>
+                                <ChangeEmailOverlay user={user} />
+                            </div>
+                            <div>
+                                <ChangePasswordOverlay />
+                            </div>
+                            {user.hasLinkedGithub && (
+                                <div>
+                                    <ChangeGithub />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </Card>

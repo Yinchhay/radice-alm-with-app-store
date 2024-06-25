@@ -20,7 +20,7 @@
   <!-- Media Page -->
   <url>
     <loc>https://radice.paragoniu.app/media</loc>
-    <lastmod>2024-06-20</lastmod>
+    <lastmod>2024-06-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -28,31 +28,31 @@
   <!-- Member Pages -->
   <url>
     <loc>https://radice.paragoniu.app/member/</loc>
-    <lastmod>2024-06-21</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2024-06-26</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <!-- Project Pages -->
   <url>
     <loc>https://radice.paragoniu.app/project/</loc>
-    <lastmod>2024-06-19</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2024-06-26</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <!-- Partner Pages -->
   <url>
     <loc>https://radice.paragoniu.app/partner/</loc>
-    <lastmod>2024-06-18</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2024-06-26</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <!-- Login Page -->
   <url>
     <loc>https://radice.paragoniu.app/login</loc>
-    <lastmod>2024-06-17</lastmod>
+    <lastmod>2024-06-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -60,7 +60,7 @@
   <!-- Join Us Page -->
   <url>
     <loc>https://radice.paragoniu.app/join-us</loc>
-    <lastmod>2024-06-16</lastmod>
+    <lastmod>2024-06-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>

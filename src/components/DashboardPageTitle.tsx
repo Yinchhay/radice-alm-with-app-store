@@ -6,6 +6,12 @@ export default function DashboardPageTitle({
     className?: string;
 }) {
     return (
-        <h1 className={["font-bold text-3xl", className].join(" ")}>{title}</h1>
+        <h1
+            className={["font-bold text-3xl dark:text-white", className].join(
+                " ",
+            )}
+        >
+            {title}
+        </h1>
     );
 }

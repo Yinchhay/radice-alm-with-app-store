@@ -70,7 +70,7 @@ export default function ResearchFilesAndLinks({
             {links && (
                 <>
                     <div className="px-6">
-                        <div className="w-[80%] h-[1px] bg-gray-300 mt-1 mb-2"></div>
+                        <div className="w-[80%] h-[1px] bg-gray-300 mt-1 mb-2 dark:bg-gray-400"></div>
                     </div>
                     <div className="flex flex-col w-full gap-2">
                         {links.map((link, i) => {

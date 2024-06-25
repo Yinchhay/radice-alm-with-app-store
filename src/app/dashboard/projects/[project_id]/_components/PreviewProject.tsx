@@ -83,7 +83,7 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                                                 <Link
                                                     key={`chapter-${i}`}
                                                     href={`#${chapter.name}-${i}`}
-                                                    className="text-gray-500 hover:text-black transition-all py-1"
+                                                    className="text-gray-500 hover:text-black transition-all py-1 dark:text-gray-400 dark:hover:text-white"
                                                 >
                                                     {chapter.name}
                                                 </Link>
@@ -94,12 +94,12 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                                                 0 ||
                                                 project.projectMembers.length >
                                                     0) && (
-                                                <div className="w-[50%] h-[1px] bg-gray-300 my-4"></div>
+                                                <div className="w-[50%] h-[1px] bg-gray-300 my-4 dark:bg-gray-400"></div>
                                             )}
                                         {project.projectPartners.length > 0 && (
                                             <Link
                                                 href={"#partners"}
-                                                className="text-gray-500 hover:text-black transition-all py-1"
+                                                className="text-gray-500 hover:text-black transition-all py-1 dark:text-gray-400 dark:hover:text-white"
                                             >
                                                 Partners
                                             </Link>
@@ -107,7 +107,7 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                                         {project.projectMembers.length > 0 && (
                                             <Link
                                                 href={"#members"}
-                                                className="text-gray-500 hover:text-black transition-all py-1"
+                                                className="text-gray-500 hover:text-black transition-all py-1 dark:text-gray-400 dark:hover:text-white"
                                             >
                                                 Members
                                             </Link>
@@ -142,7 +142,7 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                                 )}
                             </ChipsHolder>
                             {chapters.length > 0 && (
-                                <div className="grid gap-8 border-t border-gray-300 py-8">
+                                <div className="grid gap-8 border-t border-gray-300 py-8 dark:border-gray-400">
                                     {chapters.map((chapter, j) => {
                                         return (
                                             <div

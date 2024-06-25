@@ -10,6 +10,7 @@ import { Permissions } from "@/types/IAM";
 import { IconArrowLeft } from "@tabler/icons-react";
 import Tooltip from "@/components/Tooltip";
 import { Metadata } from "next";
+import DashboardPageTitle from "@/components/DashboardPageTitle";
 export const metadata: Metadata = {
     title: "Edit Role - Dashboard - Radice",
 };
@@ -49,10 +50,10 @@ export default async function EditRoleById({ params }: { params: Params }) {
                     <div className="flex gap-4 flex-col">
                         <Tooltip title="Go back">
                             <Link href="/dashboard/roles">
-                                <IconArrowLeft />
+                                <IconArrowLeft className="dark:text-white" />
                             </Link>
                         </Tooltip>
-                        <h1 className="text-2xl">Edit role</h1>
+                        <DashboardPageTitle title="Edit Role" />
                         <Card>
                             <EditRole
                                 key={roleResult.data.role.id}

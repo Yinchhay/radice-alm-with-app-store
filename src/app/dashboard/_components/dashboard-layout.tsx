@@ -20,7 +20,7 @@ export default function DashboardLayout({
         setShowSideNav(!showSideNav);
     }
     return (
-        <div className="relative bg-slate-50 min-h-screen">
+        <div className="relative bg-slate-50 dark:bg-gray-900 min-h-screen">
             <SideNav
                 showSideNav={showSideNav}
                 canAccessRoutes={canAccessRoutes}

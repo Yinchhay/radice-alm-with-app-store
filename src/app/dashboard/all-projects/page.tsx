@@ -14,6 +14,7 @@ import ToggleProjectPublic from "./toggle_project_public";
 import NoProject from "./no_project";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
+import DashboardPageTitle from "@/components/DashboardPageTitle";
 export const metadata: Metadata = {
     title: "Manage All Projects - Dashboard - Radice",
 };
@@ -58,7 +59,7 @@ export default async function ManageAllProject({
     return (
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={"loading..."}>
-                <h1 className="text-2xl">Manage all projects</h1>
+                <DashboardPageTitle title="All Projects" />
                 <div className="mt-4">
                     <SearchBar placeholder="Search projects" />
                 </div>
