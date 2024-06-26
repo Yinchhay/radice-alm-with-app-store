@@ -72,7 +72,10 @@ export async function POST(request: Request) {
         const mailResult = sendMail({
             subject: "Radice change email verification code",
             to: user.email,
-            text: `You have requested to change your email. Your verification code is: ${eightDigitCode}, please use this code to verify that you acknowledge this change. If you did not request this change, please ignore this email.`,
+            text: `You have requested to change your email. Your verification code is: ${eightDigitCode}, please use this code to verify that you acknowledge this change. 
+            <br />
+            <br />
+            If you did not request this change, please ignore this email.`,
         });
 
         return buildSuccessResponse<FetchChangeEmailSendEmailData>(successMessage, {});

@@ -90,10 +90,10 @@ export async function POST(request: NextRequest) {
         const mailResult = sendMail({
             subject: "Radice forgot password verification code",
             to: userExists.email,
-            text:
-                "Your verification code is: " +
-                eightDigitCode +
-                "\n\nPlease keep this information safe and do not share it with anyone.",
+            text: `Your verification code is: ${eightDigitCode}
+                <br />
+                <br />
+                Please keep this information safe and do not share it with anyone.`,
         });
 
         return buildSuccessResponse<FetchForgotPasswordSendEmail>(

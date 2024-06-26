@@ -104,7 +104,10 @@ export async function PATCH(request: NextRequest) {
         const mailResult = sendMail({
             subject: "Radice new email verification code",
             to: body.newEmail,
-            text: `Your new email verification code is ${eightDigitCode}, please use this code to verify your new email address. If you did not request this change, please ignore this email.`,
+            text: `Your new email verification code is ${eightDigitCode}, please use this code to verify your new email address. 
+            <br />
+            <br />
+            If you did not request this change, please ignore this email.`,
         });
 
         return buildSuccessResponse<FetchVerifyCurrentEmailCodeData>(

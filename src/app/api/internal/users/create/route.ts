@@ -58,7 +58,15 @@ export async function POST(request: Request) {
         const mailResult = sendMail({
             subject: "Your Radice account has been created",
             to: body.email,
-            text: `Welcome to Radice! Your account has been successfully created. Below are your account details: \n\nEmail: ${body.email}\nPassword: ${body.password}\n\nPlease keep this information safe and do not share it with anyone.`,
+            text: `Welcome to Radice! Your account has been successfully created. Below are your account details: 
+            <br />
+            <br />
+            Email: ${body.email}
+            <br />
+            Password: ${body.password}
+            <br />
+            <br />
+            Please keep this information safe and do not share it with anyone.`,
         });
 
         // if want to do something when email is sent successfully

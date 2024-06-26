@@ -57,7 +57,15 @@ export async function PATCH(request: Request, { params }: Params) {
         const mailResult = sendMail({
             subject: "Radice application form approved",
             to: applicationForm.email,
-            text: `Dear ${applicationForm.firstName} ${applicationForm.lastName}, we are pleased to inform you that your Radice application form has been approved. Here is your account credential that you can use to login to Radice: \n\nEmail: ${applicationForm.email}\nPassword: ${generatedPw},\n\nPlease change your password after you login to Radice.`,
+            text: `Dear ${applicationForm.firstName} ${applicationForm.lastName}, we are pleased to inform you that your Radice application form has been approved. Here is your account credential that you can use to login to Radice: 
+            <br />
+            <br />
+            Email: ${applicationForm.email}
+            <br />
+            Password: ${generatedPw}
+            <br />
+            <br />
+            Please change your password after you login to Radice.`,
         });
 
         return buildSuccessResponse<FetchApproveApplicationForm>(

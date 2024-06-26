@@ -84,7 +84,10 @@ export async function PATCH(request: Request) {
         const mailResult = sendMail({
             subject: "Your Radice account password has been changed",
             to: user.email,
-            text: `${userExists.firstName} ${userExists.lastName}, your password has been successfully changed. If you did not make this change, please contact us immediately.`,
+            text: `${userExists.firstName} ${userExists.lastName}, your password has been successfully changed. 
+            <br />
+            <br />
+            If you did not make this change, please contact us immediately.`,
         });
 
         return buildSuccessResponse<FetchChangePasswordData>(
