@@ -14,7 +14,7 @@ export default function Navbar({
     user: User;
 }) {
     return (
-        <nav className="sticky h-[70px] z-40 top-0 left-0 px-4 py-2 bg-gray-900 dark:bg-gray-950/50 flex justify-between">
+        <nav className="sticky h-[70px] z-40 top-0 left-0 px-4 py-2 bg-gray-900 dark:bg-[#0A0F1D] flex justify-between">
             <div className="flex items-center gap-2">
                 <button onClick={onClick} className="p-2 hover:bg-gray-800">
                     <IconMenu2 size={28} className="text-gray-200" />

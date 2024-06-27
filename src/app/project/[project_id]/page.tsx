@@ -49,22 +49,22 @@ export async function generateMetadata(
         openGraph: {
             images: [
                 {
-                    url: fileToUrl(project.logoUrl) + " - Radice",
-                    alt: project.name,
+                    url: fileToUrl(project.logoUrl),
+                    alt: project.name + " - Radice",
                     type: "image/png",
-                    width: 100,
-                    height: 100,
+                    width: 200,
+                    height: 200,
                 },
             ],
         },
         twitter: {
             images: [
                 {
-                    url: fileToUrl(project.logoUrl) + " - Radice",
-                    alt: project.name,
+                    url: fileToUrl(project.logoUrl),
+                    alt: project.name + " - Radice",
                     type: "image/png",
-                    width: 100,
-                    height: 100,
+                    width: 200,
+                    height: 200,
                 },
             ],
         },
@@ -478,7 +478,7 @@ export default async function ProjectPage({
                         )}
                     </div>
                 </div>
-                <div className="w-full z-10 relative h-fit">
+                <div className="w-full z-10 relative h-fit pb-8">
                     <Stepper projectStatus={projectStatusElements} />
                 </div>
             </div>

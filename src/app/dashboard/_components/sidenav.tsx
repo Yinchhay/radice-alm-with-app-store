@@ -38,7 +38,7 @@ export default function SideNav({
     return (
         <aside
             className={[
-                "fixed top-70 left-0 bg-gray-900 dark:bg-gray-950/50 h-screen z-40 transition-all w-[300px]",
+                "fixed top-70 left-0 bg-gray-900 dark:bg-[#0A0F1D] h-screen z-40 transition-all w-[300px]",
                 showSideNav ? "translate-x-0" : "translate-x-[-100%]",
             ].join(" ")}
         >

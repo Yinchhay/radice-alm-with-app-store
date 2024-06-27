@@ -462,7 +462,7 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                             )}
                         </div>
                     </div>
-                    <div className="w-full z-10 relative h-fit">
+                    <div className="w-full z-10 relative h-fit pb-4">
                         <ResearchFilesAndLinks
                             files={project.files}
                             links={project.links}

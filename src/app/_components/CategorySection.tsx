@@ -126,7 +126,7 @@ export default function CategorySection({
                                                                             80
                                                                         }
                                                                         className={[
-                                                                            "aspect-square object-cover duration-200 border border-gray-200",
+                                                                            "aspect-square object-cover duration-200 border border-gray-200 bg-white",
                                                                             selectedProject ==
                                                                             i
                                                                                 ? "scale-[90%]"
@@ -249,7 +249,7 @@ export default function CategorySection({
                                                                             80
                                                                         }
                                                                         className={[
-                                                                            "aspect-square object-cover duration-200 border border-gray-100/25",
+                                                                            "aspect-square object-cover duration-200 border border-gray-100/25 bg-white",
                                                                             selectedProject ==
                                                                             i
                                                                                 ? "scale-[90%]"
