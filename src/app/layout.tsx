@@ -1,6 +1,7 @@
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import Toaster from "@/components/Toaster";
+import { Metadata } from "next";
 
 const roboto = Roboto({
     weight: ["300", "400", "700"],
@@ -8,7 +9,26 @@ const roboto = Roboto({
     display: "swap",
 });
 
-export const metadata = {
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    url: "https://radice.paragoniu.app",
+    name: "Radice",
+    description:
+        "Radice is a center for applied research and development initiatives of Paragon International University. We are a hub of creativity and discovery, where ideas take flight and possibilities are endless. Radice is passionate about innovation and creativity, and strives to deliver high-quality results.",
+    publisher: {
+        "@type": "Organization",
+        name: "Radice",
+        logo: {
+            "@type": "ImageObject",
+            url: "https://radice.paragoniu.app/logo.png",
+            width: 192,
+            height: 192,
+        },
+    },
+};
+
+export const metadata: Metadata = {
     metadataBase: new URL("https://radice.paragoniu.app/"),
     title: "Radice",
     icons: [
@@ -54,6 +74,12 @@ export const metadata = {
             },
         ],
     },
+    alternates: {
+        canonical: "https://radice.paragoniu.app/",
+    },
+    verification: {
+        google: "oC_553TyQAcZbXu9YbNpOxqhYrHEqNhUoFe_xtdc4ig",
+    },
 };
 
 export default function RootLayout({
@@ -65,6 +91,10 @@ export default function RootLayout({
         <html lang="en" className="scroll-smooth" suppressHydrationWarning>
             <body className={roboto.className}>
                 <Toaster>{children}</Toaster>
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
             </body>
         </html>
     );

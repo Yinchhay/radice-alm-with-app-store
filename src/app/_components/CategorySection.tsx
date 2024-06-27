@@ -36,14 +36,14 @@ export default function CategorySection({
                             id={`${category.name}`}
                         >
                             <div className="container mx-auto">
-                                <h1
+                                <h2
                                     className={[
                                         "text-6xl font-bold",
                                         roboto_condensed.className,
                                     ].join(" ")}
                                 >
                                     {category.name}
-                                </h1>
+                                </h2>
                                 <div>
                                     <div className="flex justify-between mt-8">
                                         <div className="w-[600px]">
@@ -207,9 +207,9 @@ export default function CategorySection({
                             <div className="container mx-auto">
                                 <div className="flex justify-end">
                                     <div className="w-[600px]">
-                                        <h1 className="text-5xl font-bold">
+                                        <h2 className="text-5xl font-bold">
                                             {category.name}
-                                        </h1>
+                                        </h2>
                                     </div>
                                 </div>
 

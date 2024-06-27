@@ -83,11 +83,11 @@ export default function ProjectPipeline({
     return (
         <div className="bg-black py-16 text-white">
             <div className="container mx-auto">
-                <h1
+                <h2
                     className={`text-6xl font-bold mb-6 ${roboto_condensed.className}`}
                 >
                     Project Pipeline
-                </h1>
+                </h2>
                 <div className="py-4">
                     {statusOrder.map((status, index) => (
                         <div key={status}>
@@ -96,12 +96,12 @@ export default function ProjectPipeline({
                                     className={`grid grid-cols-6  border-white border-b ${index === statusOrder.length - 1 ? "border-b-0" : ""}`}
                                 >
                                     <div className="grid place-items-center border-r border-white">
-                                        <h2
+                                        <h3
                                             className={`text-2xl font-bold p-4 ${roboto_condensed.className}`}
                                         >
                                             {status.charAt(0).toUpperCase() +
                                                 status.slice(1)}
-                                        </h2>
+                                        </h3>
                                     </div>
                                     <ul className="col-span-5 p-4 flex flex-wrap gap-4">
                                         {pipeline[status].map((project) => (
@@ -115,9 +115,9 @@ export default function ProjectPipeline({
                                                 <PipelineProjectLogo
                                                     src={`/api/file?filename=${project.logoUrl}`}
                                                 />
-                                                <h3 className="text-center font-bold break-words max-w-[100px]">
+                                                <h4 className="text-center font-bold break-words max-w-[100px]">
                                                     {project.name}
-                                                </h3>
+                                                </h4>
                                             </Link>
                                         ))}
                                     </ul>

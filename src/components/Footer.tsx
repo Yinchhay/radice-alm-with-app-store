@@ -26,9 +26,18 @@ export default function Footer() {
                     </h1>
                     <p className="text-gray-200 mt-4">
                         Radice is a center for applied research and development
-                        initiatives of Paragon International University. We are
-                        a hub of creativity and discovery, where ideas take
-                        flight and possibilities are endless. Radice is
+                        initiatives of{" "}
+                        <span>
+                            <Link
+                                href="https://paragoniu.edu.kh/"
+                                target="_blank"
+                                className="hover:underline"
+                            >
+                                Paragon International University
+                            </Link>
+                        </span>
+                        . We are a hub of creativity and discovery, where ideas
+                        take flight and possibilities are endless. Radice is
                         passionate about innovation and creativity, and strives
                         to deliver high-quality results.
                     </p>

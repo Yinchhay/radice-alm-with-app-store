@@ -18,6 +18,7 @@ import {
 import CategorySectionNew from "./_components/CategorySectionNew";
 import ProjectPipeline from "./_components/ProjectPipeline";
 import { Metadata } from "next";
+import Link from "next/link";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -61,24 +62,33 @@ export default async function Home() {
                 <div className="w-[560px] flex flex-col justify-end h-full pb-16">
                     <div className={roboto_condensed.className}>
                         <div className="overflow-hidden">
-                            <h1 className="uppercase text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal">
+                            <h2 className="uppercase text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal">
                                 Where Ideas<br></br>Come to Life
-                            </h1>
+                            </h2>
                         </div>
                     </div>
                     <div className={roboto.className}>
                         <h1 className="opacity-0 fixed pointer-events-none">
-                            RADICE: a center for applied research and
+                            Radice: a center for applied research and
                             development initiatives of Paragon International
                             University.
                         </h1>
                         <p className="text mt-4">
                             Radice is a center for applied research and
-                            development initiatives of Paragon International
-                            University. We are a hub of creativity and
-                            discovery, where ideas take flight and possibilities
-                            are endless. Radice is passionate about innovation
-                            and creativity, and strives to deliver high-quality
+                            development initiatives of{" "}
+                            <span>
+                                <Link
+                                    href="https://paragoniu.edu.kh/"
+                                    target="_blank"
+                                    className="hover:underline"
+                                >
+                                    Paragon International University
+                                </Link>
+                            </span>
+                            . We are a hub of creativity and discovery, where
+                            ideas take flight and possibilities are endless.
+                            Radice is passionate about innovation and
+                            creativity, and strives to deliver high-quality
                             results.
                         </p>
                     </div>
