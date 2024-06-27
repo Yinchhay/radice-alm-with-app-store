@@ -31,8 +31,8 @@ export const editProjectSettingsDetail = z.object({
     projectDescription: z
         .string()
         .trim()
-        .max(255, {
-            message: "Project description is too long, max 255 characters",
+        .max(400, {
+            message: "Project description is too long, max 400 characters",
         })
         .optional(),
     logoUrl: z

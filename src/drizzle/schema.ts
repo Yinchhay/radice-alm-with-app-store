@@ -236,7 +236,7 @@ export const oauthProvidersRelations = relations(oauthProviders, ({ one }) => ({
 }));
 
 export enum CodeVerificationType {
-    CHANGE_EMAIL  = "change_email",
+    CHANGE_EMAIL = "change_email",
     VERIFY_NEW_EMAIL = "verify_new_email",
     FORGOT_PASSWORD = "forgot_password",
     CHANGE_GITHUB = "change_github",
@@ -363,7 +363,7 @@ export const projects = mysqlTable("projects", {
         .notNull()
         .unique(),
     description: varchar("description", {
-        length: 255,
+        length: 400,
     }),
     logoUrl: varchar("logo_url", {
         length: 2083,
@@ -394,7 +394,7 @@ export const projectsRelations = relations(projects, ({ many, one }) => ({
 }));
 
 export enum FileBelongTo {
-    ProjectSetting  = "project_setting",
+    ProjectSetting = "project_setting",
     ContentBuilder = "content_builder",
     User = "user",
     Media = "media",

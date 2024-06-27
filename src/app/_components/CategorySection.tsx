@@ -32,7 +32,7 @@ export default function CategorySection({
                 <>
                     {projects && projects.length > 0 && (
                         <div
-                            className="bg-white py-16 min-h-[660px]"
+                            className="bg-white py-16 min-h-[700px]"
                             id={`${category.name}`}
                         >
                             <div className="container mx-auto">
@@ -68,7 +68,7 @@ export default function CategorySection({
                                                     }
                                                 />
                                             </h2>
-                                            <p className="mt-2 mb-12 line-clamp-4 max-w-[500px]">
+                                            <p className="mt-2 mb-12 line-clamp-6 max-w-[510px]">
                                                 <SpecialEffectSentence
                                                     delay={50}
                                                     shuffleSpeed={25}
@@ -201,7 +201,7 @@ export default function CategorySection({
                 <>
                     {projects && projects.length > 0 && (
                         <div
-                            className="bg-black py-16 text-white min-h-[660px]"
+                            className="bg-black py-16 text-white min-h-[700px]"
                             id={`${category.name}`}
                         >
                             <div className="container mx-auto">
@@ -329,7 +329,7 @@ export default function CategorySection({
                                                     }
                                                 />
                                             </h2>
-                                            <p className="mt-2 mb-12 line-clamp-4 max-w-[500px]">
+                                            <p className="mt-2 mb-12 line-clamp-6 max-w-[510px]">
                                                 <SpecialEffectSentence
                                                     delay={50}
                                                     shuffleSpeed={25}
