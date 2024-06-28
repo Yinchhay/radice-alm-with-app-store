@@ -79,53 +79,61 @@ export default function ProjectPipeline({
         return result;
     }
     const pipeline = organizeProjectsByPipelineStatus(category);
-
+    const hasProjects = Object.keys(pipeline).length > 0;
     return (
         <div className="bg-black py-16 text-white">
             <div className="container mx-auto">
-                <h2
-                    className={`text-6xl font-bold mb-6 ${roboto_condensed.className}`}
-                >
-                    Project Pipeline
-                </h2>
-                <div className="py-4">
-                    {statusOrder.map((status, index) => (
-                        <div key={status}>
-                            {pipeline[status] && (
-                                <div
-                                    className={`grid grid-cols-6  border-white border-b ${index === statusOrder.length - 1 ? "border-b-0" : ""}`}
-                                >
-                                    <div className="grid place-items-center border-r border-white">
-                                        <h3
-                                            className={`text-2xl font-bold p-4 ${roboto_condensed.className}`}
+                {hasProjects && (
+                    <>
+                        <h2
+                            className={`text-6xl font-bold mb-6 ${roboto_condensed.className}`}
+                        >
+                            Project Pipeline
+                        </h2>
+                        <div className="py-4">
+                            {statusOrder.map((status, index) => (
+                                <div key={status}>
+                                    {pipeline[status] && (
+                                        <div
+                                            className={`grid grid-cols-6 border-white border-b ${index === statusOrder.length - 1 ? "border-b-0" : ""}`}
                                         >
-                                            {status.charAt(0).toUpperCase() +
-                                                status.slice(1)}
-                                        </h3>
-                                    </div>
-                                    <ul className="col-span-5 p-4 flex flex-wrap gap-4">
-                                        {pipeline[status].map((project) => (
-                                            <Link
-                                                href={`/project/${project.id}`}
-                                                key={
-                                                    "pipeline-project-" +
-                                                    project.id
-                                                }
-                                            >
-                                                <PipelineProjectLogo
-                                                    src={`/api/file?filename=${project.logoUrl}`}
-                                                />
-                                                <h4 className="text-center font-bold break-words max-w-[100px]">
-                                                    {project.name}
-                                                </h4>
-                                            </Link>
-                                        ))}
-                                    </ul>
+                                            <div className="grid place-items-center border-r border-white">
+                                                <h3
+                                                    className={`text-2xl font-bold p-4 ${roboto_condensed.className}`}
+                                                >
+                                                    {status
+                                                        .charAt(0)
+                                                        .toUpperCase() +
+                                                        status.slice(1)}
+                                                </h3>
+                                            </div>
+                                            <ul className="col-span-5 p-4 flex flex-wrap gap-4">
+                                                {pipeline[status].map(
+                                                    (project) => (
+                                                        <Link
+                                                            href={`/project/${project.id}`}
+                                                            key={
+                                                                "pipeline-project-" +
+                                                                project.id
+                                                            }
+                                                        >
+                                                            <PipelineProjectLogo
+                                                                src={`/api/file?filename=${project.logoUrl}`}
+                                                            />
+                                                            <h4 className="text-center font-bold break-words max-w-[100px]">
+                                                                {project.name}
+                                                            </h4>
+                                                        </Link>
+                                                    ),
+                                                )}
+                                            </ul>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </>
+                )}
             </div>
         </div>
     );
