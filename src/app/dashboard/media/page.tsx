@@ -16,6 +16,7 @@ import NoMedia from "./no_media";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
+import Loading from "@/components/Loading";
 export const metadata: Metadata = {
     title: "Manage Media - Dashboard - Radice",
 };
@@ -70,7 +71,7 @@ export default async function ManageMedia({ searchParams }: ManageMediaProps) {
 
     return (
         <div className="w-full max-w-[1000px] mx-auto">
-            <Suspense fallback={"loading..."}>
+            <Suspense fallback={<Loading />}>
                 <div className="flex flex-row justify-between">
                     <DashboardPageTitle title="Media" />
                     {canCreateMedia && <CreateMediaOverlay />}

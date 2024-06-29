@@ -22,6 +22,7 @@ import NoAssociatedProject from "./no_associated_project";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
+import Loading from "@/components/Loading";
 
 export const metadata: Metadata = {
     title: "Manage Projects - Dashboard - Radice",
@@ -67,7 +68,7 @@ export default async function ManageAssociatedProject({
 
     return (
         <div className="w-full max-w-[1000px] mx-auto">
-            <Suspense fallback={"loading..."}>
+            <Suspense fallback={<Loading />}>
                 <div className="flex flex-row justify-between">
                     <DashboardPageTitle title="Projects" />
                     {canCreateProject && <CreateProjectOverlay />}

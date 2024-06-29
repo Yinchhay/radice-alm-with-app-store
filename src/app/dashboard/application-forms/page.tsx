@@ -15,6 +15,7 @@ import NoApplicationForm from "./no_application_form";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
+import Loading from "@/components/Loading";
 export const metadata: Metadata = {
     title: "Manage Application Forms - Dashboard - Radice",
 };
@@ -68,7 +69,7 @@ export default async function ManageApplicationForms({
 
     return (
         <div className="w-full max-w-[1000px] mx-auto">
-            <Suspense fallback={"loading..."}>
+            <Suspense fallback={<Loading />}>
                 <DashboardPageTitle title="Application Forms" />
                 <div className="mt-4">
                     <SearchBar placeholder="Search application forms" />

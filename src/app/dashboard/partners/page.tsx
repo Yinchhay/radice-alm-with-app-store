@@ -17,6 +17,7 @@ import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
+import Loading from "@/components/Loading";
 export const metadata: Metadata = {
     title: "Manage Partners - Dashboard - Radice",
 };
@@ -69,7 +70,7 @@ export default async function ManagePartners({
 
     return (
         <div className="w-full max-w-[1000px] mx-auto">
-            <Suspense fallback={"loading..."}>
+            <Suspense fallback={<Loading />}>
                 <DashboardPageTitle title="Partners" />
                 <div className="mt-4">
                     <SearchBar placeholder="Search partners" />

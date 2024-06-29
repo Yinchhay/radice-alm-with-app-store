@@ -15,6 +15,8 @@ import { IconEye, IconHammer } from "@tabler/icons-react";
 import Tooltip from "@/components/Tooltip";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
+import { Suspense } from "react";
+import Loading from "@/components/Loading";
 export const metadata: Metadata = {
     title: "Project Setting - Dashboard - Radice",
 };
@@ -63,45 +65,49 @@ export default async function ProjectSettings({ params }: { params: Params }) {
 
     return (
         <div className="w-full max-w-[1000px] mx-auto bg-transparent z-10 relative">
-            <DashboardPageTitle title="Project Settings" className="mb-4" />
-            <div className="grid gap-4">
-                <ProjectDetail
-                    project={result.data.project}
-                    originalProjectCategories={originalProjectCategories}
-                />
-                <ProjectMember
-                    project={result.data.project}
-                    originalProjectMembers={originalProjectMembers}
-                />
-                <ProjectPartner
-                    project={result.data.project}
-                    originalProjectPartners={originalProjectPartners}
-                />
-                <ProjectPipeline project={result.data.project} />
-                <ProjectFile project={result.data.project} />
-                <ProjectLink project={result.data.project} />
-                <ProjectControl project={result.data.project} />
-            </div>
-            {projectRole == ProjectRole.OWNER && (
-                <div className="fixed bottom-8 right-8 z-30 grid gap-2">
-                    <Tooltip title="Preview" position="left">
-                        <Link href={`/dashboard/projects/${params.project_id}`}>
-                            <Button square>
-                                <IconEye size={32} stroke={1.5} />
-                            </Button>
-                        </Link>
-                    </Tooltip>
-                    <Tooltip title="Builder" position="left">
-                        <Link
-                            href={`/dashboard/projects/${params.project_id}/builder`}
-                        >
-                            <Button square>
-                                <IconHammer size={32} stroke={1.5} />
-                            </Button>
-                        </Link>
-                    </Tooltip>
+            <Suspense fallback={<Loading />}>
+                <DashboardPageTitle title="Project Settings" className="mb-4" />
+                <div className="grid gap-4">
+                    <ProjectDetail
+                        project={result.data.project}
+                        originalProjectCategories={originalProjectCategories}
+                    />
+                    <ProjectMember
+                        project={result.data.project}
+                        originalProjectMembers={originalProjectMembers}
+                    />
+                    <ProjectPartner
+                        project={result.data.project}
+                        originalProjectPartners={originalProjectPartners}
+                    />
+                    <ProjectPipeline project={result.data.project} />
+                    <ProjectFile project={result.data.project} />
+                    <ProjectLink project={result.data.project} />
+                    <ProjectControl project={result.data.project} />
                 </div>
-            )}
+                {projectRole == ProjectRole.OWNER && (
+                    <div className="fixed bottom-8 right-8 z-30 grid gap-2">
+                        <Tooltip title="Preview" position="left">
+                            <Link
+                                href={`/dashboard/projects/${params.project_id}`}
+                            >
+                                <Button square>
+                                    <IconEye size={32} stroke={1.5} />
+                                </Button>
+                            </Link>
+                        </Tooltip>
+                        <Tooltip title="Builder" position="left">
+                            <Link
+                                href={`/dashboard/projects/${params.project_id}/builder`}
+                            >
+                                <Button square>
+                                    <IconHammer size={32} stroke={1.5} />
+                                </Button>
+                            </Link>
+                        </Tooltip>
+                    </div>
+                )}
+            </Suspense>
         </div>
     );
 }

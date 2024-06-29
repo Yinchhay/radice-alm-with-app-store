@@ -11,6 +11,7 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import Tooltip from "@/components/Tooltip";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
+import Loading from "@/components/Loading";
 export const metadata: Metadata = {
     title: "Edit Role - Dashboard - Radice",
 };
@@ -45,7 +46,7 @@ export default async function EditRoleById({ params }: { params: Params }) {
 
     return (
         <div className="w-full max-w-[1000px] mx-auto">
-            <Suspense fallback={"loading..."}>
+            <Suspense fallback={<Loading />}>
                 {roleResult.data.role ? (
                     <div className="flex gap-4 flex-col">
                         <Tooltip title="Go back">

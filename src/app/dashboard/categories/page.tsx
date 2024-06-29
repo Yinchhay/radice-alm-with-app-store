@@ -20,6 +20,7 @@ import NoCategory from "./no_category";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
+import Loading from "@/components/Loading";
 export const metadata: Metadata = {
     title: "Manage Categories - Dashboard - Radice",
 };
@@ -79,7 +80,7 @@ export default async function ManageCategories({
 
     return (
         <div className="w-full max-w-[1000px] mx-auto">
-            <Suspense fallback={"loading..."}>
+            <Suspense fallback={<Loading />}>
                 <DashboardPageTitle title="Categories" />
                 <div className="mt-4">
                     <SearchBar placeholder="Search categories" />

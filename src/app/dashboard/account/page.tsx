@@ -14,6 +14,7 @@ import { ChangePasswordOverlay } from "./change_password";
 import { UserType } from "@/types/user";
 import ChangeGithub from "./change_github_";
 import { Metadata } from "next";
+import Loading from "@/components/Loading";
 export const metadata: Metadata = {
     title: "Manage Account - Dashboard - Radice",
 };
@@ -26,7 +27,7 @@ export default async function ManageAccount() {
 
     return (
         <div className="w-full max-w-[1000px] mx-auto">
-            <Suspense fallback={"loading..."}>
+            <Suspense fallback={<Loading />}>
                 <Card className="flex flex-col gap-4">
                     <div>
                         <ImageWithFallback
