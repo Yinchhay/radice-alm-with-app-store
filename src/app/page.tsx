@@ -52,7 +52,7 @@ export default async function Home() {
             <div className="relative">
                 <Image
                     alt="Radice"
-                    src={"/paragon.svg"}
+                    src={"/ui/paragon.svg"}
                     width={240}
                     height={784}
                     className="absolute left-0 mt-[58px]"

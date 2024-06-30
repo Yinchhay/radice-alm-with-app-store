@@ -82,7 +82,7 @@ export default function CategorySectionNew({
                                                     className={`absolute z-40 top-[50%] left-[80%] translate-y-[-50%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos > 0 ? "" : "opacity-0 pointer-events-none"}`}
                                                 >
                                                     <Image
-                                                        src="/arrow.svg"
+                                                        src="/ui/arrow.svg"
                                                         width={22}
                                                         height={40}
                                                         alt=""
@@ -107,7 +107,7 @@ export default function CategorySectionNew({
                                                     className={`absolute z-40 translate-y-[-8px] left-[90%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
                                                 >
                                                     <Image
-                                                        src="/arrow.svg"
+                                                        src="/ui/arrow.svg"
                                                         width={22}
                                                         height={40}
                                                         alt=""
@@ -218,7 +218,7 @@ export default function CategorySectionNew({
                                                     layout="responsive"
                                                     objectFit="cover"
                                                     src={
-                                                        "/carousel_card_outline.svg"
+                                                        "/ui/carousel_card_outline.svg"
                                                     }
                                                     alt=""
                                                 />
@@ -227,9 +227,9 @@ export default function CategorySectionNew({
                                                 className="relative w-[720px] h-[398px]"
                                                 style={{
                                                     maskImage:
-                                                        "url(/carousel_card.svg)",
+                                                        "url(/ui/carousel_card.svg)",
                                                     WebkitMaskImage:
-                                                        "url(/carousel_card.svg)",
+                                                        "url(/ui/carousel_card.svg)",
                                                     WebkitMaskSize:
                                                         "720px 398px",
                                                     WebkitMaskRepeat:
@@ -331,7 +331,7 @@ export default function CategorySectionNew({
                                                     className={`absolute z-40 top-[50%] mt-[-8px] left-[20px] translate-y-[-50%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos > 0 ? "" : "opacity-0 pointer-events-none"}`}
                                                 >
                                                     <Image
-                                                        src="/arrow.svg"
+                                                        src="/ui/arrow.svg"
                                                         width={22}
                                                         height={40}
                                                         alt=""
@@ -440,7 +440,7 @@ export default function CategorySectionNew({
                                                     className={`absolute z-40 translate-y-[-8px] left-[0%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
                                                 >
                                                     <Image
-                                                        src="/arrow.svg"
+                                                        src="/ui/arrow.svg"
                                                         width={22}
                                                         height={40}
                                                         alt=""
@@ -515,7 +515,7 @@ export default function CategorySectionNew({
                                                     layout="responsive"
                                                     objectFit="cover"
                                                     src={
-                                                        "/carousel_card_outline.svg"
+                                                        "/ui/carousel_card_outline.svg"
                                                     }
                                                     alt=""
                                                 />
@@ -524,9 +524,9 @@ export default function CategorySectionNew({
                                                 className="relative w-[720px] h-[398px]"
                                                 style={{
                                                     maskImage:
-                                                        "url(/carousel_card.svg)",
+                                                        "url(/ui/carousel_card.svg)",
                                                     WebkitMaskImage:
-                                                        "url(/carousel_card.svg)",
+                                                        "url(/ui/carousel_card.svg)",
                                                     WebkitMaskSize:
                                                         "720px 398px",
                                                     WebkitMaskRepeat:

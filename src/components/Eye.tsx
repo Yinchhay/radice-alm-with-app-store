@@ -62,77 +62,77 @@ export default function Eye() {
         <div className="relative grid place-items-center select-none pointer-events-none animate-fade">
             <Image
                 alt=""
-                src={"/layer12.svg"}
+                src={"/ui/layer12.svg"}
                 width={580}
                 height={580}
                 className="absolute opacity-50"
             />
             <Image
                 alt=""
-                src={"/layer0.svg"}
+                src={"/ui/layer0.svg"}
                 width={570}
                 height={570}
                 className="absolute animate-layer0 opacity-25"
             />
             <Image
                 alt=""
-                src={"/layer1.svg"}
+                src={"/ui/layer1.svg"}
                 width={800}
                 height={800}
                 className="absolute animate-layer1 opacity-30"
             />
             <Image
                 alt=""
-                src={"/layer2.svg"}
+                src={"/ui/layer2.svg"}
                 width={720}
                 height={720}
                 className="absolute animate-layer2 opacity-90"
             />
             <Image
                 alt=""
-                src={"/layer3.svg"}
+                src={"/ui/layer3.svg"}
                 width={630}
                 height={630}
                 className="absolute animate-layer3"
             />
             <Image
                 alt=""
-                src={"/layer4.svg"}
+                src={"/ui/layer4.svg"}
                 width={520}
                 height={520}
                 className="absolute animate-layer4 opacity-80"
             />
             <Image
                 alt=""
-                src={"/layer5.svg"}
+                src={"/ui/layer5.svg"}
                 width={430}
                 height={430}
                 className="absolute animate-layer5"
             />
             <Image
                 alt=""
-                src={"/layer6.svg"}
+                src={"/ui/layer6.svg"}
                 width={367}
                 height={367}
                 className="absolute animate-layer6"
             />
             <Image
                 alt=""
-                src={"/layer7.svg"}
+                src={"/ui/layer7.svg"}
                 width={350}
                 height={350}
                 className="absolute animate-layer7 opacity-75"
             />
             <Image
                 alt=""
-                src={"/layer8.svg"}
+                src={"/ui/layer8.svg"}
                 width={280}
                 height={280}
                 className="absolute animate-layer8"
             />
             <Image
                 alt=""
-                src={"/layer9.svg"}
+                src={"/ui/layer9.svg"}
                 width={255}
                 height={255}
                 className="absolute animate-layer9"
@@ -140,7 +140,7 @@ export default function Eye() {
             <Image
                 ref={iris}
                 alt=""
-                src={"/iris.svg"}
+                src={"/ui/iris.svg"}
                 width={110}
                 height={110}
                 className="absolute opacity-90"
@@ -149,7 +149,7 @@ export default function Eye() {
                 <Image
                     ref={irisRing}
                     alt=""
-                    src={"/layer10.svg"}
+                    src={"/ui/layer10.svg"}
                     width={170}
                     height={170}
                     className="absolute opacity-90"
@@ -158,7 +158,7 @@ export default function Eye() {
             <Image
                 ref={pupil}
                 alt=""
-                src={"/pupil.svg"}
+                src={"/ui/pupil.svg"}
                 width={35}
                 height={35}
                 className="absolute"

@@ -45,7 +45,7 @@ export default function AlbumCarousel({
                                 <Image
                                     width={50}
                                     height={50}
-                                    src={"/x.svg"}
+                                    src={"/ui/x.svg"}
                                     className="invert group-hover:scale-[.85] group-active:scale-100 duration-200"
                                     alt=""
                                 />
@@ -84,7 +84,7 @@ export default function AlbumCarousel({
                                         className={`-scale-100 select-none w-[60px] h-[60px] border border-gray-200 grid place-items-center group ${currentImage == 0 ? "pointer-events-none opacity-50" : "opacity-100"}`}
                                     >
                                         <Image
-                                            src={"/arrow.svg"}
+                                            src={"/ui/arrow.svg"}
                                             width={16}
                                             height={29}
                                             alt=""
@@ -103,7 +103,7 @@ export default function AlbumCarousel({
                                         className={`w-[60px] select-none h-[60px] border border-gray-200 grid place-items-center group ${currentImage + 1 == selectedAlbum.files.length ? "pointer-events-none opacity-50" : "opacity-100"}`}
                                     >
                                         <Image
-                                            src={"/arrow.svg"}
+                                            src={"/ui/arrow.svg"}
                                             width={16}
                                             height={29}
                                             alt=""

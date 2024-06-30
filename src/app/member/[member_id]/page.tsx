@@ -168,7 +168,7 @@ export default async function MemberPublicProfilePage({
                                             target="_blank"
                                         >
                                             <Image
-                                                src="/github-mark.svg"
+                                                src="/ui/github-mark.svg"
                                                 width={36}
                                                 height={36}
                                                 alt="Github Icon"

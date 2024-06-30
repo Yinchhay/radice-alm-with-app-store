@@ -40,7 +40,7 @@ export default function Carousel({
                                 onClick={() => changeSlide(-1)}
                             >
                                 <Image
-                                    src={"/arrow.svg"}
+                                    src={"/ui/arrow.svg"}
                                     width={32}
                                     height={58}
                                     alt=""
@@ -51,7 +51,7 @@ export default function Carousel({
                                 onClick={() => changeSlide(1)}
                             >
                                 <Image
-                                    src={"/arrow.svg"}
+                                    src={"/ui/arrow.svg"}
                                     width={32}
                                     height={58}
                                     alt=""
@@ -163,15 +163,15 @@ function CarouselCard({
                     height={100}
                     layout="responsive"
                     objectFit="cover"
-                    src={"/carousel_card_outline.svg"}
+                    src={"/ui/carousel_card_outline.svg"}
                     alt=""
                 />
             </div>
             <div
                 className="relative w-[687px] h-[378px]"
                 style={{
-                    maskImage: "url(/carousel_card.svg)",
-                    WebkitMaskImage: "url(/carousel_card.svg)",
+                    maskImage: "url(/ui/carousel_card.svg)",
+                    WebkitMaskImage: "url(/ui/carousel_card.svg)",
                     WebkitMaskSize: "687px 378px",
                     WebkitMaskRepeat: "no-repeat",
                 }}
