@@ -72,7 +72,8 @@ export default function JoinUsForm() {
                     <div className="grid grid-cols-2 gap-8">
                         <div>
                             <label htmlFor="firstName">First Name</label>
-                            <InputField
+                            <input
+                                className="w-full bg-white text-black px-3 py-1 rounded-sm outline outline-1 outline-gray-300 transition-all duration-150 focus:outline-2 focus:outline-blue-400"
                                 id="firstName"
                                 name="firstName"
                                 required
@@ -80,7 +81,8 @@ export default function JoinUsForm() {
                         </div>
                         <div>
                             <label htmlFor="lastName">Last Name</label>
-                            <InputField
+                            <input
+                                className="w-full bg-white text-black px-3 py-1 rounded-sm outline outline-1 outline-gray-300 transition-all duration-150 focus:outline-2 focus:outline-blue-400"
                                 id="lastName"
                                 name="lastName"
                                 required
@@ -89,28 +91,31 @@ export default function JoinUsForm() {
                     </div>
                     <div>
                         <label htmlFor="email">Email</label>
-                        <InputField id="email" name="email" required />
+                        <input
+                            className="w-full bg-white text-black px-3 py-1 rounded-sm outline outline-1 outline-gray-300 transition-all duration-150 focus:outline-2 focus:outline-blue-400"
+                            id="email"
+                            name="email"
+                            required
+                        />
                     </div>
                     <div>
                         <label htmlFor="reason">Reason for joining</label>
-                        <TextareaField id="reason" name="reason" required />
+                        <textarea
+                            className="w-full bg-white text-black px-3 py-1 rounded-sm outline outline-1 outline-gray-300 focus:outline-2 focus:outline-blue-400"
+                            id="reason"
+                            name="reason"
+                            required
+                        />
                     </div>
                     <div>
                         <label className="mr-2">CV File:</label>
-                        <label
-                            htmlFor="cvFile"
-                            className="hover:brightness-90 bg-white text-black rounded-sm outline outline-1 outline-gray-300 px-3 py-1 cursor-pointer transition-all duration-150"
-                        >
-                            Attach a File
-                            <input
-                                type="file"
-                                className="hidden"
-                                name="cvFile"
-                                accept={ACCEPTED_CV_TYPES.join(",")}
-                                id="cvFile"
-                                required
-                            />
-                        </label>
+                        <input
+                            type="file"
+                            name="cvFile"
+                            accept={ACCEPTED_CV_TYPES.join(",")}
+                            id="cvFile"
+                            required
+                        />
                     </div>
                     <ReCAPTCHA sitekey={RECAPTCHA_KEY} ref={captchaRef} />
                     {!result?.success && result?.errors && (

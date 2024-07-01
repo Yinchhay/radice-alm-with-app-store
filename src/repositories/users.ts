@@ -58,6 +58,10 @@ export const createUser = async (user: typeof users.$inferInsert) => {
     });
 };
 
+export type GetUserRolesAndRolePermissions_C_ReturnType = Awaited<
+    ReturnType<typeof getUserRolesAndRolePermissions_C>
+>;
+
 export type GetUserRolesAndRolePermissions_C_Tag =
     | `getUserRolesAndRolePermissions_C:${string}`
     | `getUserRolesAndRolePermissions_C`;

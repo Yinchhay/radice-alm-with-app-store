@@ -6,6 +6,7 @@ import { hasPermission } from "@/lib/IAM";
 import { cache } from "react";
 import { UserType } from "@/types/user";
 import { ThemeProvider } from "next-themes";
+import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
 
 export type CanAccessRoutes = {
     manageUsers: boolean;
@@ -66,9 +67,15 @@ export default async function DashboardManageLayout({
         };
     });
 
+    const userWithRoles = await getUserRolesAndRolePermissions_C(user.id);
+    console.log(userWithRoles);
     return (
         <ThemeProvider enableSystem={false} attribute="class">
-            <DashboardLayout user={user} canAccessRoutes={canAccessRoutes()}>
+            <DashboardLayout
+                user={user}
+                canAccessRoutes={canAccessRoutes()}
+                userWithRoles={userWithRoles}
+            >
                 {children}
             </DashboardLayout>
         </ThemeProvider>
