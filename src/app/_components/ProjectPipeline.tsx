@@ -81,10 +81,10 @@ export default function ProjectPipeline({
     const pipeline = organizeProjectsByPipelineStatus(category);
     const hasProjects = Object.keys(pipeline).length > 0;
     return (
-        <div className="bg-black py-16 text-white">
-            <div className="container mx-auto">
-                {hasProjects && (
-                    <>
+        <>
+            {hasProjects && (
+                <div className="bg-black py-16 text-white">
+                    <div className="container mx-auto">
                         <h2
                             className={`text-6xl font-bold mb-6 ${roboto_condensed.className}`}
                         >
@@ -132,9 +132,9 @@ export default function ProjectPipeline({
                                 </div>
                             ))}
                         </div>
-                    </>
-                )}
-            </div>
-        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
