@@ -29,7 +29,7 @@ export default function Navbar({
                 <button onClick={onClick} className="p-2 hover:bg-gray-800">
                     <IconMenu2 size={28} className="text-gray-200" />
                 </button>
-                <h2 className="dark:text-white">Roles:</h2>
+                <h2 className="text-white dark:text-white">Roles:</h2>
                 {user.type == UserType.SUPER_ADMIN ? (
                     <ChipsHolder>
                         <Tooltip

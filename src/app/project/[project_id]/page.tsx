@@ -114,7 +114,14 @@ export default async function ProjectPage({
                     <div className="absolute ">
                         <div className="fixed w-[270px]">
                             <div className="grid gap-2 w-full px-6 pb-4">
-                                <h2 className="font-bold text-xl">Content</h2>
+                                <h2 className="font-bold text-xl">
+                                    {(chapters.length > 0 ||
+                                            project.projectPartners.length >
+                                                0 ||
+                                            project.projectMembers.length >
+                                                0) &&
+                                            "Content"}
+                                        </h2>
                                 <div className="grid">
                                     {chapters.map((chapter, i) => {
                                         return (

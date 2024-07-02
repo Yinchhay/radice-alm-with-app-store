@@ -54,7 +54,7 @@ export default function ToggleSwitch({
                 <button
                     type="button"
                     className={[
-                        "rounded-full w-[50px] h-[24px] outline outline-1 outline-gray-300 flex items-center relative",
+                        "rounded-full w-[50px] h-[24px] outline outline-1 outline-gray-300 flex items-center relative dark:outline-transparent",
                         toggleOn ? "bg-blue-500" : "bg-gray-200",
                     ].join(" ")}
                     onClick={() => {
