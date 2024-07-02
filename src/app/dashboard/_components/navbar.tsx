@@ -46,9 +46,10 @@ export default function Navbar({
                             return (
                                 <Tooltip
                                     title={
-                                        role.role.description
+                                        role.role.description &&
+                                        role.role.description.length > 0
                                             ? role.role.description
-                                            : ""
+                                            : role.role.name
                                     }
                                     key={`role-chip-${role.role.id}-${i}`}
                                     position="bottom"
