@@ -105,6 +105,10 @@ function Media({
     canEditMedia: boolean;
     canDeleteMedia: boolean;
 }) {
+    if (!mediaOne.files) {
+        return;
+    }
+
     const image = mediaOne.files[0].filename;
 
     return (

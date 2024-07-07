@@ -30,7 +30,7 @@ export default function Error({
     }
 
     return (
-        <section className="flex items-center h-full sm:p-16 dark:bg-gray-50 dark:text-gray-800">
+        <section className="flex items-center h-full sm:p-16 bg-slate-50 dark:bg-gray-900">
             <div className="container flex flex-col items-center justify-center px-5 mx-auto my-8 space-y-8 text-center sm:max-w-md">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -57,11 +57,11 @@ export default function Error({
                         points="383.958 182.63 360.042 161.37 338.671 185.412 314.63 164.042 293.37 187.958 317.412 209.329 296.042 233.37 319.958 254.63 341.329 230.588 365.37 251.958 386.63 228.042 362.588 206.671 383.958 182.63"
                     ></polygon>
                 </svg>
-                <p className="text-3xl font-semibold">
+                <h1 className="text-3xl font-semibold dark:text-white">
                     {noPermission
                         ? error.message
                         : ErrorMessage.SomethingWentWrong}
-                </p>
+                </h1>
                 <Button variant="primary" onClick={onGoBack}>
                     {noPermission ? "Go back" : "Try again"}
                 </Button>

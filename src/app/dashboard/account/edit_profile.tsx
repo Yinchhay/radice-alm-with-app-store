@@ -19,7 +19,6 @@ import TableRow from "@/components/table/TableRow";
 import Cell from "@/components/table/Cell";
 import Dropdown, { DropdownElement } from "@/components/Dropdown";
 import { UserSkillSet, UserSkillSetLevel } from "@/drizzle/schema";
-import { arrayToDropdownList } from "@/lib/array_to_dropdown_list";
 import { fetchUpdateProfileInformation } from "./fetch";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
@@ -185,10 +184,6 @@ export function EditProfileOverlay({ user }: { user: User }) {
             onCancel();
         }
     }, [result]);
-
-    useEffect(() => {
-        onCancel();
-    }, [user]);
 
     return (
         <>

@@ -14,8 +14,7 @@ if (
     !connectionConfig.host ||
     !connectionConfig.port ||
     !connectionConfig.database ||
-    !connectionConfig.user ||
-    !connectionConfig.password
+    !connectionConfig.user
 ) {
     throw new Error("Invalid connection configuration");
 }

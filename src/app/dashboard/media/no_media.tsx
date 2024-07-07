@@ -14,7 +14,7 @@ export default function NoMedia({ page }: { page: number }) {
     return (
         <>
             <div className="flex flex-col items-center justify-between gap-4 my-8">
-                <h1 className="text-lg">No media found!</h1>
+                <h1 className="dark:text-white">No media found!</h1>
             </div>
         </>
     );

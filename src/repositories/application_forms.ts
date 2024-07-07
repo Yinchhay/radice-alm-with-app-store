@@ -4,7 +4,7 @@ import {
     users,
 } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
-import { and, count, eq, like, sql } from "drizzle-orm";
+import { and, count, eq, like, or, sql } from "drizzle-orm";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import bcrypt from "bcrypt";
 import { SALT_ROUNDS } from "@/lib/IAM";
@@ -37,7 +37,12 @@ export const getApplicationForms = async (
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,
-        where: (table, { like }) => like(table.firstName, `%${search}%`),
+        where: (table, { like, or }) =>
+            or(
+                like(table.firstName, `%${search}%`),
+                like(table.lastName, `%${search}%`),
+                like(table.email, `%${search}%`),
+            ),
     });
 };
 
@@ -45,7 +50,13 @@ export const getApplicationFormsTotalRow = async (search: string = "") => {
     const totalRows = await db
         .select({ count: count() })
         .from(applicationForms)
-        .where(like(applicationForms.firstName, `%${search}%`));
+        .where(
+            or(
+                like(applicationForms.firstName, `%${search}%`),
+                like(applicationForms.lastName, `%${search}%`),
+                like(applicationForms.email, `%${search}%`),
+            ),
+        );
     return totalRows[0].count;
 };
 
