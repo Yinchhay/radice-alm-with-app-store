@@ -363,7 +363,8 @@ export default function Builder({
                                 </Button>
                                 <Button
                                     variant="primary"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.preventDefault();
                                         const trimmedChapterName =
                                             newChapterName.trim();
                                         if (trimmedChapterName.length == 0) {
