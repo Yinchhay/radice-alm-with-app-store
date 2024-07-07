@@ -4,11 +4,15 @@ import Card from "./Card";
 
 export default function Stepper({
     projectStatus,
+    isDashboard = false,
 }: {
     projectStatus: ProjectStatusElement[];
+    isDashboard?: boolean;
 }) {
     return (
-        <Card className="grid">
+        <Card
+            className={`grid ${isDashboard ? "" : "dark:bg-white dark:text-black dark:outline-gray-300"}`}
+        >
             <h2 className="font-bold text-xl mb-4">Project Status</h2>
             {projectStatus.map((status, i) => {
                 return (

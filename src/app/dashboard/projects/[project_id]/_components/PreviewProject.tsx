@@ -472,7 +472,7 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                             files={project.files}
                             links={project.links}
                         />
-                        <Stepper projectStatus={projectStatusElements} />
+                        <Stepper projectStatus={projectStatusElements} isDashboard/>
                     </div>
                 </div>
             )}
