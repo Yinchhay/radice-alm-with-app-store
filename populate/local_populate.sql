@@ -13,7 +13,7 @@ INSERT INTO permissions (id, name, description) VALUES
 (10, 'Create partners', 'Permission to create partners'),
 (12, 'Delete partners', 'Permission to delete partners'),
 (13, 'Approve and reject application forms', 'Permission to approve and reject application forms'),
-(14, 'Create own projects', 'Permission to create own projects');
+(14, 'Create own projects', 'Permission to create own projects'),
 (15, 'Change project status', 'Permission to change project status'),
 (17, 'Create media', 'Permission to create media'),
 (18, 'Edit media', 'Permission to edit media'),
@@ -32,9 +32,9 @@ INSERT INTO role_permissions (role_Id, permission_id) VALUES (@role_id, 3);
 
 -- user
 INSERT INTO users (id, first_name, last_name, email, password, type) VALUES 
-('12345Local', 'Admin', 'Admin', 'admin@gmail.com', '$2b$10$z4s1nbgqLeS4afPZXeLTyeoyPEs3jJhQMcRAijj7nB2BTlBIS6tMC', 'user');
+('superadmindadixmz', 'Super', 'Admin', 'lifegoalcs2@gmail.com', '$2a$12$r1RwgV8IJZT9MNddeJk4R.WYCIElByae.zal8fWPHwh1zF1GPa9iG', 'superadmin');
 
 -- userRoles
-INSERT INTO user_roles (user_id, role_Id) VALUES ('12345Local', @role_id);
+INSERT INTO user_roles (user_id, role_Id) VALUES ('superadmindadixmz', @role_id);
 
 COMMIT;
