@@ -68,13 +68,13 @@ export default async function ManageAccount() {
                                                         textClassName="text-white"
                                                         bgClassName={[
                                                             sk.level == 0
-                                                                ? "bg-green-500"
+                                                                ? "bg-green-500 dark:bg-green-500"
                                                                 : "",
                                                             sk.level == 1
-                                                                ? "bg-blue-500"
+                                                                ? "bg-blue-500 dark:bg-blue-500"
                                                                 : "",
                                                             sk.level == 2
-                                                                ? "bg-purple-500"
+                                                                ? "bg-purple-500 dark:bg-purple-500 "
                                                                 : "",
                                                         ].join(" ")}
                                                     >
