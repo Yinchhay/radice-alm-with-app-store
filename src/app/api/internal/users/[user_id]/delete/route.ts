@@ -7,7 +7,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { deleteUserById, getUserById } from "@/repositories/users";
+import { deleteUserById, getUserByIdRegardLessOfLinkedGithub } from "@/repositories/users";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
@@ -49,11 +49,11 @@ export async function DELETE(request: Request, { params }: Params) {
         }
         data = validationResult.data;
 
-        const existingUser = await getUserById(data.userId);
+        const existingUser = await getUserByIdRegardLessOfLinkedGithub(data.userId);
         if (!existingUser) {
             return buildErrorResponse(
                 unsuccessMessage,
-                generateAndFormatZodError("unknown", ErrorMessage.NotFound),
+                generateAndFormatZodError("unknown", "User not found"),
                 HttpStatusCode.NOT_FOUND_404,
             );
         }
