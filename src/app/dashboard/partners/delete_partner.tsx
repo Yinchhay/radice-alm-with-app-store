@@ -63,7 +63,7 @@ export function DeletePartnerOverlay({
                             </h1>
                             <div className="">
                                 <p>
-                                    You are about to delete partner name{" "}
+                                    You are about to delete a partner named{" "}
                                     <strong>{partner.firstName}</strong>
                                 </p>
                             </div>

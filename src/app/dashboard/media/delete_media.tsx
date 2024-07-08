@@ -75,8 +75,8 @@ export function DeleteMediaOverlay({
                             </h1>
                             <div className="">
                                 <p>
-                                    You are about to delete media name{" "}
-                                    <strong>{mediaOne.title}</strong>
+                                    You are about to delete
+                                    <strong> {mediaOne.title}</strong>
                                 </p>
                             </div>
                         </div>

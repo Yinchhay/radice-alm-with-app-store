@@ -23,7 +23,6 @@ export function DeleteCategoryOverlay({
         useState<Awaited<ReturnType<typeof fetchDeleteCategoryById>>>();
     const { addToast } = useToast();
 
-
     function onCancel() {
         setResult(undefined);
         setShowOverlay(false);
@@ -56,9 +55,7 @@ export function DeleteCategoryOverlay({
                 </Button>
             </Tooltip>
             {showOverlay && (
-                <Overlay
-                    onClose={onCancel}
-                >
+                <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-2xl font-bold capitalize">
@@ -66,8 +63,9 @@ export function DeleteCategoryOverlay({
                             </h1>
                             <div className="">
                                 <p>
-                                    You are about to delete category name{" "}
-                                    <strong>{category.name}</strong>
+                                    You are about to delete
+                                    <strong> {category.name} </strong>
+                                    category
                                 </p>
                             </div>
                         </div>

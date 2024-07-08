@@ -59,7 +59,7 @@ export function DeleteUserOverlay({ user }: { user: UserWithoutPassword }) {
                             </h1>
                             <div className="">
                                 <p>
-                                    You are about to delete user name{" "}
+                                    You are about to delete a user named{" "}
                                     <strong>
                                         {user.firstName} {user.lastName}
                                     </strong>
