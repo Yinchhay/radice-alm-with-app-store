@@ -91,6 +91,7 @@ export default async function page() {
                     {executive.map((member, i) => {
                         return (
                             <MemberProfile
+                                key={member.email + i}
                                 member={member}
                                 variant="dark"
                                 useTitle
@@ -109,6 +110,7 @@ export default async function page() {
                     {advisors.map((adivsor, i) => {
                         return (
                             <MemberProfile
+                                key={adivsor.email + i}
                                 member={adivsor}
                                 variant="light"
                                 useTitle
@@ -128,6 +130,7 @@ export default async function page() {
                         {members.map((member, i) => {
                             return (
                                 <MemberProfile
+                                    key={member.id}
                                     member={member}
                                     variant="light"
                                 />

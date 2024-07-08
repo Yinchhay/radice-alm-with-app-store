@@ -42,7 +42,10 @@ export default async function ManageAccount() {
                         <div className="flex gap-4">
                             <h1 className="text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</h1>
                             <div className="">
-                                <EditProfileOverlay user={user} />
+                                <EditProfileOverlay
+                                    user={user}
+                                    key={JSON.stringify(user)}
+                                />
                             </div>
                         </div>
                         <h3 className="text-lg">{user.email}</h3>
@@ -55,13 +58,28 @@ export default async function ManageAccount() {
                                 <ChipsHolder>
                                     {Array.isArray(user.skillSet) &&
                                         user.skillSet.map((sk) => {
-                                            // TODO: add tooltip level
                                             return (
                                                 <Tooltip
                                                     key={sk.label}
                                                     title={`Level: ${UserSkillSetLevel[sk.level]}`}
                                                 >
-                                                    <Chip>{sk.label}</Chip>
+                                                    <Chip
+                                                        className="rounded-sm"
+                                                        textClassName="text-white"
+                                                        bgClassName={[
+                                                            sk.level == 0
+                                                                ? "bg-green-500"
+                                                                : "",
+                                                            sk.level == 1
+                                                                ? "bg-blue-500"
+                                                                : "",
+                                                            sk.level == 2
+                                                                ? "bg-purple-500"
+                                                                : "",
+                                                        ].join(" ")}
+                                                    >
+                                                        {sk.label}
+                                                    </Chip>
                                                 </Tooltip>
                                             );
                                         })}

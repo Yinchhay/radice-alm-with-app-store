@@ -68,7 +68,7 @@ export default async function DashboardManageLayout({
     });
 
     const userWithRoles = await getUserRolesAndRolePermissions_C(user.id);
-    console.log(userWithRoles);
+    // console.log(userWithRoles);
     return (
         <ThemeProvider enableSystem={false} attribute="class">
             <DashboardLayout

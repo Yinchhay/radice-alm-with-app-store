@@ -14,6 +14,8 @@ import GridRevealImage from "@/components/effects/GridRevealImage";
 import { redirect } from "next/navigation";
 import { fileToUrl } from "@/lib/file";
 import { Metadata, ResolvingMetadata } from "next";
+import Tooltip from "@/components/Tooltip";
+import { UserSkillSetLevel } from "@/drizzle/schema";
 export const dynamic = "force-dynamic";
 type Props = {
     params: { member_id: string };
@@ -132,26 +134,30 @@ export default async function MemberPublicProfilePage({
                         </div>
                         {member.skillSet && (
                             <ChipsHolder>
-                                {member.skillSet.map((skill, i) => {
+                                {member.skillSet.map((sk, i) => {
                                     return (
-                                        <Chip
-                                            key={`${skill.label}-chip-${i}`}
-                                            className="rounded-sm"
-                                            textClassName="text-white"
-                                            bgClassName={[
-                                                skill.level == 0
-                                                    ? "bg-green-500"
-                                                    : "",
-                                                skill.level == 1
-                                                    ? "bg-blue-500"
-                                                    : "",
-                                                skill.level == 2
-                                                    ? "bg-purple-500"
-                                                    : "",
-                                            ].join(" ")}
-                                        >
-                                            {skill.label}
-                                        </Chip>
+                                            <Tooltip
+                                                key={sk.label}
+                                                title={`Level: ${UserSkillSetLevel[sk.level]}`}
+                                            >
+                                                <Chip
+                                                    className="rounded-sm"
+                                                    textClassName="text-white"
+                                                    bgClassName={[
+                                                        sk.level == 0
+                                                            ? "bg-green-500"
+                                                            : "",
+                                                        sk.level == 1
+                                                            ? "bg-blue-500"
+                                                            : "",
+                                                        sk.level == 2
+                                                            ? "bg-purple-500"
+                                                            : "",
+                                                    ].join(" ")}
+                                                >
+                                                    {sk.label}
+                                                </Chip>
+                                            </Tooltip>
                                     );
                                 })}
                             </ChipsHolder>

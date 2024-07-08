@@ -50,8 +50,11 @@ export async function fetchUpdateProfileInformation(
                 body: formData,
             },
         );
-
-        revalidatePath(pathname);
+        
+        if (response.ok) {
+            revalidatePath(pathname);
+        }
+        
         return await response.json();
     } catch (error: any) {
         return returnFetchErrorSomethingWentWrong(error);
