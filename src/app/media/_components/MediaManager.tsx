@@ -12,6 +12,11 @@ export default function MediaManager({ media }: { media: PublicMedias[][] }) {
     return (
         <>
             <div className="grid gap-8">
+                {media.length <= 0 && (
+                    <p className="text-center">
+                        There are currently no media for now.
+                    </p>
+                )}
                 {media.map((collage, i) => {
                     return (
                         <Collage
