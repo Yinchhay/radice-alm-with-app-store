@@ -26,7 +26,7 @@ export default function NoProject({
     return (
         <>
             <div className="flex flex-col items-center justify-between gap-4 my-8">
-                <h1 className="text-lg">{message}</h1>
+                <h1 className="dark:text-white">{message}</h1>
             </div>
         </>
     );

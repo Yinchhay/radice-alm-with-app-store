@@ -5,6 +5,7 @@ import {
 import { db } from "@/drizzle/db";
 import {
     categories,
+    FileBelongTo,
     projectCategories,
     ProjectLink,
     projectMembers,
@@ -146,6 +147,13 @@ export async function getOneAssociatedProject(project_id: number) {
             files: true,
         },
     });
+
+    if (Array.isArray(project?.files)) {
+        project.files = project.files.filter(
+            (file) => file.belongTo === FileBelongTo.ProjectSetting,
+        );
+    }
+
     return project;
 }
 

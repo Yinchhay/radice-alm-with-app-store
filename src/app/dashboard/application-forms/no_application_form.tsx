@@ -13,7 +13,7 @@ export default function NoApplicationForm({ page }: { page: number }) {
     }
 
     return (
-        <div className="flex flex-col items-center justify-center h-48 dark:text-white">
+        <div className="flex flex-col items-center justify-center my-8 dark:text-white">
             <p className="text-lg">No application form found!</p>
         </div>
     );
