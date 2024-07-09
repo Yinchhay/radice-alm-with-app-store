@@ -59,14 +59,13 @@ export async function DELETE(request: Request, { params }: Params) {
         }
 
         if (
-            user.type !== UserType.SUPER_ADMIN &&
-            existingUser.type === UserType.PARTNER
+            existingUser.type !== UserType.PARTNER
         ) {
             return buildErrorResponse(
                 unsuccessMessage,
                 generateAndFormatZodError(
                     "unknown",
-                    "You are not allowed to delete super admin account",
+                    "The user is not a partner, therefore cannot be deleted",
                 ),
                 HttpStatusCode.NOT_ACCEPTABLE_406,
             );
