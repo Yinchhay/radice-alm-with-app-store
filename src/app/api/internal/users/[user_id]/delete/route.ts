@@ -89,7 +89,7 @@ export async function DELETE(request: Request, { params }: Params) {
             await deleteFile(existingUser.profileUrl, sessionId ?? "");
         }
 
-        const deleteResult = await deleteUserById(data.userId);
+        const deleteResult = await deleteUserById(data.userId, user.id);
         // if no row is affected, meaning that the user didn't get deleted
         if (deleteResult[0].affectedRows < 1) {
             return buildErrorResponse(

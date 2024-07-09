@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { users } from "@/drizzle/schema";
+import { projects, users } from "@/drizzle/schema";
 import { unstable_cache as cache } from "next/cache";
 import { eq, count, sql, and, like, or } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -101,9 +101,19 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
     )(userId);
 };
 
-export const deleteUserById = async (userId: string) => {
+export const deleteUserById = async (userId: string, requestDeleteByUserId: string) => {
     return await db.transaction(async (transaction) => {
-        // don't worry about foreign key, we have cascade delete
+        const ownedProjects = await transaction.query.projects.findMany({
+            where: (table, { eq }) => eq(table.userId, userId),
+        });
+
+        // transfer project to the one who request to delete the user
+        for (const project of ownedProjects) {
+            await transaction.update(projects).set({
+                userId: requestDeleteByUserId,
+            }).where(eq(projects.id, project.id));
+        }
+
         // allow only delete member
         return await transaction
             .delete(users)
