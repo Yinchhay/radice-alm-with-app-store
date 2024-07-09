@@ -56,7 +56,8 @@ export default async function PreviewProjectPage({
         <div className="dark:text-white">
             {canEdit && (
                 <div className="fixed bottom-8 right-8 z-30 grid gap-2">
-                    {projectRole == ProjectRole.OWNER && (
+                    {(projectRole == ProjectRole.OWNER ||
+                        projectRole == ProjectRole.SUPER_ADMIN) && (
                         <Tooltip title="Settings" position="left">
                             <Link
                                 href={`/dashboard/projects/${params.project_id}/settings`}

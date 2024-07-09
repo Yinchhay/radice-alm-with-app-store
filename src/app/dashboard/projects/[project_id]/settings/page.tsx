@@ -85,7 +85,8 @@ export default async function ProjectSettings({ params }: { params: Params }) {
                     <ProjectLink project={result.data.project} />
                     <ProjectControl project={result.data.project} />
                 </div>
-                {projectRole == ProjectRole.OWNER && (
+                {(projectRole == ProjectRole.OWNER ||
+                    projectRole == ProjectRole.SUPER_ADMIN) && (
                     <div className="fixed bottom-8 right-8 z-30 grid gap-2">
                         <Tooltip title="Preview" position="left">
                             <Link
