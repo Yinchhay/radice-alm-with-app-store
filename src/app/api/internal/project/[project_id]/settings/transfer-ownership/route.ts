@@ -82,7 +82,7 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        if (transferToUser.id === user.id) {
+        if (project.userId === transferToUser.id) {
             return buildErrorResponse(
                 unsuccessMessage,
                 generateAndFormatZodError(
@@ -112,8 +112,6 @@ export async function PATCH(request: Request, { params }: Params) {
             transferToUser.id,
             project.userId,
         );
-
-        // TODO: should send email to old and new owner;
 
         return buildSuccessResponse<FetchTransferProjectOwnershipData>(
             successMessage,
