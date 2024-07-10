@@ -70,7 +70,12 @@ export default function Navbar({
                 </h2>
                 <ImageWithFallback
                     className="aspect-square object-cover rounded-full"
-                    src={fileToUrl(user.profileUrl)}
+                    src={fileToUrl(
+                        user.profileUrl,
+                        user.type === UserType.PARTNER
+                            ? "/placeholders/logo_placeholder.png"
+                            : "/placeholders/missing_profile.png",
+                    )}
                     alt={"profile"}
                     width={52}
                     height={52}

@@ -65,20 +65,22 @@ export default async function page() {
                     Who We Are
                 </h1>
                 <p className="text-center mx-auto max-w-[800px]">
-                    At Radice, we are a dynamic hub of innovation and
+                    At RaDICe, we are a dynamic hub of innovation and
                     exploration, dedicated to revolutionizing the landscape of
-                    research and development. Our journey is defined by a rich
-                    tapestry of achievements, where each milestone represents a
-                    testament to our unwavering commitment to excellence. With a
-                    history steeped in collaboration, ingenuity, and forward
-                    thinking, we stand at the forefront of cutting-edge
-                    solutions that shape the future. Our core values of
-                    integrity, creativity, and impact drive every endeavor,
-                    propelling us towards a horizon of endless possibilities. As
-                    we navigate the ever-evolving realm of research and
-                    development, our mission remains clear: to inspire,
-                    innovate, and leave a lasting legacy of progress for
-                    generations to come.
+                    research and development. Operating under the executive
+                    board of Paragon International University, with the rector
+                    as its head or immediate supervisor, our journey is defined
+                    by a rich tapestry of achievements, where each milestone
+                    represents a testament to our unwavering commitment to
+                    excellence. With a history steeped in collaboration,
+                    ingenuity, and forward thinking, we stand at the forefront
+                    of cutting-edge solutions that shape the future. Our core
+                    values of integrity, creativity, and impact drive every
+                    endeavor, propelling us towards a horizon of endless
+                    possibilities. As we navigate the ever-evolving realm of
+                    research and development, our mission remains clear: to
+                    inspire, innovate, and leave a lasting legacy of progress
+                    for generations to come.
                 </p>
             </div>
             <div className="bg-black text-white py-12">

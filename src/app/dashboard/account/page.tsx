@@ -24,15 +24,19 @@ export default async function ManageAccount() {
     if (!user) {
         return redirect("/login");
     }
-
     return (
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={<Loading />}>
                 <Card className="flex flex-col gap-4">
                     <div>
                         <ImageWithFallback
-                            className="aspect-square object-cover rounded-full"
-                            src={fileToUrl(user.profileUrl)}
+                            className="aspect-square object-cover rounded-full border border-gray-300"
+                            src={fileToUrl(
+                                user.profileUrl,
+                                user.type === UserType.PARTNER
+                                    ? "/placeholders/logo_placeholder.png"
+                                    : "/placeholders/placeholder.webp",
+                            )}
                             alt={"profile"}
                             width={128}
                             height={128}

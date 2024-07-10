@@ -87,7 +87,7 @@ export default function GridRevealImage({
     }
 
     return (
-        <div className={`relative w-[${width}px] h-[${height}px]`}>
+        <div className="relative" style={{ width, height }}>
             <ImageWithFallback
                 fill={fill}
                 src={src}

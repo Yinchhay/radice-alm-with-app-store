@@ -4,6 +4,7 @@ import GridRevealImage from "@/components/effects/GridRevealImage";
 import ScrollReveal from "@/components/effects/ScrollReveal";
 import SpecialEffectSentence from "@/components/effects/SpecialEffectSentence";
 import { fileToUrl } from "@/lib/file";
+import { UserType } from "@/types/user";
 import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,7 +47,11 @@ export default function MemberProfile({
                 <div className="flex flex-col items-center w-[250px]">
                     <Link
                         href={`/${userType}/${member.id}`}
-                        className="w-[180px] h-[240px] relative"
+                        className="relative"
+                        style={{
+                            width: 180,
+                            height: userType === UserType.PARTNER ? 180 : 240,
+                        }}
                         target="_blank"
                     >
                         <ScrollReveal
@@ -61,12 +66,16 @@ export default function MemberProfile({
                                 canReveal={reveal}
                                 src={fileToUrl(
                                     member.profileUrl,
-                                    "/missing-profile.png",
+                                    userType === UserType.PARTNER
+                                        ? "/placeholders/logo_placeholder.png"
+                                        : "/placeholders/missing-profile.png",
                                 )}
-                                cols={9}
-                                rows={11}
+                                cols={userType === UserType.PARTNER ? 8 : 9}
+                                rows={userType === UserType.PARTNER ? 8 : 11}
                                 width={180}
-                                height={240}
+                                height={
+                                    userType === UserType.PARTNER ? 180 : 240
+                                }
                                 revealDelay={6}
                                 fill
                                 className={
@@ -118,7 +127,7 @@ export default function MemberProfile({
                                 canReveal={reveal}
                                 src={fileToUrl(
                                     member.profileUrl,
-                                    "/missing-profile.png",
+                                    "/placeholders/missing-profile.png",
                                 )}
                                 cols={9}
                                 rows={11}

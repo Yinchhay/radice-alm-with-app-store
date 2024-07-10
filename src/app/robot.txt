@@ -12,5 +12,6 @@ Disallow: /link-oauth
 Disallow: /test
 Disallow: /forgot-password
 Disallow: /ui/
+Disallow: /placeholders/
 
 Sitemap: https://radice.paragoniu.app/sitemap.xml

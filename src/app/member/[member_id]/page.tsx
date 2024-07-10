@@ -39,7 +39,7 @@ export async function generateMetadata(
                     {
                         url: fileToUrl(
                             member.profileUrl,
-                            "/missing-profile.png",
+                            "/placeholders/missing-profile.png",
                         ),
                         alt:
                             member.firstName +
@@ -57,7 +57,7 @@ export async function generateMetadata(
                     {
                         url: fileToUrl(
                             member.profileUrl,
-                            "/missing-profile.png",
+                            "/placeholders/missing-profile.png",
                         ),
                         alt:
                             member.firstName +
@@ -119,7 +119,7 @@ export default async function MemberPublicProfilePage({
                                 height={225}
                                 src={fileToUrl(
                                     member.profileUrl,
-                                    "/missing-profile.png",
+                                    "/placeholders/missing-profile.png",
                                 )}
                                 fill
                                 className="object-cover"
@@ -136,28 +136,28 @@ export default async function MemberPublicProfilePage({
                             <ChipsHolder>
                                 {member.skillSet.map((sk, i) => {
                                     return (
-                                            <Tooltip
-                                                key={sk.label}
-                                                title={`Level: ${UserSkillSetLevel[sk.level]}`}
+                                        <Tooltip
+                                            key={sk.label}
+                                            title={`Level: ${UserSkillSetLevel[sk.level]}`}
+                                        >
+                                            <Chip
+                                                className="rounded-sm"
+                                                textClassName="text-white"
+                                                bgClassName={[
+                                                    sk.level == 0
+                                                        ? "bg-green-500"
+                                                        : "",
+                                                    sk.level == 1
+                                                        ? "bg-blue-500"
+                                                        : "",
+                                                    sk.level == 2
+                                                        ? "bg-purple-500"
+                                                        : "",
+                                                ].join(" ")}
                                             >
-                                                <Chip
-                                                    className="rounded-sm"
-                                                    textClassName="text-white"
-                                                    bgClassName={[
-                                                        sk.level == 0
-                                                            ? "bg-green-500"
-                                                            : "",
-                                                        sk.level == 1
-                                                            ? "bg-blue-500"
-                                                            : "",
-                                                        sk.level == 2
-                                                            ? "bg-purple-500"
-                                                            : "",
-                                                    ].join(" ")}
-                                                >
-                                                    {sk.label}
-                                                </Chip>
-                                            </Tooltip>
+                                                {sk.label}
+                                            </Chip>
+                                        </Tooltip>
                                     );
                                 })}
                             </ChipsHolder>
@@ -185,8 +185,12 @@ export default async function MemberPublicProfilePage({
                             )}
                     </div>
                     <div>
-                        <h2 className="font-bold mb-2 text-lg">Researches:</h2>
-                        {projects.length <= 0 && <p>No researches yet</p>}
+                        <h2 className="font-bold mb-2 text-lg">
+                            Researches/Projects:
+                        </h2>
+                        {projects.length <= 0 && (
+                            <p>No researches or projects yet</p>
+                        )}
                         <div className="flex flex-col gap-4">
                             {projects.map((project, i) => {
                                 return (
@@ -202,7 +206,7 @@ export default async function MemberPublicProfilePage({
                                                 <Image
                                                     src={
                                                         `/api/file?filename=${project.logoUrl}` ||
-                                                        "/placeholder.webp"
+                                                        "/placeholders/placeholder.webp"
                                                     }
                                                     fill
                                                     className="object-cover"

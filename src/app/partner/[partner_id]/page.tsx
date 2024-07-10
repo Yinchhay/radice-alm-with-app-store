@@ -34,7 +34,7 @@ export async function generateMetadata(
                     {
                         url: fileToUrl(
                             partner.profileUrl,
-                            "/missing-profile.png",
+                            "/placeholders/missing-profile.png",
                         ),
                         alt:
                             partner.firstName +
@@ -52,7 +52,7 @@ export async function generateMetadata(
                     {
                         url: fileToUrl(
                             partner.profileUrl,
-                            "/missing-profile.png",
+                            "/placeholders/missing-profile.png",
                         ),
                         alt:
                             partner.firstName +
@@ -103,7 +103,7 @@ export default async function PartnerPublicProfilePage({
                                 height={220}
                                 src={fileToUrl(
                                     partner.profileUrl,
-                                    "/missing-profile.png",
+                                    "/placeholders/missing-profile.png",
                                 )}
                                 fill
                                 className="object-contain"
@@ -119,8 +119,12 @@ export default async function PartnerPublicProfilePage({
                         {partner.description && <p>{partner.description}</p>}
                     </div>
                     <div>
-                        <h2 className="font-bold mb-2 text-lg">Researches:</h2>
-                        {projects.length <= 0 && <p>No researches yet</p>}
+                        <h2 className="font-bold mb-2 text-lg">
+                            Researches/Projects:
+                        </h2>
+                        {projects.length <= 0 && (
+                            <p>No researches or projects yet</p>
+                        )}
                         <div className="flex flex-col gap-4">
                             {projects.map((project, i) => {
                                 return (

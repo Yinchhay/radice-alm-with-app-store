@@ -106,8 +106,8 @@ const ALL_STATUSES = [
     "test",
     "release",
     "live",
-    "retired",
     "retiring",
+    "retired",
 ];
 
 function capitalize(str: string): string {

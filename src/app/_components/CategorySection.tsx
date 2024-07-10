@@ -117,7 +117,7 @@ export default function CategorySection({
                                                                     <ImageWithFallback
                                                                         src={
                                                                             `/api/file?filename=${project.logoUrl}` ||
-                                                                            "/placeholder.webp"
+                                                                            "/placeholders/placeholder.webp"
                                                                         }
                                                                         width={
                                                                             80
@@ -240,7 +240,7 @@ export default function CategorySection({
                                                                     <ImageWithFallback
                                                                         src={
                                                                             `/api/file?filename=${project.logoUrl}` ||
-                                                                            "/placeholder.webp"
+                                                                            "/placeholders/placeholder.webp"
                                                                         }
                                                                         width={
                                                                             80

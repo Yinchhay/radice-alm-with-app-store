@@ -8,7 +8,11 @@ interface ImageWithFallbackProps extends ImageProps {
 }
 
 const ImageWithFallback: React.FC<ImageWithFallbackProps> = (props) => {
-    const { src, fallbackSrc = "/placeholder.webp", ...rest } = props;
+    const {
+        src,
+        fallbackSrc = "/placeholders/placeholder.webp",
+        ...rest
+    } = props;
     const [imgSrc, setImgSrc] = useState<string>(src);
 
     useEffect(() => {
