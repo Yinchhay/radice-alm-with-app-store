@@ -1,3 +1,4 @@
+"use client";
 import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
 import {
     CategoryAndProjects,
@@ -5,6 +6,7 @@ import {
 } from "@/repositories/project";
 import PipelineProjectLogo from "./PipelineProjectLogo";
 import Link from "next/link";
+import { useEffect } from "react";
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -47,38 +49,55 @@ export default function ProjectPipeline({
         "retiring",
         "retired",
     ];
-    function organizeProjectsByPipelineStatus(
+    function getUniqueProjects(
         categories: CategoryAndProjects[],
-    ): {
-        [status: string]: ProjectFromCategory[];
-    } {
-        const result: {
-            [status: string]: ProjectFromCategory[];
-        } = {};
+    ): ProjectFromCategory[] {
+        const uniqueProjectsMap: { [key: number]: ProjectFromCategory } = {};
 
-        for (const category of categories) {
-            for (const project of category.projects) {
-                if (!project.pipelineStatus) continue;
+        categories.forEach((category) => {
+            category.projects.forEach((project) => {
+                if (!uniqueProjectsMap[project.id]) {
+                    uniqueProjectsMap[project.id] = project;
+                }
+            });
+        });
 
-                let mainStatus: keyof PipelineStatus | null = null;
+        return Object.values(uniqueProjectsMap);
+    }
+    const uniqueProjects = getUniqueProjects(category);
 
-                // Find the latest (most significant) status that is true
-                for (const status of statusOrder) {
-                    if (project.pipelineStatus[status]) {
-                        mainStatus = status;
-                    }
+    function organizeProjectsByPipelineStatus(
+        projects: ProjectFromCategory[],
+    ): { [status: string]: ProjectFromCategory[] } {
+        const result: { [status: string]: ProjectFromCategory[] } = {};
+
+        for (const project of projects) {
+            if (!project.pipelineStatus) continue;
+
+            let mainStatus: keyof PipelineStatus | null = null;
+
+            // Find the latest (most significant) status that is true
+            for (const status of statusOrder) {
+                if (project.pipelineStatus[status]) {
+                    mainStatus = status;
+                }
+            }
+
+            if (mainStatus) {
+                // Initialize the array for this status if it doesn't exist
+                if (!result[mainStatus]) {
+                    result[mainStatus] = [];
                 }
 
-                if (mainStatus) {
-                    // Only keep the project under the latest true status
-                    result[mainStatus] = [project];
-                }
+                // Push the project into the appropriate status array
+                result[mainStatus].push(project);
             }
         }
 
         return result;
     }
-    const pipeline = organizeProjectsByPipelineStatus(category);
+
+    const pipeline = organizeProjectsByPipelineStatus(uniqueProjects);
     const hasProjects = Object.keys(pipeline).length > 0;
     return (
         <>
