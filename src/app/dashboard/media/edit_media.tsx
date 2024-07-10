@@ -246,7 +246,7 @@ export function EditMediaOverlay({
                                     required
                                 />
                             </div>
-                            <div className="flex flex-col gap-1 gap-4">
+                            <div className="flex flex-col items-start gap-4">
                                 <div className="flex gap-2 justify-center items-center">
                                     <label
                                         htmlFor="mediaLogo"
