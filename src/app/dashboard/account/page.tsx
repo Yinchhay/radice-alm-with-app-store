@@ -58,11 +58,11 @@ export default async function ManageAccount() {
                         <h3 className="text-lg">{user.email}</h3>
                         <h3 className="text-sm">{user.description}</h3>
                         {user.type === UserType.USER && (
-                            <div className="flex gap-2">
-                                <h2 className="text-lg font-bold min-w-fit">
-                                    Skill sets:
-                                </h2>
-                                <SkillSetChips skillSets={user.skillSet} />
+                            <div className="mb-2">
+                                <SkillSetChips
+                                    dashboard
+                                    skillSets={user.skillSet}
+                                />
                             </div>
                         )}
                         <div className="flex gap-4 flex-col">

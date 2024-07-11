@@ -144,8 +144,8 @@ export function skillSetToChips(
     skillSets: UserSkillSet[] | null,
 ): SkillSetToChipReturnType {
     const chips: SkillSetToChipReturnType = {
-        Do: [],
         Know: [],
+        Do: [],
         Teach: [],
     };
 
