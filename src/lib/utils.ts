@@ -149,11 +149,15 @@ export function skillSetToChips(
         Teach: [],
     };
 
-    if (!skillSets || skillSets.length === 0) {
+    if (!skillSets || !Array.isArray(skillSets) || skillSets.length === 0) {
         return chips;
     }
 
     skillSets.forEach((sk) => {
+        if (!sk.proficiency || !Array.isArray(sk.proficiency)) {
+            return;
+        }
+
         sk.proficiency.forEach((p) => {
             switch (p) {
                 case UserProficienciesLevel.Do:
