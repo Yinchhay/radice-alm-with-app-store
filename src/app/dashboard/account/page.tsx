@@ -8,22 +8,25 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { EditProfileOverlay } from "./edit_profile";
 import Tooltip from "@/components/Tooltip";
-import { UserSkillSetLevel } from "@/drizzle/schema";
 import { ChangeEmailOverlay } from "./change_email";
 import { ChangePasswordOverlay } from "./change_password";
 import { UserType } from "@/types/user";
 import ChangeGithub from "./change_github_";
 import { Metadata } from "next";
 import Loading from "@/components/Loading";
+import SkillSetChips from "@/components/SkillSetChips";
+
 export const metadata: Metadata = {
     title: "Manage Account - Dashboard - Radice",
 };
+
 export default async function ManageAccount() {
     const user = await getAuthUser();
 
     if (!user) {
         return redirect("/login");
     }
+
     return (
         <div className="w-full max-w-[1000px] mx-auto">
             <Suspense fallback={<Loading />}>
@@ -59,35 +62,7 @@ export default async function ManageAccount() {
                                 <h2 className="text-lg font-bold min-w-fit">
                                     Skill sets:
                                 </h2>
-                                <ChipsHolder>
-                                    {Array.isArray(user.skillSet) &&
-                                        user.skillSet.map((sk) => {
-                                            return (
-                                                <Tooltip
-                                                    key={sk.label}
-                                                    title={`Level: ${UserSkillSetLevel[sk.level]}`}
-                                                >
-                                                    <Chip
-                                                        className="rounded-sm"
-                                                        textClassName="text-white"
-                                                        bgClassName={[
-                                                            sk.level == 0
-                                                                ? "bg-green-500 dark:bg-green-500"
-                                                                : "",
-                                                            sk.level == 1
-                                                                ? "bg-blue-500 dark:bg-blue-500"
-                                                                : "",
-                                                            sk.level == 2
-                                                                ? "bg-purple-500 dark:bg-purple-500 "
-                                                                : "",
-                                                        ].join(" ")}
-                                                    >
-                                                        {sk.label}
-                                                    </Chip>
-                                                </Tooltip>
-                                            );
-                                        })}
-                                </ChipsHolder>
+                                <SkillSetChips skillSets={user.skillSet} />
                             </div>
                         )}
                         <div className="flex gap-4 flex-col">

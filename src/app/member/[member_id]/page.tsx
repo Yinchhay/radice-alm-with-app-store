@@ -15,11 +15,13 @@ import { redirect } from "next/navigation";
 import { fileToUrl } from "@/lib/file";
 import { Metadata, ResolvingMetadata } from "next";
 import Tooltip from "@/components/Tooltip";
-import { UserSkillSetLevel } from "@/drizzle/schema";
+import SkillSetChips from "@/components/SkillSetChips";
 export const dynamic = "force-dynamic";
+
 type Props = {
     params: { member_id: string };
 };
+
 export async function generateMetadata(
     { params }: Props,
     parent: ResolvingMetadata,
@@ -133,34 +135,7 @@ export default async function MemberPublicProfilePage({
                             <h2 className="">{member.email}</h2>
                         </div>
                         {member.skillSet && (
-                            <ChipsHolder>
-                                {member.skillSet.map((sk, i) => {
-                                    return (
-                                        <Tooltip
-                                            key={sk.label}
-                                            title={`Level: ${UserSkillSetLevel[sk.level]}`}
-                                        >
-                                            <Chip
-                                                className="rounded-sm"
-                                                textClassName="text-white"
-                                                bgClassName={[
-                                                    sk.level == 0
-                                                        ? "bg-green-500"
-                                                        : "",
-                                                    sk.level == 1
-                                                        ? "bg-blue-500"
-                                                        : "",
-                                                    sk.level == 2
-                                                        ? "bg-purple-500"
-                                                        : "",
-                                                ].join(" ")}
-                                            >
-                                                {sk.label}
-                                            </Chip>
-                                        </Tooltip>
-                                    );
-                                })}
-                            </ChipsHolder>
+                            <SkillSetChips skillSets={member.skillSet} />
                         )}
                         {member.description && <p>{member.description}</p>}
                         {member.hasLinkedGithub &&

@@ -17,13 +17,18 @@ import Table from "@/components/table/Table";
 import TableBody from "@/components/table/TableBody";
 import TableRow from "@/components/table/TableRow";
 import Cell from "@/components/table/Cell";
-import Dropdown, { DropdownElement } from "@/components/Dropdown";
-import { UserSkillSet, UserSkillSetLevel } from "@/drizzle/schema";
+import {
+    UserSkillSet,
+    UserProficiencies,
+    UserProficienciesLevel,
+    UserProficiencyKeys,
+} from "@/drizzle/schema";
 import { fetchUpdateProfileInformation } from "./fetch";
 import TextareaField from "@/components/TextareaField";
 import Tooltip from "@/components/Tooltip";
 import { UserType } from "@/types/user";
 import { useToast } from "@/components/Toaster";
+import CheckList, { CheckBoxElement } from "@/components/CheckList";
 
 type UserSkillSetWithId = UserSkillSet & { id: string };
 
@@ -43,23 +48,10 @@ export function EditProfileOverlay({ user }: { user: User }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { addToast } = useToast();
 
-    // convert enum to 2d array, but take only its key and value
-    const skillSetValues = Object.entries(UserSkillSetLevel).filter(
-        ([, value]) => typeof value === "number",
-    );
-    const skillSetsDropDownList: DropdownElement[] = skillSetValues.map(
-        ([name, value]) => {
-            return {
-                name: name as string,
-                value: value.toString(),
-            };
-        },
-    );
-
     function addSkillSet() {
         const emptySkillSet: UserSkillSetWithId = {
-            label: "",
-            level: UserSkillSetLevel.Know,
+            skill: "",
+            proficiency: [UserProficienciesLevel.Know],
             id: crypto.randomUUID(),
         };
 
@@ -82,7 +74,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
         });
     }
 
-    function onChangeSkillSetLabel(id: string, value: string) {
+    function onChangeSkill(id: string, value: string) {
         setSkillSets((prev) => {
             if (!Array.isArray(prev) || prev.length < 0) {
                 return [];
@@ -92,8 +84,8 @@ export function EditProfileOverlay({ user }: { user: User }) {
                 if (skillSet.id === id) {
                     return {
                         ...skillSet,
-                        label: value,
-                    };
+                        skill: value,
+                    } satisfies UserSkillSetWithId;
                 }
 
                 return skillSet;
@@ -101,7 +93,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
         });
     }
 
-    function onChangeSkillSetLevel(id: string, value: number) {
+    function onSkillProficiencyChange(id: string, proficiencies: number[]) {
         setSkillSets((prev) => {
             if (!Array.isArray(prev) || prev.length < 0) {
                 return [];
@@ -111,7 +103,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                 if (skillSet.id === id) {
                     return {
                         ...skillSet,
-                        level: value as unknown as UserSkillSetLevel,
+                        proficiency: proficiencies,
                     };
                 }
 
@@ -131,8 +123,10 @@ export function EditProfileOverlay({ user }: { user: User }) {
         // think of consequence when a user want to exploit by calling api and try to input json other format than what we expect.
         return skillSetsToAddId.map((skillSet) => {
             return {
-                label: skillSet.label || "",
-                level: skillSet.level || UserSkillSetLevel.Know,
+                skill: skillSet.skill || "",
+                proficiency: skillSet.proficiency || [
+                    UserProficienciesLevel.Know,
+                ],
                 id: crypto.randomUUID(),
             };
         });
@@ -141,8 +135,8 @@ export function EditProfileOverlay({ user }: { user: User }) {
     async function onSubmit(formData: FormData) {
         const skillSetsWithoutId: UserSkillSet[] = skillSets.map((skillSet) => {
             return {
-                label: skillSet.label,
-                level: Number(skillSet.level),
+                skill: skillSet.skill,
+                proficiency: skillSet.proficiency,
             };
         });
 
@@ -313,17 +307,14 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                                                             skillSet={
                                                                                 skillSet
                                                                             }
-                                                                            dropDownList={
-                                                                                skillSetsDropDownList
-                                                                            }
                                                                             onRemove={
                                                                                 removeSkillSet
                                                                             }
-                                                                            onLabelChange={
-                                                                                onChangeSkillSetLabel
+                                                                            onSkillChange={
+                                                                                onChangeSkill
                                                                             }
-                                                                            onLevelChange={
-                                                                                onChangeSkillSetLevel
+                                                                            onSkillProficiencyChange={
+                                                                                onSkillProficiencyChange
                                                                             }
                                                                         />
                                                                     );
@@ -359,42 +350,52 @@ export function EditProfileOverlay({ user }: { user: User }) {
 
 function SkillSetRow({
     skillSet,
-    dropDownList,
     onRemove,
-    onLabelChange,
-    onLevelChange,
+    onSkillChange,
+    onSkillProficiencyChange,
 }: {
     skillSet: UserSkillSetWithId;
-    dropDownList: DropdownElement[];
     onRemove: (skillSetId: string) => void;
-    onLabelChange: (id: string, value: string) => void;
-    onLevelChange: (id: string, value: number) => void;
+    onSkillChange: (id: string, value: string) => void;
+    onSkillProficiencyChange: (id: string, proficiencies: number[]) => void;
 }) {
+    const skillSetsCheckList: CheckBoxElement[] = UserProficiencyKeys.map(
+        (key) => {
+            const value =
+                UserProficienciesLevel[
+                    key as keyof typeof UserProficienciesLevel
+                ];
+
+            return {
+                name: key,
+                value: value.toString(),
+                // if the skillSet.proficiency has the value, then it is checked
+                checked: skillSet.proficiency.some((p) => p === value),
+            };
+        },
+    );
+
     return (
         <TableRow>
             <Cell>
                 <InputField
-                    defaultValue={skillSet.label}
-                    onChange={(e) => onLabelChange(skillSet.id, e.target.value)}
+                    defaultValue={skillSet.skill}
+                    onChange={(e) => onSkillChange(skillSet.id, e.target.value)}
                 />
             </Cell>
             <Cell>
-                <Dropdown
-                    defaultSelectedElement={{
-                        name:
-                            dropDownList.find(
-                                (item) =>
-                                    item.value === skillSet.level.toString(),
-                            )?.name ?? dropDownList[0].name,
-                        value: skillSet.level.toString(),
-                    }}
-                    dropdownList={dropDownList}
-                    onChange={(selectedElement) =>
-                        onLevelChange(
+                <CheckList
+                    id={skillSet.id}
+                    title=""
+                    checkList={skillSetsCheckList}
+                    onChange={(updatedList) => {
+                        onSkillProficiencyChange(
                             skillSet.id,
-                            Number(selectedElement.value),
-                        )
-                    }
+                            updatedList
+                                .filter((item) => item.checked)
+                                .map((item) => parseInt(item.value)),
+                        );
+                    }}
                 />
             </Cell>
             <Cell>

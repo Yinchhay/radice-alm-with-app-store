@@ -18,11 +18,18 @@ import { projectPipeLineStatusType } from "@/app/api/internal/project/[project_i
 import { UserType } from "@/types/user";
 import { skillSetSchema } from "@/app/api/internal/account/schema";
 
-export enum UserSkillSetLevel {
+export enum UserProficienciesLevel {
     Know = 0,
     Do = 1,
     Teach = 2,
 }
+export const UserProficiencies: { [key in UserProficienciesLevel]: string } = {
+    [UserProficienciesLevel.Know]: "Know",
+    [UserProficienciesLevel.Do]: "Do",
+    [UserProficienciesLevel.Teach]: "Teach",
+};
+export const UserProficiencyKeys = Object.values(UserProficiencies);
+
 export type UserSkillSet = z.infer<typeof skillSetSchema>;
 
 export const users = mysqlTable("users", {

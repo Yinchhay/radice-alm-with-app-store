@@ -1,3 +1,9 @@
+import {
+    UserProficiencies,
+    UserProficienciesLevel,
+    UserSkillSet,
+} from "@/drizzle/schema";
+
 // Important do not change hasLinkedGithub to false, we use it to filter users who have linked github account to consider as members of the system
 export const hasLinkedGithub = true;
 export const RECAPTCHA_KEY = process.env.RECAPTCHA_KEY ?? "";
@@ -128,4 +134,40 @@ export function convertToProjectStatusElements(
         name: capitalize(status),
         value: statusObj[status] !== undefined ? statusObj[status] : false,
     }));
+}
+
+type ProficiencyKey = keyof typeof UserProficienciesLevel;
+type SkillSetToChipReturnType = {
+    [K in ProficiencyKey]: string[];
+};
+export function skillSetToChips(
+    skillSets: UserSkillSet[] | null,
+): SkillSetToChipReturnType {
+    const chips: SkillSetToChipReturnType = {
+        Do: [],
+        Know: [],
+        Teach: [],
+    };
+
+    if (!skillSets || skillSets.length === 0) {
+        return chips;
+    }
+
+    skillSets.forEach((sk) => {
+        sk.proficiency.forEach((p) => {
+            switch (p) {
+                case UserProficienciesLevel.Do:
+                    chips.Do.push(sk.skill);
+                    break;
+                case UserProficienciesLevel.Know:
+                    chips.Know.push(sk.skill);
+                    break;
+                case UserProficienciesLevel.Teach:
+                    chips.Teach.push(sk.skill);
+                    break;
+            }
+        });
+    });
+
+    return chips;
 }

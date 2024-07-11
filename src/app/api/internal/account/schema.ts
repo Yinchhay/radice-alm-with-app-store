@@ -1,21 +1,17 @@
-import { UserSkillSetLevel } from "@/drizzle/schema";
 import { z } from "zod";
 
-export const skillSetLevelSchema = z.nativeEnum(UserSkillSetLevel, {
-    required_error: "Skill level is required",
-    invalid_type_error: "Skill level invalid",
-});
+
 export const skillSetSchema = z.object({
-    label: z
+    skill: z
         .string()
         .trim()
         .min(1, {
-            message: "Label is required",
+            message: "Skill is required",
         })
         .max(75, {
-            message: "Label must be less than or equal to 75 characters",
+            message: "Skill must be less than or equal to 75 characters",
         }),
-    level: skillSetLevelSchema,
+    proficiency: z.array(z.number()),
 });
 
 export const updateProfileInformationFormSchema = z.object({
@@ -49,14 +45,13 @@ export const updateProfileInformationFormSchema = z.object({
             message: "Logo is too long, max 2083 characters",
         })
         .optional(),
-    // no duplicate skillSet label
     skillSet: z.array(skillSetSchema).refine(
         (value) => {
-            const labels = value.map((v) => v.label);
-            return new Set(labels).size === labels.length;
+            const skills = value.map((v) => v.skill);
+            return new Set(skills).size === skills.length;
         },
         {
-            message: "Duplicate skill set label(s) are not allowed",
+            message: "Duplicate skill(s) are not allowed",
         },
     ),
 });

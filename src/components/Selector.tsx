@@ -34,7 +34,7 @@ export default function Selector({
     checkListTitle: string;
     checkList: CheckBoxElement[];
     searchTerm?: string;
-    onSearchChange?: (searchText: string) => Promise<void>;
+    onSearchChange?: (searchText: string) => Promise<void> | void;
     onCheckChange?: (
         updatedList: CheckBoxElement[],
         changedCheckbox: CheckBoxElement,
@@ -48,11 +48,13 @@ export default function Selector({
     const [loading, setLoading] = useState(false);
 
     const searchDebounced = useDebouncedCallback(async (searchText: string) => {
-        if (onSearchChange) {
-            setLoading(true);
-            await onSearchChange(searchText).finally(() => {
-                setLoading(false);
-            });
+        try {
+            if (onSearchChange) {
+                setLoading(true);
+                await onSearchChange(searchText);
+            }
+        } finally {
+            setLoading(false);
         }
     }, searchDelay);
 

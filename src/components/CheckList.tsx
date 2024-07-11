@@ -12,12 +12,15 @@ export default function CheckList({
     checkList,
     atLeastOne = false,
     disabled,
+    id,
     onChange,
 }: {
     title: string;
     checkList: CheckBoxElement[];
     atLeastOne?: boolean;
     disabled?: boolean;
+    // for when there are multiple checklists in the same page
+    id?: string;
     onChange?: (
         updatedList: CheckBoxElement[],
         changedCheckbox: CheckBoxElement,
@@ -55,18 +58,22 @@ export default function CheckList({
 
     return (
         <div>
-            <h1 className="font-bold">{title}: </h1>
+            <h1 className="font-bold">{title ? `${title}:` : ""} </h1>
             <ul>
                 {checkboxElements.map((checkboxElement, index) => (
                     <li
                         className="flex items-center gap-2 capitalize"
-                        key={checkboxElement.name + checkboxElement.value}
+                        key={id + checkboxElement.name + checkboxElement.value}
                     >
                         <input
                             disabled={disabled}
                             className="w-4 aspect-square flex-shrink-0"
                             type="checkbox"
-                            id={checkboxElement.name + checkboxElement.value}
+                            id={
+                                id +
+                                checkboxElement.name +
+                                checkboxElement.value
+                            }
                             checked={checkboxElement.checked}
                             onChange={(e) =>
                                 handleCheckboxChange(index, e.target.checked)
@@ -74,7 +81,9 @@ export default function CheckList({
                         />
                         <label
                             htmlFor={
-                                checkboxElement.name + checkboxElement.value
+                                id +
+                                checkboxElement.name +
+                                checkboxElement.value
                             }
                         >
                             {checkboxElement.name}

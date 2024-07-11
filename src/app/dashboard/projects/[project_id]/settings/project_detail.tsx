@@ -106,8 +106,8 @@ export default function ProjectDetail({
         }
 
         const formState = JSON.stringify({
-            projectName: projectName.current?.value,
-            projectDescription: projectDescription.current?.value,
+            projectName: projectName.current?.value ?? "",
+            projectDescription: projectDescription.current?.value ?? "",
             projectCategories: checkedCategories.map((cate) => cate.value),
             logoSrc: logoSrc,
         });
@@ -122,8 +122,8 @@ export default function ProjectDetail({
 
         setInitialFormState(
             JSON.stringify({
-                projectName: project.name,
-                projectDescription: project.description,
+                projectName: project.name ?? "",
+                projectDescription: project.description ?? "",
                 projectCategories: project.projectCategories.map(
                     (cate) => cate.categoryId,
                 ),
@@ -144,6 +144,8 @@ export default function ProjectDetail({
 
     useEffect(() => {
         updateInitialFormState();
+
+        setLogoSrc(fileToUrl(project.logoUrl));
     }, [project, originalProjectCategories]);
 
     return (
