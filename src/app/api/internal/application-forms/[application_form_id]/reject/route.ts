@@ -1,6 +1,6 @@
 import { lucia } from "@/auth/lucia";
 import { deleteFile } from "@/lib/file";
-import { generateAndFormatZodError } from "@/lib/form";
+import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
     buildErrorResponse,
@@ -13,6 +13,7 @@ import { rejectApplicationFormById } from "@/repositories/application_forms";
 import { sendMail } from "@/smtp/mail";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
+import { rejectFormApplicationSchema } from "../../schema";
 
 // update type if we were to return any data back to the response
 export type FetchRejectApplicationForm = Record<string, never>;
@@ -34,6 +35,17 @@ export async function PATCH(request: Request, { params }: Params) {
         if (errorNoPermission) {
             return buildNoPermissionErrorResponse();
         }
+
+        let body = await request.json();
+        const validationResult = rejectFormApplicationSchema.safeParse(body);
+        if (!validationResult.success) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                formatZodError(validationResult.error),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
+        }
+        body = validationResult.data;
 
         // during reject, we reject and return back the application form details
         const applicationForm = await rejectApplicationFormById(
@@ -59,7 +71,16 @@ export async function PATCH(request: Request, { params }: Params) {
         const mailResult = sendMail({
             subject: "Radice application form rejected",
             to: applicationForm.email,
-            text: `Dear ${applicationForm.firstName} ${applicationForm.lastName}, we regret to inform you that your Radice application form has been rejected.`,
+            text: `Dear ${applicationForm.firstName} ${applicationForm.lastName}, we regret to inform you that your Radice application form has been rejected.
+            ${
+                body.reason
+                    ? `
+            <br />
+            <br />
+                Reason: ${body.reason}`
+                    : ""
+            }
+            `,
         });
 
         return buildSuccessResponse<FetchRejectApplicationForm>(

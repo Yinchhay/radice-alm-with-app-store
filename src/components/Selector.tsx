@@ -6,6 +6,7 @@ import Overlay from "./Overlay";
 import Button from "./Button";
 import { useDebouncedCallback } from "use-debounce";
 import { RefObject, useEffect, useRef, useState } from "react";
+import Loading from "./Loading";
 
 interface CheckBoxElement {
     name: string;
@@ -33,7 +34,7 @@ export default function Selector({
     checkListTitle: string;
     checkList: CheckBoxElement[];
     searchTerm?: string;
-    onSearchChange?: (searchText: string) => void;
+    onSearchChange?: (searchText: string) => Promise<void>;
     onCheckChange?: (
         updatedList: CheckBoxElement[],
         changedCheckbox: CheckBoxElement,
@@ -44,10 +45,14 @@ export default function Selector({
     // a state to ensure that the checkList is re-rendered
     const [checkListState, setCheckListState] =
         useState<CheckBoxElement[]>(checkList);
+    const [loading, setLoading] = useState(false);
 
-    const searchDebounced = useDebouncedCallback((searchText: string) => {
+    const searchDebounced = useDebouncedCallback(async (searchText: string) => {
         if (onSearchChange) {
-            onSearchChange(searchText);
+            setLoading(true);
+            await onSearchChange(searchText).finally(() => {
+                setLoading(false);
+            });
         }
     }, searchDelay);
 
@@ -67,16 +72,22 @@ export default function Selector({
                     placeholder={searchPlaceholder}
                     onChange={(e) => searchDebounced(e.target.value)}
                 />
-                <CheckList
-                    title={checkListTitle}
-                    checkList={checkListState}
-                    onChange={(updatedList, changedCheckbox) => {
-                        setCheckListState(updatedList);
-                        if (onCheckChange) {
-                            onCheckChange(updatedList, changedCheckbox);
-                        }
-                    }}
-                />
+                {loading ? (
+                    <Loading />
+                ) : checkListState.length > 0 ? (
+                    <CheckList
+                        title={checkListTitle}
+                        checkList={checkListState}
+                        onChange={(updatedList, changedCheckbox) => {
+                            setCheckListState(updatedList);
+                            if (onCheckChange) {
+                                onCheckChange(updatedList, changedCheckbox);
+                            }
+                        }}
+                    />
+                ) : (
+                    <p className="text-center text-gray-500">No result</p>
+                )}
                 <div className="flex gap-3 justify-end">
                     <Button onClick={onCancel} type="button">
                         Cancel

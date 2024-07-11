@@ -270,7 +270,7 @@ export default function EditRole({
                 <label htmlFor="roleName" className="font-semibold">
                     Role permissions:
                 </label>
-                <div className="grid gap-2">{RolePermissions}</div>
+                <div className="">{RolePermissions}</div>
             </div>
             <div className="flex flex-col gap-2">
                 <div className="flex flex-row justify-between">
@@ -335,7 +335,8 @@ function RolePermission({
     onChange: (id: number, state: boolean) => void;
 }) {
     return (
-        <div className="flex justify-between">
+        <div className="flex justify-between hover:bg-gray-100 dark:hover:bg-slate-500 p-2 rounded-sm transition-colors duration-200 ease-in-out
+        ">
             <p>{permission.name}</p>
             <ToggleSwitch
                 defaultState={permission.state}

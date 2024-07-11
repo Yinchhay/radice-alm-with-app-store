@@ -32,9 +32,10 @@ INSERT INTO role_permissions (role_Id, permission_id) VALUES (@role_id, 3);
 
 -- user
 INSERT INTO users (id, first_name, last_name, email, password, type) VALUES 
-('superadmindadixmz', 'Super', 'Admin', 'lifegoalcs2@gmail.com', '$2a$12$r1RwgV8IJZT9MNddeJk4R.WYCIElByae.zal8fWPHwh1zF1GPa9iG', 'superadmin');
+-- IMPORTANT: Change the password and email.
+('superadminzz', 'Super', 'Admin', 'any@gmail.com', '$2a$12$r1RwgV8IJZT9MNddeJk4R.WYCIElByae.zal8fWPHwh1zF1GPa9iG', 'superadmin');
 
 -- userRoles
-INSERT INTO user_roles (user_id, role_Id) VALUES ('superadmindadixmz', @role_id);
+INSERT INTO user_roles (user_id, role_Id) VALUES ('superadminzz', @role_id);
 
 COMMIT;

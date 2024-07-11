@@ -30,6 +30,7 @@ export async function fetchApplicationForms(
 
 export async function fetchRejectApplicationFormById(
     applicationFormId: number,
+    reason: string,
     pathname: string,
 ): ResponseJson<FetchApplicationFormsData> {
     try {
@@ -41,6 +42,7 @@ export async function fetchRejectApplicationFormById(
                 headers: {
                     Authorization: `Bearer ${sessionId}`,
                 },
+                body: JSON.stringify({ reason }),
             },
         );
 

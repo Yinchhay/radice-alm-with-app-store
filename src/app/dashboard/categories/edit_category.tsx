@@ -176,7 +176,7 @@ function EditCategoryBtn() {
     const formStatus = useFormStatus();
     return (
         <Button disabled={formStatus.pending} variant="primary">
-            {formStatus.pending ? "Editing" : "Edit"}
+            {formStatus.pending ? "Saving" : "Save"}
         </Button>
     );
 }

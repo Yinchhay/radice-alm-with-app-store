@@ -293,10 +293,10 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                                     <Table className="w-full">
                                                         <TableHeader>
                                                             <ColumName>
-                                                                Label
+                                                                Skill
                                                             </ColumName>
                                                             <ColumName className="min-w-36">
-                                                                Level
+                                                                Proficiency
                                                             </ColumName>
                                                             <ColumName>
                                                                 Action
@@ -415,7 +415,7 @@ function EditProfileBtn() {
     const formStatus = useFormStatus();
     return (
         <Button disabled={formStatus.pending} variant="primary">
-            {formStatus.pending ? "Editing" : "Edit"}
+            {formStatus.pending ? "Saving" : "Save"}
         </Button>
     );
 }
