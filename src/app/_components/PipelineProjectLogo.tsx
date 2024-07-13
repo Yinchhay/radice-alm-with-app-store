@@ -23,7 +23,7 @@ export default function PipelineProjectLogo({ src }: { src: string }) {
                     rows={5}
                     cols={5}
                     revealDelay={12}
-                    className="aspect-square object-cover border relative z-10 border-gray-300 hover:scale-90 duration-200"
+                    className="aspect-square object-cover border relative z-10 border-gray-300 hover:scale-90 duration-200 bg-white"
                 />
             </div>
         </ScrollReveal>

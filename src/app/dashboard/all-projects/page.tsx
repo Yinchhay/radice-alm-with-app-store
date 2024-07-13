@@ -90,7 +90,7 @@ function Project({
         <Card square>
             <div className="flex flex-row gap-4 relative">
                 <ImageWithFallback
-                    className="aspect-square object-cover rounded-sm  w-32 h-32"
+                    className="aspect-square object-cover rounded-sm  w-32 h-32 bg-white"
                     src={fileToUrl(project.logoUrl)}
                     alt={"project logo"}
                     width={128}

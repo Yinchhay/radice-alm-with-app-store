@@ -270,7 +270,7 @@ export default function Builder({
         if (chapters.length > 0) {
             const newComponent = generateComponent(
                 "image",
-                "/placeholders/placeholder.webp",
+                "/placeholders/placeholder.png",
             );
             setComponents((prevComponents) => [
                 ...prevComponents,

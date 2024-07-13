@@ -181,7 +181,7 @@ export default async function MemberPublicProfilePage({
                                                 <Image
                                                     src={
                                                         `/api/file?filename=${project.logoUrl}` ||
-                                                        "/placeholders/placeholder.webp"
+                                                        "/placeholders/placeholder.png"
                                                     }
                                                     fill
                                                     className="object-cover"

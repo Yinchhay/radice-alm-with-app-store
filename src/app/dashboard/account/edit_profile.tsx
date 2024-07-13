@@ -197,7 +197,7 @@ export function EditProfileOverlay({ user }: { user: User }) {
                                         user.profileUrl,
                                         user.type === UserType.PARTNER
                                             ? "/placeholders/logo_placeholder.png"
-                                            : "/placeholders/placeholder.webp",
+                                            : "/placeholders/placeholder.png",
                                     )}
                                     alt={"profile"}
                                     width={128}

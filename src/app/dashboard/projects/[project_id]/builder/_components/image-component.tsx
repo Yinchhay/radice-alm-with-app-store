@@ -41,13 +41,13 @@ export default function ImageComponent({
     const [showEdit, setShowEdit] = useState<boolean>(false);
     const [fileList, setFileList] = useState<FileList>();
     const [imageSrc, setImageSrc] = useState<string>(
-        component.text ? component.text : "/placeholders/placeholder.webp",
+        component.text ? component.text : "/placeholders/placeholder.png",
     );
     const buttonRef = useRef<HTMLButtonElement>(null);
 
     function Cancel() {
         setImageSrc(
-            component.text ? component.text : "/placeholders/placeholder.webp",
+            component.text ? component.text : "/placeholders/placeholder.png",
         );
         setFileList(undefined);
     }
@@ -68,8 +68,8 @@ export default function ImageComponent({
                     newData.text = newImg;
                     setImageSrc(newImg);
                 } else {
-                    newData.text = "/placeholders/placeholder.webp";
-                    setImageSrc("/placeholders/placeholder.webp");
+                    newData.text = "/placeholders/placeholder.png";
+                    setImageSrc("/placeholders/placeholder.png");
                 }
             }
             onSave(newData);
@@ -85,7 +85,7 @@ export default function ImageComponent({
         if (fileList) {
             const sessionId = await getSessionCookie();
             if (component.text) {
-                if (component.text != "/placeholders/placeholder.webp") {
+                if (component.text != "/placeholders/placeholder.png") {
                     const deleteOldImage = await deleteFile(
                         component.text,
                         sessionId ?? "",
@@ -107,7 +107,7 @@ export default function ImageComponent({
             } else {
                 //console.log(newUpload.message);
             }
-            return "/placeholders/placeholder.webp";
+            return "/placeholders/placeholder.png";
         }
     }
 
@@ -159,7 +159,7 @@ export default function ImageComponent({
                             if (component.text) {
                                 if (
                                     component.text !=
-                                    "/placeholders/placeholder.webp"
+                                    "/placeholders/placeholder.png"
                                 ) {
                                     const deleteOldImage = await deleteFile(
                                         component.text,
@@ -226,8 +226,8 @@ export default function ImageComponent({
                                 newData.text = newImg;
                                 setImageSrc(newImg);
                             } else {
-                                newData.text = "/placeholders/placeholder.webp";
-                                setImageSrc("/placeholders/placeholder.webp");
+                                newData.text = "/placeholders/placeholder.png";
+                                setImageSrc("/placeholders/placeholder.png");
                             }
                             onSave(newData);
                         }}

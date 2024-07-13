@@ -126,7 +126,7 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                         <div className="w-full px-8 grid gap-4">
                             <div className="flex gap-8 items-center">
                                 <ImageWithFallback
-                                    className="border border-gray-300 object-cover aspect-square"
+                                    className="border border-gray-300 object-cover aspect-square bg-white"
                                     width={80}
                                     height={80}
                                     src={fileToUrl(project.logoUrl)}
@@ -472,7 +472,10 @@ export default function PreviewProject({ project_id }: { project_id: number }) {
                             files={project.files}
                             links={project.links}
                         />
-                        <Stepper projectStatus={projectStatusElements} isDashboard/>
+                        <Stepper
+                            projectStatus={projectStatusElements}
+                            isDashboard
+                        />
                     </div>
                 </div>
             )}

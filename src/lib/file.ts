@@ -101,7 +101,7 @@ export function fileToUrl(
     fallbackSrc?: string | undefined,
 ): string {
     if (!file) {
-        return fallbackSrc || "/placeholders/placeholder.webp";
+        return fallbackSrc || "/placeholders/placeholder.png";
     }
 
     const fileStartsWith = ["http", "/", "blob:"];
