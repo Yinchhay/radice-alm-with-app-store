@@ -66,9 +66,9 @@ export const users = mysqlTable("users", {
         .notNull()
         .$type<UserType>()
         .default(UserType.USER),
-    skillSet: json("skillSet").$type<UserSkillSet[]>().default([]),
+    skillSet: json("skill_set").$type<UserSkillSet[]>().default([]),
     description: varchar("description", {
-        length: 255,
+        length: 500,
     }),
     joinSince: timestamp("join_since").defaultNow(),
     leaveAt: timestamp("leave_at"),

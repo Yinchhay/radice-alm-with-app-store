@@ -33,8 +33,8 @@ export const updateProfileInformationFormSchema = z.object({
         .max(50, {
             message: "Last name must be less than or equal to 50 characters",
         }),
-    description: z.string().trim().max(255, {
-        message: "Description must be less than or equal to 255 characters",
+    description: z.string().trim().max(500, {
+        message: "Description must be less than or equal to 500 characters",
     }),
     // for fallback if no profile is being updated
     currentProfileLogo: z.string().trim().optional(),

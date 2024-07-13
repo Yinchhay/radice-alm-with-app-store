@@ -12,7 +12,7 @@ export default function SkillSetChips({
     dashboard?: boolean;
 }) {
     const chips = skillSetToChips(skillSets);
-    console.log(chips);
+
     if (dashboard) {
         return (
             <div>
@@ -25,6 +25,7 @@ export default function SkillSetChips({
                                 {chips.Know.map((skill, i) => {
                                     return (
                                         <Chip
+                                            key={skill + i}
                                             className="rounded-sm outline outline-1 outline-gray-300 dark:outline-gray-600 dark:bg-gray-700"
                                             textClassName="text-black"
                                             bgClassName="bg-white"
@@ -45,6 +46,7 @@ export default function SkillSetChips({
                                 {chips.Do.map((skill, i) => {
                                     return (
                                         <Chip
+                                            key={skill + i}
                                             className="rounded-sm outline outline-1 outline-gray-300 dark:outline-gray-600 dark:bg-gray-700"
                                             textClassName="text-black"
                                             bgClassName="bg-white"
@@ -65,6 +67,7 @@ export default function SkillSetChips({
                                 {chips.Teach.map((skill, i) => {
                                     return (
                                         <Chip
+                                            key={skill + i}
                                             className="rounded-sm outline outline-1 outline-gray-300 dark:outline-gray-600 dark:bg-gray-700"
                                             textClassName="text-black"
                                             bgClassName="bg-white"
@@ -97,6 +100,7 @@ export default function SkillSetChips({
                                     {chips.Know.map((skill, i) => {
                                         return (
                                             <Chip
+                                                key={skill + i}
                                                 className="rounded-sm"
                                                 textClassName="text-white"
                                                 bgClassName="bg-black"
@@ -115,6 +119,7 @@ export default function SkillSetChips({
                                     {chips.Do.map((skill, i) => {
                                         return (
                                             <Chip
+                                                key={skill + i}
                                                 className="rounded-sm"
                                                 textClassName="text-white"
                                                 bgClassName="bg-black"
@@ -133,6 +138,7 @@ export default function SkillSetChips({
                                     {chips.Teach.map((skill, i) => {
                                         return (
                                             <Chip
+                                                key={skill + i}
                                                 className="rounded-sm"
                                                 textClassName="text-white"
                                                 bgClassName="bg-black"
