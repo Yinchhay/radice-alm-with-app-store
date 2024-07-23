@@ -52,7 +52,7 @@ export default function Builder({
     });
     const keyboardSensor = useSensor(KeyboardSensor);
     const sensors = useSensors(mouseSensor, keyboardSensor);
-    const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+    const [selectedChapter, setSelectedChapter] = useState<string>("");
     const [chapters, setChapters] = useState<Chapter[]>([]);
     const [components, setComponents] = useState<Component[]>([]);
     const [dataLoaded, setDataLoaded] = useState(false);
@@ -61,15 +61,16 @@ export default function Builder({
     const defaultChapterName = "New Chapter";
     const [newChapterName, setNewChapterName] = useState(defaultChapterName);
     const [errorMessage, setErrorMessage] = useState("");
-
+    function getChapterIndexById(id: string) {
+        return chapters.findIndex((chapter) => chapter.id === id);
+    }
     function deleteChapter(ID: string) {
-        if (selectedChapter !== null) {
-            if (selectedChapter <= 0) {
+        if (selectedChapter !== "") {
+            if (chapters.length - 1 <= 0) {
                 setComponents([]);
-                setSelectedChapter(null);
+                setSelectedChapter("");
             } else {
-                setSelectedChapter(0);
-                setComponents(chapters[0].components);
+                setSelectedChapter(chapters[0].id);
             }
         }
         setChapters((prevContent) =>
@@ -92,9 +93,6 @@ export default function Builder({
             components: [],
         };
         setChapters((prevChapters) => [...prevChapters, newChapter]);
-        if (chapters.length == 0) {
-            setSelectedChapter(0);
-        }
         setNewChapterName(defaultChapterName);
         setErrorMessage("");
     }
@@ -126,7 +124,6 @@ export default function Builder({
                                         .projectContent as string,
                                 ),
                             );
-                            setSelectedChapter(0);
                         } catch {
                             setChapters([]);
                         }
@@ -144,10 +141,20 @@ export default function Builder({
     }, []);
 
     useEffect(() => {
-        if (chapters.length > 0 && selectedChapter !== null) {
-            setComponents(chapters[selectedChapter].components);
+        if (chapters.length > 0 && selectedChapter !== "") {
+            setComponents(
+                chapters[getChapterIndexById(selectedChapter)].components,
+            );
         }
     }, [selectedChapter]);
+
+    useEffect(() => {
+        if (dataLoaded) {
+            if (chapters.length >= 1) {
+                setSelectedChapter(chapters[0].id);
+            }
+        }
+    }, [dataLoaded]);
 
     useEffect(() => {
         async function updateProjectContent() {
@@ -169,7 +176,7 @@ export default function Builder({
     useEffect(() => {
         setChapters((prevChapters) => {
             return prevChapters.map((chapter, i) => {
-                if (i == selectedChapter) {
+                if (chapter.id == selectedChapter) {
                     chapter.components = components;
                 }
                 return chapter;
@@ -187,7 +194,6 @@ export default function Builder({
                     (chapter) => chapter.id === e.over?.id,
                 );
                 setChapters(arrayMove(chapters, oldIndex, newIndex));
-                setSelectedChapter(newIndex);
             }
         }
     }
@@ -399,9 +405,9 @@ export default function Builder({
                             }
                             selectedChapter={selectedChapter}
                             chapters={chapters}
-                            selectChapterIndex={(index) => {
+                            selectChapterID={(chapterID) => {
                                 setSelectedComponent("");
-                                setSelectedChapter(index);
+                                setSelectedChapter(chapterID);
                             }}
                             onCreateChapter={() => setShowCreateOverlay(true)}
                             onDeleteChapter={(chapterID) =>

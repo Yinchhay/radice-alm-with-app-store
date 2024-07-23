@@ -20,18 +20,18 @@ export default function ChapterManager({
     chapters,
     onCreateChapter,
     onDeleteChapter,
-    selectChapterIndex,
+    selectChapterID,
     onEditChapterName,
     moveChapters,
     selectedChapter,
 }: {
     chapters: Chapter[];
-    selectChapterIndex: (index: number) => void;
+    selectChapterID: (chapterID: string) => void;
     onCreateChapter: () => void;
     onDeleteChapter: (chapterID: string) => void;
     onEditChapterName: (chapterID: string, chapterName: string) => void;
     moveChapters: (e: DragEndEvent) => void;
-    selectedChapter: number | null;
+    selectedChapter: string;
 }) {
     const mouseSensor = useSensor(MouseSensor, {
         activationConstraint: {
@@ -69,9 +69,8 @@ export default function ChapterManager({
                             return (
                                 <ChapterComponent
                                     selected={
-                                        selectedChapter !== null &&
-                                        chapter.id ==
-                                            chapters[selectedChapter].id
+                                        selectedChapter !== "" &&
+                                        chapter.id == selectedChapter
                                             ? true
                                             : false
                                     }
@@ -87,10 +86,12 @@ export default function ChapterManager({
                                     chapter={chapter}
                                     key={`${chapter.id}-chapter`}
                                     onClick={() => {
-                                        if (selectedChapter == null) {
-                                            selectChapterIndex(i);
-                                        } else if (selectedChapter != i) {
-                                            selectChapterIndex(i);
+                                        if (selectedChapter == "") {
+                                            selectChapterID(chapter.id);
+                                        } else if (
+                                            selectedChapter != chapter.id
+                                        ) {
+                                            selectChapterID(chapter.id);
                                         }
                                     }}
                                 />
