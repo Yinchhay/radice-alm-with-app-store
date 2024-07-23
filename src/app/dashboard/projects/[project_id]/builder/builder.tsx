@@ -69,6 +69,8 @@ export default function Builder({
             if (chapters.length - 1 <= 0) {
                 setComponents([]);
                 setSelectedChapter("");
+            } else if (getChapterIndexById(ID) == 0) {
+                setSelectedChapter(chapters[1].id);
             } else {
                 setSelectedChapter(chapters[0].id);
             }
