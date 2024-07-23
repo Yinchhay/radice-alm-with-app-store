@@ -1,0 +1,93 @@
+import { formatZodError, generateAndFormatZodError } from "@/lib/form";
+import { checkBearerAndPermission } from "@/lib/IAM";
+import {
+    buildErrorResponse,
+    buildNoBearerTokenErrorResponse,
+    buildNoPermissionErrorResponse,
+    checkAndBuildErrorResponse,
+    buildSuccessResponse,
+} from "@/lib/response";
+import { revalidateTags } from "@/lib/server_utils";
+import { deleteRoleById, getRoleByIdNoFilter } from "@/repositories/role";
+import { ErrorMessage } from "@/types/error";
+import { HttpStatusCode } from "@/types/http";
+import { Permissions } from "@/types/IAM";
+import { z } from "zod";
+import { deleteRoleFormSchema } from "../../schema";
+import { PermissionsToFilterIfNotSuperAdmin } from "@/lib/filter";
+import { UserType } from "@/types/user";
+
+// update type if we were to return any data back to the response
+export type FetchDeleteRole = Record<string, never>;
+
+type Params = { params: { role_id: string } };
+const successMessage = "Delete role successfully";
+const unsuccessMessage = "Delete role failed";
+
+export async function DELETE(request: Request, { params }: Params) {
+    try {
+        const requiredPermission = new Set([Permissions.DELETE_ROLES]);
+        const { errorNoBearerToken, errorNoPermission, user } =
+            await checkBearerAndPermission(request, requiredPermission);
+        if (errorNoBearerToken) {
+            return buildNoBearerTokenErrorResponse();
+        }
+        if (errorNoPermission) {
+            return buildNoPermissionErrorResponse();
+        }
+
+        let data: z.infer<typeof deleteRoleFormSchema> = {
+            roleId: Number(params.role_id),
+        };
+        const validationResult = deleteRoleFormSchema.safeParse(data);
+        if (!validationResult.success) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                formatZodError(validationResult.error),
+                HttpStatusCode.BAD_REQUEST_400,
+            );
+        }
+        data = validationResult.data;
+
+        const role = await getRoleByIdNoFilter(data.roleId);
+
+        if (!role) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("roleId", ErrorMessage.NotFound),
+                HttpStatusCode.NOT_FOUND_404,
+            );
+        }
+
+        if (user.type !== UserType.SUPER_ADMIN) {
+            const roleHasRolePermission = role.rolePermissions.some((rp) =>
+                PermissionsToFilterIfNotSuperAdmin.includes(rp.permission.id),
+            );
+
+            if (roleHasRolePermission) {
+                return buildErrorResponse(
+                    unsuccessMessage,
+                    generateAndFormatZodError(
+                        "permission",
+                        "You are not allowed to delete this role because it has permission(s) that you are not allowed to delete",
+                    ),
+                    HttpStatusCode.FORBIDDEN_403,
+                );
+            }
+        }
+
+        const deleteResult = await deleteRoleById(data.roleId);
+        // if no row is affected, meaning that the role didn't get deleted
+        if (deleteResult[0].affectedRows < 1) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("unknown", ErrorMessage.NotFound),
+                HttpStatusCode.NOT_FOUND_404,
+            );
+        }
+
+        return buildSuccessResponse<FetchDeleteRole>(successMessage, {});
+    } catch (error: any) {
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
+    }
+}

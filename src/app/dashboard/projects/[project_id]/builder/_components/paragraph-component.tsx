@@ -1,0 +1,157 @@
+"use client";
+import Button from "@/components/Button";
+import InputField from "@/components/InputField";
+import {
+    Component,
+    TextAlign,
+    fontAligns,
+    fontWeights,
+    paragraphFontSizes,
+} from "@/types/content";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import ReactTextareaAutosize from "react-textarea-autosize";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+export default function ParagraphComponent({
+    component,
+    onSave,
+    onDelete,
+    onSelected,
+    selectedComponentID,
+}: {
+    component: Component;
+    onSave: (newData: Component) => void;
+    onDelete: (ID: string) => void;
+    onSelected: (ID: string) => void;
+    selectedComponentID: string;
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: component.id });
+
+    const style = {
+        transform: CSS.Translate.toString(transform),
+        transition,
+    };
+    const [showEdit, setShowEdit] = useState<boolean>(false);
+    const textRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textRef.current) {
+            textRef.current.value = component.text ? component.text : "";
+        }
+    }, []);
+
+    function Cancel() {
+        if (textRef.current) {
+            textRef.current.value = component.text ? component.text : "";
+        }
+    }
+
+    useEffect(() => {
+        if (isDragging) {
+            onSelected("");
+        }
+    }, [isDragging]);
+
+    useEffect(() => {
+        if (selectedComponentID == component.id) {
+            setShowEdit(true);
+        } else if (showEdit) {
+            setShowEdit(false);
+            let newData = component;
+            if (textRef.current) {
+                newData.text = textRef.current.value;
+            }
+            onSave(newData);
+        }
+    }, [selectedComponentID]);
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...(!showEdit ? listeners : {})}
+            aria-describedby=""
+            data-no-dnd="true"
+            className={[
+                "outline outline-1 hover:outline-gray-400 rounded-md",
+                selectedComponentID == component.id
+                    ? "outline-gray-400"
+                    : "outline-transparent",
+                isDragging ? "" : "duration-200",
+            ].join(" ")}
+        >
+            <ReactTextareaAutosize
+                spellCheck={false}
+                ref={textRef}
+                className={`w-full h-full resize-none focus:outline-none overflow-hidden bg-transparent p-4 ${selectedComponentID == component.id ? "pb-0" : ""}`}
+                style={{
+                    fontSize:
+                        component.style &&
+                        component.style.fontSize !== undefined
+                            ? paragraphFontSizes[component.style.fontSize].value
+                            : paragraphFontSizes[1].value,
+                    fontWeight:
+                        component.style &&
+                        component.style.fontWeight !== undefined
+                            ? fontWeights[component.style.fontWeight].value
+                            : fontWeights[1].value,
+                    textAlign:
+                        component.style &&
+                        component.style.fontAlign !== undefined
+                            ? (fontAligns[component.style.fontAlign]
+                                  .value as TextAlign)
+                            : (fontAligns[0].value as TextAlign),
+                }}
+                onClick={() => {
+                    if (!isDragging) {
+                        onSelected(component.id);
+                    }
+                }}
+            />
+            {showEdit && (
+                <div className="flex gap-3 justify-end items-center pb-4 pr-4">
+                    <Button
+                        variant="danger"
+                        onClick={() => {
+                            onSelected("");
+                            onDelete(component.id);
+                        }}
+                    >
+                        Delete
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            onSelected("");
+                            Cancel();
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            onSelected("");
+                            let newData = component;
+                            if (textRef.current) {
+                                newData.text = textRef.current.value;
+                            }
+                            onSave(newData);
+                        }}
+                        variant="primary"
+                    >
+                        Save
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+}

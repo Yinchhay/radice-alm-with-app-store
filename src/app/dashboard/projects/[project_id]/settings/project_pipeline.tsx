@@ -1,0 +1,206 @@
+"use client";
+import { FetchOneAssociatedProjectData } from "@/app/api/internal/project/[project_id]/route";
+import Button from "@/components/Button";
+import Card from "@/components/Card";
+import CheckList, { CheckBoxElement } from "@/components/CheckList";
+import FormErrorMessages from "@/components/FormErrorMessages";
+import { ProjectPipelineStatus } from "@/drizzle/schema";
+import { arrayToCheckList } from "@/lib/array_to_check_list";
+import { useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { fetchEditProjectSettingsPipeline } from "./fetch";
+import { usePathname } from "next/navigation";
+import { useToast } from "@/components/Toaster";
+import { IconCheck } from "@tabler/icons-react";
+
+/**
+ * Any change to the pipeline type please change in
+ * projectPipeLineStatusType in src\app\api\internal\project\[project_id]\schema.ts
+ */
+export function ProjectPipeline({
+    project,
+}: {
+    project: FetchOneAssociatedProjectData["project"];
+}) {
+    if (!project) {
+        throw new Error("Project not found");
+    }
+
+    function getPipelineStatus(): ProjectPipelineStatus {
+        if (project && project.pipelineStatus) {
+            return {
+                requirements: project.pipelineStatus?.requirements ?? false,
+                definition: project.pipelineStatus?.definition ?? false,
+                analysis: project.pipelineStatus?.analysis ?? false,
+                approved: project.pipelineStatus?.approved ?? false,
+                chartered: project.pipelineStatus?.chartered ?? false,
+                design: project.pipelineStatus?.design ?? false,
+                development: project.pipelineStatus?.development ?? false,
+                build: project.pipelineStatus?.build ?? false,
+                test: project.pipelineStatus?.test ?? false,
+                release: project.pipelineStatus?.release ?? false,
+                live: project.pipelineStatus?.live ?? false,
+                retiring: project.pipelineStatus?.retiring ?? false,
+                retired: project.pipelineStatus?.retired ?? false,
+            };
+        }
+
+        return {
+            requirements: false,
+            definition: false,
+            analysis: false,
+            approved: false,
+            chartered: false,
+            design: false,
+            development: false,
+            build: false,
+            test: false,
+            release: false,
+            live: false,
+            retiring: false,
+            retired: false,
+        };
+    }
+
+    function pipeLineToCheckList(): CheckBoxElement[] {
+        const pipelineStatus = getPipelineStatus();
+        const checkList = arrayToCheckList(
+            Object.entries(pipelineStatus),
+            0,
+            1,
+        );
+
+        return checkList.map((checkbox) => {
+            return {
+                name: checkbox.name,
+                value: checkbox.value,
+                checked: Boolean(checkbox.value),
+            };
+        });
+    }
+
+    const [pipelineStatusCheckList, setPipelineStatusCheckList] = useState<
+        CheckBoxElement[]
+    >(pipeLineToCheckList());
+    const pathname = usePathname();
+    const [result, setResult] =
+        useState<
+            Awaited<ReturnType<typeof fetchEditProjectSettingsPipeline>>
+        >();
+
+    const { addToast } = useToast();
+
+    const [initialFormState, setInitialFormState] = useState<string>();
+    const [isFormModified, setIsFormModified] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
+
+    function onResetClick() {
+        setPipelineStatusCheckList(pipeLineToCheckList());
+    }
+
+    function checkListToObject(
+        checkList: CheckBoxElement[],
+    ): Record<string, boolean> {
+        let object: Record<string, boolean> = {};
+        for (const checkBox of checkList) {
+            object[checkBox.name] = checkBox.checked;
+        }
+
+        return object;
+    }
+
+    async function onSubmit(formData: FormData) {
+        if (!project) return;
+
+        const projectPipelineStatus = checkListToObject(
+            pipelineStatusCheckList,
+        ) as ProjectPipelineStatus;
+
+        const res = await fetchEditProjectSettingsPipeline(
+            project.id,
+            projectPipelineStatus,
+            pathname,
+        );
+        setResult(res);
+
+        if (res.success) {
+            addToast(
+                <div className="flex gap-2">
+                    <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full" />
+                    <p>Successfully updated project pipeline</p>
+                </div>,
+            );
+        }
+    }
+
+    function updateInitialFormState() {
+        if (!project) {
+            return;
+        }
+
+        setInitialFormState(JSON.stringify(getPipelineStatus()));
+    }
+
+    function detectChanges() {
+        if (!initialFormState) {
+            return;
+        }
+
+        const formState = JSON.stringify(
+            checkListToObject(pipelineStatusCheckList),
+        );
+
+        setIsFormModified(formState !== initialFormState);
+    }
+
+    useEffect(() => {
+        detectChanges();
+    }, [pipelineStatusCheckList, initialFormState]);
+
+    useEffect(() => {
+        updateInitialFormState();
+    }, [project]);
+
+    return (
+        <Card>
+            <h1 className="text-2xl">Project status</h1>
+            <form action={onSubmit} ref={formRef} onChange={detectChanges}>
+                <div className="my-4">
+                    <CheckList
+                        title={"Status"}
+                        checkList={pipelineStatusCheckList}
+                        onChange={(updatedList, changedCheckBox) => {
+                            setPipelineStatusCheckList(updatedList);
+                        }}
+                    />
+                </div>
+                <div className="flex justify-end">
+                    {isFormModified && (
+                        <div className="flex gap-4">
+                            <Button
+                                onClick={onResetClick}
+                                variant="secondary"
+                                type="button"
+                            >
+                                Reset
+                            </Button>
+                            <SaveChangesBtn />
+                        </div>
+                    )}
+                </div>
+                {!result?.success && result?.errors && (
+                    <FormErrorMessages errors={result?.errors} />
+                )}
+            </form>
+        </Card>
+    );
+}
+
+function SaveChangesBtn() {
+    const formStatus = useFormStatus();
+    return (
+        <Button disabled={formStatus.pending} variant="primary">
+            {formStatus.pending ? "Saving changes" : "Save changes"}
+        </Button>
+    );
+}

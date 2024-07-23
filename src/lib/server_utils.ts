@@ -1,0 +1,51 @@
+"use server";
+/**
+ * Note: server action must be async function
+ */
+
+import { cookies, headers } from "next/headers";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { lucia } from "@/auth/lucia";
+
+export async function getProtocol(): Promise<string> {
+    // For the protocol, we will check based on env HTTP_PROTOCOL, if not check by x-forwarded-proto, if not check by NODE_ENV (production or not), if not default to http
+    let protocol = process.env.HTTP_PROTOCOL;
+
+    if (!protocol) {
+        protocol =
+            headers().get("x-forwarded-proto") ||
+            (process.env.NODE_ENV === "production" ? "https" : "http");
+    }
+
+    return protocol;
+}
+
+export async function getBaseUrl(): Promise<string> {
+    const protocol = await getProtocol();
+    return `${protocol}://${headers().get("x-forwarded-host")}` || "";
+}
+
+export async function getFullUrl(): Promise<string> {
+    return headers().get("referer") || "";
+}
+
+/**
+ * custom revalidateTag because I want to have type for it
+ * when passing generic to the function it will infer the type so that we can ensure that the tag
+ * is valid, if the tag is not valid typescript will show an error
+ * example usage: revalidateTag<Generic in /repositories>("getUserById_C:123")
+ * using array of tags: revalidateTags<Generic in /repositories>("getUserById_C:123", "getUserById_C:124")
+ */
+export async function revalidateTags<T>(...tags: T[]): Promise<void> {
+    for (const tag of tags) {
+        revalidateTag(tag as string);
+    }
+}
+
+export async function clientRevalidatePath(path: string): Promise<void> {
+    return revalidatePath(path);
+}
+
+export async function getSessionCookie(): Promise<string | null> {
+    return cookies().get(lucia.sessionCookieName)?.value ?? null;
+}

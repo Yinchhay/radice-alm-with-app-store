@@ -1,0 +1,5 @@
+{
+    "permissions": "has create, delete, edit categories",
+    "email": "admin@gmail.com",
+    "password": "123456789"
+}

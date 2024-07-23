@@ -1,0 +1,62 @@
+import { checkBearerAndPermission, RouteRequiredPermissions } from "@/lib/IAM";
+import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
+import {
+    buildNoBearerTokenErrorResponse,
+    buildNoPermissionErrorResponse,
+    checkAndBuildErrorResponse,
+    buildSuccessResponse,
+} from "@/lib/response";
+import { getUsers, getUsersTotalRow } from "@/repositories/users";
+import { NextRequest } from "next/server";
+
+type GetUsersReturnType = Awaited<ReturnType<typeof getUsers>>;
+
+export type FetchUsersData = {
+    users: GetUsersReturnType;
+    totalRows: number;
+    rowsPerPage: number;
+    maxPage: number;
+};
+
+const successMessage = "Get users successfully";
+const unsuccessMessage = "Get users failed";
+
+export async function GET(request: NextRequest) {
+    try {
+        const { errorNoBearerToken, errorNoPermission } =
+            await checkBearerAndPermission(
+                request,
+                RouteRequiredPermissions.get("manageUsers")!,
+            );
+        if (errorNoBearerToken) {
+            return buildNoBearerTokenErrorResponse();
+        }
+        if (errorNoPermission) {
+            return buildNoPermissionErrorResponse();
+        }
+
+        const page: number =
+            Number(request.nextUrl.searchParams.get("page")) || 1;
+        let rowsPerPage: number =
+            Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
+            ROWS_PER_PAGE;
+        const search = request.nextUrl.searchParams.get("search") || "";
+
+                    // limit to max 100 rows per page
+        if (rowsPerPage > 100) {
+            rowsPerPage = 100;
+        }
+
+        const users = await getUsers(page, rowsPerPage, search);
+        const totalRows = await getUsersTotalRow(search);
+
+        return buildSuccessResponse<FetchUsersData>(successMessage, {
+            users: users,
+            totalRows: totalRows,
+            rowsPerPage: rowsPerPage,
+            maxPage: getPaginationMaxPage(totalRows, rowsPerPage),
+        });
+    } catch (error: any) {
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
+    }
+}

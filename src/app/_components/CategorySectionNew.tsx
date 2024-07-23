@@ -1,0 +1,564 @@
+"use client";
+import { useEffect, useState } from "react";
+import { fetchPublicProjectsByCategory } from "../fetch";
+import TechButton from "@/components/TechButton";
+import ImageWithFallback from "@/components/ImageWithFallback";
+import CategoryProjectLogo from "./CategoryProjectLogo";
+import SpecialEffectText from "../../components/effects/SpecialEffectText";
+import SpecialEffectSentence from "../../components/effects/SpecialEffectSentence";
+import { PublicCategory } from "../api/public/categories/route";
+import { GetPublicProjectsByCategoryIdReturnType } from "../api/public/categories/[category_id]/projects/route";
+import { Roboto_Condensed, Roboto_Flex } from "next/font/google";
+import Image from "next/image";
+import { fileToUrl } from "@/lib/file";
+import { CategoryAndProjects } from "@/repositories/project";
+import GridRevealImage from "@/components/effects/GridRevealImage";
+import GridRvealVideo from "@/components/effects/GridRevealVideo";
+const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
+const roboto_condensed = Roboto_Condensed({
+    weight: ["400", "700"],
+    subsets: ["latin"],
+    display: "swap",
+});
+
+export default function CategorySectionNew({
+    variant = "light",
+    category,
+}: {
+    variant: string;
+    category: CategoryAndProjects;
+}) {
+    // Reverse the projects list if the variant is dark
+    const projects =
+        variant === "dark"
+            ? [...category.projects].reverse()
+            : category.projects;
+
+    const moveLength = 88;
+    const [maxPos, setMaxPos] = useState(
+        projects.length > 6 ? projects.length - 6 : 0,
+    );
+    const [currentPos, setCurrentPos] = useState(
+        variant == "light" ? 0 : projects.length - 6,
+    );
+    const [selectedProject, setSelectedProject] = useState<number>(
+        variant == "light" ? 0 : projects.length - 1,
+    );
+
+    switch (variant) {
+        case "light":
+            return (
+                <>
+                    {projects && projects.length > 0 && (
+                        <div
+                            className="bg-white pt-8 pb-16 min-h-[740px]"
+                            id={`${category.name}`}
+                        >
+                            <div className="container mx-auto">
+                                <div className="grid grid-cols-5 w-full items-end border-b pb-8 border-black">
+                                    <h1
+                                        className={[
+                                            "text-6xl font-bold col-span-2",
+                                            roboto_condensed.className,
+                                        ].join(" ")}
+                                    >
+                                        {category.name}
+                                    </h1>
+                                    <div
+                                        className={`col-span-3 ${roboto_flex.className} uppercase`}
+                                    >
+                                        <div className="relative grid grid-cols-3 overflow-hidden py-2 mb-[-20px]">
+                                            <div className="relative h-[100px] mt-[-8px] z-10 grid grid-cols-4">
+                                                <div className="bg-white col-span-3"></div>
+                                                <div className="absolute w-[100px] h-[100px] right-0 bg-gradient-to-l from-transparent via-white to-white"></div>
+                                                <button
+                                                    onClick={() => {
+                                                        if (currentPos > 0) {
+                                                            setCurrentPos(
+                                                                currentPos - 1,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`absolute z-40 top-[50%] left-[80%] translate-y-[-50%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos > 0 ? "" : "opacity-0 pointer-events-none"}`}
+                                                >
+                                                    <Image
+                                                        src="/ui/arrow.svg"
+                                                        width={22}
+                                                        height={40}
+                                                        alt=""
+                                                        className="invert opacity-75 -scale-100"
+                                                    />
+                                                </button>
+                                            </div>
+                                            <div className="col-span-2">
+                                                <div
+                                                    className={`w-[100px] h-[100px] absolute left-[90%] mt-[-8px] bg-gradient-to-r from-transparent via-white to-white z-30 duration-200 ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
+                                                ></div>
+                                                <button
+                                                    onClick={() => {
+                                                        if (
+                                                            currentPos < maxPos
+                                                        ) {
+                                                            setCurrentPos(
+                                                                currentPos + 1,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`absolute z-40 translate-y-[-8px] left-[90%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
+                                                >
+                                                    <Image
+                                                        src="/ui/arrow.svg"
+                                                        width={22}
+                                                        height={40}
+                                                        alt=""
+                                                        className="invert opacity-75"
+                                                    />
+                                                </button>
+                                                <ul
+                                                    className="flex mb-[-4px] gap-2 duration-200"
+                                                    style={{
+                                                        transform: `translateX(${-currentPos * moveLength}px)`,
+                                                    }}
+                                                >
+                                                    {projects.map(
+                                                        (project, i) => (
+                                                            <button
+                                                                onClick={() =>
+                                                                    setSelectedProject(
+                                                                        i,
+                                                                    )
+                                                                }
+                                                                className={[
+                                                                    "flex-shrink-0 focus:outline-transparent transition-all relative group cursor-pointer grid place-items-center w-[80px] h-[80px] select-none",
+                                                                ].join(" ")}
+                                                                key={`${category.name}-${project.name}-${project.id}`}
+                                                            >
+                                                                <ImageWithFallback
+                                                                    src={
+                                                                        `/api/file?filename=${project.logoUrl}` ||
+                                                                        "/placeholders/placeholder.png"
+                                                                    }
+                                                                    width={80}
+                                                                    height={80}
+                                                                    className={[
+                                                                        "aspect-square object-cover duration-200 border border-gray-300",
+                                                                        selectedProject ===
+                                                                        i
+                                                                            ? "scale-[90%]"
+                                                                            : "group-hover:scale-[90%]",
+                                                                    ].join(" ")}
+                                                                    alt=""
+                                                                />
+                                                                <div className="w-[80px] h-[80px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-20">
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-t border-l border-black w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "top-[-.4rem] left-[-.4rem] opacity-0"
+                                                                                : "top-[-.1rem] left-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-b border-l border-black w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "bottom-[-.4rem] left-[-.4rem] opacity-0"
+                                                                                : "bottom-[-.1rem] left-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-t border-r border-black w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "top-[-.4rem] right-[-.4rem] opacity-0"
+                                                                                : "top-[-.1rem] right-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-b border-r border-black w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "bottom-[-.4rem] right-[-.4rem] opacity-0"
+                                                                                : "bottom-[-.1rem] right-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                </div>
+                                                            </button>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-5 mt-12">
+                                    <div className="col-span-3">
+                                        <div className="ml-1 relative w-[720px] h-[398px]">
+                                            <div
+                                                className={[
+                                                    "absolute w-[720px] h-[398px] top-3 left-3 select-none pointer-events-none",
+                                                ].join(" ")}
+                                            >
+                                                <Image
+                                                    className="invert"
+                                                    width={100}
+                                                    height={100}
+                                                    layout="responsive"
+                                                    objectFit="cover"
+                                                    src={
+                                                        "/ui/carousel_card_outline.svg"
+                                                    }
+                                                    alt=""
+                                                />
+                                            </div>
+                                            <div
+                                                className="relative w-[720px] h-[398px]"
+                                                style={{
+                                                    maskImage:
+                                                        "url(/ui/carousel_card.svg)",
+                                                    WebkitMaskImage:
+                                                        "url(/ui/carousel_card.svg)",
+                                                    WebkitMaskSize:
+                                                        "720px 398px",
+                                                    WebkitMaskRepeat:
+                                                        "no-repeat",
+                                                }}
+                                            >
+                                                <GridRvealVideo
+                                                    fill
+                                                    isAlphabet={false}
+                                                    canReveal
+                                                    variant="light"
+                                                    width={720}
+                                                    height={400}
+                                                    cols={18}
+                                                    rows={10}
+                                                    revealDelay={2}
+                                                    className="object-cover"
+                                                    src={
+                                                        fileToUrl(category.logo)
+                                                            ? "/cloud_cover.mp4"
+                                                            : "/cloud_cover.mp4"
+                                                    }
+                                                    alt=""
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <CategoryProjectLogo
+                                            variant="light"
+                                            src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
+                                        />
+                                        <h2
+                                            className={[
+                                                "font-bold text-5xl mt-8 break-words max-w-[600px]",
+                                                roboto_condensed.className,
+                                            ].join(" ")}
+                                        >
+                                            <SpecialEffectText
+                                                delay={50}
+                                                shuffleSpeed={15}
+                                                randomAmount={1}
+                                                originalText={
+                                                    projects[selectedProject]
+                                                        .name
+                                                }
+                                            />
+                                        </h2>
+                                        <p className="mt-2 mb-10 line-clamp-4 max-w-[500px] text-lg">
+                                            <SpecialEffectSentence
+                                                delay={50}
+                                                shuffleSpeed={25}
+                                                randomAmount={12}
+                                                originalText={
+                                                    projects[selectedProject]
+                                                        .description ||
+                                                    "This project does not have a description."
+                                                }
+                                            />
+                                        </p>
+                                        <TechButton
+                                            variant="dark"
+                                            link={`/project/${projects[selectedProject].id}`}
+                                            text="VIEW"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        case "dark":
+            return (
+                <>
+                    {projects && projects.length > 0 && (
+                        <div
+                            className="bg-black text-white pt-8 pb-16 min-h-[740px]"
+                            id={`${category.name}`}
+                        >
+                            <div className="container mx-auto">
+                                <div className="grid grid-cols-5 w-full items-end border-b pb-8 border-white">
+                                    <div
+                                        className={`col-span-3 ${roboto_flex.className} uppercase`}
+                                    >
+                                        <div className="relative grid grid-cols-3 overflow-hidden py-2 mb-[-20px]">
+                                            <div className="col-span-2">
+                                                <div
+                                                    className={`w-[100px] h-[100px] absolute left-[-20px] mt-[-8px] bg-gradient-to-l from-transparent via-black to-black z-30 duration-200 ${currentPos > 0 ? "" : "opacity-0 pointer-events-none"}`}
+                                                ></div>
+                                                <button
+                                                    onClick={() => {
+                                                        if (currentPos > 0) {
+                                                            setCurrentPos(
+                                                                currentPos - 1,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`absolute z-40 top-[50%] mt-[-8px] left-[20px] translate-y-[-50%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos > 0 ? "" : "opacity-0 pointer-events-none"}`}
+                                                >
+                                                    <Image
+                                                        src="/ui/arrow.svg"
+                                                        width={22}
+                                                        height={40}
+                                                        alt=""
+                                                        className="-scale-100"
+                                                    />
+                                                </button>
+                                                <ul
+                                                    className="flex mb-[-4px] gap-2 duration-200 ml-[80px]"
+                                                    style={{
+                                                        transform: `translateX(${-currentPos * moveLength}px)`,
+                                                    }}
+                                                >
+                                                    {projects.map(
+                                                        (project, i) => (
+                                                            <button
+                                                                onClick={() =>
+                                                                    setSelectedProject(
+                                                                        i,
+                                                                    )
+                                                                }
+                                                                className={[
+                                                                    "flex-shrink-0 focus:outline-transparent transition-all relative group cursor-pointer grid place-items-center w-[80px] h-[80px] select-none",
+                                                                ].join(" ")}
+                                                                key={`${category.name}-${project.name}-${project.id}`}
+                                                            >
+                                                                <ImageWithFallback
+                                                                    src={
+                                                                        `/api/file?filename=${project.logoUrl}` ||
+                                                                        "/placeholders/placeholder.png"
+                                                                    }
+                                                                    width={80}
+                                                                    height={80}
+                                                                    className={[
+                                                                        "aspect-square object-cover duration-200 border border-gray-300",
+                                                                        selectedProject ===
+                                                                        i
+                                                                            ? "scale-[90%]"
+                                                                            : "group-hover:scale-[90%]",
+                                                                    ].join(" ")}
+                                                                    alt=""
+                                                                />
+                                                                <div className="w-[80px] h-[80px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-20">
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-t border-l border-white w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "top-[-.4rem] left-[-.4rem] opacity-0"
+                                                                                : "top-[-.1rem] left-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-b border-l border-white w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "bottom-[-.4rem] left-[-.4rem] opacity-0"
+                                                                                : "bottom-[-.1rem] left-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-t border-r border-white w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "top-[-.4rem] right-[-.4rem] opacity-0"
+                                                                                : "top-[-.1rem] right-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={[
+                                                                            "duration-150 group-active:duration-75 border-b border-r border-white w-5 h-5 bg-transparent absolute",
+                                                                            selectedProject !==
+                                                                            i
+                                                                                ? "bottom-[-.4rem] right-[-.4rem] opacity-0"
+                                                                                : "bottom-[-.1rem] right-[-.1rem]",
+                                                                        ].join(
+                                                                            " ",
+                                                                        )}
+                                                                    ></div>
+                                                                </div>
+                                                            </button>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            </div>
+                                            <div className="relative h-[100px] mt-[-8px] z-10 grid grid-cols-4">
+                                                <div className="absolute w-[100px] h-[100px] left-[0] bg-gradient-to-r from-transparent via-black to-black"></div>
+                                                <div className="absolute w-[200px] h-[100px] left-[100px] bg-black"></div>
+                                                <button
+                                                    onClick={() => {
+                                                        if (
+                                                            currentPos < maxPos
+                                                        ) {
+                                                            setCurrentPos(
+                                                                currentPos + 1,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`absolute z-40 translate-y-[-8px] left-[0%] hover:scale-[.8] active:scale-100 duration-200 px-4 py-8 select-none ${currentPos < maxPos ? "" : "opacity-0 pointer-events-none"}`}
+                                                >
+                                                    <Image
+                                                        src="/ui/arrow.svg"
+                                                        width={22}
+                                                        height={40}
+                                                        alt=""
+                                                    />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h1
+                                        className={[
+                                            "text-6xl font-bold col-span-2",
+                                            roboto_condensed.className,
+                                        ].join(" ")}
+                                    >
+                                        {category.name}
+                                    </h1>
+                                </div>
+                                <div className="grid grid-cols-5 mt-12">
+                                    <div className="col-span-2">
+                                        <CategoryProjectLogo
+                                            variant="light"
+                                            src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
+                                        />
+                                        <h2
+                                            className={[
+                                                "font-bold text-5xl mt-8 break-words max-w-[600px]",
+                                                roboto_condensed.className,
+                                            ].join(" ")}
+                                        >
+                                            <SpecialEffectText
+                                                delay={50}
+                                                shuffleSpeed={15}
+                                                randomAmount={1}
+                                                originalText={
+                                                    category.projects[
+                                                        selectedProject
+                                                    ].name
+                                                }
+                                            />
+                                        </h2>
+                                        <p className="mt-2 mb-10 line-clamp-4 max-w-[500px] text-lg">
+                                            <SpecialEffectSentence
+                                                delay={50}
+                                                shuffleSpeed={25}
+                                                randomAmount={12}
+                                                originalText={
+                                                    category.projects[
+                                                        selectedProject
+                                                    ].description ||
+                                                    "This project does not have a description."
+                                                }
+                                            />
+                                        </p>
+                                        <TechButton
+                                            variant="light"
+                                            link={`/project/${category.projects[selectedProject].id}`}
+                                            text="VIEW"
+                                        />
+                                    </div>
+                                    <div></div>
+                                    <div className="col-span-2">
+                                        <div className="ml-1 relative w-[720px] h-[398px]">
+                                            <div
+                                                className={[
+                                                    "absolute w-[720px] h-[398px] top-3 left-3 select-none pointer-events-none",
+                                                ].join(" ")}
+                                            >
+                                                <Image
+                                                    className="invert"
+                                                    width={100}
+                                                    height={100}
+                                                    layout="responsive"
+                                                    objectFit="cover"
+                                                    src={
+                                                        "/ui/carousel_card_outline.svg"
+                                                    }
+                                                    alt=""
+                                                />
+                                            </div>
+                                            <div
+                                                className="relative w-[720px] h-[398px]"
+                                                style={{
+                                                    maskImage:
+                                                        "url(/ui/carousel_card.svg)",
+                                                    WebkitMaskImage:
+                                                        "url(/ui/carousel_card.svg)",
+                                                    WebkitMaskSize:
+                                                        "720px 398px",
+                                                    WebkitMaskRepeat:
+                                                        "no-repeat",
+                                                }}
+                                            >
+                                                <GridRvealVideo
+                                                    fill
+                                                    isAlphabet={false}
+                                                    canReveal
+                                                    variant="light"
+                                                    width={720}
+                                                    height={400}
+                                                    cols={18}
+                                                    rows={10}
+                                                    revealDelay={2}
+                                                    className="object-cover"
+                                                    src={
+                                                        fileToUrl(category.logo)
+                                                            ? "/cloud_cover.mp4"
+                                                            : "/cloud_cover.mp4"
+                                                    }
+                                                    alt=""
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+    }
+}
