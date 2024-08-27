@@ -138,33 +138,6 @@ export default async function page() {
                                 />
                             );
                         })}
-                        {members.map((member, i) => {
-                            return (
-                                <MemberProfile
-                                    key={member.id}
-                                    member={member}
-                                    variant="light"
-                                />
-                            );
-                        })}
-                        {members.map((member, i) => {
-                            return (
-                                <MemberProfile
-                                    key={member.id}
-                                    member={member}
-                                    variant="light"
-                                />
-                            );
-                        })}
-                        {members.map((member, i) => {
-                            return (
-                                <MemberProfile
-                                    key={member.id}
-                                    member={member}
-                                    variant="light"
-                                />
-                            );
-                        })}
                     </div>
                 </div>
             )}
