@@ -128,7 +128,34 @@ export default async function page() {
                     >
                         Our Members
                     </h1>
-                    <div className="flex justify-center gap-8 mt-4">
+                    <div className="flex justify-center gap-8 mt-4 flex-wrap">
+                        {members.map((member, i) => {
+                            return (
+                                <MemberProfile
+                                    key={member.id}
+                                    member={member}
+                                    variant="light"
+                                />
+                            );
+                        })}
+                        {members.map((member, i) => {
+                            return (
+                                <MemberProfile
+                                    key={member.id}
+                                    member={member}
+                                    variant="light"
+                                />
+                            );
+                        })}
+                        {members.map((member, i) => {
+                            return (
+                                <MemberProfile
+                                    key={member.id}
+                                    member={member}
+                                    variant="light"
+                                />
+                            );
+                        })}
                         {members.map((member, i) => {
                             return (
                                 <MemberProfile

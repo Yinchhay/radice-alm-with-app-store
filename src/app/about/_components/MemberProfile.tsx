@@ -87,15 +87,15 @@ export default function MemberProfile({
                         </ScrollReveal>
                     </Link>
                     <h1
-                        className={`font-bold text-xl mt-2 ${roboto_flex.className}`}
+                        className={`font-bold text-xl mt-2 ${roboto_flex.className} text-center`}
                     >
                         {member.firstName + " " + member.lastName}
                     </h1>
                     <h2
                         className={
                             useTitle
-                                ? `font-bold ${roboto_condensed.className} text-lg leading-[0.9] mb-2`
-                                : "text-sm"
+                                ? `font-bold ${roboto_condensed.className} text-lg leading-[0.9] mb-2 text-center`
+                                : "text-sm text-center"
                         }
                     >
                         {useTitle
@@ -140,14 +140,14 @@ export default function MemberProfile({
                         </ScrollReveal>
                     </Link>
                     <h1
-                        className={`font-bold text-xl mt-2 ${roboto_flex.className}`}
+                        className={`font-bold text-xl mt-2 ${roboto_flex.className} text-center`}
                     >
                         {member.firstName + " " + member.lastName}
                     </h1>
                     <h2
                         className={
                             useTitle
-                                ? `font-bold ${roboto_condensed.className} text-lg leading-[0.9]  mb-2`
+                                ? `font-bold ${roboto_condensed.className} text-lg leading-[0.9]  mb-2 text-center`
                                 : "text-sm"
                         }
                     >
