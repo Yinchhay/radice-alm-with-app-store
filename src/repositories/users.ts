@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { projects, users } from "@/drizzle/schema";
+import { projects, users, userRoles, roles, rolePermissions, permissions } from "@/drizzle/schema"; // Ensure all necessary schemas are imported
 import { unstable_cache as cache } from "next/cache";
 import { eq, count, sql, and, like, or } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -65,33 +65,113 @@ export type GetUserRolesAndRolePermissions_C_ReturnType = Awaited<
 export type GetUserRolesAndRolePermissions_C_Tag =
     | `getUserRolesAndRolePermissions_C:${string}`
     | `getUserRolesAndRolePermissions_C`;
-// important, do not use this function to show client
+
+// IMPORTANT: This function has been further refactored to perform multiple, extremely simpler queries
+// by fetching each level of relation separately, to maximize compatibility with
+// MariaDB 10.4's SQL parser.
+// It hides the password column for client safety.
 export const getUserRolesAndRolePermissions_C = async (userId: string) => {
     return await cache(
         async (userId: string) => {
-            return await db.query.users.findFirst({
+            // 1. Fetch the user without any relations initially
+            const user = await db.query.users.findFirst({
                 columns: {
-                    password: false,
+                    password: false, // Exclude password for client safety
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    phoneNumber: true,
+                    isActive: true,
+                    hasLinkedGithub: true,
+                    profileUrl: true,
+                    type: true,
+                    skillSet: true,
+                    description: true,
+                    joinSince: true,
+                    leaveAt: true,
+                    createdAt: true,
+                    updatedAt: true,
                 },
-                where: (table, { eq }) => eq(table.id, userId),
-                with: {
-                    userRoles: {
-                        with: {
-                            role: {
-                                with: {
-                                    rolePermissions: {
-                                        with: {
-                                            permission: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
+                where: eq(users.id, userId),
             });
+
+            if (!user) {
+                return null;
+            }
+
+            // 2. Fetch user roles for the fetched user, without directly fetching the 'role' object
+            const fetchedUserRoles = await db.query.userRoles.findMany({
+                where: eq(userRoles.userId, user.id),
+                // No 'with' clause here to keep the SQL simple
+            });
+
+            // 3. Collect all unique role IDs from fetchedUserRoles
+            const roleIds = [...new Set(fetchedUserRoles.map(ur => ur.roleId))];
+            let fetchedRoles: typeof roles.$inferSelect[] = [];
+            if (roleIds.length > 0) {
+                 // Fetch roles separately
+                fetchedRoles = await db.query.roles.findMany({
+                    where: or(...roleIds.map(id => eq(roles.id, id))),
+                });
+            }
+
+
+            // 4. Collect all unique permission IDs from the roles' rolePermissions
+            const allRolePermissions: typeof rolePermissions.$inferSelect[] = [];
+            let permissionIds: number[] = [];
+
+            if (fetchedRoles.length > 0) {
+                // Fetch role permissions for all fetched roles
+                for (const roleItem of fetchedRoles) {
+                    const rp = await db.query.rolePermissions.findMany({
+                        where: eq(rolePermissions.roleId, roleItem.id),
+                    });
+                    allRolePermissions.push(...rp);
+                    permissionIds.push(...rp.map(p => p.permissionId));
+                }
+                permissionIds = [...new Set(permissionIds)]; // Get unique permission IDs
+            }
+
+            let fetchedPermissions: typeof permissions.$inferSelect[] = [];
+            if (permissionIds.length > 0) {
+                // Fetch permissions separately
+                fetchedPermissions = await db.query.permissions.findMany({
+                    where: or(...permissionIds.map(id => eq(permissions.id, id))),
+                });
+            }
+
+            // 5. Manually reconstruct the nested object structure
+            const userRolesWithDetails = fetchedUserRoles.map(ur => {
+                const associatedRole = fetchedRoles.find(r => r.id === ur.roleId);
+                let rolePermissionsWithDetails: (typeof rolePermissions.$inferSelect & { permission?: typeof permissions.$inferSelect })[] = [];
+
+                if (associatedRole) {
+                    // Filter role permissions for this specific role
+                    const currentRolePermissions = allRolePermissions.filter(rp => rp.roleId === associatedRole.id);
+
+                    rolePermissionsWithDetails = currentRolePermissions.map(rp => {
+                        const associatedPermission = fetchedPermissions.find(p => p.id === rp.permissionId);
+                        return {
+                            ...rp,
+                            permission: associatedPermission,
+                        };
+                    });
+                }
+
+                return {
+                    ...ur,
+                    role: associatedRole ? { ...associatedRole, rolePermissions: rolePermissionsWithDetails } : undefined,
+                };
+            });
+
+            // Manually attach the combined roles data back to the user object
+            return {
+                ...user,
+                userRoles: userRolesWithDetails,
+            };
         },
-        [],
+        [], // Dependencies for cache. Empty means it depends only on `userId` which is passed later.
         {
             tags: [
                 `getUserRolesAndRolePermissions_C:${userId}`,
@@ -100,6 +180,7 @@ export const getUserRolesAndRolePermissions_C = async (userId: string) => {
         },
     )(userId);
 };
+
 
 export const deleteUserById = async (userId: string, requestDeleteByUserId: string) => {
     return await db.transaction(async (transaction) => {

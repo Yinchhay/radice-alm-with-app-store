@@ -108,7 +108,9 @@ export default function JoinUsForm() {
                         />
                     </div>
                     <div>
-                        <label className="mr-2">CV File:</label>
+                        <label className="mr-2" htmlFor="cvFile">
+                            CV File:
+                        </label>
                         <input
                             type="file"
                             name="cvFile"

@@ -10,7 +10,7 @@ export default {
    * schema.ts will be introspected and migration files will be generated in this folder
    */
   out: './src/drizzle/migrations',
-  driver: 'mysql2', // 'pg' | 'mysql2' | 'better-sqlite' | 'libsql' | 'turso'
+  dialect: 'mysql',
   dbCredentials: {
     host: process.env.DB_HOST ?? 'localhost',
     port: parseInt(process.env.DB_PORT ?? '3306'),

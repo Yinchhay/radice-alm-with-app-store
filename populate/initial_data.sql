@@ -15,4 +15,4 @@ INSERT INTO permissions (id, name, description) VALUES
 (15, 'Change project status', 'Permission to change project status'),
 (17, 'Create media', 'Permission to create media'),
 (18, 'Edit media', 'Permission to edit media'),
-(19, 'Delete media', 'Permission to delete media'),
+(19, 'Delete media', 'Permission to delete media')
