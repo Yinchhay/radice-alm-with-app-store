@@ -11,6 +11,10 @@ import {
     int,
     boolean,
     json,
+    text,
+    mysqlEnum, 
+    unique, 
+    index 
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -85,6 +89,8 @@ export const userRelations = relations(users, ({ many, one }) => ({
     projectPartners: many(projectPartners),
     sessions: many(sessions),
     files: many(files),
+    bugReports: many(bugReports),
+    feedbacks: many(feedbacks),
     codeVerifications: many(codeVerifications),
 }));
 
@@ -303,13 +309,14 @@ export const applicationForms = mysqlTable("application_forms", {
     })
         .notNull()
         .unique(),
-    reason: varchar("reason", {
-        length: 5000,
-    }).notNull(),
-    cv: varchar("cv", {
+    phoneNumber: varchar("phone_number", {
+        length: 30,
+    }),
+    cvUrl: varchar("cv_url", {
         length: 2083,
-    }).notNull(),
-    status: varchar("approved", {
+    }),
+    // Use 'approved' instead of 'status' to match DB
+    approved: varchar("approved", {
         length: 50,
     })
         .notNull()
@@ -382,9 +389,9 @@ export const projects = mysqlTable("projects", {
     userId: varchar("user_id", {
         length: 255,
     }).references(() => users.id, {
-        // on delete allow delete user.
         onDelete: "set null",
     }),
+    isApp: boolean("is_app").default(false),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -394,6 +401,7 @@ export const projectsRelations = relations(projects, ({ many, one }) => ({
     projectMembers: many(projectMembers),
     projectPartners: many(projectPartners),
     files: many(files),
+    apps: many(apps),
     user: one(users, {
         fields: [projects.userId],
         references: [users.id],
@@ -555,3 +563,173 @@ export const media = mysqlTable("media", {
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
+// Create enum for feedback stars
+export const starEnum = mysqlEnum('star_rating', ['1', '2', '3', '4', '5']);
+
+// App Priority table
+export const appPriority = mysqlTable('app_priority', {
+  id: int('id').primaryKey().autoincrement(),
+  name: varchar('name', { length: 255 }).unique().notNull(),
+  description: varchar('description', { length: 500}),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// App Types table
+export const appTypes = mysqlTable('app_types', {
+  id: int('id').primaryKey().autoincrement(),
+  name: varchar('name', { length: 255 }).unique().notNull(),
+  description: varchar('description', { length: 500}),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// Apps table
+export const apps = mysqlTable('apps', {
+id: int('id').primaryKey().autoincrement(),
+  projectId: int('project_id').references(() => projects.id),
+  subtitle: varchar('subtitle', { length: 255 }),
+  type: int('type').references(() => appTypes.id),
+  aboutDesc: varchar('about_desc', { length: 1000 }),
+  content: text('content'),
+  webUrl: varchar('web_url', { length: 500 }),
+  appFile: varchar('app_file', { length: 500 }), // apk file
+  status: text('status'), // 'pending', 'accepted', 'denied', 'archived'
+  cardImage: varchar('card_image', { length: 500 }),
+  bannerImage: varchar('banner_image', { length: 500 }),
+  featuredPriority: int('featured_priority').references(() => appPriority.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// Versions table
+export const versions = mysqlTable('versions', {
+  id: int('id').primaryKey().autoincrement(),
+  appId: int('app_id').references(() => apps.id),
+  versionNumber: varchar('version_number', { length: 50 }), // data: 1.0.0, 1.0.1, 1.1.0
+  majorVersion: int('major_version'),
+  minorVersion: int('minor_version'),
+  patchVersion: int('patch_version'),
+  isCurrent: boolean('is_current').default(false), // only one current version per app
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+},);
+
+// Version Logs table
+export const versionLogs = mysqlTable('version_logs', {
+  id: int('id').primaryKey().autoincrement(),
+  versionId: int('version_id').references(() => versions.id),
+  action: varchar('action', { length: 50 }), // created, updated, activated, deactivated
+  content: text('content'), // what changed in this version
+  createdBy: int('created_by'), // user who made the change
+  createdAt: timestamp('created_at').defaultNow(),
+},);
+
+// App Screenshots table
+export const appScreenshots = mysqlTable('app_screenshots', {
+  id: int('id').primaryKey().autoincrement(),
+  appId: int('app_id').references(() => apps.id),
+  imageUrl: varchar('image_url', { length: 500 }),
+  sortOrder: int('sort_order').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// Bug Reports table
+export const bugReports = mysqlTable('bug_reports', {
+  id: int('id').primaryKey().autoincrement(),
+  title: varchar('title', { length: 255 }),
+  description: text('description'),
+  image: varchar('image', { length: 500 }),
+  video: varchar('video', { length: 500 }),
+  userId: varchar('user_id', { length: 255 }).references(() => users.id),
+  appId: int('app_id').references(() => apps.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// Feedbacks table
+export const feedbacks = mysqlTable('feedbacks', {
+  id: int('id').primaryKey().autoincrement(),
+  userId: varchar('user_id', { length: 255 }).references(() => users.id),
+  appId: int('app_id').references(() => apps.id),
+  title: varchar('title', { length: 255 }),
+  review: text('review'),
+  star: starEnum,
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// Relations for RADICE App store
+export const appPriorityRelations = relations(appPriority, ({ many }) => ({
+  apps: many(apps),
+}));
+
+export const appTypesRelations = relations(appTypes, ({ many }) => ({
+  apps: many(apps),
+}));
+
+export const appsRelations = relations(apps, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [apps.projectId],
+    references: [projects.id],
+  }),
+  appType: one(appTypes, {
+    fields: [apps.type],
+    references: [appTypes.id],
+  }),
+  priority: one(appPriority, {
+    fields: [apps.featuredPriority],
+    references: [appPriority.id],
+  }),
+  versions: many(versions),
+  screenshots: many(appScreenshots),
+  bugReports: many(bugReports),
+  feedbacks: many(feedbacks),
+}));
+
+export const versionsRelations = relations(versions, ({ one, many }) => ({
+  app: one(apps, {
+    fields: [versions.appId],
+    references: [apps.id],
+  }),
+  logs: many(versionLogs),
+}));
+
+export const versionLogsRelations = relations(versionLogs, ({ one }) => ({
+  version: one(versions, {
+    fields: [versionLogs.versionId],
+    references: [versions.id],
+  }),
+}));
+
+export const appScreenshotsRelations = relations(appScreenshots, ({ one }) => ({
+  app: one(apps, {
+    fields: [appScreenshots.appId],
+    references: [apps.id],
+  }),
+}));
+
+export const bugReportsRelations = relations(bugReports, ({ one }) => ({
+  user: one(users, {
+    fields: [bugReports.userId],
+    references: [users.id],
+  }),
+  app: one(apps, {
+    fields: [bugReports.appId],
+    references: [apps.id],
+  }),
+}));
+
+export const feedbacksRelations = relations(feedbacks, ({ one }) => ({
+  user: one(users, {
+    fields: [feedbacks.userId],
+    references: [users.id],
+  }),
+  app: one(apps, {
+    fields: [feedbacks.appId],
+    references: [apps.id],
+  }),
+}));

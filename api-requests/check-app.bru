@@ -1,0 +1,11 @@
+meta {
+  name: check-app
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/app/api/internal/projects/1/check-app-association/
+  body: none
+  auth: inherit
+}

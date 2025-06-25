@@ -1,19 +1,12 @@
 {
-  "version": "5",
+  "version": "7",
   "dialect": "mysql",
   "entries": [
     {
       "idx": 0,
       "version": "5",
-      "when": 1715971083384,
-      "tag": "0000_lame_sugar_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1750349165783,
-      "tag": "0001_stale_nehzno",
+      "when": 1750832277876,
+      "tag": "0000_opposite_magdalene",
       "breakpoints": true
     }
   ]

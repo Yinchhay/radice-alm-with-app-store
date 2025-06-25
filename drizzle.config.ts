@@ -16,6 +16,9 @@ export default {
     port: parseInt(process.env.DB_PORT ?? '3306'),
     database: process.env.DB_DATABASE ?? '',
     user: process.env.DB_USERNAME ?? '',
-    password: process.env.DB_PASSWORD ?? '',
+    // Only include password if it's not empty
+    ...(process.env.DB_PASSWORD && process.env.DB_PASSWORD.trim() !== '' 
+      ? { password: process.env.DB_PASSWORD } 
+      : {}),
   },
 } satisfies Config;
