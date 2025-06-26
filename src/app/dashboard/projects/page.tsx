@@ -3,7 +3,7 @@ import { CreateProjectOverlay } from "./create_project";
 import Pagination from "@/components/Pagination";
 import { fetchAssociatedProjects } from "./fetch";
 import Card from "@/components/Card";
-import { IconEye, IconHammer, IconSettings } from "@tabler/icons-react";
+import { IconEye, IconHammer, IconSettings, IconShoppingBag } from "@tabler/icons-react";
 import Button from "@/components/Button";
 import { SuccessResponse } from "@/lib/response";
 import { FetchAssociatedProjectsData } from "@/app/api/internal/project/associate/route";
@@ -196,6 +196,26 @@ function Project({
                                     className="outline-0"
                                 >
                                     <IconHammer
+                                        size={28}
+                                        className="group-hover:text-blue-500 transition-all"
+                                        stroke={1.3}
+                                    />
+                                </Button>
+                            </Link>
+                        </Tooltip>
+                    )}
+                    {canEdit && (
+                        <Tooltip title="App content builder" position="top">
+                            <Link
+                                href={`/dashboard/projects/${project.id}/builder`}
+                                className="group"
+                            >
+                                <Button
+                                    square
+                                    variant="outline"
+                                    className="outline-0"
+                                >
+                                    <IconShoppingBag
                                         size={28}
                                         className="group-hover:text-blue-500 transition-all"
                                         stroke={1.3}

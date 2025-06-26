@@ -26,6 +26,7 @@ export type FetchEditProjectContent = Awaited<
 
 export async function PATCH(request: Request, { params }: Params) {
     try {
+        // Check for Bearer Token and Permissions
         const chapters = await request.json();
         const requiredPermission = new Set([]);
         const { errorNoBearerToken, errorNoPermission, user } =
@@ -37,6 +38,7 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
+        // Validate the request body
         let body: z.infer<typeof editProjectContentSchema> = {
             userId: user.id,
             projectId: params.project_id,
@@ -55,6 +57,8 @@ export async function PATCH(request: Request, { params }: Params) {
         const project = await getOneAssociatedProject(
             Number(params.project_id),
         );
+
+        // Check for Project Role
         if (!project) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -73,6 +77,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.UNAUTHORIZED_401,
             );
         }
+        // Edit project content
         const { updateSuccess, updatedProject } = await editProjectContentById(
             project.id,
             JSON.stringify(chapters),
@@ -84,6 +89,7 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.UNAUTHORIZED_401,
             );
         }
+        // Return success response
         return buildSuccessResponse<FetchEditProjectContent>(successMessage, {
             updateSuccess,
             updatedProject,
