@@ -657,7 +657,7 @@ export const feedbacks = mysqlTable('feedbacks', {
   appId: int('app_id').references(() => apps.id),
   title: varchar('title', { length: 255 }),
   review: text('review'),
-  star: starEnum,
+  star_rating: starEnum,
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
 });

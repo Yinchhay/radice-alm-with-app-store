@@ -1,0 +1,21 @@
+meta {
+  name: delete-feedback
+  type: http
+  seq: 2
+}
+
+delete {
+  url: http://localhost:3000/api/internal/app/2/feedback/delete
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: e2iqzawb7fcxegcyl5nwtnmdrm32zegverkb3m47
+}
+
+body:json {
+  {
+    "feedbackId": 3
+  }
+}

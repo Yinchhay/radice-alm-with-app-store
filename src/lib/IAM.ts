@@ -142,20 +142,20 @@ export const checkBearerAndPermission = async (
     requiredPermissions: Set<Permissions>,
 ): Promise<
     | {
-          errorNoBearerToken: false;
-          errorNoPermission: true;
-          user: null;
-      }
+        errorNoBearerToken: false;
+        errorNoPermission: true;
+        user: null;
+    }
     | {
-          errorNoBearerToken: true;
-          errorNoPermission: false;
-          user: null;
-      }
+        errorNoBearerToken: true;
+        errorNoPermission: false;
+        user: null;
+    }
     | {
-          errorNoBearerToken: false;
-          errorNoPermission: false;
-          user: User;
-      }
+        errorNoBearerToken: false;
+        errorNoPermission: false;
+        user: User;
+    }
 > => {
     const authorizationHeader = request.headers.get("Authorization");
     const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
