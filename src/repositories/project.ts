@@ -150,7 +150,7 @@ export async function getOneAssociatedProject(project_id: number) {
 
     if (Array.isArray(project?.files)) {
         project.files = project.files.filter(
-            (file) => file.belongTo === FileBelongTo.ProjectSetting,
+            (file) => file.belongTo === FileBelongTo.PROJECT_SETTING,
         );
     }
 
