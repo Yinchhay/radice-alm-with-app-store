@@ -1,5 +1,5 @@
 /**
- * This file is the schema being used by drizzle-kit to generate the migrations
+ * This file is the schema being used by drizzle-kit to generate the migrations to the database
  */
 
 import { relations } from "drizzle-orm";
