@@ -19,6 +19,7 @@ import CategorySectionNew from "./_components/CategorySectionNew";
 import ProjectPipeline from "./_components/ProjectPipeline";
 import { Metadata } from "next";
 import Link from "next/link";
+
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -37,6 +38,7 @@ export const metadata: Metadata = {
     description:
         "Radice is a center for applied research and development initiatives of Paragon International University. We are a hub of creativity and discovery, where ideas take flight and possibilities are endless. Radice is passionate about innovation and creativity, and strives to deliver high-quality results.",
 };
+
 export default async function Home() {
     const result = await fetchPublicProjectsAndCategories();
 
