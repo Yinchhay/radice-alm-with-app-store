@@ -12,12 +12,24 @@ export default function NavItem({
     const pathName = usePathname();
 
     return (
-        <li>
+        <li className="w-full list-none">
             <Link
                 href={link}
                 className={[
-                    "flex items-center gap-2 text-gray-200 font-bold px-4 py-2 rounded-sm hover:bg-gray-800",
-                    pathName == link ? "bg-gray-800" : "",
+                    "flex",
+                    "p-3",
+                    "px-5",
+                    "items-center",
+                    "gap-4",
+                    "self-stretch",
+                    "rounded-lg",
+                    "text-gray-700",
+                    "w-full",
+                    "cursor-pointer",
+                    "transition-colors",
+                    pathName === link
+                        ? "bg-gray-100 font-semibold"
+                        : "hover:bg-gray-100",
                 ].join(" ")}
             >
                 {children}
