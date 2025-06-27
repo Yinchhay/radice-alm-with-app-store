@@ -36,6 +36,7 @@ export enum AppStatus {
     ACCEPTED = "accepted", 
     DENIED = "denied",
     ARCHIVED = "archived",
+    DRAFT = "draft",
 }
 
 export enum VersionAction {
