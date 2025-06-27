@@ -12,11 +12,12 @@ export default function TesterRegistrationForm() {
     const handleSubmit = async (formData: FormData) => {
         setIsLoading(true);
         try {
-            const name = formData.get("name") as string;
+            const firstName = formData.get("firstName") as string;
+            const lastName = formData.get("lastName") as string;
             const email = formData.get("email") as string;
             const password = formData.get("password") as string;
             const confirmPassword = formData.get("confirmPassword") as string;
-            if (!name || !email || !password || !confirmPassword) {
+            if (!firstName || !lastName || !email || !password || !confirmPassword) {
                 setResult({ success: false, errors: ["Please fill in all fields"] });
                 setIsLoading(false);
                 return;
@@ -39,16 +40,29 @@ export default function TesterRegistrationForm() {
 
     return (
         <form className="w-full flex flex-col gap-6" action={handleSubmit}>
-            <div className="flex flex-col gap-1">
-                <label htmlFor="name" className="text-base text-black font-medium">Name</label>
-                <InputField
-                    name="name"
-                    id="name"
-                    type="text"
-                    required
-                    className="h-12 px-4 border border-gray-300 rounded-lg text-base bg-white placeholder-gray-400"
-                    placeholder="Enter your name"
-                />
+            <div className="flex gap-4">
+                <div className="flex flex-col gap-1 flex-1">
+                    <label htmlFor="firstName" className="text-base text-black font-medium">First Name</label>
+                    <InputField
+                        name="firstName"
+                        id="firstName"
+                        type="text"
+                        required
+                        className="h-12 px-4 border border-gray-300 rounded-lg text-base bg-white placeholder-gray-400"
+                        placeholder="Enter your first name"
+                    />
+                </div>
+                <div className="flex flex-col gap-1 flex-1">
+                    <label htmlFor="lastName" className="text-base text-black font-medium">Last Name</label>
+                    <InputField
+                        name="lastName"
+                        id="lastName"
+                        type="text"
+                        required
+                        className="h-12 px-4 border border-gray-300 rounded-lg text-base bg-white placeholder-gray-400"
+                        placeholder="Enter your last name"
+                    />
+                </div>
             </div>
             <div className="flex flex-col gap-1">
                 <label htmlFor="email" className="text-base text-black font-medium">Email</label>
