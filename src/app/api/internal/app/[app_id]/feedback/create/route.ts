@@ -7,6 +7,7 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import { createFeedback } from "@/repositories/feedback";
+import { getTesterById } from "@/repositories/tester";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { z } from "zod";
@@ -22,7 +23,7 @@ export async function POST(
     { params }: { params: { app_id: string } },
 ) {
     try {
-        // Get and validate session/user without permission checks
+        // Get and validate tester session
         const authorizationHeader = request.headers.get("Authorization");
         const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
 
@@ -31,14 +32,25 @@ export async function POST(
         }
 
         const { session, user } = await lucia.validateSession(sessionId);
+
         if (!session || !user) {
             return buildNoBearerTokenErrorResponse();
+        }
+
+        const tester = await getTesterById(user.id);
+
+        if (!tester) {
+            return buildErrorResponse(
+                "Unauthorized: Tester access required",
+                { auth: "Invalid tester session" },
+                HttpStatusCode.UNAUTHORIZED_401,
+            );
         }
 
         // Parse request body
         let body: z.infer<typeof createFeedbackFormSchema> =
             await request.json();
-        body.userId = user.id;
+        body.testerId = tester.id;
 
         // Convert and validate appId
         const appId = parseInt(params.app_id, 10);

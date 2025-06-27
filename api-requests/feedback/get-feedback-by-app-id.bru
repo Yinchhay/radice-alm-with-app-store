@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: http://localhost:3000/api/internal/app/${app_id}/feedback
+  url: http://localhost:3000/api/internal/app/1/feedback
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: 5cadylzusaeey77gukdfsghujmmgjvqakceyv3ua
 }
