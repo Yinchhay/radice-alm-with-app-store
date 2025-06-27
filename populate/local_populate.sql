@@ -363,6 +363,8 @@ INSERT INTO `projects` VALUES (1,'Scholarize','Scholarize is a platform designed
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 UNLOCK TABLES;
 
+ALTER TABLE projects
+ADD COLUMN is_app TINYINT(1) DEFAULT '0';
 --
 -- Table structure for table `role_permissions`
 --
