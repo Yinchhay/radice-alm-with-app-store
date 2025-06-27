@@ -1,3 +1,5 @@
+// Need to be changed
+
 import { formatZodError } from "@/lib/form";
 import { lucia } from "@/auth/lucia";
 import {
@@ -54,7 +56,7 @@ export async function DELETE(request: Request) {
             );
         }
 
-        if (feedback.userId !== user.id) {
+        if (feedback.testerId !== user.id) { // Need changing
             return buildErrorResponse(
                 unsuccessMessage,
                 { feedbackId: "You can only delete your own feedback" },

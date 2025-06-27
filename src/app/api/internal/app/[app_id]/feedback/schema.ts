@@ -21,7 +21,7 @@ export const createFeedbackFormSchema = z.object({
         .max(300, {
             message: "Review must be less than or equal to 300 characters",
         }),
-    star_rating: z.enum(["1", "2", "3", "4", "5"], {
+    starRating: z.enum(["1", "2", "3", "4", "5"], {
         errorMap: () => ({ message: "Rating must be between 1 and 5" }),
     }),
     userId: z.string().trim().min(1, {
