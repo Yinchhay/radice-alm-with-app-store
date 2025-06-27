@@ -220,16 +220,27 @@ export const categories = mysqlTable("categories", {
 
 export const projects = mysqlTable("projects", {
     id: int("id").primaryKey().autoincrement(),
-    name: varchar("name", { length: 50 }).notNull().unique(),
-    description: varchar("description", { length: 400 }),
-    logoUrl: varchar("logo_url", { length: 2083 }),
-    isApp: boolean("is_app").default(false),
+    name: varchar("name", {
+        length: 50,
+    })
+        .notNull()
+        .unique(),
+    description: varchar("description", {
+        length: 400,
+    }),
+    logoUrl: varchar("logo_url", {
+        length: 2083,
+    }),
     isPublic: boolean("is_public").default(false),
     projectContent: json("project_content").default([]),
-    links: json("links").default([]),
-    pipelineStatus: json("pipeline_status"),
-    userId: varchar("user_id", { length: 255 })
-        .references(() => users.id, { onDelete: "set null" }),
+    links: json("links").$type<ProjectLink[]>().default([]),
+    pipelineStatus: json("pipeline_status").$type<ProjectPipelineStatus>(),
+    userId: varchar("user_id", {
+        length: 255,
+    }).references(() => users.id, {
+        onDelete: "set null",
+    }),
+    isApp: boolean("is_app").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
