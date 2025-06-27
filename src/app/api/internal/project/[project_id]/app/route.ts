@@ -72,6 +72,7 @@ export async function POST(
 
     const createResult = await createApp({
       projectId: projectId,
+      status: "draft"
     });
 
     if (createResult[0].affectedRows < 1) {
