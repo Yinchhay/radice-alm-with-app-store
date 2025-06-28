@@ -16,9 +16,11 @@ export type PaginationProps = {
 export default function Pagination({ page, maxPage, onPageChange }: PaginationProps) {
     const [currentPage, setCurrentPage] = useState<number>(page || 1);
 
-    if (currentPage < 1) {
-        setCurrentPage(1);
-    }
+    useEffect(() => {
+        if (currentPage < 1) {
+            setCurrentPage(1);
+        }
+    }, [currentPage]);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
