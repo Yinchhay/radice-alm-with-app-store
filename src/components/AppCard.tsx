@@ -1,4 +1,3 @@
-// Import the App type from the appstore
 import { App } from "@/app/appstore/appstore";
 
 const typeColors: Record<number, { name: string; color: string }> = {
@@ -7,9 +6,16 @@ const typeColors: Record<number, { name: string; color: string }> = {
     3: { name: "API", color: "#34A853" }
 }
 
-export function AppCard({app} : { app: App}){
+export function AppCard({app, clickable = true} : { app: App; clickable?: boolean}){
+    const handleClick = () => {
+        if (clickable) {
+            window.location.href = `/app/${app.app.id}`;
+        }
+    };
+
+    
     return (
-        <div className='bg-transparent rounded-xl overflow-hidden flex flex-col p-4'>
+        <div onClick={handleClick} className={`bg-transparent overflow-hidden flex flex-col p-4 ${clickable ? 'cursor-pointer hover:bg-transparent' : ''}`}>
             {app.app.cardImage ? (
                 <img src={app.app.cardImage} alt={app.project.name || "App"} className="w-full h-48 object-cover rounded-lg mb-4"/>
             ) : (
