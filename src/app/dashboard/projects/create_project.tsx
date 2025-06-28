@@ -40,16 +40,14 @@ export function CreateProjectOverlay() {
 
     return (
         <>
-            <Tooltip title="Create a project" zIndex={5000}>
-                <Button
-                    data-test="createProject"
-                    onClick={() => setShowOverlay(true)}
-                    square={true}
-                    variant="primary"
-                >
-                    <IconPlus></IconPlus>
-                </Button>
-            </Tooltip>
+            <Button
+                data-test="createProject"
+                onClick={() => setShowOverlay(true)}
+                className="flex items-center gap-4 px-3 py-2 rounded-lg bg-[#7F56D9] text-white font-semibold hover:bg-[#6B47C7] transition-all"
+                style={{ borderRadius: 8, background: '#7F56D9', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 16 }}
+            >
+                Add New Project
+            </Button>
             {showOverlay && (
                 <Overlay
                     onClose={onCancel}

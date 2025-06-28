@@ -51,13 +51,13 @@ export default function Navbar({ onClick, user, userWithRoles }: NavbarProps) {
                         <ChipsHolder>
                             {userWithRoles?.userRoles.map((role, i: number) => (
                                 role.role && (
-                                    <Tooltip
-                                        key={`role-chip-${role.role.id}-${i}`}
-                                        title={role.role.description?.length ? role.role.description : role.role.name}
-                                        position="bottom"
-                                    >
-                                        <Chip>{role.role.name}</Chip>
-                                    </Tooltip>
+                                <Tooltip
+                                    key={`role-chip-${role.role.id}-${i}`}
+                                    title={role.role.description?.length ? role.role.description : role.role.name}
+                                    position="bottom"
+                                >
+                                    <Chip>{role.role.name}</Chip>
+                                </Tooltip>
                                 )
                             ))}
                         </ChipsHolder>

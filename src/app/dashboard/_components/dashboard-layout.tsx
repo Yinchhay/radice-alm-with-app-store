@@ -29,22 +29,22 @@ export default function DashboardLayout({
   return (
     <div className="bg-slate-white dark:bg-gray-900 min-h-screen">
       {/* Fixed Navbar */}
-      <header
+        <header
         className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700"
-        style={{ height: NAVBAR_HEIGHT }}
-      >
-        <Navbar
-          onClick={toggleSideNav}
-          user={user}
-          userWithRoles={userWithRoles}
-        />
-      </header>
+          style={{ height: NAVBAR_HEIGHT }}
+        >
+          <Navbar
+            onClick={toggleSideNav}
+            user={user}
+            userWithRoles={userWithRoles}
+          />
+        </header>
 
       {/* Main content area with top margin to account for fixed navbar */}
-      <div 
+        <div
         className="flex justify-center pt-[70px] min-h-screen"
         style={{ paddingTop: NAVBAR_HEIGHT }}
-      >
+        >
         {/* Container with max-width */}
         <div className="max-w-[1440px] w-full flex">
           {/* Sidebar */}

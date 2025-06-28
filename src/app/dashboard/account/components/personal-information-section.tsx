@@ -147,17 +147,17 @@ export default function PersonalInformationSection({ user, onUserUpdate }: Perso
           {/* Profile Image */}
           <div className="relative">
             <div className="relative w-[200px] h-[200px]">
-              <ImageWithFallback
+            <ImageWithFallback
                 className={`aspect-square object-cover rounded-full border border-gray-300 hover:opacity-80 cursor-pointer`}
-                src={fileToUrl(
+              src={fileToUrl(
                   hasPhotoUpload && uploadedPhotoUrl === null ? "" : (uploadedPhotoUrl || user.profileUrl),
-                  user.type === UserType.PARTNER ? "/placeholders/logo_placeholder.png" : "/placeholders/placeholder.png",
-                )}
-                alt={"profile"}
+                user.type === UserType.PARTNER ? "/placeholders/logo_placeholder.png" : "/placeholders/placeholder.png",
+              )}
+              alt={"profile"}
                 width={200}
                 height={200}
-                onClick={handleImageClick}
-              />
+              onClick={handleImageClick}
+            />
               <div
                 className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-full cursor-pointer"
                 onClick={handleImageClick}
@@ -248,15 +248,15 @@ export default function PersonalInformationSection({ user, onUserUpdate }: Perso
             {!result?.success && result?.errors && <FormErrorMessages errors={result?.errors} />}
 
             {isChanged && (
-              <div className="flex gap-2">
+            <div className="flex gap-2">
                 <Button type="submit" variant="purple">
-                  Update
-                </Button>
-                <Button type="button" variant="outline" onClick={handleCancel}>
-                  Cancel
-                </Button>
+                    Update
+                  </Button>
+                  <Button type="button" variant="outline" onClick={handleCancel}>
+                    Cancel
+                  </Button>
               </div>
-            )}
+              )}
           </div>
         </div>
       </form>
