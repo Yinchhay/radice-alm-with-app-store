@@ -49,12 +49,16 @@ export default function AppStorePage() {
     const [livePage, setLivePage] = useState(1);
 
     useEffect(() => {
+        let isMounted = true;
+        
         const getApps = async () => {
             setLoading(true);
             setError(null);
 
             try {
                 const data = await fetchApps();
+                if (!isMounted) return;
+                
                 if (
                     data &&
                     "success" in data &&
@@ -70,15 +74,22 @@ export default function AppStorePage() {
                     setApps([]);
                 }
             } catch (error) {
+                if (!isMounted) return; 
                 console.error("Error fetching apps:", error);
                 setError("Failed to load apps. Please try again.");
                 setApps([]);
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
         getApps();
+        
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     const filteredApps = apps.filter((app: App) => {
@@ -169,6 +180,18 @@ export default function AppStorePage() {
                     {loading ? (
                         <div className="flex justify-center items-center py-12">
                             <div className="text-gray-500">Loading apps...</div>
+                        </div>
+                    ) : error ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="text-red-500 text-center">
+                                <p className="mb-2">{error}</p>
+                                <button 
+                                    onClick={() => window.location.reload()} 
+                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                >
+                                    Try Again
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         PriorityOrder.map(({ key, label }) => {
