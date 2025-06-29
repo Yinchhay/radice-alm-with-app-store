@@ -8,7 +8,7 @@ import {
 } from "@/lib/response";
 import {
     getAllPublicApps,
-    getAllPublicAppsTotalRow,
+    getAppsForManageAllAppsTotalRow,
 } from "@/repositories/app";
 import { NextRequest } from "next/server";
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 
         const allPublicApps =
             await getAllPublicApps(page, rowsPerPage, search);
-        const totalRows = await getAllPublicAppsTotalRow(search);
+        const totalRows = await getAppsForManageAllAppsTotalRow(search);
 
         return buildSuccessResponse<FetchAllPublicAppsData>(
             successMessage,
