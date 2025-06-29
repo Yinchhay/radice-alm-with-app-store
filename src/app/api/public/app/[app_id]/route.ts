@@ -20,9 +20,15 @@ const unsuccessMessage = "Get public app by id failed";
 
 export async function GET(request: NextRequest, { params }: Params) {
     try {
-        const app = await getAppByIdForPublic(
-            Number(params.app_id),
-        );
+        const appID = parseInt(params.app_id);
+        if (isNaN(appID)) {
+            return checkAndBuildErrorResponse("Invalid app ID", new Error("App ID must be a number"));
+        }
+
+        const app = await getAppByIdForPublic(appID);
+        if (!app) {
+            return checkAndBuildErrorResponse("App not found", new Error("No app found with the provided ID"));
+        }
 
         return buildSuccessResponse<FetchPublicAppByIdData>(
             successMessage,
@@ -31,6 +37,7 @@ export async function GET(request: NextRequest, { params }: Params) {
             },
         );
     } catch (error: any) {
+        console.error("Error fetching app:", error);
         return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }
