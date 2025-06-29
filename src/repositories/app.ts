@@ -32,11 +32,16 @@ export async function getAppsForManageAllAppsTotalRow(search: string = "") {
         .select({ count: count() })
         .from(apps)
         .innerJoin(projects, eq(apps.projectId, projects.id))
-        .where(like(projects.name, `%${search}%`));
+        .where(
+            and(
+                like(projects.name, `%${search}%`),
+                eq(projects.isPublic, true)
+            )
+        );
     return totalRows[0].count;
 }
 
-export async function getAppsForManageAllApps(
+export async function getAllPublicApps(
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
     search: string = "",
@@ -60,11 +65,78 @@ export async function getAppsForManageAllApps(
         .from(apps)
         .leftJoin(projects, eq(apps.projectId, projects.id))
         .leftJoin(appTypes, eq(apps.type, appTypes.id))
-        .where(like(projects.name, `%${search}%`))
+        .where(
+            and(
+                like(projects.name, `%${search}%`),
+                eq(projects.isPublic, true)
+            )
+        )
         .limit(rowsPerPage)
         .offset((page - 1) * rowsPerPage)
         .orderBy(sql`${apps.id} DESC`);
 }
+
+export async function getAppByIdForPublic(app_id: number) {
+    return await db.query.apps.findFirst({
+        where: (table, { eq, and }) =>
+            and(eq(table.id, app_id), eq(table.status, "accepted")),
+
+        columns: {
+            subtitle: true,
+            aboutDesc: true,
+            content:true,
+            webUrl: true,
+            appFile: true,
+            cardImage: true,
+            bannerImage: true,
+        },
+        with: {
+
+            project: {
+                columns:{
+                    name: true,
+                    description: true,
+                },
+                with: {
+                    projectMembers: {
+                        with: {
+                            user: {
+                                columns: {
+                                    password: false,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+
+            screenshots: {
+                columns: {
+                    imageUrl: true,
+                    sortOrder: true,
+                },
+            },
+
+            versions: {
+                columns: {
+                    versionNumber: true,
+                    majorVersion: true,
+                    minorVersion: true,
+                    patchVersion: true,
+                },
+            },
+
+            appType: {
+                columns: {
+                    name: true,
+                },
+            },
+
+
+        },
+    });
+}
+
 
 export async function getAssociatedProjectsOfApp(appId: number) {
     return await db
