@@ -44,6 +44,9 @@ export default function Navbar() {
                         <Link href={"/join-us"} className="uppercase">
                             Join Us
                         </Link>
+                        <Link href={"/appstore"} className="uppercase">
+                            Appstore
+                        </Link>
                     </ul>
                 </div>
                 <div

@@ -7,13 +7,13 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import {
-    getAllPublicApps,
-    getAllPublicAppsTotalRow,
+    getAppsForManageAllApps,
+    getAppsForManageAllAppsTotalRow,
 } from "@/repositories/app";
 import { NextRequest } from "next/server";
 
 export type GetAllPublicAppsReturnType = Awaited<
-    ReturnType<typeof getAllPublicApps>
+    ReturnType<typeof getAppsForManageAllApps>
 >;
 
 export type FetchAllPublicAppsData = {
@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
         }
 
         const allPublicApps =
-            await getAllPublicApps(page, rowsPerPage, search);
-        const totalRows = await getAllPublicAppsTotalRow(search);
+            await getAppsForManageAllApps(page, rowsPerPage, search);
+        const totalRows = await getAppsForManageAllAppsTotalRow(search);
 
         return buildSuccessResponse<FetchAllPublicAppsData>(
             successMessage,

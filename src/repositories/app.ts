@@ -41,7 +41,7 @@ export async function getAppsForManageAllAppsTotalRow(search: string = "") {
     return totalRows[0].count;
 }
 
-export async function getAllPublicApps(
+export async function getAppsForManageAllApps(
     page: number = 1,
     rowsPerPage: number = ROWS_PER_PAGE,
     search: string = "",
