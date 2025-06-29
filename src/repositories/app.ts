@@ -1,6 +1,6 @@
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
-import { apps, projects, appTypes } from "@/drizzle/schema";
+import { apps, projects, appTypes, projectCategories, categories } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 import {
@@ -60,6 +60,15 @@ export async function getAllPublicApps(
                 id: appTypes.id,
                 name: appTypes.name,
                 description: appTypes.description,
+            },
+            projectCategories: {
+                id: projectCategories.id,
+                categoryId: projectCategories.categoryId,
+            },
+            category: {
+                id: categories.id,
+                name: categories.name,
+                description: categories.description,
             },
         })
         .from(apps)
@@ -285,14 +294,18 @@ export async function updateAppStatus(id: number, status: string) {
 }
 
 export async function getAppById(id: number) {
-    try {
-        const app = await db.query.apps.findFirst({
-            where: (app, { eq }) => eq(app.id, id),
-        });
-
-        return app || null;
-    } catch (error) {
-        console.error("Error fetching app by ID:", error);
-        throw error;
-    }
+    return await db.query.apps.findFirst({
+        where: (app, { eq }) => eq(app.id, id),
+        with: {
+            project: {
+                columns: {
+                    id: true,
+                    name: true,
+                    logoUrl: true,
+                    isPublic: true,
+                    userId: true,
+                },
+            },
+        },
+    });
 }
