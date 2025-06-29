@@ -50,7 +50,7 @@ export default function DashboardLayout({
           {/* Sidebar */}
           {showSideNav && (
             <aside
-              className="sticky top-[70px] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 overflow-y-auto"
+              className="sticky top-[70px] bg-white dark:bg-gray-900 overflow-y-auto"
               style={{ 
                 width: SIDEBAR_WIDTH,
                 height: `calc(100vh - ${NAVBAR_HEIGHT}px)`
