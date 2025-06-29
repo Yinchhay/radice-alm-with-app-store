@@ -35,6 +35,15 @@ export type App = {
         name: string;
         description: string;
     };
+    projectCategories?: {
+        id: number;
+        categoryId: number;
+    };
+    category?: {
+        id: number;
+        name: string;
+        description: string;
+    };
 };
 
 export default function AppStorePage() {
@@ -102,7 +111,11 @@ export default function AppStorePage() {
             activeType === "All" ||
             (activeType === "Web" && app.app.type === 1) ||
             (activeType === "Mobile" && app.app.type === 2) ||
-            (activeType === "API" && app.app.type === 3);
+            (activeType === "API" && app.app.type === 3) ||
+            (activeType === "EdTech" && app.category?.name === "EdTech") ||
+            (activeType === "FinTech" && app.category?.name === "FinTech") ||
+            (activeType === "Humanitarian Engineering" && app.category?.name === "Humanitarian Engineering") ||
+            (activeType === "Gamification" && app.category?.name === "Gamification");
 
         return matchesSearch && matchesType;
     });
