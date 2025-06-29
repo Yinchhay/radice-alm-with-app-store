@@ -6,19 +6,20 @@ import { getAuthUser } from "@/auth/lucia";
 import { fileToUrl } from "@/lib/file";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import Chip from "@/components/Chip";
-import ChipsHolder from "@/components/ChipsHolder";
-import Tooltip from "@/components/Tooltip";
 import { fetchProjectsForManageAllProjects } from "./fetch";
 import { FetchProjectsForManageAllProjectsData } from "@/app/api/internal/project/route";
 import ToggleProjectPublic from "./toggle_project_public";
+import ToggleAppPublic from "./toggle_app_public";
 import NoProject from "./no_project";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
 import Loading from "@/components/Loading";
+
 export const metadata: Metadata = {
     title: "Manage All Projects - Dashboard - Radice",
 };
+
 type ManageAllProjectsProps = {
     searchParams?: {
         page?: string;
@@ -42,17 +43,13 @@ export default async function ManageAllProject({
 
     const result = await fetchProjectsForManageAllProjects(
         page,
-        3,
+        4,
         searchParams?.search,
     );
     if (!result.success) {
         console.error(result.message);
         throw new Error(result.message);
     }
-
-    const ProjectLists = result.data.projects.map((project) => {
-        return <Project key={project.id} project={project} />;
-    });
 
     const showPagination =
         result.data.maxPage >= page && result.data.maxPage > 1;
@@ -64,15 +61,19 @@ export default async function ManageAllProject({
                 <div className="mt-4">
                     <SearchBar placeholder="Search projects" />
                 </div>
+
                 {result.data.projects.length > 0 ? (
-                    <div className="my-4 w-full flex gap-4 flex-col">
-                        {ProjectLists}
+                    <div className="py-4 flex flex-col gap-4">
+                        {result.data.projects.map((project) => (
+                            <Project key={project.id} project={project} />
+                        ))}
                     </div>
                 ) : (
                     <NoProject search={searchParams?.search} page={page} />
                 )}
+
                 {showPagination && (
-                    <div className="float-right mb-4">
+                    <div className="flex justify-end pb-4">
                         <Pagination page={page} maxPage={result.data.maxPage} />
                     </div>
                 )}
@@ -87,42 +88,51 @@ function Project({
     project: SuccessResponse<FetchProjectsForManageAllProjectsData>["data"]["projects"][number];
 }) {
     return (
-        <Card square>
-            <div className="flex flex-row gap-4 relative">
+        <Card square className="p-6 h-[200px] flex overflow-hidden">
+            {/* Project Logo */}
+            <div className="h-full aspect-square flex-shrink-0">
                 <ImageWithFallback
-                    className="aspect-square object-cover rounded-sm  w-32 h-32 bg-white"
-                    src={fileToUrl(project.logoUrl)}
-                    alt={"project logo"}
-                    width={128}
-                    height={128}
+                    className="w-full h-full object-cover bg-white rounded-lg"
+                    src={fileToUrl(project.logoUrl) || "/placeholder.svg"}
+                    alt="project logo"
+                    width={200}
+                    height={200}
                 />
-                <div className="flex mb-6">
-                    <div className="flex flex-col">
-                        <h1 className="text-xl">{project.name}</h1>
-                        <p className="text-sm">{project.description}</p>
-                        <ChipsHolder className="mt-1">
-                            {Array.isArray(project.projectCategories) &&
-                                project.projectCategories.map(
-                                    (categoryJoin) => {
-                                        return (
-                                            <Tooltip
-                                                key={categoryJoin.category.id}
-                                                title={
-                                                    categoryJoin.category.name
-                                                }
-                                            >
-                                                <Chip>
-                                                    {categoryJoin.category.name}
-                                                </Chip>
-                                            </Tooltip>
-                                        );
-                                    },
-                                )}
-                        </ChipsHolder>
+            </div>
+
+            {/* Project Info + Toggle Buttons */}
+            <div className="flex flex-1 pl-6 gap-6">
+                {/* Info */}
+                <div className="flex flex-col gap-4 flex-1 min-w-0">
+                    <div className="flex gap-2 flex-wrap">
+                        {project.projectCategories.map((catJoin) => (
+                            <Chip
+                                key={catJoin.category.id}
+                                textClassName="text-[#7F56D9] font-bold text-sm"
+                                bgClassName="bg-transparent"
+                                className="px-0"
+                            >
+                                {catJoin.category.name}
+                            </Chip>
+                        ))}
                     </div>
+                    <h1 className="text-black font-semibold text-xl leading-6">{project.name}</h1>
+                    <p className="text-black/64 text-sm leading-5 line-clamp-3 overflow-hidden">{project.description}</p>
                 </div>
-                <div className="absolute bottom-0 right-0 flex gap-2">
-                    <ToggleProjectPublic project={project} key={project.id} />
+
+                {/* Toggles - Positioned like the buttons were */}
+                <div className="flex flex-col justify-between items-end h-full py-2 gap-2">
+                    {/* Public Toggle */}
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Public</span>
+                        <ToggleProjectPublic project={project} />
+                    </div>
+
+                    {/* App Toggle */}
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">App</span>
+                        <ToggleAppPublic project={project} />
+                    </div>
                 </div>
             </div>
         </Card>
