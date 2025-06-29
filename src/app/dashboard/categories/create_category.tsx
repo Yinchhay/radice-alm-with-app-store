@@ -5,14 +5,13 @@ import Overlay from "@/components/Overlay";
 import { useEffect, useRef, useState } from "react";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconCheck, IconPlus } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import { fetchCreateCategory } from "./fetch";
 import { useFormStatus } from "react-dom";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { ACCEPTED_IMAGE_TYPES } from "@/lib/file";
 import TextareaField from "@/components/TextareaField";
-import Tooltip from "@/components/Tooltip";
 import { useToast } from "@/components/Toaster";
 
 export function CreateCategoryOverlay() {
@@ -35,7 +34,6 @@ export function CreateCategoryOverlay() {
     }
 
     useEffect(() => {
-        // close the overlay after creating successfully
         if (showOverlay && result?.success) {
             addToast(
                 <div className="flex gap-2">
@@ -43,23 +41,19 @@ export function CreateCategoryOverlay() {
                     <p>Successfully created category</p>
                 </div>,
             );
-
             onCancel();
         }
     }, [result]);
 
     return (
         <>
-            <Tooltip title="Create a category">
-                <Button
-                    data-test="createCategory"
-                    onClick={() => setShowOverlay(true)}
-                    square={true}
-                    variant="primary"
-                >
-                    <IconPlus></IconPlus>
-                </Button>
-            </Tooltip>
+            <button
+                data-test="createCategory"
+                onClick={() => setShowOverlay(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-1.5 px-3 rounded-lg transition-colors whitespace-nowrap"
+            >
+                Add Categories
+            </button>
             {showOverlay && (
                 <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
