@@ -22,6 +22,8 @@ import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { FetchUsersBySearchData } from "@/app/api/internal/users/search/route";
 import { FetchCategoriesBySearchData } from "@/app/api/internal/category/search/route";
 import { FetchPartnersBySearchData } from "@/app/api/internal/partner/search/route";
+import { FetchUpdateProjectSettingsPublicStatus } from "@/app/api/internal/project/[project_id]/settings/update-public-status/route";
+import { FetchUpdateProjectSettingsAppStatus } from "@/app/api/internal/project/[project_id]/settings/update-app-status/route";
 
 export async function fetchEditProjectSettingsDetail(
     projectId: number,
@@ -225,7 +227,7 @@ export async function fetchUpdateProjectPublicStatus(
     projectId: number,
     body: z.infer<typeof updateProjectPublicStatusSchema>,
     pathname: string,
-): ResponseJson<FetchEditProjectSettingsPipelines> {
+): ResponseJson<FetchUpdateProjectSettingsPublicStatus> {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
@@ -233,14 +235,47 @@ export async function fetchUpdateProjectPublicStatus(
             {
                 method: "PATCH",
                 headers: {
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${sessionId}`,
                 },
                 body: JSON.stringify(body),
             },
         );
 
-        revalidatePath(pathname);
-        return await response.json();
+        const result = await response.json();
+        if (result.success) {
+            revalidatePath(pathname);
+        }
+        return result;
+    } catch (error: any) {
+        return returnFetchErrorSomethingWentWrong(error);
+    }
+}
+
+export async function fetchUpdateProjectAppStatus(
+    projectId: number,
+    body: z.infer<typeof updateProjectPublicStatusSchema>,
+    pathname: string,
+): ResponseJson<FetchUpdateProjectSettingsAppStatus> {
+    try {
+        const sessionId = await getSessionCookie();
+        const response = await fetch(
+            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/update-app-status`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${sessionId}`,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+
+        const result = await response.json();
+        if (result.success) {
+            revalidatePath(pathname);
+        }
+        return result;
     } catch (error: any) {
         return returnFetchErrorSomethingWentWrong(error);
     }

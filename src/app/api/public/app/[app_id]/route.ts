@@ -1,22 +1,36 @@
-import { checkAndBuildErrorResponse, buildSuccessResponse } from "@/lib/response";
-import { getAppById } from "@/repositories/app";
+import {
+    checkAndBuildErrorResponse,
+    buildSuccessResponse,
+} from "@/lib/response";
+import { getAppByIdForPublic } from "@/repositories/app";
 import { NextRequest } from "next/server";
 
-type Param = { params: { app_id: string } };
-export async function GET(request: NextRequest, { params }: Param) {
-    try {
-        const appID = parseInt(params.app_id);
-        if (isNaN(appID)){
-            return checkAndBuildErrorResponse("Invalid app ID", new Error("App ID must be a number"));
-        }
+export type GetPublicAppByIdReturnType = Awaited<
+    ReturnType<typeof getAppByIdForPublic>
+>;
 
-        const app = await getAppById(appID);
-        if (!app) {
-            return checkAndBuildErrorResponse("App not found", new Error("No app found with the provided ID"));
-        }
-        return buildSuccessResponse("Get app by ID successfully", {app})
-    } catch (error) {
-        console.error("Error fetching app:", error);
-        return checkAndBuildErrorResponse("Failed to fetch app", error);
+export type FetchPublicAppByIdData = {
+    app: GetPublicAppByIdReturnType;
+};
+
+type Params = { params: { app_id: string } };
+
+const successMessage = "Get public app by id successfully";
+const unsuccessMessage = "Get public app by id failed";
+
+export async function GET(request: NextRequest, { params }: Params) {
+    try {
+        const app = await getAppByIdForPublic(
+            Number(params.app_id),
+        );
+
+        return buildSuccessResponse<FetchPublicAppByIdData>(
+            successMessage,
+            {
+                app: app,
+            },
+        );
+    } catch (error: any) {
+        return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }

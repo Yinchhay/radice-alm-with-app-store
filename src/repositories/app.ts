@@ -1,6 +1,6 @@
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
-import { apps, projects, appTypes, projectCategories, categories } from "@/drizzle/schema";
+import { apps, projects, appTypes } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 import {
@@ -32,7 +32,12 @@ export async function getAppsForManageAllAppsTotalRow(search: string = "") {
         .select({ count: count() })
         .from(apps)
         .innerJoin(projects, eq(apps.projectId, projects.id))
-        .where(like(projects.name, `%${search}%`));
+        .where(
+            and(
+                like(projects.name, `%${search}%`),
+                eq(projects.isPublic, true)
+            )
+        );
     return totalRows[0].count;
 }
 
@@ -56,26 +61,82 @@ export async function getAppsForManageAllApps(
                 name: appTypes.name,
                 description: appTypes.description,
             },
-            projectCategories: {
-                id: projectCategories.id,
-                categoryId: projectCategories.categoryId,
-            },
-            category: {
-                id: categories.id,
-                name: categories.name,
-                description: categories.description,
-            },
         })
         .from(apps)
         .leftJoin(projects, eq(apps.projectId, projects.id))
         .leftJoin(appTypes, eq(apps.type, appTypes.id))
-        .leftJoin(projectCategories, eq(projects.id, projectCategories.projectId))
-        .leftJoin(categories, eq(projectCategories.categoryId, categories.id))
-        .where(like(projects.name, `%${search}%`))
+        .where(
+            and(
+                like(projects.name, `%${search}%`),
+                eq(projects.isPublic, true)
+            )
+        )
         .limit(rowsPerPage)
         .offset((page - 1) * rowsPerPage)
         .orderBy(sql`${apps.id} DESC`);
 }
+
+export async function getAppByIdForPublic(app_id: number) {
+    return await db.query.apps.findFirst({
+        where: (table, { eq, and }) =>
+            and(eq(table.id, app_id), eq(table.status, "accepted")),
+
+        columns: {
+            subtitle: true,
+            aboutDesc: true,
+            content:true,
+            webUrl: true,
+            appFile: true,
+            cardImage: true,
+            bannerImage: true,
+        },
+        with: {
+
+            project: {
+                columns:{
+                    name: true,
+                    description: true,
+                },
+                with: {
+                    projectMembers: {
+                        with: {
+                            user: {
+                                columns: {
+                                    password: false,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+
+            screenshots: {
+                columns: {
+                    imageUrl: true,
+                    sortOrder: true,
+                },
+            },
+
+            versions: {
+                columns: {
+                    versionNumber: true,
+                    majorVersion: true,
+                    minorVersion: true,
+                    patchVersion: true,
+                },
+            },
+
+            appType: {
+                columns: {
+                    name: true,
+                },
+            },
+
+
+        },
+    });
+}
+
 
 export async function getAssociatedProjectsOfApp(appId: number) {
     return await db
@@ -224,18 +285,14 @@ export async function updateAppStatus(id: number, status: string) {
 }
 
 export async function getAppById(id: number) {
-    return await db.query.apps.findFirst({
-        where: (app, { eq }) => eq(app.id, id),
-        with: {
-            project: {
-                columns: {
-                    id: true,
-                    name: true,
-                    logoUrl: true,
-                    isPublic: true,
-                    userId: true,
-                },
-            },
-        },
-    });
+    try {
+        const app = await db.query.apps.findFirst({
+            where: (app, { eq }) => eq(app.id, id),
+        });
+
+        return app || null;
+    } catch (error) {
+        console.error("Error fetching app by ID:", error);
+        throw error;
+    }
 }

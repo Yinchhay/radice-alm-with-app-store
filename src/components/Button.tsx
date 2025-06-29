@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     className?: string;
-    variant?: "outline" | "primary" | "secondary" | "danger" | undefined;
+    variant?: "outline" | "primary" | "secondary" | "purple" | "danger" | undefined;
     square?: boolean;
     children: React.ReactNode;
 };
@@ -12,22 +12,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         let buttonStyle = "";
         switch (variant) {
             case "outline":
-                buttonStyle =
-                    "bg-white text-black rounded-sm outline outline-1 outline-gray-300 dark:bg-gray-700 dark:outline-gray-600 dark:text-white";
+                buttonStyle = "flex px-3 py-2 items-center gap-4 rounded-lg text-sm font-bold bg-white text-black border border-gray-300";
                 break;
             case "primary":
-                buttonStyle = "bg-blue-500 text-white rounded-sm";
+                buttonStyle = "flex px-3 py-2 items-center gap-4 rounded-lg text-sm font-bold bg-blue-500 text-white";
                 break;
             case "secondary":
                 buttonStyle =
-                    "bg-gray-100 text-black rounded-sm dark:bg-gray-700 dark:outline-gray-500 dark:text-white";
+                    "flex px-3 py-2 items-center gap-4 rounded-lg text-sm font-bold bg-gray-100 text-black dark:bg-gray-700 dark:outline-gray-500 dark:text-white";
+                break;
+            case "purple":
+                buttonStyle =
+                    "flex px-3 py-2 items-center gap-4 rounded-lg text-sm font-bold bg-purple-700 text-white";
                 break;
             case "danger":
-                buttonStyle = "bg-red-500 text-white rounded-sm";
+                buttonStyle = "flex px-3 py-2 items-center gap-4 rounded-lg text-sm font-bold bg-red-500 text-white";
                 break;
             default:
                 buttonStyle =
-                    "bg-white text-black rounded-sm outline outline-1 outline-gray-300 outline-gray-300 dark:bg-gray-700 dark:outline-gray-600 dark:text-white";
+                    "flex px-3 py-2 items-center gap-4 rounded-lg text-sm font-bold bg-white text-black outline outline-1 outline-gray-300 dark:bg-gray-700 dark:outline-gray-600 dark:text-white";
         }
         if (square) {
             buttonStyle += " px-1 py-1 aspect-square";

@@ -7,6 +7,8 @@ import {
 } from "next/font/google";
 import GlitchText from "@/components/GlitchText";
 import Link from "next/link";
+import { colors } from "@/lib/colors";
+
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
     subsets: ["latin"],
@@ -32,7 +34,7 @@ export default function Navbar() {
                 <div
                     className={`mt-6 flex justify-center col-span-3 ${roboto_mono.className}`}
                 >
-                    <ul className="flex gap-16">
+                    <ul className="flex gap-10 items-center">
                         <Link href={"/about"} className="uppercase">
                             Who we are
                         </Link>
@@ -48,11 +50,20 @@ export default function Navbar() {
                     </ul>
                 </div>
                 <div
-                    className={`mt-6 flex justify-end ${roboto_mono.className}`}
+                    className={`mt-6 flex justify-end items-center gap-6 ${roboto_mono.className}`}
                 >
-                    <a href="/login" className="uppercase">
+                    <Link 
+                        href="/tester-login" 
+                        className="uppercase"
+                    >
+                        Log In
+                    </Link>
+                    <Link 
+                        href="/login" 
+                        className="uppercase"
+                    >
                         Dashboard
-                    </a>
+                    </Link>
                 </div>
             </div>
         </nav>

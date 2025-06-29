@@ -368,6 +368,16 @@ export async function updateProjectPublicStatus(
         .where(eq(projects.id, projectId));
 }
 
+export async function updateProjectAppStatus(
+    projectId: number,
+    isApp: boolean,
+) {
+    return await db
+        .update(projects)
+        .set({ isApp: isApp })
+        .where(eq(projects.id, projectId));
+}
+
 export async function updateProjectLinks(
     projectId: number,
     links: ProjectLink[],

@@ -30,7 +30,7 @@ export default function Error({
     }
 
     return (
-        <section className="flex items-center h-full sm:p-16 bg-slate-50 dark:bg-gray-900">
+        <section className="flex items-center h-full sm:p-16 bg-slate-white dark:bg-gray-900">
             <div className="container flex flex-col items-center justify-center px-5 mx-auto my-8 space-y-8 text-center sm:max-w-md">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"

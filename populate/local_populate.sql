@@ -340,6 +340,7 @@ CREATE TABLE `projects` (
   `description` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `logo_url` varchar(2083) DEFAULT NULL,
   `is_public` tinyint(1) DEFAULT '0',
+  -- `is_app` tinyint(1) DEFAULT '0',
   `project_content` json DEFAULT (_utf8mb4'[]'),
   `links` json DEFAULT (_utf8mb4'[]'),
   `pipeline_status` json DEFAULT NULL,
@@ -363,8 +364,6 @@ INSERT INTO `projects` VALUES (1,'Scholarize','Scholarize is a platform designed
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 UNLOCK TABLES;
 
-ALTER TABLE projects
-ADD COLUMN is_app TINYINT(1) DEFAULT '0';
 --
 -- Table structure for table `role_permissions`
 --
