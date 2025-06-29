@@ -1,4 +1,5 @@
 import { App } from "@/app/appstore/appstore";
+import Link from "next/link";
 
 const typeColors: Record<number, { name: string; color: string }> = {
     1: { name: "Web", color: "#4285F4" },
@@ -7,15 +8,8 @@ const typeColors: Record<number, { name: string; color: string }> = {
 }
 
 export function AppCard({app, clickable = true} : { app: App; clickable?: boolean}){
-    const handleClick = () => {
-        if (clickable) {
-            window.location.href = `/app/${app.app.id}`;
-        }
-    };
-
-    
-    return (
-        <div onClick={handleClick} className={`bg-transparent overflow-hidden flex flex-col p-4 ${clickable ? 'cursor-pointer hover:bg-transparent' : ''}`}>
+    const CardContent = () => (
+        <div className="bg-transparent overflow-hidden flex flex-col p-4">
             {app.app.cardImage ? (
                 <img src={app.app.cardImage} alt={app.project.name || "App"} className="w-full h-48 object-cover rounded-lg mb-4"/>
             ) : (
@@ -43,5 +37,16 @@ export function AppCard({app, clickable = true} : { app: App; clickable?: boolea
                 </div>
             </div>
         </div>
-    )
+    );
+    if (clickable) {
+        return (
+            <Link 
+                href={`/appstore/${app.app.id}`}
+                className="block cursor-pointer hover:bg-gray-50 transition-colors rounded-xl"
+            >
+                <CardContent />
+            </Link>
+        )
+    }
+    return <CardContent />;
 }
