@@ -3,7 +3,7 @@ import { CreateProjectOverlay } from "./create_project";
 import Pagination from "@/components/Pagination";
 import { fetchAssociatedProjects } from "./fetch";
 import Card from "@/components/Card";
-import { IconEye, IconHammer, IconSettings, IconShoppingBag } from "@tabler/icons-react";
+import { IconEye, IconHammer, IconSettings } from "@tabler/icons-react";
 import Button from "@/components/Button";
 import { SuccessResponse } from "@/lib/response";
 import { FetchAssociatedProjectsData } from "@/app/api/internal/project/associate/route";
@@ -25,89 +25,71 @@ import DashboardPageTitle from "@/components/DashboardPageTitle";
 import Loading from "@/components/Loading";
 
 export const metadata: Metadata = {
-    title: "Manage Projects - Dashboard - Radice",
-};
+  title: "Manage Projects - Dashboard - Radice",
+}
 
 type ManageAssociatedProps = {
-    searchParams?: {
-        page?: string;
-        search?: string;
-    };
-};
+  searchParams?: {
+    page?: string
+    search?: string
+  }
+}
 
-export default async function ManageAssociatedProject({
-    searchParams,
-}: ManageAssociatedProps) {
-    const user = await getAuthUser();
+export default async function ManageAssociatedProject({ searchParams }: ManageAssociatedProps) {
+  const user = await getAuthUser()
+  if (!user) throw new Error("Unauthorized")
 
-    if (!user) {
-        throw new Error("Unauthorized to access this page");
-    }
+  let page = Number(searchParams?.page) || 1
+  if (page < 1) page = 1
 
-    let page = Number(searchParams?.page) || 1;
-    if (page < 1) {
-        page = 1;
-    }
+  const result = await fetchAssociatedProjects(page, 4, searchParams?.search)
+  if (!result.success) throw new Error(result.message)
 
-    const result = await fetchAssociatedProjects(page, 4, searchParams?.search);
-    if (!result.success) {
-        throw new Error(result.message);
-    }
+  const { canAccess: canCreateProject } = await hasPermission(user.id, new Set([Permissions.CREATE_OWN_PROJECTS]))
 
-    const ProjectLists = result.data.projects.map((project) => {
-        return <Project key={project.id} project={project} user={user} />;
-    });
+  const showPagination = result.data.maxPage >= page && result.data.maxPage > 1
 
-    const showPagination =
-        result.data.maxPage >= page && result.data.maxPage > 1;
-
-    const { canAccess: canCreateProject } = await hasPermission(
-        user.id,
-        new Set([Permissions.CREATE_OWN_PROJECTS]),
-    );
-
-    return (
-        <div className="w-full max-w-[1000px] mx-auto">
-            <Suspense fallback={<Loading />}>
-                <div className="flex flex-row justify-between">
-                    <DashboardPageTitle title="Projects" />
-                    {canCreateProject && <CreateProjectOverlay />}
-                </div>
-                <div className="mt-4">
-                    <SearchBar placeholder="Search associated projects" />
-                </div>
-                {result.data.projects.length > 0 ? (
-                    <div className="py-4 w-full flex gap-4 flex-col">
-                        {ProjectLists}
-                    </div>
-                ) : (
-                    <NoAssociatedProject page={page} />
-                )}
-                {showPagination && (
-                    <div className="flex justify-end pb-4">
-                        <Pagination page={page} maxPage={result.data.maxPage} />
-                    </div>
-                )}
-            </Suspense>
+  return (
+    <div className="w-full max-w-[1000px] mx-auto">
+      <Suspense fallback={<Loading />}>
+        <div className="flex justify-between items-center">
+          <DashboardPageTitle title="Projects" />
+          {canCreateProject && <CreateProjectOverlay />}
         </div>
-    );
+
+        <div className="mt-4">
+          <SearchBar placeholder="Search associated projects" />
+        </div>
+
+        {result.data.projects.length > 0 ? (
+          <div className="py-4 flex flex-col gap-4">
+            {result.data.projects.map((project) => (
+              <Project key={project.id} project={project} user={user} />
+            ))}
+          </div>
+        ) : (
+          <NoAssociatedProject page={page} />
+        )}
+
+        {showPagination && (
+          <div className="flex justify-end pb-4">
+            <Pagination page={page} maxPage={result.data.maxPage} />
+          </div>
+        )}
+      </Suspense>
+    </div>
+  )
 }
 
 function Project({
-    user,
-    project,
+  user,
+  project,
 }: {
-    user: User;
-    project: SuccessResponse<FetchAssociatedProjectsData>["data"]["projects"][number];
+  user: User
+  project: SuccessResponse<FetchAssociatedProjectsData>["data"]["projects"][number]
 }) {
-    const { canEdit, projectRole } = checkProjectRole(
-        user.id,
-        project,
-        user.type,
-    );
-    const canViewSettings =
-        projectRole === ProjectRole.OWNER ||
-        projectRole === ProjectRole.SUPER_ADMIN;
+  const { canEdit, projectRole } = checkProjectRole(user.id, project, user.type)
+  const canViewSettings = projectRole === ProjectRole.OWNER || projectRole === ProjectRole.SUPER_ADMIN
 
     return (
         <Card square>
@@ -196,26 +178,6 @@ function Project({
                                     className="outline-0"
                                 >
                                     <IconHammer
-                                        size={28}
-                                        className="group-hover:text-blue-500 transition-all"
-                                        stroke={1.3}
-                                    />
-                                </Button>
-                            </Link>
-                        </Tooltip>
-                    )}
-                    {canEdit && (
-                        <Tooltip title="App content builder" position="top">
-                            <Link
-                                href={`/dashboard/projects/${project.id}/builder`}
-                                className="group"
-                            >
-                                <Button
-                                    square
-                                    variant="outline"
-                                    className="outline-0"
-                                >
-                                    <IconShoppingBag
                                         size={28}
                                         className="group-hover:text-blue-500 transition-all"
                                         stroke={1.3}

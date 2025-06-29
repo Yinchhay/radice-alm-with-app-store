@@ -1,5 +1,4 @@
 "use client";
-import Button from "@/components/Button";
 import { useEffect, useState } from "react";
 import { logout } from "../_functions/fetch";
 import { redirect } from "next/navigation";
@@ -27,9 +26,23 @@ function LogoutButton() {
     return (
         <button
             disabled={formStatus.pending}
-            className="w-full flex items-center gap-2 text-gray-200 font-bold px-4 py-2 rounded-sm hover:bg-gray-800 hover:text-red-500 transition-all"
+            className={[
+                "w-full",
+                "flex",
+                "p-3",
+                "px-5",
+                "items-center",
+                "gap-4",
+                "self-stretch",
+                "rounded-lg",
+                "text-gray-700",
+                "cursor-pointer",
+                "transition-colors",
+                "hover:bg-gray-100",
+                "font-semibold",
+            ].join(" ")}
         >
-            <IconLogout2 size={28} />
+            <IconLogout2 size={20} />
             {formStatus.pending ? "Logging out" : "Logout"}
         </button>
     );
