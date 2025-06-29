@@ -35,7 +35,8 @@ export async function getAppsForManageAllAppsTotalRow(search: string = "") {
         .where(
             and(
                 like(projects.name, `%${search}%`),
-                eq(projects.isPublic, true)
+                eq(projects.isPublic, true),
+                eq(apps.status, "accepted")
             )
         );
     return totalRows[0].count;
@@ -68,7 +69,8 @@ export async function getAppsForManageAllApps(
         .where(
             and(
                 like(projects.name, `%${search}%`),
-                eq(projects.isPublic, true)
+                eq(projects.isPublic, true),
+                eq(apps.status, "accepted")
             )
         )
         .limit(rowsPerPage)
@@ -82,6 +84,7 @@ export async function getAppByIdForPublic(app_id: number) {
             and(eq(table.id, app_id), eq(table.status, "accepted")),
 
         columns: {
+            id: true,
             subtitle: true,
             aboutDesc: true,
             content:true,
@@ -96,6 +99,7 @@ export async function getAppByIdForPublic(app_id: number) {
                 columns:{
                     name: true,
                     description: true,
+                    isPublic: true,
                 },
                 with: {
                     projectMembers: {
@@ -197,7 +201,6 @@ export async function editAppById(
             throw new Error('No update data provided');
         }
 
-        // Check if app exists before updating
         const existingApp = await db.query.apps.findFirst({
             where: (app, { eq }) => eq(app.id, id),
         });
@@ -210,19 +213,16 @@ export async function editAppById(
             };
         }
 
-        // Add updatedAt timestamp
         const dataWithTimestamp = {
             ...updateData,
             updatedAt: new Date(),
         };
 
-        // Perform the update
         await db
             .update(apps)
             .set(dataWithTimestamp)
             .where(eq(apps.id, id));
 
-        // Alternative: Fetch the updated app if returning() is not supported
         const updatedApp = await db.query.apps.findFirst({
             where: (app, { eq }) => eq(app.id, id),
             with: {
@@ -254,7 +254,6 @@ export async function editAppById(
     } catch (error) {
         console.error("Error editing app:", error);
         
-        // Return detailed error information
         return {
             updateSuccess: false,
             updatedApp: null,
