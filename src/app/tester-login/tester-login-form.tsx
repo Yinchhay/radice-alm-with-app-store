@@ -63,14 +63,14 @@ export default function TesterLoginForm() {
                     {result.errors.map((err, i) => <div key={i}>{err}</div>)}
                 </div>
             )}
-            <Button
+            <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 bg-black text-white rounded-lg text-base font-normal hover:brightness-90 transition-all"
+                className="w-full h-[50px] bg-black text-white rounded-xl text-lg font-semibold"
                 style={{ boxShadow: "none" }}
             >
                 Log In
-            </Button>
+            </button>
             {/* Divider */}
             <div className="flex items-center gap-2 w-full">
                 <div className="flex-1 h-px bg-gray-200" />
