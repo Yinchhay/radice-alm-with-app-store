@@ -16,6 +16,8 @@ import {
 } from "@/repositories/app";
 import { checkProjectRole } from "@/lib/project";
 import { editAppFormSchema } from "../../schema";
+// Import the existing function that fetches project with members and partners
+import { getOneAssociatedProject } from "@/repositories/project";
 
 const successMessage = "App updated successfully";
 const unsuccessMessage = "Failed to update app";
@@ -24,7 +26,7 @@ type Params = { params: { app_id: string } };
 
 export type FetchEditApp = Awaited<ReturnType<typeof editAppById>>;
 
-export async function PATCH(request: NextRequest, { params }: Params): Promise<NextResponse> {
+export async function PATCH(request: NextRequest, { params }: Params) {
     try {
         const requestBody = await request.json();
         
@@ -86,10 +88,21 @@ export async function PATCH(request: NextRequest, { params }: Params): Promise<N
             );
         }
 
-        const project = associatedProjects[0].project;
+        const projectId = associatedProjects[0].project.id;
+
+        // Fetch the complete project data with members and partners
+        const projectWithMembersAndPartners = await getOneAssociatedProject(projectId);
+        
+        if (!projectWithMembersAndPartners) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("unknown", "Project data not found"),
+                HttpStatusCode.NOT_FOUND_404,
+            );
+        }
 
         // Check for Project Role
-        const { canEdit } = checkProjectRole(user.id, project, user.type);
+        const { canEdit } = checkProjectRole(user.id, projectWithMembersAndPartners, user.type);
         
         if (!canEdit) {
             return buildErrorResponse(
