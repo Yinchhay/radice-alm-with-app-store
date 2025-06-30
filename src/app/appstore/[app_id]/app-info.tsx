@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import AppBanner from "./_components/app-banner";
 import AppScreenshotsCarousel from "./_components/app-screenshots-carousel";
 import AppReviews from "./_components/app-reviews";
-import BugReportForm from "./_components/bug-report-form";
+import AppBugReportForm from "./_components/bug-report-form";
 import type { App } from "@/types/app_types";
 
 export default function AppPageWrapper(props: { params: { app_id: string } }) {
@@ -138,11 +138,12 @@ function AppPage({ params }: { params: { app_id: string } }) {
                         </div>
                         {/*right side*/}
                         <div className="flex-1 min-w-[300px] max-w-3xl">
-                            <AppScreenshotsCarousel
-                                screenshots={screenshots}
-                                appName={project?.name || "App"}
-                            />
-
+                            {(appType?.name === "Web" || appType?.name === "Mobile") && (
+                                <AppScreenshotsCarousel
+                                    screenshots={screenshots}
+                                    appName={project?.name || "App"}
+                                />
+                            )}
                             <div className="mb-8">
                                 <h2 className="text-xl mb-3 font-semibold">
                                     About
@@ -170,18 +171,97 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         "No update information available."}
                                 </p>
                             </div>
-                            {/* Reviews */}
-                            <AppReviews
-                                appId={app.id}
-                                appName={project?.name || "App"}
-                                reviews={[]} // TODO: Add reviews data from API
-                            />
-
-                            {/* Bug Report */}
-                            <BugReportForm
-                                appId={app.id}
-                                appName={project?.name || "App"}
-                            />
+                            <div className="mb-6">
+                                <div className="flex flex-col md:flex-row">
+                                    {/* Left column */}
+                                    <div className="min-w-[260px] max-w-sm flex flex-col">
+                                        <div className="mb-6">
+                                            <h3 className="text-lg font-semibold mb-2">
+                                                Updated on
+                                            </h3>
+                                            <div className="text-base text-gray-600 mb-2">
+                                                {app.updatedAt
+                                                    ? new Date(
+                                                        app.updatedAt,
+                                                    ).toLocaleDateString(
+                                                        undefined,
+                                                        {
+                                                            year: "numeric",
+                                                            month: "short",
+                                                            day: "numeric",
+                                                        },
+                                                    )
+                                                    : "N/A"}
+                                            </div>
+                                            <h3 className="text-lg font-semibold mb-2">
+                                                Version
+                                            </h3>
+                                            <div className="text-base text-gray-600">
+                                                {/* @ts-expect-error version may not exist on App type */}
+                                                {app.version || "N/A"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="min-w-[260px] max-w-sm flex flex-col md:items-end">
+                                        <h3 className="text-lg font-semibold mb-2">
+                                            Compatibility
+                                        </h3>
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <img
+                                                    src={
+                                                        appType?.name === "Web"
+                                                            ? "/ui/tick.mark.svg"
+                                                            : "/ui/x_mark.svg"
+                                                    }
+                                                    alt="Web"
+                                                    className="w-6 h-6"
+                                                />
+                                                <span className="text-base">
+                                                    Web
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <img
+                                                    src={
+                                                        appType?.name ===
+                                                        "Mobile"
+                                                            ? "/ui/tick.mark.svg"
+                                                            : "/ui/x_mark.svg"
+                                                    }
+                                                    alt="Mobile"
+                                                    className="w-6 h-6"
+                                                />
+                                                <span className="text-base">
+                                                    Andriod
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <img
+                                                    src={"/ui/x_mark.svg"}
+                                                    alt="iOS"
+                                                    className="w-6 h-6"
+                                                />
+                                                <span className="text-base">
+                                                    iOS
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mb-6">
+                                <AppReviews 
+                                    appId={Number(params.app_id)} 
+                                    appName={project?.name || "App"} 
+                                />
+                            </div>
+                            <div className="mt-6">
+                                <AppBugReportForm 
+                                    appId={Number(params.app_id)}
+                                    appName={project?.name || "App"}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
