@@ -168,7 +168,8 @@ export async function getAppsForManageAllApps(
         .where(
             and(
                 like(projects.name, `%${search}%`),
-                eq(projects.isPublic, true)
+                eq(projects.isPublic, true),
+                eq(apps.status, "accepted")
             )
         )
         .limit(rowsPerPage)

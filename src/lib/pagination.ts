@@ -1,5 +1,7 @@
 export const ROWS_PER_PAGE = 5;
 
+export const ROWS_PER_FEEDBACK_PAGE = 2;
+
 export function getPaginationMaxPage(
     totalItemCount: number,
     rowsPerPage: number = ROWS_PER_PAGE,
