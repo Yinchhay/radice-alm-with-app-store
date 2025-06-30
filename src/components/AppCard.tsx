@@ -20,6 +20,7 @@ export function AppCard({app, clickable = true} : { app: App; clickable?: boolea
                 )}
             </div>
             <div className="flex flex-col">
+                <div className="font-bold text-sm mb-1" style={{color: "#7F56D9"}}>{app.category?.name|| "Unknown"}</div>
                 <div className="font-bold text-lg mb-1">{app.project.name || "Untitled"}</div>
                 <div className="text-sm text-gray-600 mb-2">{app.app.subtitle}</div>
                 <div className="flex items-center justify-between">
