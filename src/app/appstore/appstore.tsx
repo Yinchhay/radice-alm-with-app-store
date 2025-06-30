@@ -145,8 +145,8 @@ export default function AppStorePage() {
     }
 
     return (
-        <div className="flex flex-col min-h-screen">
-            <div className="flex-1 w-full px-4">
+        <div className="flex justify-center">
+            <div className="flex-1 max-w-[1440px] px-4">
                 <div className="w-full mx-auto px-4">
                     <div style={{ marginTop: "25px" }}>
                         <h1 className="text-4xl text-center text-gray-900">
