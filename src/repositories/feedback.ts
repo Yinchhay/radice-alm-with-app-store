@@ -1,6 +1,7 @@
 import { db } from "@/drizzle/db";
+import { ROWS_PER_FEEDBACK_PAGE } from "@/lib/pagination";
 import { feedbacks } from "@/drizzle/schema";
-import { eq, desc, and, or, ilike, sql } from "drizzle-orm";
+import { eq, desc, and, or, like, sql } from "drizzle-orm";
 
 export const createFeedback = async (
     feedback: typeof feedbacks.$inferInsert,
@@ -22,10 +23,11 @@ export async function getFeedbackById(feedbackId: number) {
     }
 }
 
+//Get Feedback By App
 export async function getAllFeedbacksByAppId(
     appId: number,
-    page: number,
-    rowsPerPage: number,
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_FEEDBACK_PAGE,
     search: string = "",
 ) {
     try {
@@ -36,8 +38,8 @@ export async function getAllFeedbacksByAppId(
             whereCondition = and(
                 eq(feedbacks.appId, appId),
                 or(
-                    ilike(feedbacks.review, `%${search}%`),
-                    ilike(feedbacks.title, `%${search}%`),
+                    like(feedbacks.review, `%${search}%`),
+                    like(feedbacks.title, `%${search}%`),
                 ),
             );
         } else {
@@ -74,8 +76,8 @@ export async function getAllFeedbacksByTesterId(
             whereCondition = and(
                 eq(feedbacks.testerId, testerId),
                 or(
-                    ilike(feedbacks.review, `%${search}%`),
-                    ilike(feedbacks.title, `%${search}%`),
+                    like(feedbacks.review, `%${search}%`),
+                    like(feedbacks.title, `%${search}%`),
                 ),
             );
         } else {
@@ -120,8 +122,8 @@ export async function getFeedbacksTotalRowByAppId(
             whereCondition = and(
                 eq(feedbacks.appId, appId),
                 or(
-                    ilike(feedbacks.review, `%${search}%`),
-                    ilike(feedbacks.title, `%${search}%`),
+                    like(feedbacks.review, `%${search}%`),
+                    like(feedbacks.title, `%${search}%`),
                 ),
             );
         } else {
@@ -152,8 +154,8 @@ export async function getFeedbacksTotalRowByTesterId(
             whereCondition = and(
                 eq(feedbacks.testerId, testerId),
                 or(
-                    ilike(feedbacks.review, `%${search}%`),
-                    ilike(feedbacks.title, `%${search}%`),
+                    like(feedbacks.review, `%${search}%`),
+                    like(feedbacks.title, `%${search}%`),
                 ),
             );
         } else {
