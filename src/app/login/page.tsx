@@ -24,8 +24,8 @@ export default async function Page() {
             <div className="container mx-auto min-h-[60vh] grid justify-center mt-16">
                 <div className="flex gap-4 flex-col">
                     <LoginForm />
-                    <Link href={"/forgot-password"}>Forgot password</Link>
-                    <LoginGithubButton />
+                    {/* <Link href={"/forgot-password"}>Forgot password</Link>
+                    <LoginGithubButton /> */}
                 </div>
             </div>
             <Footer />

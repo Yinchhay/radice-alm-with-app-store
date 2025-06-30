@@ -76,7 +76,23 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             <Link href="/about" style={navLinkStyle}>Who We Are</Link>
             <Link href="/media" style={navLinkStyle}>Media</Link>
             <Link href="/dashboard" style={navLinkStyle}>Developer</Link>
-            <Link href="/appstore" style={appStoreGradientBorder}>App Store</Link>
+            <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <span style={{
+                    position: "absolute",
+                    top: -10,
+                    right: -10,
+                    background: "#fff",
+                    color: "#6B7280",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    borderRadius: 4,
+                    padding: "2px 6px",
+                    zIndex: 2,
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                    border: "2px solid #D1D5DB"
+                }}>New</span>
+                <Link href="/appstore" style={appStoreGradientBorder}>App Store</Link>
+            </div>
         </div>
     );
 
