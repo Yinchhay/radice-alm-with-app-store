@@ -9,15 +9,18 @@ const typeColors: Record<number, { name: string; color: string }> = {
 
 export function AppCard({app, clickable = true} : { app: App; clickable?: boolean}){
     const CardContent = () => (
-        <div className="bg-transparent overflow-hidden flex flex-col p-4">
-            {app.app.cardImage ? (
-                <img src={app.app.cardImage} alt={app.project.name || "App"} className="w-full h-48 object-cover rounded-lg mb-4"/>
-            ) : (
-                <div className="w-full h-48 bg-gray-100 flex items-center justify-center rounded-lg mb-4">
-                    <span className="text-gray-400">No Image</span>
-                </div>
-            )}
+        <div className="bg-transparent overflow-hidden flex flex-col p-4 w-full">
+            <div className="w-full aspect-[16/9] mb-4">
+                {app.app.cardImage ? (
+                    <img src={app.app.cardImage} alt={app.project.name || "App"} className="w-full h-full object-cover rounded-lg"/>
+                ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+                        <span className="text-gray-400">No Image</span>
+                    </div>
+                )}
+            </div>
             <div className="flex flex-col">
+                <div className="font-bold text-sm mb-1" style={{color: "#7F56D9"}}>{app.category?.name|| "Unknown"}</div>
                 <div className="font-bold text-lg mb-1">{app.project.name || "Untitled"}</div>
                 <div className="text-sm text-gray-600 mb-2">{app.app.subtitle}</div>
                 <div className="flex items-center justify-between">

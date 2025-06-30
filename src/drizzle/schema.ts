@@ -417,8 +417,8 @@ export const projects = mysqlTable("projects", {
     logoUrl: varchar("logo_url", {
         length: 2083,
     }),
-    isPublic: boolean("is_public").default(false),
-    isApp: boolean("is_app").default(false),
+    isPublic: boolean("is_public").notNull().default(false),
+    isApp: boolean("is_app").notNull().default(false),
     projectContent: json("project_content").default([]),
     links: json("links").$type<ProjectLink[]>().default([]),
     pipelineStatus: json("pipeline_status").$type<ProjectPipelineStatus>(),

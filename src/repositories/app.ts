@@ -1,6 +1,13 @@
 import { db } from "@/drizzle/db";
-import { eq } from "drizzle-orm";
-import { apps, projects, appTypes, projectCategories, categories } from "@/drizzle/schema";
+import { eq, desc, asc } from "drizzle-orm";
+import {
+    apps,
+    projects,
+    appTypes,
+    categories,
+    projectCategories,
+    appPriority,
+} from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
 import {
@@ -15,17 +22,99 @@ import {
 } from "drizzle-orm";
 import { z } from "zod";
 
+export type AppWithRelations = {
+    app: typeof apps.$inferSelect;
+    project: {
+        id: number;
+        name: string;
+        description: string | null;
+        logoUrl: string | null;
+        isPublic: boolean;
+        userId: string;
+    };
+    appType: {
+        id: number;
+        name: string;
+        description: string | null;
+    } | null;
+    priority: {
+        id: number;
+        name: string;
+        description: string | null;
+    } | null;
+    categories: {
+        id: number;
+        name: string;
+        description: string | null;
+    }[];
+};
+
+export async function getAppWithAllRelations(
+    appId: number,
+): Promise<AppWithRelations | null> {
+    try {
+        const appData = await db.query.apps.findFirst({
+            where: eq(apps.id, appId),
+            with: {
+                project: {
+                    columns: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        logoUrl: true,
+                        isPublic: true,
+                        userId: true,
+                    },
+                },
+                appType: true,
+                priority: true,
+            },
+        });
+
+        if (!appData || !appData.project) return null;
+
+        const projectCategoriesResult: {
+            category: typeof categories.$inferSelect;
+        }[] = await db
+            .select({
+                category: categories,
+            })
+            .from(projectCategories)
+            .innerJoin(
+                categories,
+                eq(projectCategories.categoryId, categories.id),
+            )
+            .where(eq(projectCategories.projectId, appData.project.id));
+
+        return {
+            app: appData,
+            project: {
+                ...appData.project,
+                isPublic: appData.project.isPublic ?? false,
+                userId: appData.project.userId ?? "",
+            },
+            appType: appData.appType,
+            priority: appData.priority,
+            categories: projectCategoriesResult.map((pc) => pc.category),
+        };
+    } catch (error) {
+        console.error("Error fetching app with all relations:", error);
+        throw error;
+    }
+}
+
 export const createApp = async (app: typeof apps.$inferInsert) => {
     return await db.insert(apps).values(app);
 };
 
-export const getAppByProjectId = async (projectId: number) => {
-    const result = await db
-        .select()
-        .from(apps)
-        .where(eq(apps.projectId, projectId));
-    return result;
-};
+// Try to avoid using this function, use `getAppWithAllRelations` instead
+// export const getAppByProjectId = async (projectId: number) => {
+//     const result = await db
+//         .select()
+//         .from(apps)
+//         .where(eq(apps.projectId, projectId));
+//     return result;
+// };
 
 export async function getAppsForManageAllAppsTotalRow(search: string = "") {
     const totalRows = await db
@@ -203,13 +292,12 @@ export async function editAppById(
     }>,
 ) {
     try {
-        // Validate input
-        if (!id || typeof id !== 'number' || id <= 0) {
-            throw new Error('Invalid app ID provided');
+        if (!id || typeof id !== "number" || id <= 0) {
+            throw new Error("Invalid app ID provided");
         }
 
         if (!updateData || Object.keys(updateData).length === 0) {
-            throw new Error('No update data provided');
+            throw new Error("No update data provided");
         }
 
         const existingApp = await db.query.apps.findFirst({
@@ -220,7 +308,7 @@ export async function editAppById(
             return {
                 updateSuccess: false,
                 updatedApp: null,
-                error: 'App not found',
+                error: "App not found",
             };
         }
 
@@ -229,10 +317,7 @@ export async function editAppById(
             updatedAt: new Date(),
         };
 
-        await db
-            .update(apps)
-            .set(dataWithTimestamp)
-            .where(eq(apps.id, id));
+        await db.update(apps).set(dataWithTimestamp).where(eq(apps.id, id));
 
         const updatedApp = await db.query.apps.findFirst({
             where: (app, { eq }) => eq(app.id, id),
@@ -253,7 +338,7 @@ export async function editAppById(
             return {
                 updateSuccess: false,
                 updatedApp: null,
-                error: 'Failed to retrieve updated app',
+                error: "Failed to retrieve updated app",
             };
         }
 
@@ -264,11 +349,14 @@ export async function editAppById(
         };
     } catch (error) {
         console.error("Error editing app:", error);
-        
+
         return {
             updateSuccess: false,
             updatedApp: null,
-            error: error instanceof Error ? error.message : 'Unknown error occurred',
+            error:
+                error instanceof Error
+                    ? error.message
+                    : "Unknown error occurred",
         };
     }
 }
@@ -303,6 +391,76 @@ export async function getAppById(id: number) {
         return app || null;
     } catch (error) {
         console.error("Error fetching app by ID:", error);
+        throw error;
+    }
+}
+
+export type ProjectJoinMembersAndPartners = {
+    id: number;
+    name: string;
+    description: string | null;
+    logoUrl: string | null;
+    isPublic: boolean | null;
+    projectContent: unknown;
+    links: any[] | null;
+    pipelineStatus: any | null;
+    userId: string | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+    projectMembers: {
+        id: number;
+        createdAt: Date | null;
+        updatedAt: Date | null;
+        userId: string;
+        projectId: number;
+        title: string;
+        canEdit: boolean | null;
+    }[];
+    projectPartners: {
+        id: number;
+        projectId: number;
+        partnerId: string;
+    }[];
+};
+
+export async function getAssociatedProjectsWithMembers(appId: number): Promise<ProjectJoinMembersAndPartners[]> {
+    try {
+        const result = await db.query.apps.findFirst({
+            where: eq(apps.id, appId),
+            with: {
+                project: {
+                    with: {
+                        projectMembers: true,
+                        projectPartners: true,
+                    },
+                },
+            },
+        });
+
+        if (!result || !result.project) {
+            return [];
+        }
+
+        // Transform the result to match the expected type
+        const projectWithMembers: ProjectJoinMembersAndPartners = {
+            id: result.project.id,
+            name: result.project.name,
+            description: result.project.description,
+            logoUrl: result.project.logoUrl,
+            isPublic: result.project.isPublic,
+            projectContent: result.project.projectContent,
+            links: result.project.links,
+            pipelineStatus: result.project.pipelineStatus,
+            userId: result.project.userId,
+            createdAt: result.project.createdAt,
+            updatedAt: result.project.updatedAt,
+            projectMembers: result.project.projectMembers || [],
+            projectPartners: result.project.projectPartners || [],
+        };
+
+        return [projectWithMembers];
+    } catch (error) {
+        console.error("Error fetching associated projects with members:", error);
         throw error;
     }
 }
