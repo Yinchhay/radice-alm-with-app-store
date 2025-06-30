@@ -146,7 +146,7 @@ export default function AppStorePage() {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <div className="flex-1 max-w-7xl mx-auto px-4">
+            <div className="flex-1 w-full px-4">
                 <div className="w-full mx-auto px-4">
                     <div style={{ marginTop: "25px" }}>
                         <h1 className="text-4xl text-center text-gray-900">
@@ -219,7 +219,7 @@ export default function AppStorePage() {
                                         </h2>
                                         <span className="w-2 h-2 bg-green-500 rounded-full" />
                                     </div>
-                                    <div className="grid grid-cols-3 ">
+                                    <div className="grid gap-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                                         {paginatedApps.length > 0 ? (
                                             paginatedApps.map((app: App) => (
                                                 <AppCard key={app.app.id} app={app} />
