@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { getBaseUrl } from "@/lib/server_utils";
 import { notFound } from "next/navigation";
 import AppBanner from "./_components/app-banner";
+import AppActionButton from "./_components/app-action-button";
 import AppScreenshotsCarousel from "./_components/app-screenshots-carousel";
 import AppReviews from "./_components/app-reviews";
 import type { App } from "@/types/app_types";
@@ -72,6 +73,29 @@ function AppPage({ params }: { params: { app_id: string } }) {
             sortOrder: screenshot.sortOrder,
         })) || [];
 
+    const getAction = () => {
+        if ((appType?.name === "Web" || appType?.name === "Mobile") && (webUrl || appFile)) {
+            return {
+                url: webUrl || appFile,
+                label: "Start Testing",
+                disabled: false,
+            };
+        } else if (appType?.name === "API" && appFile) {
+            return {
+                url: appFile,
+                label: "View Documentation",
+                disabled: false,
+            };
+        }
+        return {
+            url: null,
+            label: "Not Available",
+            disabled: true,
+        };
+    };
+
+    const action = getAction();
+
     return (
         <div className="flex justify-center">
             <div className="flex-1 max-w-[1440px] px-4">
@@ -104,35 +128,14 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         .join(", ")}
                                 </div>
                             )}
-                            {(appType?.name === "Web" ||
-                                appType?.name === "Mobile") && (
-                                <button
-                                    className={`bg-black text-white font-semibold py-2 px-6 rounded mb-2 w-fit hover:bg-gray-800 transition-colors${!webUrl && !appFile ? " opacity-50 cursor-not-allowed" : ""}`}
-                                    type="button"
-                                    onClick={() => {
-                                        if (webUrl) {
-                                            window.open(webUrl, "_blank");
-                                        } else if (appFile) {
-                                            window.open(appFile, "_blank");
-                                        }
-                                    }}
-                                    disabled={!webUrl && !appFile}
-                                >
-                                    Start Testing
-                                </button>
-                            )}
-                            {appType?.name === "API" && (
-                                <button
-                                    className="bg-gray-200 text-black font-semibold py-2 px-6 rounded w-fit hover:bg-gray-300 transition-colors ml-2"
-                                    type="button"
-                                    onClick={() =>
-                                        window.open(apiDocUrl, "_blank")
-                                    }
-                                    disabled={!apiDocUrl}
-                                >
-                                    View Document
-                                </button>
-                            )}
+                            <AppActionButton
+                                onClick={() => {
+                                    if (action.url) window.open(action.url, "_blank");
+                                }}
+                                disabled={action.disabled}
+                            >
+                                {action.label}
+                            </AppActionButton>
                         </div>
                         <div className="flex-1 min-w-[300px] max-w-3xl">
                             <AppScreenshotsCarousel
