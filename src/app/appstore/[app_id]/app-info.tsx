@@ -6,6 +6,7 @@ import AppBanner from "./_components/app-banner";
 import AppActionButton from "./_components/app-action-button";
 import AppScreenshotsCarousel from "./_components/app-screenshots-carousel";
 import AppReviews from "./_components/app-reviews";
+import BugReportForm from "./_components/bug-report-form";
 import type { App } from "@/types/app_types";
 
 export default function AppPageWrapper(props: { params: { app_id: string } }) {
@@ -57,7 +58,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-[60vh]">
-                <span className="text-3xl font-bold text-gray-500">Loading...</span>
+                <span className="text-3xl text-gray-500">Loading...</span>
             </div>
         );
     }
@@ -175,6 +176,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 appId={app.id}
                                 appName={project?.name || "App"}
                             />
+                            <BugReportForm appId={app.id} />
                         </div>
                     </div>
                 </div>
