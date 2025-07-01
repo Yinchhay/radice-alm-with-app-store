@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import AppBanner from "./_components/app-banner";
 import AppScreenshotsCarousel from "./_components/app-screenshots-carousel";
 import AppReviews from "./_components/app-reviews";
-import AppBugReportForm from "./_components/bug-report-form";
+// import AppBugReportForm from "./_components/bug-report-form";
+import AppActionButton from "./_components/app-action-button";
 import type { App } from "@/types/app_types";
 
 export default function AppPageWrapper(props: { params: { app_id: string } }) {
@@ -97,7 +98,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 {app.subtitle || "No subtitle"}
                             </div>
                             {project?.projectMembers && (
-                                <div className="mb-4 text-sm font-bold">
+                                <div className="mb-2 text-sm font-bold">
                                     {project.projectMembers
                                         .map(
                                             (member) =>
@@ -106,35 +107,20 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         .join(", ")}
                                 </div>
                             )}
-                            {(appType?.name === "Web" ||
-                                appType?.name === "Mobile") && (
-                                <button
-                                    className={`bg-black text-white font-semibold py-2 px-6 rounded mb-2 w-fit hover:bg-gray-800 transition-colors${!webUrl && !appFile ? " opacity-50 cursor-not-allowed" : ""}`}
-                                    type="button"
-                                    onClick={() => {
-                                        if (webUrl) {
-                                            window.open(webUrl, "_blank");
-                                        } else if (appFile) {
-                                            window.open(appFile, "_blank");
-                                        }
-                                    }}
-                                    disabled={!webUrl && !appFile}
-                                >
-                                    Start Testing
-                                </button>
-                            )}
-                            {appType?.name === "API" && (
-                                <button
-                                    className="bg-gray-200 text-black font-semibold py-2 px-6 rounded w-fit hover:bg-gray-300 transition-colors ml-2"
-                                    type="button"
-                                    onClick={() =>
-                                        window.open(apiDocUrl, "_blank")
+                            <AppActionButton 
+                                onClick={() => {
+                                    if (webUrl) {
+                                        window.open(webUrl, "_blank");
+                                    } else if (appFile) {
+                                        window.open(appFile, "_blank");
                                     }
-                                    disabled={!apiDocUrl}
-                                >
-                                    View Document
-                                </button>
-                            )}
+                                }}
+                                className="text-sm"
+                            >
+                                {(appType?.name === "Web" ||
+                                    appType?.name === "Mobile") &&
+                                    (webUrl || appFile) ? "Start Testing" : appType?.name === "API" && appFile ? "View Documentation" : "Not Available"}
+                            </AppActionButton>
                         </div>
                         {/*right side*/}
                         <div className="flex-1 min-w-[300px] max-w-3xl">
@@ -171,7 +157,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         "No update information available."}
                                 </p>
                             </div>
-                            <div className="mb-6">
+                            <div className="mb-3">
                                 <div className="flex flex-col md:flex-row">
                                     {/* Left column */}
                                     <div className="min-w-[260px] max-w-sm flex flex-col">
@@ -254,12 +240,6 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 <AppReviews 
                                     appId={Number(params.app_id)} 
                                     appName={project?.name || "App"} 
-                                />
-                            </div>
-                            <div className="mt-6">
-                                <AppBugReportForm 
-                                    appId={Number(params.app_id)}
-                                    appName={project?.name || "App"}
                                 />
                             </div>
                         </div>
