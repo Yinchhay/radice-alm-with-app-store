@@ -27,7 +27,7 @@ export default function LoginGithubButton() {
 
     return (
         <Link href="/api/oauth/github/login" prefetch={false}>
-            <Button className="flex gap-2">
+            <Button className="flex gap-2 w-full">
                 <IconBrandGithub />
                 Sign in with GitHub
             </Button>
