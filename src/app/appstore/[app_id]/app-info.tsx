@@ -5,8 +5,6 @@ import { notFound } from "next/navigation";
 import AppBanner from "./_components/app-banner";
 import AppScreenshotsCarousel from "./_components/app-screenshots-carousel";
 import AppReviews from "./_components/app-reviews";
-// import AppBugReportForm from "./_components/bug-report-form";
-import AppActionButton from "./_components/app-action-button";
 import type { App } from "@/types/app_types";
 
 export default function AppPageWrapper(props: { params: { app_id: string } }) {
@@ -58,7 +56,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-[60vh]">
-                <span className="text-2xl text-black">Loading...</span>
+                <span className="text-3xl font-bold text-gray-500">Loading...</span>
             </div>
         );
     }
@@ -88,7 +86,6 @@ function AppPage({ params }: { params: { app_id: string } }) {
                             subtitle={app.subtitle}
                         />
                     </div>
-                    {/* left side */}
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 min-w-[260px] max-w-sm flex flex-col justify-start">
                             <h1 className="text-4xl font-bold mb-2">
@@ -98,7 +95,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 {app.subtitle || "No subtitle"}
                             </div>
                             {project?.projectMembers && (
-                                <div className="mb-2 text-sm font-bold">
+                                <div className="mb-4 text-sm font-bold">
                                     {project.projectMembers
                                         .map(
                                             (member) =>
@@ -107,29 +104,42 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         .join(", ")}
                                 </div>
                             )}
-                            <AppActionButton 
-                                onClick={() => {
-                                    if (webUrl) {
-                                        window.open(webUrl, "_blank");
-                                    } else if (appFile) {
-                                        window.open(appFile, "_blank");
-                                    }
-                                }}
-                                className="text-sm"
-                            >
-                                {(appType?.name === "Web" ||
-                                    appType?.name === "Mobile") &&
-                                    (webUrl || appFile) ? "Start Testing" : appType?.name === "API" && appFile ? "View Documentation" : "Not Available"}
-                            </AppActionButton>
-                        </div>
-                        {/*right side*/}
-                        <div className="flex-1 min-w-[300px] max-w-3xl">
-                            {(appType?.name === "Web" || appType?.name === "Mobile") && (
-                                <AppScreenshotsCarousel
-                                    screenshots={screenshots}
-                                    appName={project?.name || "App"}
-                                />
+                            {(appType?.name === "Web" ||
+                                appType?.name === "Mobile") && (
+                                <button
+                                    className={`bg-black text-white font-semibold py-2 px-6 rounded mb-2 w-fit hover:bg-gray-800 transition-colors${!webUrl && !appFile ? " opacity-50 cursor-not-allowed" : ""}`}
+                                    type="button"
+                                    onClick={() => {
+                                        if (webUrl) {
+                                            window.open(webUrl, "_blank");
+                                        } else if (appFile) {
+                                            window.open(appFile, "_blank");
+                                        }
+                                    }}
+                                    disabled={!webUrl && !appFile}
+                                >
+                                    Start Testing
+                                </button>
                             )}
+                            {appType?.name === "API" && (
+                                <button
+                                    className="bg-gray-200 text-black font-semibold py-2 px-6 rounded w-fit hover:bg-gray-300 transition-colors ml-2"
+                                    type="button"
+                                    onClick={() =>
+                                        window.open(apiDocUrl, "_blank")
+                                    }
+                                    disabled={!apiDocUrl}
+                                >
+                                    View Document
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-[300px] max-w-3xl">
+                            <AppScreenshotsCarousel
+                                screenshots={screenshots}
+                                appName={project?.name || "App"}
+                            />
+
                             <div className="mb-8">
                                 <h2 className="text-xl mb-3 font-semibold">
                                     About
@@ -157,91 +167,11 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         "No update information available."}
                                 </p>
                             </div>
-                            <div className="mb-3">
-                                <div className="flex flex-col md:flex-row">
-                                    {/* Left column */}
-                                    <div className="min-w-[260px] max-w-sm flex flex-col">
-                                        <div className="mb-6">
-                                            <h3 className="text-lg font-semibold mb-2">
-                                                Updated on
-                                            </h3>
-                                            <div className="text-base text-gray-600 mb-2">
-                                                {app.updatedAt
-                                                    ? new Date(
-                                                        app.updatedAt,
-                                                    ).toLocaleDateString(
-                                                        undefined,
-                                                        {
-                                                            year: "numeric",
-                                                            month: "short",
-                                                            day: "numeric",
-                                                        },
-                                                    )
-                                                    : "N/A"}
-                                            </div>
-                                            <h3 className="text-lg font-semibold mb-2">
-                                                Version
-                                            </h3>
-                                            <div className="text-base text-gray-600">
-                                                {/* @ts-expect-error version may not exist on App type */}
-                                                {app.version || "N/A"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="min-w-[260px] max-w-sm flex flex-col md:items-end">
-                                        <h3 className="text-lg font-semibold mb-2">
-                                            Compatibility
-                                        </h3>
-                                        <div className="flex flex-col gap-2">
-                                            <div className="flex items-center gap-2">
-                                                <img
-                                                    src={
-                                                        appType?.name === "Web"
-                                                            ? "/ui/tick.mark.svg"
-                                                            : "/ui/x_mark.svg"
-                                                    }
-                                                    alt="Web"
-                                                    className="w-6 h-6"
-                                                />
-                                                <span className="text-base">
-                                                    Web
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <img
-                                                    src={
-                                                        appType?.name ===
-                                                        "Mobile"
-                                                            ? "/ui/tick.mark.svg"
-                                                            : "/ui/x_mark.svg"
-                                                    }
-                                                    alt="Mobile"
-                                                    className="w-6 h-6"
-                                                />
-                                                <span className="text-base">
-                                                    Andriod
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <img
-                                                    src={"/ui/x_mark.svg"}
-                                                    alt="iOS"
-                                                    className="w-6 h-6"
-                                                />
-                                                <span className="text-base">
-                                                    iOS
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="mb-6">
-                                <AppReviews 
-                                    appId={Number(params.app_id)} 
-                                    appName={project?.name || "App"} 
-                                />
-                            </div>
+                            {/* Reviews */}
+                            <AppReviews
+                                appId={app.id}
+                                appName={project?.name || "App"}
+                            />
                         </div>
                     </div>
                 </div>
