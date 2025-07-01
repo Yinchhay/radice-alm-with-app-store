@@ -5,46 +5,7 @@ import SearchBar from "@/components/SearchBar";
 import { useSearchParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import Pagination from "@/components/NonRouterPushPagination";
-
-export type App = {
-    app: {
-        id: number;
-        projectId: number;
-        subtitle: string;
-        type: number;
-        aboutDesc: string;
-        content: string;
-        webUrl: string;
-        appFile: string;
-        status: string;
-        cardImage: string;
-        bannerImage: string;
-        featuredPriority: number;
-        createdAt: string;
-        updatedAt: string;
-    };
-    project: {
-        id: number;
-        name: string;
-        logoUrl: string;
-        isPublic: boolean;
-        userId: number;
-    };
-    appType: {
-        id: number;
-        name: string;
-        description: string;
-    };
-    projectCategories?: {
-        id: number;
-        categoryId: number;
-    };
-    category?: {
-        id: number;
-        name: string;
-        description: string;
-    };
-};
+import type { App } from "@/types/app_types";
 
 export default function AppStorePage() {
     const [apps, setApps] = useState<App[]>([]);
@@ -59,7 +20,7 @@ export default function AppStorePage() {
 
     useEffect(() => {
         let isMounted = true;
-        
+
         const getApps = async () => {
             setLoading(true);
             setError(null);
@@ -67,7 +28,7 @@ export default function AppStorePage() {
             try {
                 const data = await fetchApps();
                 if (!isMounted) return;
-                
+
                 if (
                     data &&
                     "success" in data &&
@@ -75,15 +36,25 @@ export default function AppStorePage() {
                     "data" in data &&
                     Array.isArray(data.data.apps)
                 ) {
-                    const sortedApps = data.data.apps.sort(
-                        (a: App, b: App) => (b.app.featuredPriority ?? 0) - (a.app.featuredPriority ?? 0)
-                    );
+                    const sortedApps = data.data.apps
+                        .map((item: any) => ({
+                            ...item.app,
+                            project: item.project,
+                            appType: item.appType,
+                            category: item.category,
+                            projectCategories: item.projectCategories,
+                        }))
+                        .sort(
+                            (a: App, b: App) =>
+                                (b.featuredPriority ?? 0) -
+                                (a.featuredPriority ?? 0),
+                        );
                     setApps(sortedApps);
                 } else {
                     setApps([]);
                 }
             } catch (error) {
-                if (!isMounted) return; 
+                if (!isMounted) return;
                 console.error("Error fetching apps:", error);
                 setError("Failed to load apps. Please try again.");
                 setApps([]);
@@ -95,7 +66,7 @@ export default function AppStorePage() {
         };
 
         getApps();
-        
+
         return () => {
             isMounted = false;
         };
@@ -103,29 +74,36 @@ export default function AppStorePage() {
 
     const filteredApps = apps.filter((app: App) => {
         const matchesSearch =
-            (app.project.name?.toLowerCase() || "").includes(searchQuery) ||
-            (app.app.subtitle?.toLowerCase() || "").includes(searchQuery) ||
-            (app.app.aboutDesc?.toLowerCase() || "").includes(searchQuery);
+            (app.project?.name?.toLowerCase() || "").includes(searchQuery) ||
+            (app.subtitle?.toLowerCase() || "").includes(searchQuery) ||
+            (app.aboutDesc?.toLowerCase() || "").includes(searchQuery);
 
         const matchesType =
             activeType === "All" ||
-            (activeType === "Web" && app.app.type === 1) ||
-            (activeType === "Mobile" && app.app.type === 2) ||
-            (activeType === "API" && app.app.type === 3) ||
+            (activeType === "Web" && app.type === 1) ||
+            (activeType === "Mobile" && app.type === 2) ||
+            (activeType === "API" && app.type === 3) ||
             (activeType === "EdTech" && app.category?.name === "EdTech") ||
             (activeType === "FinTech" && app.category?.name === "FinTech") ||
-            (activeType === "Humanitarian Engineering" && app.category?.name === "Humanitarian Engineering") ||
-            (activeType === "Gamification" && app.category?.name === "Gamification");
+            (activeType === "Humanitarian Engineering" &&
+                app.category?.name === "Humanitarian Engineering") ||
+            (activeType === "Gamification" &&
+                app.category?.name === "Gamification");
 
         return matchesSearch && matchesType;
     });
 
-    const groupedByPriority: Record<number, App[]> = filteredApps.reduce((groups, app) => {
-        const priority = app.app.featuredPriority ?? 0;
-        if (!groups[priority]) groups[priority] = [];
-        groups[priority].push(app);
-        return groups;
-    }, {} as Record<number, App[]>);
+    const groupedByPriority: Record<number, App[]> = filteredApps.reduce(
+        (groups, app) => {
+            const priority = app.featuredPriority ?? 0;
+            if (!groups[priority]) groups[priority] = [];
+            groups[priority].push(app);
+            return groups;
+        },
+        {} as Record<number, App[]>,
+    );
+
+    console.log("Grouped by priority:", groupedByPriority);
 
     const PriorityOrder = [
         { key: 2, label: "Open for Testing" },
@@ -198,8 +176,8 @@ export default function AppStorePage() {
                         <div className="flex justify-center items-center py-12">
                             <div className="text-red-500 text-center">
                                 <p className="mb-2">{error}</p>
-                                <button 
-                                    onClick={() => window.location.reload()} 
+                                <button
+                                    onClick={() => window.location.reload()}
                                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                                 >
                                     Try Again
@@ -210,7 +188,10 @@ export default function AppStorePage() {
                         PriorityOrder.map(({ key, label }) => {
                             const page = key === 2 ? openTestingPage : livePage;
                             const appsForStatus = groupedByPriority[key] || [];
-                            const { paginatedApps, maxPage } = getPaginatedApps(appsForStatus, page);
+                            const { paginatedApps, maxPage } = getPaginatedApps(
+                                appsForStatus,
+                                page,
+                            );
                             return (
                                 <div key={key} className="mb-12">
                                     <div className="flex items-center gap-2 mb-4">
@@ -222,7 +203,10 @@ export default function AppStorePage() {
                                     <div className="grid gap-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                                         {paginatedApps.length > 0 ? (
                                             paginatedApps.map((app: App) => (
-                                                <AppCard key={app.app.id} app={app} />
+                                                <AppCard
+                                                    key={app.id}
+                                                    app={app}
+                                                />
                                             ))
                                         ) : (
                                             <div className="col-span-full text-gray-400 text-center">
@@ -232,12 +216,14 @@ export default function AppStorePage() {
                                     </div>
                                     {maxPage > 1 && (
                                         <div className="flex justify-center mt-6">
-                                            <Pagination 
-                                                page={page} 
-                                                maxPage={maxPage} 
+                                            <Pagination
+                                                page={page}
+                                                maxPage={maxPage}
                                                 onPageChange={(newPage) => {
                                                     if (key === 2) {
-                                                        setOpenTestingPage(newPage);
+                                                        setOpenTestingPage(
+                                                            newPage,
+                                                        );
                                                     } else {
                                                         setLivePage(newPage);
                                                     }
@@ -254,3 +240,4 @@ export default function AppStorePage() {
         </div>
     );
 }
+
