@@ -55,16 +55,14 @@ export async function POST(
     try {
       const createResult = await createApp({
         projectId: projectId,
-        status: "draft"
+        status: "draft", // Default status for new apps
       });
       let appId: number;
       
       if (Array.isArray(createResult) && createResult.length > 0) {
-        // If using MySQL adapter, it might have insertId
         if ('insertId' in createResult[0]) {
           appId = createResult[0].insertId as number;
         } else if ('id' in createResult[0]) {
-          // If the full record is returned
           appId = (createResult[0] as any).id;
         } else {
           throw new Error("Unable to get app ID from create result");
@@ -78,15 +76,10 @@ export async function POST(
       });
 
     } catch (createError: any) {
-      // Handle the case where an app already exists for this project
-      // This would typically be a constraint violation error
       if (createError.code === 'ER_DUP_ENTRY' || 
           createError.message?.includes('UNIQUE constraint') ||
           createError.message?.includes('duplicate')) {
         
-        // Try to find the existing app for this project
-        // Since we don't have a direct function, we could add a simple query here
-        // or modify the repository to add this function
         return new Response(
           JSON.stringify({
             message: unsuccessMessage,
@@ -100,7 +93,6 @@ export async function POST(
         );
       }
       
-      // Re-throw other errors
       throw createError;
     }
 

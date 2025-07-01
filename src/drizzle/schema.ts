@@ -32,10 +32,11 @@ export enum FileBelongTo {
 }
 
 export enum AppStatus {
+    DRAFT = "draft",
     PENDING = "pending",
     ACCEPTED = "accepted", 
     DENIED = "denied",
-    ARCHIVED = "archived",
+    UNDER_REVIEW = "under_review",
 }
 
 export enum VersionAction {
@@ -631,7 +632,7 @@ export const apps = mysqlTable("apps", {
     content: text("content"),
     webUrl: varchar("web_url", { length: 500 }),
     appFile: varchar("app_file", { length: 500 }), // APK file
-    status: varchar("status", { length: 50 }).default(AppStatus.PENDING),
+    status: varchar("status", { length: 50 }).default(AppStatus.DRAFT),
     cardImage: varchar("card_image", { length: 500 }),
     bannerImage: varchar("banner_image", { length: 500 }),
     featuredPriority: int("featured_priority")
