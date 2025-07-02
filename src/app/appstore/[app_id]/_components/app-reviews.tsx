@@ -150,7 +150,7 @@ export default function AppReviews({
                 <span className="flex items-baseline">
                     <span className="text-xl font-semibold leading-none">Ratings and Reviews</span>
                     {reviews.length > 0 && (
-                        <span className="text-base font-normal text-gray-500 leading-none ml-2">({reviews.length} ratings)</span>
+                        <span className="text-base font-normal text-gray-500 leading-none ml-2">({reviews.length > 10 ? '+9' : reviews.length} ratings)</span>
                     )}
                 </span>
                 <button className="w-4 h-4 inline-block align-middle relative top-[2px]">
