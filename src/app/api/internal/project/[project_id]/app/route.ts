@@ -7,7 +7,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { createApp, getAppByProjectId } from "@/repositories/app";
+import { createApp, getAppsByProjectId } from "@/repositories/app";
 import { HttpStatusCode } from "@/types/http";
 
 export type FetchCreateApp = {
@@ -43,7 +43,7 @@ export async function POST(
             );
         }
 
-        const existingApps = await getAppByProjectId(projectId);
+        const existingApps = await getAppsByProjectId(projectId);
 
         if (existingApps.length > 0) {
             const hasNonAccepted = existingApps.some(

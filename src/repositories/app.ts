@@ -107,8 +107,9 @@ export const createApp = async (app: typeof apps.$inferInsert) => {
     return await db.insert(apps).values(app);
 };
 
-export async function getAppByProjectId(projectId: number) {
-    return await db.query.apps.findFirst({
+// This function retrieves all apps associated with a specific project ID.
+export async function getAppsByProjectId(projectId: number) {
+    return await db.query.apps.findMany({
         where: (app, { eq }) => eq(app.projectId, projectId),
     });
 }
