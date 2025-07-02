@@ -1,4 +1,5 @@
-import { lucia } from "@/auth/lucia";
+import { NextRequest } from "next/server";
+import jwt from "jsonwebtoken";
 import {
     buildSuccessResponse,
     buildNoBearerTokenErrorResponse,
@@ -9,33 +10,37 @@ import { getAllAcceptedApps } from "@/repositories/app/public";
 import { db } from "@/drizzle/db";
 import { testers } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
-import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     try {
-        // const authorizationHeader = request.headers.get("Authorization");
-        // const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+        const authorizationHeader = request.headers.get("Authorization");
+        if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
+            return buildNoBearerTokenErrorResponse();
+        }
 
-        // if (!sessionId) {
-        //     return buildNoBearerTokenErrorResponse();
-        // }
+        const token = authorizationHeader.replace("Bearer ", "");
 
-        // const session = await lucia.validateSession(sessionId);
-        // if (!session?.session) {
-        //     return buildNoPermissionErrorResponse();
-        // }
+        let payload: any;
+        try {
+            payload = jwt.verify(token, process.env.JWT_SECRET!);
+        } catch (err) {
+            return buildNoPermissionErrorResponse();
+        }
 
-        // const testerId = session.session.userId;
+        const testerId = payload.id;
+        if (!testerId) {
+            return buildNoPermissionErrorResponse();
+        }
 
-        // const [tester] = await db
-        //     .select()
-        //     .from(testers)
-        //     .where(eq(testers.id, testerId))
-        //     .limit(1);
+        const [tester] = await db
+            .select()
+            .from(testers)
+            .where(eq(testers.id, testerId))
+            .limit(1);
 
-        // if (!tester) {
-        //     return buildNoPermissionErrorResponse();
-        // }
+        if (!tester) {
+            return buildNoPermissionErrorResponse();
+        }
 
         const apps = await getAllAcceptedApps();
 
