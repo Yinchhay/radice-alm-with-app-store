@@ -7,7 +7,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { updateAppStatus } from "@/repositories/app";
+import { updateAppStatus } from "@/repositories/app/internal";
 import { HttpStatusCode } from "@/types/http";
 
 // update type if we were to return any data back to the response

@@ -13,7 +13,7 @@ import {
     editAppById,
     getAppById,
     getAssociatedProjectsOfApp,
-} from "@/repositories/app";
+} from "@/repositories/app/internal";
 import { checkProjectRole } from "@/lib/project";
 import { editAppFormSchema } from "../../schema";
 // Import the existing function that fetches project with members and partners

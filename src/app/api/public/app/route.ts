@@ -1,73 +1,53 @@
-import { checkBearerAndPermission, RouteRequiredPermissions } from "@/lib/IAM";
-import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
+import { NextRequest } from "next/server";
+import jwt from "jsonwebtoken";
 import {
+    buildSuccessResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
     checkAndBuildErrorResponse,
-    buildSuccessResponse,
 } from "@/lib/response";
-import {
-    getAppsForManageAllApps,
-    getAppsForManageAllAppsTotalRow,
-} from "@/repositories/app";
-import { NextRequest } from "next/server";
-
-export type GetAllPublicAppsReturnType = Awaited<
-    ReturnType<typeof getAppsForManageAllApps>
->;
-
-export type FetchAllPublicAppsData = {
-    apps: GetAllPublicAppsReturnType;
-    totalRows: number;
-    rowsPerPage: number;
-    maxPage: number;
-    page: number;
-};
-
-const successMessage = "Get app for manage all apps successfully";
-const unsuccessMessage = "Get app for manage all apps failed";
+import { getAllAcceptedApps } from "@/repositories/app/public";
+import { db } from "@/drizzle/db";
+import { testers } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
     try {
-        // const { errorNoBearerToken, errorNoPermission } =
-        //     await checkBearerAndPermission(
-        //         request,
-        //         RouteRequiredPermissions.get("manageAllProjects")!,
-        //     );
-        // if (errorNoBearerToken) {
-        //     return buildNoBearerTokenErrorResponse();
-        // }
-        // if (errorNoPermission) {
-        //     return buildNoPermissionErrorResponse();
-        // }
-
-        const page: number =
-            Number(request.nextUrl.searchParams.get("page")) || 1;
-        let rowsPerPage: number =
-            Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
-            ROWS_PER_PAGE;
-        const search = request.nextUrl.searchParams.get("search") || "";
-
-        // limit to max 100 rows per page
-        if (rowsPerPage > 100) {
-            rowsPerPage = 100;
+        const authorizationHeader = request.headers.get("Authorization");
+        if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
+            return buildNoBearerTokenErrorResponse();
         }
 
-        const allPublicApps =
-            await getAppsForManageAllApps(page, rowsPerPage, search);
-        const totalRows = await getAppsForManageAllAppsTotalRow(search);
+        const token = authorizationHeader.replace("Bearer ", "");
 
-        return buildSuccessResponse<FetchAllPublicAppsData>(
-            successMessage,
-            {
-                apps: allPublicApps,  
-                totalRows: totalRows,
-                rowsPerPage: rowsPerPage,
-                page: page,
-                maxPage: getPaginationMaxPage(totalRows, rowsPerPage),
-            },
-        );
+        let payload: any;
+        try {
+            payload = jwt.verify(token, process.env.JWT_SECRET!);
+        } catch (err) {
+            return buildNoPermissionErrorResponse();
+        }
+
+        const testerId = payload.id;
+        if (!testerId) {
+            return buildNoPermissionErrorResponse();
+        }
+
+        const [tester] = await db
+            .select()
+            .from(testers)
+            .where(eq(testers.id, testerId))
+            .limit(1);
+
+        if (!tester) {
+            return buildNoPermissionErrorResponse();
+        }
+
+        const apps = await getAllAcceptedApps();
+
+        return buildSuccessResponse("Get accepted apps successfully", {
+            apps,
+        });
     } catch (error: any) {
-        return checkAndBuildErrorResponse(unsuccessMessage, error);
+        return checkAndBuildErrorResponse("Get accepted apps failed", error);
     }
 }
