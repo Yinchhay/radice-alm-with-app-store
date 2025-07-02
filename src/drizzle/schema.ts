@@ -21,7 +21,6 @@ import {
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 
-
 export enum FileBelongTo {
     PROJECT_SETTING = "project_setting",
     CONTENT_BUILDER = "content_builder",
@@ -34,7 +33,7 @@ export enum FileBelongTo {
 export enum AppStatus {
     DRAFT = "draft",
     PENDING = "pending",
-    ACCEPTED = "accepted", 
+    ACCEPTED = "accepted",
     DENIED = "denied",
     UNDER_REVIEW = "under_review",
 }
@@ -47,7 +46,13 @@ export enum VersionAction {
 }
 
 // Create star rating enum
-export const starRatingEnum = mysqlEnum("star_rating", ["1", "2", "3", "4", "5"]);
+export const starRatingEnum = mysqlEnum("star_rating", [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+]);
 
 // ======================
 // CORE USER TABLES
@@ -623,11 +628,9 @@ export const appPriority = mysqlTable("app_priority", {
 
 export const apps = mysqlTable("apps", {
     id: int("id").primaryKey().autoincrement(),
-    projectId: int("project_id")
-        .references(() => projects.id),
+    projectId: int("project_id").references(() => projects.id),
     subtitle: varchar("subtitle", { length: 255 }),
-    type: int("type")
-        .references(() => appTypes.id),
+    type: int("type").references(() => appTypes.id),
     aboutDesc: varchar("about_desc", { length: 1000 }),
     content: text("content"),
     webUrl: varchar("web_url", { length: 500 }),
@@ -635,16 +638,14 @@ export const apps = mysqlTable("apps", {
     status: varchar("status", { length: 50 }).default(AppStatus.DRAFT),
     cardImage: varchar("card_image", { length: 500 }),
     bannerImage: varchar("banner_image", { length: 500 }),
-    featuredPriority: int("featured_priority")
-        .references(() => appPriority.id),
+    featuredPriority: int("featured_priority").references(() => appPriority.id),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
 export const versions = mysqlTable("versions", {
     id: int("id").primaryKey().autoincrement(),
-    appId: int("app_id")
-        .references(() => apps.id),
+    appId: int("app_id").references(() => apps.id),
     versionNumber: varchar("version_number", { length: 50 }), // e.g., 1.0.0, 1.0.1, 1.1.0
     majorVersion: int("major_version"),
     minorVersion: int("minor_version"),
@@ -656,8 +657,7 @@ export const versions = mysqlTable("versions", {
 
 export const versionLogs = mysqlTable("version_logs", {
     id: int("id").primaryKey().autoincrement(),
-    versionId: int("version_id")
-        .references(() => versions.id),
+    versionId: int("version_id").references(() => versions.id),
     action: varchar("action", { length: 50 }), // created, updated, activated, deactivated
     content: text("content"), // what changed in this version
     createdBy: varchar("created_by", { length: 255 }), // user who made the change
@@ -666,8 +666,7 @@ export const versionLogs = mysqlTable("version_logs", {
 
 export const appScreenshots = mysqlTable("app_screenshots", {
     id: int("id").primaryKey().autoincrement(),
-    appId: int("app_id")
-        .references(() => apps.id),
+    appId: int("app_id").references(() => apps.id),
     imageUrl: varchar("image_url", { length: 500 }),
     sortOrder: int("sort_order").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
@@ -684,20 +683,20 @@ export const bugReports = mysqlTable("bug_reports", {
     description: text("description"),
     image: varchar("image", { length: 500 }),
     video: varchar("video", { length: 500 }),
-    testerId: varchar("tester_id", { length: 255 })
-        .references(() => testers.id),
-    appId: int("app_id")
-        .references(() => apps.id),
+    testerId: varchar("tester_id", { length: 255 }).references(
+        () => testers.id,
+    ),
+    appId: int("app_id").references(() => apps.id),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
 export const feedbacks = mysqlTable("feedbacks", {
     id: int("id").primaryKey().autoincrement(),
-    testerId: varchar("tester_id", { length: 255 })
-        .references(() => testers.id),
-    appId: int("app_id")
-        .references(() => apps.id),
+    testerId: varchar("tester_id", { length: 255 }).references(
+        () => testers.id,
+    ),
+    appId: int("app_id").references(() => apps.id),
     title: varchar("title", { length: 255 }),
     review: text("review"),
     starRating: starRatingEnum,
@@ -724,7 +723,6 @@ export const testers = mysqlTable("testers", {
 // RELATIONS
 // ======================
 
-
 export const testerRelations = relations(testers, ({ many }) => ({
     bugReports: many(bugReports),
     feedbacks: many(feedbacks),
@@ -741,16 +739,19 @@ export const permissionRelations = relations(permissions, ({ many }) => ({
     rolePermissions: many(rolePermissions),
 }));
 
-export const rolePermissionRelations = relations(rolePermissions, ({ one }) => ({
-    role: one(roles, {
-        fields: [rolePermissions.roleId],
-        references: [roles.id],
+export const rolePermissionRelations = relations(
+    rolePermissions,
+    ({ one }) => ({
+        role: one(roles, {
+            fields: [rolePermissions.roleId],
+            references: [roles.id],
+        }),
+        permission: one(permissions, {
+            fields: [rolePermissions.permissionId],
+            references: [permissions.id],
+        }),
     }),
-    permission: one(permissions, {
-        fields: [rolePermissions.permissionId],
-        references: [permissions.id],
-    }),
-}));
+);
 
 export const userRoleRelations = relations(userRoles, ({ one }) => ({
     user: one(users, {
@@ -771,19 +772,25 @@ export const oauthProviderRelations = relations(oauthProviders, ({ one }) => ({
     }),
 }));
 
-export const codeVerificationRelations = relations(codeVerifications, ({ one }) => ({
-    user: one(users, {
-        fields: [codeVerifications.userId],
-        references: [users.id],
+export const codeVerificationRelations = relations(
+    codeVerifications,
+    ({ one }) => ({
+        user: one(users, {
+            fields: [codeVerifications.userId],
+            references: [users.id],
+        }),
     }),
-}));
+);
 
-export const applicationFormRelations = relations(applicationForms, ({ one }) => ({
-    reviewedBy: one(users, {
-        fields: [applicationForms.reviewedByUserId],
-        references: [users.id],
+export const applicationFormRelations = relations(
+    applicationForms,
+    ({ one }) => ({
+        reviewedBy: one(users, {
+            fields: [applicationForms.reviewedByUserId],
+            references: [users.id],
+        }),
     }),
-}));
+);
 
 // Project Relations
 export const categoryRelations = relations(categories, ({ many }) => ({
@@ -802,16 +809,19 @@ export const projectRelations = relations(projects, ({ many, one }) => ({
     }),
 }));
 
-export const projectCategoryRelations = relations(projectCategories, ({ one }) => ({
-    project: one(projects, {
-        fields: [projectCategories.projectId],
-        references: [projects.id],
+export const projectCategoryRelations = relations(
+    projectCategories,
+    ({ one }) => ({
+        project: one(projects, {
+            fields: [projectCategories.projectId],
+            references: [projects.id],
+        }),
+        category: one(categories, {
+            fields: [projectCategories.categoryId],
+            references: [categories.id],
+        }),
     }),
-    category: one(categories, {
-        fields: [projectCategories.categoryId],
-        references: [categories.id],
-    }),
-}));
+);
 
 export const projectMemberRelations = relations(projectMembers, ({ one }) => ({
     project: one(projects, {
@@ -824,16 +834,19 @@ export const projectMemberRelations = relations(projectMembers, ({ one }) => ({
     }),
 }));
 
-export const projectPartnerRelations = relations(projectPartners, ({ one }) => ({
-    project: one(projects, {
-        fields: [projectPartners.projectId],
-        references: [projects.id],
+export const projectPartnerRelations = relations(
+    projectPartners,
+    ({ one }) => ({
+        project: one(projects, {
+            fields: [projectPartners.projectId],
+            references: [projects.id],
+        }),
+        partner: one(users, {
+            fields: [projectPartners.partnerId],
+            references: [users.id],
+        }),
     }),
-    partner: one(users, {
-        fields: [projectPartners.partnerId],
-        references: [users.id],
-    }),
-}));
+);
 
 // File Relations
 export const fileRelations = relations(files, ({ one }) => ({
