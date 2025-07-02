@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
             );
         }
         
-        // Create tester (password hashing is handled in the repository)
         await createTester({
             firstName: validatedData.firstName,
             lastName: validatedData.lastName,

@@ -7,7 +7,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { updateAppStatus } from "@/repositories/app";
+import { updateAppStatus } from "@/repositories/app/internal";
 import { sendMail } from "@/smtp/mail";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";

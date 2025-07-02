@@ -7,7 +7,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { createApp, getAppsByProjectId } from "@/repositories/app";
+import { createApp, getAppsByProjectId } from "@/repositories/app/internal";
 import { HttpStatusCode } from "@/types/http";
 
 export type FetchCreateApp = {

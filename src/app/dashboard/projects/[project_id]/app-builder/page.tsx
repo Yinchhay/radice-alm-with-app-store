@@ -1,4 +1,4 @@
-import { getAppsByProjectId } from "@/repositories/app";
+import { getAppsByProjectId } from "@/repositories/app/internal";
 import { getOneAssociatedProject } from "@/repositories/project";
 
 export default async function AppBuilderPage({ params }: { params: { project_id: string } }) {

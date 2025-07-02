@@ -1,73 +1,48 @@
-import { checkBearerAndPermission, RouteRequiredPermissions } from "@/lib/IAM";
-import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
+import { lucia } from "@/auth/lucia";
 import {
+    buildSuccessResponse,
     buildNoBearerTokenErrorResponse,
     buildNoPermissionErrorResponse,
     checkAndBuildErrorResponse,
-    buildSuccessResponse,
 } from "@/lib/response";
-import {
-    getAppsForManageAllApps,
-    getAppsForManageAllAppsTotalRow,
-} from "@/repositories/app";
+import { getAllAcceptedApps } from "@/repositories/app/public";
+import { db } from "@/drizzle/db";
+import { testers } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
-
-export type GetAllPublicAppsReturnType = Awaited<
-    ReturnType<typeof getAppsForManageAllApps>
->;
-
-export type FetchAllPublicAppsData = {
-    apps: GetAllPublicAppsReturnType;
-    totalRows: number;
-    rowsPerPage: number;
-    maxPage: number;
-    page: number;
-};
-
-const successMessage = "Get app for manage all apps successfully";
-const unsuccessMessage = "Get app for manage all apps failed";
 
 export async function GET(request: NextRequest) {
     try {
-        // const { errorNoBearerToken, errorNoPermission } =
-        //     await checkBearerAndPermission(
-        //         request,
-        //         RouteRequiredPermissions.get("manageAllProjects")!,
-        //     );
-        // if (errorNoBearerToken) {
+        // const authorizationHeader = request.headers.get("Authorization");
+        // const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+
+        // if (!sessionId) {
         //     return buildNoBearerTokenErrorResponse();
         // }
-        // if (errorNoPermission) {
+
+        // const session = await lucia.validateSession(sessionId);
+        // if (!session?.session) {
         //     return buildNoPermissionErrorResponse();
         // }
 
-        const page: number =
-            Number(request.nextUrl.searchParams.get("page")) || 1;
-        let rowsPerPage: number =
-            Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
-            ROWS_PER_PAGE;
-        const search = request.nextUrl.searchParams.get("search") || "";
+        // const testerId = session.session.userId;
 
-        // limit to max 100 rows per page
-        if (rowsPerPage > 100) {
-            rowsPerPage = 100;
-        }
+        // const [tester] = await db
+        //     .select()
+        //     .from(testers)
+        //     .where(eq(testers.id, testerId))
+        //     .limit(1);
 
-        const allPublicApps =
-            await getAppsForManageAllApps(page, rowsPerPage, search);
-        const totalRows = await getAppsForManageAllAppsTotalRow(search);
+        // if (!tester) {
+        //     return buildNoPermissionErrorResponse();
+        // }
 
-        return buildSuccessResponse<FetchAllPublicAppsData>(
-            successMessage,
-            {
-                apps: allPublicApps,  
-                totalRows: totalRows,
-                rowsPerPage: rowsPerPage,
-                page: page,
-                maxPage: getPaginationMaxPage(totalRows, rowsPerPage),
-            },
-        );
+        const apps = await getAllAcceptedApps();
+
+        return buildSuccessResponse("Get accepted apps successfully", {
+            apps,
+        });
     } catch (error: any) {
-        return checkAndBuildErrorResponse(unsuccessMessage, error);
+        return checkAndBuildErrorResponse("Get accepted apps failed", error);
     }
 }
