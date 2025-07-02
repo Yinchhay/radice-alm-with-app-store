@@ -41,7 +41,7 @@ export default function DashboardLayout({
       </header>
 
       {/* Main content area with top margin to account for fixed navbar */}
-      <div 
+      <div
         className="flex justify-center pt-[70px] min-h-screen"
         style={{ paddingTop: NAVBAR_HEIGHT }}
       >
@@ -50,8 +50,8 @@ export default function DashboardLayout({
           {/* Sidebar */}
           {showSideNav && (
             <aside
-              className="sticky top-[70px] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 overflow-y-auto"
-              style={{ 
+              className="sticky top-[70px] bg-white dark:bg-gray-900 overflow-y-auto"
+              style={{
                 width: SIDEBAR_WIDTH,
                 height: `calc(100vh - ${NAVBAR_HEIGHT}px)`
               }}
@@ -61,9 +61,9 @@ export default function DashboardLayout({
           )}
 
           {/* Main content */}
-          <main 
+          <main
             className={`flex-1 bg-white dark:bg-gray-800 overflow-auto`}
-            style={{ 
+            style={{
               minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`
             }}
           >

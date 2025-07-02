@@ -36,8 +36,9 @@ CREATE TABLE `application_forms` (
 	`last_name` varchar(50) NOT NULL,
 	`email` varchar(255) NOT NULL,
 	`phone_number` varchar(30),
-	`cv_url` varchar(2083),
-	`approved` varchar(50) NOT NULL DEFAULT 'Pending',
+	`reason` varchar(500),
+	`cv` varchar(2083),
+	`approved` varchar(50) NOT NULL DEFAULT 'pending',
 	`reviewed_by_user_id` varchar(255),
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
@@ -54,7 +55,7 @@ CREATE TABLE `apps` (
 	`content` text,
 	`web_url` varchar(500),
 	`app_file` varchar(500),
-	`status` text,
+	`status` varchar(50) DEFAULT 'pending',
 	`card_image` varchar(500),
 	`banner_image` varchar(500),
 	`featured_priority` int,
@@ -69,7 +70,7 @@ CREATE TABLE `bug_reports` (
 	`description` text,
 	`image` varchar(500),
 	`video` varchar(500),
-	`user_id` varchar(255),
+	`tester_id` varchar(255),
 	`app_id` int,
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
@@ -103,7 +104,7 @@ CREATE TABLE `code_verifications` (
 --> statement-breakpoint
 CREATE TABLE `feedbacks` (
 	`id` int AUTO_INCREMENT NOT NULL,
-	`user_id` varchar(255),
+	`tester_id` varchar(255),
 	`app_id` int,
 	`title` varchar(255),
 	`review` text,
@@ -130,7 +131,7 @@ CREATE TABLE `media` (
 	`title` varchar(255) NOT NULL,
 	`description` varchar(2083),
 	`date` datetime NOT NULL,
-	`files` json NOT NULL,
+	`files` json NOT NULL DEFAULT ('[]'),
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `media_id` PRIMARY KEY(`id`),
@@ -151,7 +152,7 @@ CREATE TABLE `oauth_providers` (
 );
 --> statement-breakpoint
 CREATE TABLE `permissions` (
-	`id` int NOT NULL,
+	`id` int AUTO_INCREMENT NOT NULL,
 	`name` varchar(50) NOT NULL,
 	`description` varchar(255),
 	`is_active` boolean DEFAULT true,
@@ -191,12 +192,12 @@ CREATE TABLE `projects` (
 	`name` varchar(50) NOT NULL,
 	`description` varchar(400),
 	`logo_url` varchar(2083),
+	`is_app` boolean DEFAULT false,
 	`is_public` boolean DEFAULT false,
 	`project_content` json DEFAULT ('[]'),
 	`links` json DEFAULT ('[]'),
 	`pipeline_status` json,
 	`user_id` varchar(255),
-	`is_app` boolean DEFAULT false,
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `projects_id` PRIMARY KEY(`id`),
@@ -228,6 +229,21 @@ CREATE TABLE `sessions` (
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `sessions_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `testers` (
+	`id` varchar(255) NOT NULL DEFAULT (uuid()),
+	`first_name` varchar(50) NOT NULL,
+	`last_name` varchar(50) NOT NULL,
+	`email` varchar(255) NOT NULL,
+	`password` varchar(255) NOT NULL,
+	`phone_number` varchar(30),
+	`profile_url` varchar(255),
+	`description` varchar(500),
+	`created_at` timestamp DEFAULT (now()),
+	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `testers_id` PRIMARY KEY(`id`),
+	CONSTRAINT `testers_email_unique` UNIQUE(`email`)
 );
 --> statement-breakpoint
 CREATE TABLE `user_roles` (
@@ -263,7 +279,7 @@ CREATE TABLE `version_logs` (
 	`version_id` int,
 	`action` varchar(50),
 	`content` text,
-	`created_by` int,
+	`created_by` varchar(255),
 	`created_at` timestamp DEFAULT (now()),
 	CONSTRAINT `version_logs_id` PRIMARY KEY(`id`)
 );
@@ -286,10 +302,10 @@ ALTER TABLE `application_forms` ADD CONSTRAINT `application_forms_reviewed_by_us
 ALTER TABLE `apps` ADD CONSTRAINT `apps_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `apps` ADD CONSTRAINT `apps_type_app_types_id_fk` FOREIGN KEY (`type`) REFERENCES `app_types`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `apps` ADD CONSTRAINT `apps_featured_priority_app_priority_id_fk` FOREIGN KEY (`featured_priority`) REFERENCES `app_priority`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `bug_reports` ADD CONSTRAINT `bug_reports_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `bug_reports` ADD CONSTRAINT `bug_reports_tester_id_testers_id_fk` FOREIGN KEY (`tester_id`) REFERENCES `testers`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `bug_reports` ADD CONSTRAINT `bug_reports_app_id_apps_id_fk` FOREIGN KEY (`app_id`) REFERENCES `apps`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `code_verifications` ADD CONSTRAINT `code_verifications_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `feedbacks` ADD CONSTRAINT `feedbacks_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `feedbacks` ADD CONSTRAINT `feedbacks_tester_id_testers_id_fk` FOREIGN KEY (`tester_id`) REFERENCES `testers`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `feedbacks` ADD CONSTRAINT `feedbacks_app_id_apps_id_fk` FOREIGN KEY (`app_id`) REFERENCES `apps`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `files` ADD CONSTRAINT `files_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `files` ADD CONSTRAINT `files_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint

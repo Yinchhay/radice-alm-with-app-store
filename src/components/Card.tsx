@@ -10,7 +10,7 @@ export default function Card({
     overWritePadding?: boolean;
 }) {
     let cardStyle =
-        "bg-white text-black rounded-sm outline outline-1 outline-gray-300 dark:bg-gray-800 dark:text-white dark:outline-gray-700";
+        "bg-white text-black rounded-lg border border-black/16 dark:bg-gray-800 dark:text-white dark:border-white/16";
     let padding = square ? "p-4" : "px-6 py-4";
     if (overWritePadding) {
         padding = "";

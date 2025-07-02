@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "fc109535-9447-4ddf-bebe-1ccb3bbc439f",
+  "id": "d6f03475-e862-41a9-be64-54611366b2dd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "app_priority": {
@@ -258,8 +258,15 @@
           "notNull": false,
           "autoincrement": false
         },
-        "cv_url": {
-          "name": "cv_url",
+        "reason": {
+          "name": "reason",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cv": {
+          "name": "cv",
           "type": "varchar(2083)",
           "primaryKey": false,
           "notNull": false,
@@ -271,7 +278,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'Pending'"
+          "default": "'pending'"
         },
         "reviewed_by_user_id": {
           "name": "reviewed_by_user_id",
@@ -393,10 +400,11 @@
         },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'pending'"
         },
         "card_image": {
           "name": "card_image",
@@ -528,8 +536,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "user_id": {
-          "name": "user_id",
+        "tester_id": {
+          "name": "tester_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
@@ -562,12 +570,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "bug_reports_user_id_users_id_fk": {
-          "name": "bug_reports_user_id_users_id_fk",
+        "bug_reports_tester_id_testers_id_fk": {
+          "name": "bug_reports_tester_id_testers_id_fk",
           "tableFrom": "bug_reports",
-          "tableTo": "users",
+          "tableTo": "testers",
           "columnsFrom": [
-            "user_id"
+            "tester_id"
           ],
           "columnsTo": [
             "id"
@@ -784,8 +792,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "user_id": {
-          "name": "user_id",
+        "tester_id": {
+          "name": "tester_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
@@ -839,12 +847,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "feedbacks_user_id_users_id_fk": {
-          "name": "feedbacks_user_id_users_id_fk",
+        "feedbacks_tester_id_testers_id_fk": {
+          "name": "feedbacks_tester_id_testers_id_fk",
           "tableFrom": "feedbacks",
-          "tableTo": "users",
+          "tableTo": "testers",
           "columnsFrom": [
-            "user_id"
+            "tester_id"
           ],
           "columnsTo": [
             "id"
@@ -1014,7 +1022,8 @@
           "type": "json",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "('[]')"
         },
         "created_at": {
           "name": "created_at",
@@ -1159,7 +1168,7 @@
           "type": "int",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": true
         },
         "name": {
           "name": "name",
@@ -1479,6 +1488,14 @@
           "notNull": false,
           "autoincrement": false
         },
+        "is_app": {
+          "name": "is_app",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
         "is_public": {
           "name": "is_public",
           "type": "boolean",
@@ -1516,14 +1533,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "is_app": {
-          "name": "is_app",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": false
         },
         "created_at": {
           "name": "created_at",
@@ -1781,6 +1790,104 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+    "testers": {
+      "name": "testers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "profile_url": {
+          "name": "profile_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "testers_id": {
+          "name": "testers_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "testers_email_unique": {
+          "name": "testers_email_unique",
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
     "user_roles": {
       "name": "user_roles",
       "columns": {
@@ -2024,7 +2131,7 @@
         },
         "created_by": {
           "name": "created_by",
-          "type": "int",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

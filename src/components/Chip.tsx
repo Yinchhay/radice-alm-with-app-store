@@ -3,8 +3,8 @@ import { text } from "stream/consumers";
 export default function Chip({
     children,
     className = "",
-    textClassName = "text-black hover:text-white",
-    bgClassName = "bg-gray-200 hover:bg-black",
+    textClassName = "",
+    bgClassName = "",
 }: {
     children: React.ReactNode;
     className?: string;
@@ -13,7 +13,7 @@ export default function Chip({
 }) {
     return (
         <div
-            className={`text-sm py-1 px-3 rounded-full  transition-all dark:bg-gray-600 dark:text-white ${className} ${textClassName} ${bgClassName}`}
+            className={`py-1 rounded-full transition-all ${textClassName} ${bgClassName} ${className}`}
         >
             {children}
         </div>

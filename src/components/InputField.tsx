@@ -9,7 +9,7 @@ type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 const InputField = forwardRef<HTMLInputElement, InputProps>(
     ({ className, isSearch = false, ...props }, ref) => {
         const baseClasses = [
-            "text-sm flex h-10 px-3 py-2 items-center gap-3 self-stretch rounded-lg border border-gray-400 focus:outline-2 focus:outline-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white",
+            "text-sm flex h-10 px-3 py-2 items-center gap-3 self-stretch rounded-lg border border-black/16 focus:outline-2 focus:outline-blue-400 dark:bg-gray-700 dark:border-white/16 dark:text-white",
             "w-full text-black transition-all duration-150",
             props.disabled ? "brightness-90" : "",
             className,

@@ -27,7 +27,7 @@ export default function NavItem({
                     "w-full",
                     "cursor-pointer",
                     "transition-colors",
-                    pathName === link
+                    (pathName === link || (link === "/dashboard/projects" && pathName.startsWith("/dashboard/appstore/")))
                         ? "bg-gray-100 font-semibold"
                         : "hover:bg-gray-100",
                 ].join(" ")}

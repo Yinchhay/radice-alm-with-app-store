@@ -135,6 +135,7 @@ export async function POST(request: Request) {
             );
         }
 
+        //The Post API
         const createResult = await createApplicationForm(body);
         // if no row is affected, meaning that creating applicationForm failed
         if (createResult[0].affectedRows < 1) {

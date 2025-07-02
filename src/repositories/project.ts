@@ -150,7 +150,7 @@ export async function getOneAssociatedProject(project_id: number) {
 
     if (Array.isArray(project?.files)) {
         project.files = project.files.filter(
-            (file) => file.belongTo === FileBelongTo.ProjectSetting,
+            (file) => file.belongTo === FileBelongTo.PROJECT_SETTING,
         );
     }
 
@@ -365,6 +365,16 @@ export async function updateProjectPublicStatus(
     return await db
         .update(projects)
         .set({ isPublic: isPublic })
+        .where(eq(projects.id, projectId));
+}
+
+export async function updateProjectAppStatus(
+    projectId: number,
+    isApp: boolean,
+) {
+    return await db
+        .update(projects)
+        .set({ isApp: isApp })
         .where(eq(projects.id, projectId));
 }
 
