@@ -73,24 +73,24 @@ export default function BugReportForm({ appId }: { appId: number }) {
                 </span>
             </button>
             {showForm && (
-                <div className="mt-4">
-                    <div className="mt-4">
-                        <label className="text-xs text-gray-500">Bug Title *</label>
+                <div className="mt-6 p-5">
+                    <div className="mb-5">
+                        <label className="block text-xs text-gray-500 mb-2">Bug Title *</label>
                         <input
                             type="text"
                             value={bugTitle}
                             onChange={(e) => setBugTitle(e.target.value)}
-                            className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 mt-1 placeholder:text-sm placeholder:text-gray-400"
+                            className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 placeholder:text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
                             placeholder="Brief description of the bug"
                             maxLength={100}
                         />
                     </div>
-                    <div className="mt-4">
-                        <label className="text-xs text-gray-500">Bug Description *</label>
+                    <div className="mb-6">
+                        <label className="block text-xs text-gray-500 mb-2">Bug Description *</label>
                         <textarea
                             value={bugDescription}
                             onChange={(e) => setBugDescription(e.target.value)}
-                            className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 mt-1 placeholder:text-sm placeholder:text-gray-400 h-24 resize-none"
+                            className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 placeholder:text-sm placeholder:text-gray-400 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100"
                             placeholder="Please describe the bug in detail"
                             maxLength={1000}
                         />
@@ -98,8 +98,8 @@ export default function BugReportForm({ appId }: { appId: number }) {
                             {bugDescription.length}/1000
                         </div>
                     </div>
-                    <div className="mt-4">
-                        <label className="text-xs text-gray-500">Attachments (Optional)</label>
+                    <div className="mb-6">
+                        <label className="block text-xs text-gray-500 mb-2">Attachments (Optional)</label>
                         <div className="flex gap-4 mb-3 mt-1">
                             <div>
                                 <input
@@ -158,7 +158,7 @@ export default function BugReportForm({ appId }: { appId: number }) {
                             </div>
                         )}
                     </div>
-                    <div className="mt-5 flex justify-end">
+                    <div className="flex justify-end mt-2">
                         <AppActionButton
                             onClick={handleSubmit}
                             disabled={isSubmitting || !bugTitle.trim() || !bugDescription.trim()}
