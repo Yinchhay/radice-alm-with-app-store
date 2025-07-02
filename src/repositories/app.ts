@@ -107,13 +107,11 @@ export const createApp = async (app: typeof apps.$inferInsert) => {
     return await db.insert(apps).values(app);
 };
 
-export const getAppByProjectId = async (projectId: number) => {
-    const result = await db
-        .select()
-        .from(apps)
-        .where(eq(apps.projectId, projectId));
-    return result;
-};
+export async function getAppByProjectId(projectId: number) {
+    return await db.query.apps.findFirst({
+        where: (app, { eq }) => eq(app.projectId, projectId),
+    });
+}
 
 export async function getAppsForManageAllAppsTotalRow(search: string = "") {
     const totalRows = await db
