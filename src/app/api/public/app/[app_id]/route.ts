@@ -2,7 +2,7 @@ import {
     checkAndBuildErrorResponse,
     buildSuccessResponse,
 } from "@/lib/response";
-import { getAppByIdForPublic } from "@/repositories/app";
+import { getAppByIdForPublic } from "@/repositories/app/internal";
 import { NextRequest } from "next/server";
 
 export type GetPublicAppByIdReturnType = Awaited<

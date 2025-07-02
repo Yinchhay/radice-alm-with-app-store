@@ -1,10 +1,12 @@
-import { getAppByProjectId } from "@/repositories/app";
+import { getAppsByProjectId } from "@/repositories/app/internal";
 import { getOneAssociatedProject } from "@/repositories/project";
 
 export default async function AppBuilderPage({ params }: { params: { project_id: string } }) {
-    const app = await getAppByProjectId(Number(params.project_id));
+    const apps = await getAppsByProjectId(Number(params.project_id));
+    const app = apps.length > 0 ? apps[0] : null; // Show first app, or replace with sorting logic
     const project = await getOneAssociatedProject(Number(params.project_id));
     const projectName = project?.name;
+
     if (!app) {
         return (
             <div>
@@ -15,6 +17,7 @@ export default async function AppBuilderPage({ params }: { params: { project_id:
             </div>
         );
     }
+
     return (
         <div>
             <h1 className="text-5xl font-bold mb-4">App Builder</h1>
@@ -36,4 +39,4 @@ export default async function AppBuilderPage({ params }: { params: { project_id:
             </div>
         </div>
     );
-} 
+}
