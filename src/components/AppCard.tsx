@@ -12,7 +12,16 @@ export function AppCard({app, clickable = true} : { app: App; clickable?: boolea
         <div className="bg-transparent overflow-hidden flex flex-col p-4 w-full">
             <div className="w-full aspect-[16/9] mb-4">
                 {app.cardImage ? (
-                    <img src={app.cardImage} alt={app.project?.name || "App"} className="w-full h-full object-cover rounded-lg"/>
+                    <img
+                        src={app.cardImage}
+                        alt={app.project?.name || "App"}
+                        className="w-full h-full object-cover rounded-lg"
+                        loading="lazy"
+                        onError={e => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "/placeholders/placeholder.png";
+                        }}
+                    />
                 ) : (
                     <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
                         <span className="text-gray-400">No Image</span>
@@ -53,3 +62,4 @@ export function AppCard({app, clickable = true} : { app: App; clickable?: boolea
     }
     return <CardContent />;
 }
+;
