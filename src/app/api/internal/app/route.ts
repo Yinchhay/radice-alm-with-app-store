@@ -9,7 +9,7 @@ import {
 import {
     getAppsForManageAllApps,
     getAppsForManageAllAppsTotalRow,
-} from "@/repositories/app";
+} from "@/repositories/app/internal";
 import { NextRequest } from "next/server";
 
 export type GetAppsForManageAllAppsReturnType = Awaited<
