@@ -75,7 +75,10 @@ function AppPage({ params }: { params: { app_id: string } }) {
         })) || [];
 
     const getAction = () => {
-        if ((appType?.name === "Web" || appType?.name === "Mobile") && (webUrl || appFile)) {
+        if (
+            (appType?.name === "Web" || appType?.name === "Mobile") &&
+            (webUrl || appFile)
+        ) {
             return {
                 url: webUrl || appFile,
                 label: "Start Testing",
@@ -131,7 +134,8 @@ function AppPage({ params }: { params: { app_id: string } }) {
                             )}
                             <AppActionButton
                                 onClick={() => {
-                                    if (action.url) window.open(action.url, "_blank");
+                                    if (action.url)
+                                        window.open(action.url, "_blank");
                                 }}
                                 disabled={action.disabled}
                             >
@@ -144,8 +148,8 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 appName={project?.name || "App"}
                             />
 
-                            <div className="mb-8">
-                                <h2 className="text-xl mb-3 font-semibold">
+                            <div className="mb-10">
+                                <h2 className="text-xl mb-4 font-semibold">
                                     About
                                 </h2>
                                 <p className="text-sm text-gray-700">
@@ -153,8 +157,8 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         "No description available."}
                                 </p>
                             </div>
-                            <div className="mb-6">
-                                <div className="flex items-center justify-between mb-3">
+                            <div className="mb-10">
+                                <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xl font-semibold">
                                         What's New
                                     </h2>
@@ -171,12 +175,95 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         "No update information available."}
                                 </p>
                             </div>
-                            {/* Reviews */}
-                            <AppReviews
-                                appId={app.id}
-                                appName={project?.name || "App"}
-                            />
-                            <BugReportForm appId={app.id} />
+                            <div className="mb-10">
+                                <div className="flex flex-col md:flex-row">
+                                    {/* Left column */}
+                                    <div className="min-w-[260px] max-w-sm flex flex-col">
+                                        <div className="mb-6">
+                                            <h3 className="text-lg font-semibold mb-2">
+                                                Updated on
+                                            </h3>
+
+                                            <div className="text-base text-gray-600 mb-2">
+                                                {app.updatedAt
+                                                    ? new Date(
+                                                        app.updatedAt,
+                                                    ).toLocaleDateString(
+                                                        undefined,
+                                                        {
+                                                            year: "numeric",
+                                                            month: "short",
+                                                            day: "numeric",
+                                                        },
+                                                    )
+                                                    : "N/A"}
+                                            </div>
+                                            <h3 className="text-lg font-semibold mb-2">
+                                                Version
+                                            </h3>
+                                            <div className="text-base text-gray-600">
+                                                {/* @ts-expect-error version may not exist on App type */}
+                                                {app.version || "N/A"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="min-w-[260px] max-w-sm flex flex-col md:items-end">
+                                        <h3 className="text-lg font-semibold mb-2">
+                                            Compatibility
+                                        </h3>
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <img
+                                                    src={
+                                                        appType?.name === "Web"
+                                                            ? "/ui/tick.mark.svg"
+                                                            : "/ui/x_mark.svg"
+                                                    }
+                                                    alt="Web"
+                                                    className="w-6 h-6"
+                                                />
+                                                <span className="text-base">
+                                                    Web
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <img
+                                                    src={
+                                                        appType?.name ===
+                                                        "Mobile"
+                                                            ? "/ui/tick.mark.svg"
+                                                            : "/ui/x_mark.svg"
+                                                    }
+                                                    alt="Mobile"
+                                                    className="w-6 h-6"
+                                                />
+                                                <span className="text-base">
+                                                    Andriod
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <img
+                                                    src={"/ui/x_mark.svg"}
+                                                    alt="iOS"
+                                                    className="w-6 h-6"
+                                                />
+                                                <span className="text-base">
+                                                    iOS
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mb-12 mt-12">
+                                <AppReviews
+                                    appId={app.id}
+                                    appName={project?.name || "App"}
+                                />
+                            </div>
+                            <div className="mb-12 mt-12">
+                                <BugReportForm appId={app.id} />
+                            </div>
                         </div>
                     </div>
                 </div>
