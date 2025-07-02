@@ -1,0 +1,18 @@
+meta {
+  name: login-tester
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:3000/api/tester/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "kpen@gmail.com",
+    "password": "Kolbot123"
+  }
+}
