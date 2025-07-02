@@ -228,45 +228,47 @@ function Project({
           )}
 
           {/* App Builder Button - Now Last */}
-          <Link href={`/dashboard/projects/${project.id}/app-builder`} className="w-full">
-            <div
-              className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded-lg hover:brightness-90 transition-all duration-150 cursor-pointer"
-              title="App Builder"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 18 18" fill="none">
-                <path
-                  d="M1.04736 12.1666C1.04736 12.1666 1.17196 13.6916 1.20091 14.1724C1.23952 14.8174 1.48871 15.5377 1.90462 16.0379C2.49162 16.7468 3.18304 16.9969 4.1061 16.9987C5.19148 17.0004 13.084 17.0004 14.1694 16.9987C15.0924 16.9969 15.7839 16.7468 16.3709 16.0379C16.7868 15.5377 17.036 14.8174 17.0754 14.1724C17.1035 13.6916 17.2281 12.1666 17.2281 12.1666"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M6.04199 3.2629V2.93737C6.04199 1.8669 6.9089 1 7.97937 1H10.2449C11.3145 1 12.1823 1.8669 12.1823 2.93737L12.1832 3.2629"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M9.11206 13.2206V12.0852"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M1 5.94747V8.98954C2.68292 10.0995 4.69926 10.8769 6.91215 11.1849C7.17713 10.2188 8.04842 9.51073 9.10749 9.51073C10.1499 9.51073 11.0387 10.2188 11.2862 11.1936C13.5078 10.8857 15.5321 10.1083 17.2237 8.98954V5.94747C17.2237 4.4611 16.0278 3.26428 14.5414 3.26428H3.69109C2.20472 3.26428 1 4.4611 1 5.94747Z"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-          </Link>
+          {canEdit && projectRole !== ProjectRole.NONE && (
+            <Link href={`/dashboard/projects/${project.id}/app-builder`} className="w-full">
+              <div
+                className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded-lg hover:brightness-90 transition-all duration-150 cursor-pointer"
+                title="App Builder"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M1.04736 12.1666C1.04736 12.1666 1.17196 13.6916 1.20091 14.1724C1.23952 14.8174 1.48871 15.5377 1.90462 16.0379C2.49162 16.7468 3.18304 16.9969 4.1061 16.9987C5.19148 17.0004 13.084 17.0004 14.1694 16.9987C15.0924 16.9969 15.7839 16.7468 16.3709 16.0379C16.7868 15.5377 17.036 14.8174 17.0754 14.1724C17.1035 13.6916 17.2281 12.1666 17.2281 12.1666"
+                    stroke="black"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M6.04199 3.2629V2.93737C6.04199 1.8669 6.9089 1 7.97937 1H10.2449C11.3145 1 12.1823 1.8669 12.1823 2.93737L12.1832 3.2629"
+                    stroke="black"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M9.11206 13.2206V12.0852"
+                    stroke="black"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M1 5.94747V8.98954C2.68292 10.0995 4.69926 10.8769 6.91215 11.1849C7.17713 10.2188 8.04842 9.51073 9.10749 9.51073C10.1499 9.51073 11.0387 10.2188 11.2862 11.1936C13.5078 10.8857 15.5321 10.1083 17.2237 8.98954V5.94747C17.2237 4.4611 16.0278 3.26428 14.5414 3.26428H3.69109C2.20472 3.26428 1 4.4611 1 5.94747Z"
+                    stroke="black"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </Card>
