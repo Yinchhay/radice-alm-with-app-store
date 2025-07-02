@@ -17,6 +17,7 @@ export default function BugReportForm({ appId }: { appId: number }) {
                 name: file.name,
                 size: formatFileSize(file.size),
                 type: fileType,
+                raw: file,
             };
             setUploadedFiles(prev => [...prev, newFile]);
         }
@@ -34,6 +35,15 @@ export default function BugReportForm({ appId }: { appId: number }) {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
 
+    const uploadFile = async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/file', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('File upload failed');
+        const data = await res.json();
+        return data.url;
+    };
+
     const handleSubmit = async () => {
         if (!bugTitle.trim() || !bugDescription.trim()) {
             alert("Please fill in both title and description");
@@ -41,12 +51,29 @@ export default function BugReportForm({ appId }: { appId: number }) {
         }
         setIsSubmitting(true);
         try {
-            console.log("Submitting bug report:", {
-                appId,
-                title: bugTitle,
-                description: bugDescription,
-                files: uploadedFiles,
+            let imageUrl, videoUrl;
+            for (const file of uploadedFiles) {
+                if (file.type === 'image') {
+                    imageUrl = await uploadFile(file.raw as File);
+                } else if (file.type === 'video') {
+                    videoUrl = await uploadFile(file.raw as File);
+                }
+            }
+            const res = await fetch(`/api/public/app/${appId}/bug-report`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: bugTitle,
+                    description: bugDescription,
+                    ...(imageUrl && { image: imageUrl }),
+                    ...(videoUrl && { video: videoUrl }),
+                }),
             });
+            if (!res.ok) {
+                const errorData = await res.json();
+                console.error("Bug report error:", errorData);
+                throw new Error("Failed to submit bug report");
+            }
             setBugTitle("");
             setBugDescription("");
             setUploadedFiles([]);
