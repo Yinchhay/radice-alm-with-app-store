@@ -122,7 +122,8 @@ export async function getAppsForManageAllAppsTotalRow(search: string = "") {
         .where(
             and(
                 like(projects.name, `%${search}%`),
-                eq(projects.isPublic, true)
+                eq(projects.isPublic, true),
+                eq(apps.status, "accepted")
             )
         );
     return totalRows[0].count;
@@ -180,6 +181,7 @@ export async function getAppByIdForPublic(app_id: number) {
             and(eq(table.id, app_id), eq(table.status, "accepted")),
 
         columns: {
+            id: true,
             subtitle: true,
             aboutDesc: true,
             content:true,
@@ -194,6 +196,7 @@ export async function getAppByIdForPublic(app_id: number) {
                 columns:{
                     name: true,
                     description: true,
+                    isPublic: true,
                 },
                 with: {
                     projectMembers: {
@@ -294,7 +297,6 @@ export async function editAppById(
             throw new Error("No update data provided");
         }
 
-        // Check if app exists before updating
         const existingApp = await db.query.apps.findFirst({
             where: (app, { eq }) => eq(app.id, id),
         });

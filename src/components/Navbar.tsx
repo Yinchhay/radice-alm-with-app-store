@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
 import {
     Roboto_Condensed,
@@ -25,13 +27,15 @@ interface NavbarProps {
 }
 
 export default function Navbar({ variant = "default" }: NavbarProps) {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     // Logo element
     const logo = (
         <Link href="/" style={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start" }}>
             <img
                 src="/RadiceLogo_light.png"
                 alt="Radice Logo"
-                style={{ objectFit: "contain", height: "50px", width: "300px", display: "block" }}
+                className="object-contain h-10 w-36 sm:h-12 sm:w-48 md:h-[50px] md:w-[300px]"
+                style={{ objectFit: "contain", display: "block" }}
             />
         </Link>
     );
@@ -237,87 +241,134 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         </div>
     );
 
+    const navLinksMobile = (
+        <div className="flex flex-col items-center space-y-6 w-full">
+            <Link href="/about" className="text-xl font-medium w-full text-center">Who We Are</Link>
+            <Link href="/media" className="text-xl font-medium w-full text-center">Media</Link>
+            <Link href="/dashboard" className="text-xl font-medium w-full text-center">Developer</Link>
+            <div className="relative w-full flex flex-col items-center">
+                <Link href="/appstore" className="text-xl font-medium w-full text-center border-2 border-transparent rounded-lg px-4 py-2 mt-2 mb-1 bg-gradient-to-r from-white to-white bg-clip-padding" style={{background: "linear-gradient(white, white) padding-box, linear-gradient(120deg, #ffb56b, #ff5ec4, #7c5fff, #01cfff, #00ff87) border-box"}}>
+                    App Store
+                </Link>
+                <span className="absolute -top-4 right-1 bg-white text-gray-500 text-xs font-bold rounded px-2 py-0.5 border border-gray-200 shadow">New</span>
+            </div>
+        </div>
+    );
+
+    const authButtonsMobile = (
+        <div className="flex flex-col items-center space-y-4 w-full mt-4">
+            <Link href="/tester-login" className="text-lg w-full text-center">Login</Link>
+            <Link href="/tester-registration" className="w-full text-center bg-black text-white rounded-lg py-2 text-lg font-semibold">Sign Up</Link>
+        </div>
+    );
+
     // Layouts
     if (variant === "justLogo") {
         return (
-            <nav style={{
-                display: "flex",
-                width: "1440px",
-                maxWidth: "1440px",
-                padding: "16px 40px 16px 40px",
-                justifyContent: "space-between",
-                alignItems: "center",
-                margin: "auto",
-            }}>
+            <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
             </nav>
         );
     }
     if (variant === "loggedIn") {
         return (
-            <nav style={{
-                display: "flex",
-                width: "1440px",
-                maxWidth: "1440px",
-                padding: "16px 40px 16px 40px",
-                justifyContent: "space-between",
-                alignItems: "center",
-                margin: "auto",
-            }}>
+            <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
-                {navLinks}
-                {loggedInRight}
+                <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
+                <div className="hidden md:flex">{loggedInRight}</div>
+                {/* Hamburger for mobile */}
+                <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                {mobileMenuOpen && (
+                    <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col" onClick={() => setMobileMenuOpen(false)}>
+                        <div className="bg-white w-full max-w-xs h-full flex flex-col items-center justify-center p-4 mx-auto rounded-l-lg" onClick={e => e.stopPropagation()}>
+                            <button className="mb-6 mx-auto" onClick={() => setMobileMenuOpen(false)}>
+                                <svg width="32" height="32" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M6 6l12 12M6 18L18 6"/></svg>
+                            </button>
+                            <div className="flex flex-col items-center space-y-6 w-full">
+                                {navLinksMobile}
+                                {authButtonsMobile}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </nav>
         );
     }
     if (variant === "dashboard") {
         return (
-            <nav style={{
-                display: "flex",
-                width: "1440px",
-                maxWidth: "1440px",
-                padding: "16px 40px 16px 40px",
-                justifyContent: "space-between",
-                alignItems: "center",
-                margin: "auto",
-            }}>
+            <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
-                {dashboardLinks}
-                {loggedInRight}
+                <div className="hidden md:flex flex-1 justify-center">{dashboardLinks}</div>
+                <div className="hidden md:flex">{loggedInRight}</div>
+                <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                {mobileMenuOpen && (
+                    <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col">
+                        <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
+                            <button className="self-end mb-6" onClick={() => setMobileMenuOpen(false)}>
+                                <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M6 6l12 12M6 18L18 6"/></svg>
+                            </button>
+                            <div className="flex flex-col items-start space-y-6 w-full">
+                                {dashboardLinks}
+                                {loggedInRight}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </nav>
         );
     }
     if (variant === "tester") {
         return (
-            <nav style={{
-                display: "flex",
-                width: "1440px",
-                maxWidth: "1440px",
-                padding: "16px 40px 16px 40px",
-                justifyContent: "space-between",
-                alignItems: "center",
-                margin: "auto",
-            }}>
+            <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
-                {navLinks}
-                {testerAuthButtons}
+                <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
+                <div className="hidden md:flex">{testerAuthButtons}</div>
+                {/* Hamburger for mobile */}
+                <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                {mobileMenuOpen && (
+                    <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col">
+                        <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
+                            <button className="self-end mb-6" onClick={() => setMobileMenuOpen(false)}>
+                                <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M6 6l12 12M6 18L18 6"/></svg>
+                            </button>
+                            <div className="flex flex-col items-start space-y-6 w-full">
+                                {navLinksMobile}
+                                {authButtonsMobile}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </nav>
         );
     }
     // Default
     return (
-        <nav style={{
-            display: "flex",
-            width: "1440px",
-            maxWidth: "1440px",
-            padding: "16px 40px 16px 40px",
-            justifyContent: "space-between",
-            alignItems: "center",
-            margin: "auto",
-        }}>
+        <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
             {logo}
-            {navLinks}
-            {authButtons}
+            <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
+            <div className="hidden md:flex">{authButtons}</div>
+            <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            {mobileMenuOpen && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col" onClick={() => setMobileMenuOpen(false)}>
+                    <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
+                        <button className="self-end mb-6" onClick={() => setMobileMenuOpen(false)}>
+                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M6 6l12 12M6 18L18 6"/></svg>
+                        </button>
+                        <div className="flex flex-col items-center space-y-8 w-full max-w-xs">
+                            {navLinksMobile}
+                            {authButtonsMobile}
+                        </div>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }
