@@ -33,16 +33,12 @@ export const testerRegistrationSchema = z.object({
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
             "Password must contain at least one lowercase letter, one uppercase letter, and one number"
         ),
-    confirmPassword: z.string(),
     phoneNumber: z
         .string()
         .max(30, "Phone number must be 30 characters or less")
         .optional()
         .or(z.literal("")),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-});
+})
 
 /**
  * Tester login schema

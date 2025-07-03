@@ -6,10 +6,9 @@ import Overlay from "@/components/Overlay";
 import { categories } from "@/drizzle/schema";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import { fetchDeleteCategoryById } from "./fetch";
 import { usePathname } from "next/navigation";
-import Tooltip from "@/components/Tooltip";
 import { useToast } from "@/components/Toaster";
 
 export function DeleteCategoryOverlay({
@@ -29,7 +28,6 @@ export function DeleteCategoryOverlay({
     }
 
     useEffect(() => {
-        // close the overlay after deleting successfully
         if (showOverlay && result?.success) {
             addToast(
                 <div className="flex gap-2">
@@ -37,23 +35,19 @@ export function DeleteCategoryOverlay({
                     <p>Successfully deleted category</p>
                 </div>,
             );
-
             onCancel();
         }
     }, [result]);
 
     return (
         <>
-            <Tooltip title="Delete category">
-                <Button
-                    data-test={`deleteCategory-${category.name}`}
-                    onClick={() => setShowOverlay(true)}
-                    square={true}
-                    variant="danger"
-                >
-                    <IconX></IconX>
-                </Button>
-            </Tooltip>
+            <Button
+                data-test={`deleteCategory-${category.name}`}
+                onClick={() => setShowOverlay(true)}
+                className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white"
+            >
+                Delete
+            </Button>
             {showOverlay && (
                 <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
@@ -105,7 +99,7 @@ function DeleteCategoryBtn() {
         <Button
             data-test="deleteCategoryBtn"
             disabled={formStatus.pending}
-            variant="danger"
+            className="bg-red-600 hover:bg-red-700 text-white"
         >
             {formStatus.pending ? "Deleting" : "Delete"}
         </Button>
