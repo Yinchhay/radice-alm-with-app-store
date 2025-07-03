@@ -14,7 +14,7 @@ export default function AppStorePage() {
     const [error, setError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get("search")?.toLowerCase() || "";
-    const appsPerPage = 6;
+    const appsPerPage = 3;
     const [openTestingPage, setOpenTestingPage] = useState(1);
     const [livePage, setLivePage] = useState(1);
 
@@ -36,19 +36,11 @@ export default function AppStorePage() {
                     "data" in data &&
                     Array.isArray(data.data.apps)
                 ) {
-                    const sortedApps = data.data.apps
-                        .map((item: any) => ({
-                            ...item.app,
-                            project: item.project,
-                            appType: item.appType,
-                            category: item.category,
-                            projectCategories: item.projectCategories,
-                        }))
-                        .sort(
-                            (a: App, b: App) =>
-                                (b.featuredPriority ?? 0) -
-                                (a.featuredPriority ?? 0),
-                        );
+                    const sortedApps = data.data.apps.sort(
+                        (a: App, b: App) =>
+                            (b.featuredPriority ?? 0) -
+                            (a.featuredPriority ?? 0),
+                    );
                     setApps(sortedApps);
                 } else {
                     setApps([]);
@@ -102,8 +94,6 @@ export default function AppStorePage() {
         },
         {} as Record<number, App[]>,
     );
-
-    console.log("Grouped by priority:", groupedByPriority);
 
     const PriorityOrder = [
         { key: 2, label: "Open for Testing" },
@@ -240,4 +230,3 @@ export default function AppStorePage() {
         </div>
     );
 }
-
