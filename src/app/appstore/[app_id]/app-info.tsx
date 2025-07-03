@@ -105,6 +105,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
             <div className="flex-1 max-w-[1440px] px-4">
                 <div className="max-w-6xl mx-auto px-4 py-8">
                     <div className="mb-8">
+                        {/* Right column */}
                         <AppBanner
                             bannerImage={
                                 app.bannerImage ||
@@ -147,7 +148,6 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 screenshots={screenshots}
                                 appName={project?.name || "App"}
                             />
-
                             <div className="mb-10">
                                 <h2 className="text-xl mb-4 font-semibold">
                                     About
