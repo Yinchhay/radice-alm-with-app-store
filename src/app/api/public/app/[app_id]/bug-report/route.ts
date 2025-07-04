@@ -10,8 +10,11 @@ import {
 import { createBugReport } from "@/repositories/bug_report";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
+import jwt from "jsonwebtoken";
+import { db } from "@/drizzle/db"; // or wherever your db client is
+import { eq } from "drizzle-orm";
+import { testers } from "@/drizzle/schema";
 import { Permissions } from "@/types/IAM";
-import { z } from "zod";
 import { createBugReportFormSchema} from "./schema";
 
 export type FetchCreateBugReport = { 
@@ -21,23 +24,57 @@ export type FetchCreateBugReport = {
 const successMessage = "Created bug report successfully";
 const unsuccessMessage = "Create bug report failed";
 
+interface TesterJwtPayload {
+    id: string;
+    email: string;
+    type: "tester";
+}
+
 export async function POST(
     request: Request,
     { params }: { params: { app_id: string } }
 ) {
   try {
-    // const requiredPermission = new Set([]);
-    // const { errorNoBearerToken, errorNoPermission, user } =
-    //   await checkBearerAndPermission(request, requiredPermission);
-    
-    // if (errorNoBearerToken) {
-    //   return buildNoBearerTokenErrorResponse();
-    // }
-    
-    // if (errorNoPermission) {
-    //   return buildNoPermissionErrorResponse();
-    // }
 
+     //Extract and validate authorization header
+       const authorizationHeader = request.headers.get("Authorization");
+        if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
+            return buildNoBearerTokenErrorResponse();
+        }
+
+        const token = authorizationHeader.replace("Bearer ", "");
+
+        // safely read and verify the JWT token
+        const JWT_SECRET = process.env.JWT_SECRET;
+        if (!JWT_SECRET) {
+            console.error("Missing JWT_SECRET in environment");
+            throw new Error("Server misconfiguration: JWT secret is not set");
+        }
+
+        let payload: TesterJwtPayload;
+        try {
+            payload = jwt.verify(token, JWT_SECRET!) as TesterJwtPayload;
+        } catch (err) {
+            console.error("JWT Verification Failed:", err);
+            return buildNoPermissionErrorResponse();
+        }
+
+        const testerId = payload.id;
+        if (!testerId) {
+            return buildNoPermissionErrorResponse();
+        }
+
+        const [tester] = await db
+            .select()
+            .from(testers)
+            .where(eq(testers.id, testerId))
+            .limit(1);
+
+        if (!tester) {
+            return buildNoPermissionErrorResponse();
+        }
+
+        // Convert and validate appId
     const appId = parseInt(params.app_id);
     if (isNaN(appId) || appId <= 0) {
       return new Response(
@@ -98,6 +135,8 @@ export async function POST(
         description: body.description,
         image: body.image,
         video: body.video,
+        testerId: testerId,
+        appId: body.appId,
     });
 
     if (createResult[0].affectedRows < 1) {

@@ -6,14 +6,13 @@ import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import InputField from "@/components/InputField";
 import FormErrorMessages from "@/components/FormErrorMessages";
-import { IconCheck, IconEdit } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import { categories } from "@/drizzle/schema";
 import { fetchEditCategoryById } from "./fetch";
 import { usePathname } from "next/navigation";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { ACCEPTED_IMAGE_TYPES, fileToUrl } from "@/lib/file";
 import TextareaField from "@/components/TextareaField";
-import Tooltip from "@/components/Tooltip";
 import { useToast } from "@/components/Toaster";
 
 export function EditCategoryOverlay({
@@ -40,7 +39,6 @@ export function EditCategoryOverlay({
     }
 
     useEffect(() => {
-        // close the overlay after editing successfully
         if (showOverlay && result?.success) {
             addToast(
                 <div className="flex gap-2">
@@ -48,22 +46,20 @@ export function EditCategoryOverlay({
                     <p>Successfully edited category</p>
                 </div>,
             );
-
             onCancel();
         }
     }, [result]);
 
     return (
         <>
-            <Tooltip title="Edit category">
-                <Button
-                    data-test={`editCategory-${category.name}`}
-                    onClick={() => setShowOverlay(true)}
-                    square={true}
-                >
-                    <IconEdit></IconEdit>
-                </Button>
-            </Tooltip>
+            <Button
+                data-test={`editCategory-${category.name}`}
+                onClick={() => setShowOverlay(true)}
+                variant="outline"
+                className="px-3 py-1 text-sm"
+            >
+                Edit
+            </Button>
             {showOverlay && (
                 <Overlay onClose={onCancel}>
                     <Card className="w-[480px] font-normal max-h-[800px] overflow-y-auto">
