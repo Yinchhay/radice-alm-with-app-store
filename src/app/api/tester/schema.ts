@@ -80,11 +80,7 @@ export const testerPasswordResetSchema = z.object({
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
             "Password must contain at least one lowercase letter, one uppercase letter, and one number"
         ),
-    confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-});
+})
 
 /**
  * Tester password change schema (for logged-in users)
@@ -101,11 +97,7 @@ export const testerPasswordChangeSchema = z.object({
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
             "Password must contain at least one lowercase letter, one uppercase letter, and one number"
         ),
-    confirmNewPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: "Passwords don't match",
-    path: ["confirmNewPassword"],
-});
+})
 
 // ============================================================================
 // PROFILE MANAGEMENT SCHEMAS

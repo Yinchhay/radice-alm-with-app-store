@@ -645,12 +645,12 @@ export const apps = mysqlTable("apps", {
 
 export const versions = mysqlTable("versions", {
     id: int("id").primaryKey().autoincrement(),
-    appId: int("app_id").references(() => apps.id),
+    projectId: int("project_id").references(() => projects.id), // Changed from appId to projectId
     versionNumber: varchar("version_number", { length: 50 }), // e.g., 1.0.0, 1.0.1, 1.1.0
     majorVersion: int("major_version"),
     minorVersion: int("minor_version"),
     patchVersion: int("patch_version"),
-    isCurrent: boolean("is_current").default(false), // only one current version per app
+    isCurrent: boolean("is_current").default(false), // only one current version per project
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -658,7 +658,7 @@ export const versions = mysqlTable("versions", {
 export const versionLogs = mysqlTable("version_logs", {
     id: int("id").primaryKey().autoincrement(),
     versionId: int("version_id").references(() => versions.id),
-    action: varchar("action", { length: 50 }), // created, updated, activated, deactivated
+    action: varchar("action", { length: 50 }), // created, updated, activated, deactivated, app_created, app_approved, app_deleted
     content: text("content"), // what changed in this version
     createdBy: varchar("created_by", { length: 255 }), // user who made the change
     createdAt: timestamp("created_at").defaultNow(),
@@ -889,9 +889,9 @@ export const appRelations = relations(apps, ({ one, many }) => ({
 }));
 
 export const versionRelations = relations(versions, ({ one, many }) => ({
-    app: one(apps, {
-        fields: [versions.appId],
-        references: [apps.id],
+    project: one(projects, {
+        fields: [versions.projectId],
+        references: [projects.id],
     }),
     logs: many(versionLogs),
 }));
