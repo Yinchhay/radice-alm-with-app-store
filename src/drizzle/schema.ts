@@ -645,7 +645,7 @@ export const apps = mysqlTable("apps", {
 
 export const versions = mysqlTable("versions", {
     id: int("id").primaryKey().autoincrement(),
-    projectId: int("project_id").references(() => projects.id), // Changed from appId to projectId
+    appId: int("project_id").references(() => apps.id), // Changed from appId to projectId
     versionNumber: varchar("version_number", { length: 50 }), // e.g., 1.0.0, 1.0.1, 1.1.0
     majorVersion: int("major_version"),
     minorVersion: int("minor_version"),
@@ -889,9 +889,9 @@ export const appRelations = relations(apps, ({ one, many }) => ({
 }));
 
 export const versionRelations = relations(versions, ({ one, many }) => ({
-    project: one(projects, {
-        fields: [versions.projectId],
-        references: [projects.id],
+    app: one(apps, {
+        fields: [versions.appId],
+        references: [apps.id],
     }),
     logs: many(versionLogs),
 }));
