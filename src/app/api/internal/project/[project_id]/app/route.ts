@@ -12,6 +12,7 @@ import {
     getAppsByProjectId,
     getAppByIdForPublic,
 } from "@/repositories/app/internal";
+import { createVersion, getLatestVersionByAppId } from "@/repositories/version";
 import { HttpStatusCode } from "@/types/http";
 
 export type FetchCreateApp = {
@@ -57,7 +58,6 @@ export async function POST(
         );
 
         if (nonAcceptedApp) {
-            // Return the existing draft/rejected app instead of creating a new one
             return buildSuccessResponse<FetchCreateApp>(
                 "Found existing app in progress",
                 {
@@ -69,14 +69,12 @@ export async function POST(
         }
 
         // No existing draft/rejected app found, create a new one
-        // First, check if there's an accepted app to copy from
         const acceptedApp = existingApps.find(
             (app) => app.status === "accepted",
         );
 
         let appData;
         if (acceptedApp) {
-            // Get the full accepted app data to copy
             const acceptedAppDetails = await getAppByIdForPublic(
                 acceptedApp.id,
             );
@@ -85,7 +83,6 @@ export async function POST(
                 appData = {
                     projectId,
                     status: "draft",
-                    // Only include fields that are not null/undefined and match your schema
                     ...(acceptedAppDetails.subtitle && {
                         subtitle: acceptedAppDetails.subtitle,
                     }),
@@ -109,14 +106,12 @@ export async function POST(
                     }),
                 };
             } else {
-                // Fallback if accepted app details can't be fetched
                 appData = {
                     projectId,
                     status: "draft",
                 };
             }
         } else {
-            // No accepted app exists, create fresh draft
             appData = {
                 projectId,
                 status: "draft",
@@ -136,6 +131,47 @@ export async function POST(
             }
         } else {
             throw new Error("Create operation did not return expected result");
+        }
+
+        let major = 1,
+            minor = 0,
+            patch = 0;
+
+        if (acceptedApp) {
+            const latestAcceptedVersion = await getLatestVersionByAppId(
+                acceptedApp.id,
+            );
+
+            if (latestAcceptedVersion) {
+                major = latestAcceptedVersion.majorVersion ?? 1;
+                minor = latestAcceptedVersion.minorVersion ?? 0;
+                patch = (latestAcceptedVersion.patchVersion ?? 0) + 1;
+            }
+        }
+
+        const versionNumber = `${major}.${minor}.${patch}`;
+
+        const versionContent = acceptedApp
+            ? "- Draft created by cloning accepted app"
+            : "- New draft app created from scratch";
+
+        const versionResult = await createVersion({
+            appId,
+            projectId,
+            versionNumber,
+            majorVersion: major,
+            minorVersion: minor,
+            patchVersion: patch,
+            isCurrent: false,
+            content: versionContent,
+        });
+
+        let versionId: number;
+        if (Array.isArray(versionResult) && versionResult.length > 0) {
+            versionId =
+                versionResult[0].insertId || (versionResult[0] as any).id;
+        } else {
+            throw new Error("Failed to create version");
         }
 
         return buildSuccessResponse<FetchCreateApp>(
