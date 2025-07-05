@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "4f3bb8d8-7f4a-4b14-8945-d5276131bb3f",
-  "prevId": "83627f0b-1c2d-42ae-a117-4ebe0f62e5df",
+  "id": "24cd4f86-e8c4-4d9b-80fb-95ee853ff3dc",
+  "prevId": "4f3bb8d8-7f4a-4b14-8945-d5276131bb3f",
   "tables": {
     "app_priority": {
       "name": "app_priority",
@@ -2090,80 +2090,6 @@
       },
       "checkConstraint": {}
     },
-    "version_logs": {
-      "name": "version_logs",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "version_id": {
-          "name": "version_id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "action": {
-          "name": "action",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(now())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "version_logs_version_id_versions_id_fk": {
-          "name": "version_logs_version_id_versions_id_fk",
-          "tableFrom": "version_logs",
-          "tableTo": "versions",
-          "columnsFrom": [
-            "version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "version_logs_id": {
-          "name": "version_logs_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
     "versions": {
       "name": "versions",
       "columns": {
@@ -2223,6 +2149,13 @@
           "notNull": false,
           "autoincrement": false,
           "default": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
