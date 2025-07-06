@@ -49,31 +49,42 @@ export type AppWithRelations = {
     }[];
 };
 
-export async function getAllAcceptedApps(){
+export async function getAllAcceptedApps() {
     try {
-        const acceptedApps = await db.query.apps.findMany({
-            where: eq(apps.status, "accepted"),
-            with: {
+        const acceptedApps = await db
+            .select({
+                app: apps,
                 project: {
-                    with: {
-                        projectCategories: {
-                            with: {
-                                category: true
-                            }
-                        }
-                    }
+                    id: projects.id,
+                    name: projects.name,
+                    logoUrl: projects.logoUrl,
+                    isPublic: projects.isPublic,
+                    userId: projects.userId,
                 },
-                appType: true,
-                priority: true,
-                screenshots: true
-            }
-        });
-        return acceptedApps.map(app => ({
-            ...app,
-            category: app.project?.projectCategories?.[0]?.category || null,
-            projectCategories: app.project?.projectCategories?.[0] || null
-        }))
-        
+                appType: {
+                    id: appTypes.id,
+                    name: appTypes.name,
+                    description: appTypes.description,
+                },
+                projectCategories: {
+                    id: projectCategories.id,
+                    categoryId: projectCategories.categoryId,
+                },
+                category: {
+                    id: categories.id,
+                    name: categories.name,
+                    description: categories.description,
+                },
+            })
+            .from(apps)
+            .leftJoin(projects, eq(apps.projectId, projects.id))
+            .leftJoin(appTypes, eq(apps.type, appTypes.id))
+            .leftJoin(projectCategories, eq(projects.id, projectCategories.projectId))
+            .leftJoin(categories, eq(projectCategories.categoryId, categories.id))
+            .where(eq(apps.status, "accepted"))
+            .orderBy(sql`${apps.id} DESC`);
+
+        return acceptedApps;
     } catch (error) {
         console.error("Error fetching all accepted apps:", error);
         throw error;
