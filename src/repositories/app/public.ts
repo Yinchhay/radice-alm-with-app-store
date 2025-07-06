@@ -84,7 +84,14 @@ export async function getAllAcceptedApps() {
             .where(eq(apps.status, "accepted"))
             .orderBy(sql`${apps.id} DESC`);
 
-        return acceptedApps;
+            
+            return acceptedApps.map(row => ({
+                ...row.app,
+                project: row.project,
+                appType: row.appType,
+                category: row.category,
+                projectCategories: row.projectCategories,
+            }));
     } catch (error) {
         console.error("Error fetching all accepted apps:", error);
         throw error;
