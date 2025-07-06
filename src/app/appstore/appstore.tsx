@@ -14,7 +14,6 @@ export default function AppStorePage() {
     const [error, setError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get("search")?.toLowerCase() || "";
-    const appsPerPage = 3;
     const [openTestingPage, setOpenTestingPage] = useState(1);
     const [livePage, setLivePage] = useState(1);
 
@@ -100,18 +99,6 @@ export default function AppStorePage() {
         { key: 1, label: "Live" },
     ];
 
-    function getPaginatedApps(appsForStatus: App[], page: number) {
-        const maxPage = Math.max(
-            1,
-            Math.ceil(appsForStatus.length / appsPerPage),
-        );
-        const paginatedApps = appsForStatus.slice(
-            (page - 1) * appsPerPage,
-            page * appsPerPage,
-        );
-        return { paginatedApps, maxPage };
-    }
-
     return (
         <div className="flex justify-center">
             <div className="flex-1 max-w-[1440px] px-4">
@@ -178,10 +165,6 @@ export default function AppStorePage() {
                         PriorityOrder.map(({ key, label }) => {
                             const page = key === 2 ? openTestingPage : livePage;
                             const appsForStatus = groupedByPriority[key] || [];
-                            const { paginatedApps, maxPage } = getPaginatedApps(
-                                appsForStatus,
-                                page,
-                            );
                             return (
                                 <div key={key} className="mb-12">
                                     <div className="flex items-center gap-2 mb-4">
@@ -190,43 +173,47 @@ export default function AppStorePage() {
                                         </h2>
                                         <span className="w-2 h-2 bg-green-500 rounded-full" />
                                     </div>
-                                    <div className="grid gap-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                                        {paginatedApps.length > 0 ? (
-                                            paginatedApps.map((app: App) => (
-                                                <AppCard
-                                                    key={app.id}
-                                                    app={app}
-                                                />
-                                            ))
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                                        {appsForStatus.length > 0 ? (
+                                            appsForStatus
+                                                .slice(
+                                                    (page - 1) * 3,
+                                                    page * 3,
+                                                )
+                                                .map((app) => (
+                                                    <AppCard
+                                                        key={app.id}
+                                                        app={app}
+                                                        clickable={true}
+                                                    />
+                                                ))
                                         ) : (
-                                            <div className="col-span-full text-gray-400 text-center">
-                                                No apps in this section
+                                            <div className="col-span-full text-center text-gray-500">
+                                                No apps available for this status.
                                             </div>
                                         )}
-                                    </div>
-                                    {maxPage > 1 && (
-                                        <div className="flex justify-center mt-6">
-                                            <Pagination
-                                                page={page}
-                                                maxPage={maxPage}
-                                                onPageChange={(newPage) => {
-                                                    if (key === 2) {
-                                                        setOpenTestingPage(
-                                                            newPage,
-                                                        );
-                                                    } else {
-                                                        setLivePage(newPage);
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                    )}
                                 </div>
-                            );
-                        })
-                    )}
-                </div>
+                                {appsForStatus.length > 3 && (
+                                    <div className="flex justify-center mt-6">
+                                        <Pagination
+                                            page={page}
+                                            maxPage={Math.ceil(appsForStatus.length / 3)}
+                                            onPageChange={(newPage) => {
+                                                if (key === 2) {
+                                                    setOpenTestingPage(newPage);
+                                                } else {
+                                                    setLivePage(newPage);
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
             </div>
         </div>
-    );
+    </div>
+);
 }
