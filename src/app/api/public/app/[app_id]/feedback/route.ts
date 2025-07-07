@@ -12,6 +12,10 @@ import {
 } from "@/repositories/feedback";
 import { HttpStatusCode } from "@/types/http";
 import { NextRequest } from "next/server";
+import { db } from "@/drizzle/db";
+import { feedbacks } from "@/drizzle/schema";
+import { testers } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export type GetFeedbacksReturnType = Awaited<
     ReturnType<typeof getAllFeedbacksByAppId>
@@ -68,16 +72,30 @@ export async function GET(
             rowsPerPage = 100;
         }
 
-        const feedbacks = await getAllFeedbacksByAppId(
-            appId,
-            page,
-            rowsPerPage,
-            search,
-        );
+        // Join feedback with testers
+        const feedbackList = await db
+            .select({
+                id: feedbacks.id,
+                testerId: feedbacks.testerId,
+                appId: feedbacks.appId,
+                title: feedbacks.title,
+                review: feedbacks.review,
+                starRating: feedbacks.starRating,
+                createdAt: feedbacks.createdAt,
+                updatedAt: feedbacks.updatedAt,
+                tester: {
+                    firstName: testers.firstName,
+                    lastName: testers.lastName,
+                }
+            })
+            .from(feedbacks)
+            .leftJoin(testers, eq(feedbacks.testerId, testers.id))
+            .where(eq(feedbacks.appId, appId));
+
         const totalRows = await getFeedbacksTotalRowByAppId(appId, search);
 
         return buildSuccessResponse<FetchFeedbacksData>(successMessage, {
-            feedbacks: feedbacks,
+            feedbacks: feedbackList,
             totalRows: totalRows,
             rowsPerPage: rowsPerPage,
             page: page,

@@ -66,7 +66,7 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
 
     const checkAuth = async () => {
         try {
-            const response = await fetch("/api/testers/auth/profile", {
+            const response = await fetch("/api/tester/auth/profile", {
                 credentials: "include",
             });
 
@@ -106,20 +106,6 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
         } catch (error) {
             console.error("Login error:", error);
             return { success: false, error: "Network error. Please try again." };
-        }
-    };
-
-    const logout = async () => {
-        try {
-            await fetch("/api/testers/auth/logout", {
-                method: "POST",
-                credentials: "include",
-            });
-        } catch (error) {
-            console.error("Logout error:", error);
-        } finally {
-            setTester(null);
-            router.push("/testers/login");
         }
     };
 
@@ -208,7 +194,7 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
         isLoading,
         isAuthenticated: !!tester,
         login,
-        logout,
+        logout: async () => {},
         register,
         updateProfile,
         changePassword,

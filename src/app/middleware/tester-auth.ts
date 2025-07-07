@@ -36,26 +36,35 @@ export interface AuthenticatedTesterRequest extends NextRequest {
  * Verify tester JWT token from cookie
  */
 export async function verifyTesterToken(request: NextRequest): Promise<TesterTokenPayload | null> {
-    const token = request.cookies.get("tester-token")?.value;
-    
+    // 1. Try cookie first
+    let token = request.cookies.get("tester-token")?.value;
+
+    // 2. Fallback to Authorization header if missing
+    if (!token) {
+    const authHeader = request.headers.get("authorization");
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            token = authHeader.split(" ")[1];
+        }
+    }
+
     if (!token) {
         return null;
     }
-    
+
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as TesterTokenPayload;
-        
-        // Ensure it's a tester token, not a regular user token
+
         if (decoded.type !== "tester") {
             return null;
         }
-        
+
         return decoded;
     } catch (error) {
         console.error("JWT verification failed:", error);
         return null;
     }
 }
+
 
 /**
  * Get authenticated tester from token
