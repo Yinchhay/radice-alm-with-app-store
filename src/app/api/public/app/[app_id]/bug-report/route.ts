@@ -16,6 +16,7 @@ import { eq } from "drizzle-orm";
 import { testers } from "@/drizzle/schema";
 import { Permissions } from "@/types/IAM";
 import { createBugReportFormSchema} from "./schema";
+import { cookies } from "next/headers";
 
 export type FetchCreateBugReport = { 
   bugReportId: number;
@@ -37,12 +38,18 @@ export async function POST(
   try {
 
      //Extract and validate authorization header
-       const authorizationHeader = request.headers.get("Authorization");
-        if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
+        let token: string | undefined = undefined;
+        const authorizationHeader = request.headers.get("Authorization");
+        if (authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.replace("Bearer ", "");
+        }
+        if (!token) {
+            const cookieStore = cookies();
+            token = cookieStore.get("tester-token")?.value;
+        }
+        if (!token) {
             return buildNoBearerTokenErrorResponse();
         }
-
-        const token = authorizationHeader.replace("Bearer ", "");
 
         // safely read and verify the JWT token
         const JWT_SECRET = process.env.JWT_SECRET;
