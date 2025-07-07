@@ -1,5 +1,6 @@
 import type { App } from "@/types/app_types";
 import Link from "next/link";
+import Image from "next/image";
 
 const typeColors: Record<number, { name: string; color: string }> = {
     1: { name: "Web", color: "#4285F4" },
@@ -12,7 +13,18 @@ export function AppCard({app, clickable = true} : { app: App; clickable?: boolea
         <div className="bg-transparent overflow-hidden flex flex-col p-4 w-full">
             <div className="w-full aspect-[16/9] mb-4">
                 {app.cardImage ? (
-                    <img src={app.cardImage} alt={app.project?.name || "App"} className="w-full h-full object-cover rounded-lg"/>
+                    <Image
+                        src={app.cardImage.startsWith("/") ? app.cardImage : `/placeholders/placeholder.png`}
+                        alt={app.project?.name || "App"}
+                        className="w-full h-full object-cover rounded-lg"
+                        width={400}
+                        height={225}
+                        style={{objectFit: 'cover', borderRadius: '0.5rem'}}
+                        onError={(e) => {
+                            e.currentTarget.src = "/placeholders/placeholder.png";
+                        }}
+                        priority={false}
+                    />
                 ) : (
                     <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
                         <span className="text-gray-400">No Image</span>
