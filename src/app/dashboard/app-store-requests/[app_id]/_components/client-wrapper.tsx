@@ -6,11 +6,11 @@ import FeedbackTab from './feedback-tab';
 import BugReportsTab from './bugreport-tab';
 import VersionLogsTab from './versionlog-tab';
 
-interface AppBuilderClientWrapperProps {
-  projectId: string;
+interface AppRequestClientWrapperProps {
+  appId: string;
 }
 
-export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientWrapperProps) {
+export default function AppRequestClientWrapper({ appId }: AppRequestClientWrapperProps) {
   const [activeTab, setActiveTab] = useState('information');
 
   const tabs = [
@@ -41,11 +41,11 @@ export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientW
 
       {/* Tab Content */}
       <div className="py-4">
-        {activeTab === 'information' && <InformationTab projectId={projectId} />}
-        {activeTab === 'feedback' && <FeedbackTab />}
-        {activeTab === 'bug-reports' && <BugReportsTab />}
-        {activeTab === 'version-logs' && <VersionLogsTab />}
+        {activeTab === 'information' && <InformationTab appId={appId} />}
+        {activeTab === 'feedback' && <FeedbackTab appId={appId} />}
+        {activeTab === 'bug-reports' && <BugReportsTab appId={appId} />}
+        {activeTab === 'version-logs' && <VersionLogsTab appId={appId} />}
       </div>
     </div>
   );
-}
+} 
