@@ -78,8 +78,8 @@ async function saveUploadedFile(file: File, appId: number, fileType: 'image' | '
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
     
-    // Return relative path for database storage
-    return `uploads/apps/${uniqueFilename}`;
+    // Return absolute path for Next.js compatibility
+    return `/uploads/apps/${uniqueFilename}`;  // Added leading slash here
 }
 
 // Helper function to validate file
@@ -368,11 +368,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
         // Add image paths if new files were uploaded
         if (newCardImagePath) {
-            updateData.card_image = newCardImagePath;
+            updateData.cardImage = newCardImagePath;
         }
         
         if (newBannerImagePath) {
-            updateData.banner_image = newBannerImagePath;
+            updateData.bannerImage = newBannerImagePath;
         }
 
         // Check if there's actual data to update
