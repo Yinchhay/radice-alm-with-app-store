@@ -25,7 +25,7 @@ const successMessage = "App updated successfully";
 const unsuccessMessage = "Failed to update app";
 
 // Configuration for file uploads
-const FILE_STORAGE_PATH = process.env.FILE_STORAGE_PATH || './src/file_storage';
+const FILE_STORAGE_PATH = path.join(process.cwd(), process.env.FILE_STORAGE_PATH || './public/uploads/apps');
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_SCREENSHOTS = 10;
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
