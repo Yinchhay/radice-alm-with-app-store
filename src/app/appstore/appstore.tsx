@@ -103,8 +103,6 @@ export default function AppStorePage() {
         {} as Record<number, App[]>,
     );
 
-    console.log("Grouped by priority:", groupedByPriority);
-
     const PriorityOrder = [
         { key: 2, label: "Open for Testing" },
         { key: 1, label: "Live" },
@@ -240,4 +238,3 @@ export default function AppStorePage() {
         </div>
     );
 }
-
