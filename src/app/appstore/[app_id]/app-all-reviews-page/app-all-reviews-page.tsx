@@ -73,7 +73,6 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                 if (!response.ok) throw new Error("Failed to fetch reviews");
                 const data = await response.json();
                 setMaxPage(data.data.maxPage || 1);
-                setTotalReviews(data.data.totalRows || 0);
                 setReviews(data.data.feedbacks || []);
             } catch (error) {
                 console.error(error);
