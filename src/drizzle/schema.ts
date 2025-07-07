@@ -645,7 +645,7 @@ export const apps = mysqlTable("apps", {
 
 export const versions = mysqlTable("versions", {
     id: int("id").primaryKey().autoincrement(),
-    appId: int("app_id").references(() => apps.id), 
+    appId: int("app_id").references(() => apps.id, { onDelete: "set null" }),
     projectId: int("project_id").references(() => projects.id),
     versionNumber: varchar("version_number", { length: 50 }), // e.g., 1.0.0, 1.0.1, 1.1.0
     majorVersion: int("major_version"),
@@ -659,7 +659,7 @@ export const versions = mysqlTable("versions", {
 
 export const appScreenshots = mysqlTable("app_screenshots", {
     id: int("id").primaryKey().autoincrement(),
-    appId: int("app_id").references(() => apps.id),
+    appId: int("app_id").references(() => apps.id, { onDelete: "cascade" }),
     imageUrl: varchar("image_url", { length: 500 }),
     sortOrder: int("sort_order").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
@@ -678,8 +678,9 @@ export const bugReports = mysqlTable("bug_reports", {
     video: varchar("video", { length: 500 }),
     testerId: varchar("tester_id", { length: 255 }).references(
         () => testers.id,
+        { onDelete: "cascade" },
     ),
-    appId: int("app_id").references(() => apps.id),
+    appId: int("app_id").references(() => apps.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -688,8 +689,9 @@ export const feedbacks = mysqlTable("feedbacks", {
     id: int("id").primaryKey().autoincrement(),
     testerId: varchar("tester_id", { length: 255 }).references(
         () => testers.id,
+        { onDelete: "cascade" },
     ),
-    appId: int("app_id").references(() => apps.id),
+    appId: int("app_id").references(() => apps.id, { onDelete: "cascade" }),
     title: varchar("title", { length: 255 }),
     review: text("review"),
     starRating: starRatingEnum,

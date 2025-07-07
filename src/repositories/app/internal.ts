@@ -461,3 +461,14 @@ export async function getAssociatedProjectsWithMembers(appId: number): Promise<P
         throw error;
     }
 }
+
+export async function getAcceptedAppByProjectId(projectId: number) {
+    const result = await db.query.apps.findFirst({
+        where: and(
+            eq(apps.projectId, projectId),
+            eq(apps.status, "accepted"),
+        ),
+    });
+
+    return result ?? undefined;
+}

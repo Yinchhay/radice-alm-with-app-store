@@ -243,6 +243,35 @@ export const getTesterCount = async (): Promise<number> => {
     return result[0].count;
 };
 
+/**
+ * Update tester profile
+ * @param testerId 
+ * @param data 
+ */
+export async function updateTester(
+    testerId: string,
+    data: Partial<{
+        firstName: string;
+        lastName: string;
+        phoneNumber: string | null;
+        profileUrl: string | null;
+        description: string | null;
+    }>
+) {
+    try {
+        await db
+            .update(testers)
+            .set({
+                ...data,
+                updatedAt: new Date(),
+            })
+            .where(eq(testers.id, testerId));
+    } catch (error) {
+        console.error("Error updating tester:", error);
+        throw new Error("Failed to update tester profile");
+    }
+}
+
 // ============================================================================
 // TYPE EXPORTS
 // ============================================================================
