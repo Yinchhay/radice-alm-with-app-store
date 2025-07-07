@@ -37,5 +37,4 @@ yarn-error.log*
 next-env.d.ts
 
 # File storage
-/src/file_storage/*
 /src/generated/prisma
