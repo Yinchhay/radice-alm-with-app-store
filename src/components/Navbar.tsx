@@ -11,6 +11,7 @@ import {
 import GlitchText from "@/components/GlitchText";
 import Link from "next/link";
 import { colors } from "@/lib/colors";
+import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
 
 const roboto_condensed = Roboto_Condensed({
     weight: ["400", "700"],
@@ -28,6 +29,7 @@ interface NavbarProps {
 
 export default function Navbar({ variant = "default" }: NavbarProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { tester, isAuthenticated, logout, isLoading } = useTesterAuth();
     // Logo element
     const logo = (
         <Link href="/" style={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start" }}>
@@ -100,6 +102,16 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         </div>
     );
 
+    // Profile avatar and logout
+    const profileMenu = (
+        <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-base font-bold text-gray-700 uppercase">
+                {tester ? `${tester.firstName?.[0] || ''}${tester.lastName?.[0] || ''}` : "?"}
+            </div>
+            <span className="text-sm font-medium text-gray-800">{tester?.firstName} {tester?.lastName}</span>
+        </div>
+    );
+
     // Auth buttons (default)
     const authButtons = (
         <div className="flex items-center gap-4" style={{ width: "300px", justifyContent: "flex-end" }}>
@@ -145,14 +157,6 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         <div className="flex items-center gap-4">
             {/* Replace with actual avatar/profile logic as needed */}
             <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#eee" }} />
-            <button style={{
-                color: "#000",
-                fontFamily: "Inter",
-                fontSize: "14px",
-                fontStyle: "normal",
-                fontWeight: "400",
-                lineHeight: "normal",
-            }}>Logout</button>
         </div>
     );
 
@@ -275,7 +279,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
                 <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
-                <div className="hidden md:flex">{loggedInRight}</div>
+                <div className="hidden md:flex">{isAuthenticated ? profileMenu : loggedInRight}</div>
                 {/* Hamburger for mobile */}
                 <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -288,7 +292,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                             </button>
                             <div className="flex flex-col items-center space-y-6 w-full">
                                 {navLinksMobile}
-                                {authButtonsMobile}
+                                {isAuthenticated ? profileMenu : authButtonsMobile}
                             </div>
                         </div>
                     </div>
@@ -301,7 +305,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
                 <div className="hidden md:flex flex-1 justify-center">{dashboardLinks}</div>
-                <div className="hidden md:flex">{loggedInRight}</div>
+                <div className="hidden md:flex">{isAuthenticated ? profileMenu : loggedInRight}</div>
                 <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
@@ -313,7 +317,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                             </button>
                             <div className="flex flex-col items-start space-y-6 w-full">
                                 {dashboardLinks}
-                                {loggedInRight}
+                                {isAuthenticated ? profileMenu : loggedInRight}
                             </div>
                         </div>
                     </div>
@@ -326,7 +330,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
                 <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
-                <div className="hidden md:flex">{testerAuthButtons}</div>
+                <div className="hidden md:flex">{isAuthenticated ? profileMenu : testerAuthButtons}</div>
                 {/* Hamburger for mobile */}
                 <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -339,7 +343,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                             </button>
                             <div className="flex flex-col items-start space-y-6 w-full">
                                 {navLinksMobile}
-                                {authButtonsMobile}
+                                {isAuthenticated ? profileMenu : authButtonsMobile}
                             </div>
                         </div>
                     </div>
@@ -352,7 +356,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
             {logo}
             <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
-            <div className="hidden md:flex">{authButtons}</div>
+            <div className="hidden md:flex">{isAuthenticated ? profileMenu : authButtons}</div>
             <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
@@ -364,7 +368,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                         </button>
                         <div className="flex flex-col items-center space-y-8 w-full max-w-xs">
                             {navLinksMobile}
-                            {authButtonsMobile}
+                            {isAuthenticated ? profileMenu : authButtonsMobile}
                         </div>
                     </div>
                 </div>

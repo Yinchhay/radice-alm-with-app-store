@@ -19,13 +19,18 @@ export default function TesterLoginForm() {
                 setIsLoading(false);
                 return;
             }
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            if (email && password) {
+            // Call real API endpoint
+            const response = await fetch("/api/tester/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+            if (response.ok) {
                 setResult({ success: true });
                 router.push("/tester-dashboard");
             } else {
-                setResult({ success: false, errors: ["Invalid credentials"] });
+                setResult({ success: false, errors: [data.error || "Invalid credentials"] });
             }
         } catch (error) {
             setResult({ success: false, errors: ["An error occurred. Please try again."] });
@@ -69,7 +74,7 @@ export default function TesterLoginForm() {
                 className="w-full h-[50px] bg-black text-white rounded-xl text-lg font-semibold"
                 style={{ boxShadow: "none" }}
             >
-                Log In
+                {isLoading ? "Logging in..." : "Log In"}
             </button>
             {/* Divider */}
             <div className="flex items-center gap-2 w-full">
