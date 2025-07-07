@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { fetchAppBuilderData, FetchAppBuilderData } from '../fetch';
 
 function FileDropzone({
   label,
@@ -51,17 +52,82 @@ function FileDropzone({
   );
 }
 
-export default function InformationTab({ projectName = 'UniSaga' }) {
+interface InformationTabProps {
+  projectId: string;
+}
+
+export default function InformationTab({ projectId }: InformationTabProps) {
+  const [loading, setLoading] = useState(true);
+  const [appData, setAppData] = useState<FetchAppBuilderData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
   const [priorityTesting, setPriorityTesting] = useState(false);
-  const [description, setDescription] = useState(
-    'UniSaga is a gamified mobile app that transforms university life into an engaging adventure...'
-  );
-  const [webUrl, setWebUrl] = useState('unisaga.paragoniu.app');
+  const [description, setDescription] = useState('');
+  const [webUrl, setWebUrl] = useState('');
+  const [appType, setAppType] = useState('');
 
   const [appFiles, setAppFiles] = useState<any[]>([]);
   const [cardImages, setCardImages] = useState<any[]>([]);
   const [bannerImages, setBannerImages] = useState<any[]>([]);
   const [screenshots, setScreenshots] = useState<any[]>([]);
+
+  // Fetch app data on component mount
+  useEffect(() => {
+    const loadAppData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchAppBuilderData(projectId);
+        
+        if (response.success && response.data) {
+          setAppData(response.data);
+          
+          // Populate form fields with fetched data
+          if (response.data.app) {
+            setDescription(response.data.app.aboutDesc || '');
+            setWebUrl(response.data.app.webUrl || '');
+            setPriorityTesting(response.data.app.featuredPriority === 1);
+            
+            // If there are existing files, populate them
+            if (response.data.app.appFile) {
+              setAppFiles([{
+                name: 'Existing App File',
+                size: 'Uploaded',
+                progress: 100,
+                url: response.data.app.appFile
+              }]);
+            }
+            
+            if (response.data.app.cardImage) {
+              setCardImages([{
+                name: 'Existing Card Image',
+                size: 'Uploaded',
+                progress: 100,
+                url: response.data.app.cardImage
+              }]);
+            }
+            
+            if (response.data.app.bannerImage) {
+              setBannerImages([{
+                name: 'Existing Banner Image',
+                size: 'Uploaded',
+                progress: 100,
+                url: response.data.app.bannerImage
+              }]);
+            }
+          }
+        } else {
+          setError(response.message || 'Failed to load app data');
+        }
+      } catch (err) {
+        setError('An error occurred while loading app data');
+        console.error('Error loading app data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAppData();
+  }, [projectId]);
 
   const formatSize = (bytes: number) =>
     bytes < 1024
@@ -126,12 +192,46 @@ export default function InformationTab({ projectName = 'UniSaga' }) {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold">Information</h1>
+          <p className="text-gray-500 text-sm">
+            Loading app information...
+          </p>
+        </div>
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-32 bg-gray-200 rounded mb-4"></div>
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold">Information</h1>
+          <p className="text-red-500 text-sm">
+            Error: {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold">Information</h1>
         <p className="text-gray-500 text-sm">
           Fill in your app information and prepare it for listing on our store.
+          {appData?.isNewApp && (
+            <span className="text-blue-600 font-medium"> Creating new app...</span>
+          )}
         </p>
       </div>
 
@@ -139,10 +239,21 @@ export default function InformationTab({ projectName = 'UniSaga' }) {
         <h3 className="text-lg font-semibold">Basic Information</h3>
 
         <div className="space-y-1">
+          <label className="block text-sm font-medium">App Name</label>
+          <input
+            type="text"
+            value={appData?.project?.name || 'Loading...'}
+            readOnly
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
+          />
+          <div className="text-xs text-gray-500">Project name (read-only)</div>
+        </div>
+
+        <div className="space-y-1 mt-3">
           <label className="block text-sm font-medium">Sub Title</label>
           <input
             type="text"
-            value={projectName}
+            value={appData?.project?.name || 'Loading...'}
             readOnly
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
           />
@@ -151,10 +262,15 @@ export default function InformationTab({ projectName = 'UniSaga' }) {
 
         <div className="space-y-1 mt-3">
           <label className="block text-sm font-medium">Type</label>
-          <select className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm">
-            <option>Web</option>
-            <option>Mobile</option>
-            <option>Desktop</option>
+          <select 
+            value={appType}
+            onChange={(e) => setAppType(e.target.value)}
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+          >
+            <option value="">Select Type</option>
+            <option value="web">Web</option>
+            <option value="mobile">Mobile</option>
+            <option value="desktop">Desktop</option>
           </select>
         </div>
 
@@ -198,8 +314,9 @@ export default function InformationTab({ projectName = 'UniSaga' }) {
           className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
           rows={5}
           maxLength={300}
+          placeholder="Describe your app..."
         />
-        <div className="text-xs text-gray-500">20/300 words</div>
+        <div className="text-xs text-gray-500">{description.length}/300 words</div>
       </div>
 
       <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
@@ -209,6 +326,7 @@ export default function InformationTab({ projectName = 'UniSaga' }) {
           value={webUrl}
           onChange={(e) => setWebUrl(e.target.value)}
           className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+          placeholder="https://example.com"
         />
       </div>
 
@@ -257,6 +375,12 @@ export default function InformationTab({ projectName = 'UniSaga' }) {
       <div className="flex justify-center pt-4">
         <button className="w-64 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-900">
           Continue
+        </button>
+      </div>
+
+      <div className="pt-4">
+        <button className="w-full py-3 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 transition-colors">
+          Save
         </button>
       </div>
     </div>

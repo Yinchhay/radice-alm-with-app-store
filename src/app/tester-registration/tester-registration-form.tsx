@@ -27,10 +27,19 @@ export default function TesterRegistrationForm() {
                 setIsLoading(false);
                 return;
             }
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setResult({ success: true });
-            router.push("/tester-dashboard");
+            // Call real API endpoint
+            const response = await fetch("/api/tester/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ firstName, lastName, email, password }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setResult({ success: true });
+                router.push("/appstore");
+            } else {
+                setResult({ success: false, errors: [data.error || "Registration failed"] });
+            }
         } catch (error) {
             setResult({ success: false, errors: ["An error occurred. Please try again."] });
         } finally {
@@ -108,7 +117,7 @@ export default function TesterRegistrationForm() {
                 className="w-full h-[50px] bg-black text-white rounded-xl text-lg font-semibold"
                 style={{ boxShadow: "none" }}
             >
-                Sign Up
+                {isLoading ? "Signing up..." : "Sign Up"}
             </button>
             {/* Divider */}
             <div className="flex items-center gap-2 w-full">
