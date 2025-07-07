@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Toaster from "@/components/Toaster";
 import { Metadata } from "next";
+import { TesterAuthProvider } from "@/app/contexts/TesterAuthContext";
 
 const inter = Inter({
   weight: [
@@ -80,7 +81,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={inter.className}>
-        <Toaster>{children}</Toaster>
+        <TesterAuthProvider>
+          <Toaster>{children}</Toaster>
+        </TesterAuthProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
