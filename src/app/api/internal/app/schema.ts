@@ -47,7 +47,6 @@ export const editAppFormSchema = z.object({
     
     type: z
         .number({
-            required_error: "App type is required",
             invalid_type_error: "App type must be a number",
         })
         .optional(),
