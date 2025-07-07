@@ -167,7 +167,7 @@ export default function AppReviews({
                         </span>
                         {reviews.length > 0 && (
                             <span className="text-base font-normal text-gray-500 leading-none ml-2">
-                                ({reviews.length > 9 ? "9+" : reviews.length} ratings)
+                                ({reviews.length < 9 ? "9+" : reviews.length} ratings)
                             </span>
                         )}
                     </span>
