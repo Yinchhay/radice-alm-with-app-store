@@ -72,6 +72,7 @@ export async function GET(
             rowsPerPage = 100;
         }
 
+        const offset = (page - 1) * rowsPerPage;
         // Join feedback with testers
         const feedbackList = await db
             .select({
@@ -90,7 +91,9 @@ export async function GET(
             })
             .from(feedbacks)
             .leftJoin(testers, eq(feedbacks.testerId, testers.id))
-            .where(eq(feedbacks.appId, appId));
+            .where(eq(feedbacks.appId, appId))
+            .limit(rowsPerPage)
+            .offset(offset);
 
         const totalRows = await getFeedbacksTotalRowByAppId(appId, search);
 
