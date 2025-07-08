@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import InformationTab from './information-tab';
 import FeedbackTab from './feedback-tab';
 import BugReportsTab from './bugreport-tab';
 import VersionLogsTab from './versionlog-tab';
+import { fetchAppBuilderData } from '../fetch';
 
 interface AppBuilderClientWrapperProps {
   projectId: string;
@@ -12,6 +13,29 @@ interface AppBuilderClientWrapperProps {
 
 export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientWrapperProps) {
   const [activeTab, setActiveTab] = useState('information');
+  const [appId, setAppId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadAppId = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchAppBuilderData(projectId);
+        if (response.success && response.data && response.data.appId) {
+          setAppId(response.data.appId);
+        } else {
+          setError(response.message || 'Failed to load appId');
+        }
+      } catch (err) {
+        setError('Failed to load appId');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAppId();
+  }, [projectId]);
 
   const tabs = [
     { id: 'information', label: 'Information' },
@@ -38,12 +62,11 @@ export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientW
           </button>
         ))}
       </div>
-
       {/* Tab Content */}
       <div className="py-4">
         {activeTab === 'information' && <InformationTab projectId={projectId} />}
-        {activeTab === 'feedback' && <FeedbackTab />}
-        {activeTab === 'bug-reports' && <BugReportsTab />}
+        {activeTab === 'feedback' && (loading ? <div>Loading...</div> : error ? <div className="text-red-500">{error}</div> : appId ? <FeedbackTab appId={appId} /> : null)}
+        {activeTab === 'bug-reports' && (loading ? <div>Loading...</div> : error ? <div className="text-red-500">{error}</div> : appId ? <BugReportsTab appId={appId} /> : null)}
         {activeTab === 'version-logs' && <VersionLogsTab />}
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { fetchAppBuilderData, FetchAppBuilderData } from '../fetch';
+import { fetchAppBuilderData, FetchAppBuilderData, saveAppDraft } from '../fetch';
 
 function FileDropzone({
   label,
@@ -65,11 +65,31 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const [description, setDescription] = useState('');
   const [webUrl, setWebUrl] = useState('');
   const [appType, setAppType] = useState('');
+  const [subtitle, setSubtitle] = useState('');
+  const [currentAppStatus, setCurrentAppStatus] = useState<string>('');
 
   const [appFiles, setAppFiles] = useState<any[]>([]);
   const [cardImages, setCardImages] = useState<any[]>([]);
   const [bannerImages, setBannerImages] = useState<any[]>([]);
   const [screenshots, setScreenshots] = useState<any[]>([]);
+
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [webUrlError, setWebUrlError] = useState('');
+
+  // Static app type options
+  const appTypeOptions = [
+    { id: 1, name: 'Web' },
+    { id: 2, name: 'Mobile' },
+    { id: 3, name: 'Desktop' },
+  ];
+
+  // Simple URL validation: must start with http:// or https:// or be empty
+  const validateWebUrl = (url: string) => {
+    if (!url) return '';
+    if (/^https?:\/\//.test(url)) return '';
+    return 'URL must start with http:// or https://';
+  };
 
   // Fetch app data on component mount
   useEffect(() => {
@@ -80,12 +100,15 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         
         if (response.success && response.data) {
           setAppData(response.data);
+          setCurrentAppStatus(response.data.status);
           
           // Populate form fields with fetched data
           if (response.data.app) {
+            setSubtitle(response.data.app.subtitle || '');
             setDescription(response.data.app.aboutDesc || '');
             setWebUrl(response.data.app.webUrl || '');
             setPriorityTesting(response.data.app.featuredPriority === 1);
+            setAppType(response.data.app.type ? String(response.data.app.type) : '');
             
             // If there are existing files, populate them
             if (response.data.app.appFile) {
@@ -128,6 +151,10 @@ export default function InformationTab({ projectId }: InformationTabProps) {
 
     loadAppData();
   }, [projectId]);
+
+  useEffect(() => {
+    setWebUrlError(validateWebUrl(webUrl));
+  }, [webUrl]);
 
   const formatSize = (bytes: number) =>
     bytes < 1024
@@ -192,6 +219,78 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     </div>
   );
 
+  const handleSave = async () => {
+    if (!appData) return;
+    setSaveLoading(true);
+    setSaveMessage(null);
+    try {
+      // If the current app is accepted, create a new draft app
+      if (currentAppStatus === 'accepted') {
+        // Call the internal project app POST endpoint to create a new draft
+        const sessionId = await (await import('../fetch')).getSessionCookie();
+        const baseUrl = await (await import('../fetch')).getBaseUrl();
+        const res = await fetch(`${baseUrl}/api/internal/project/${projectId}/app`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionId}`,
+          },
+          cache: 'no-cache',
+        });
+        const data = await res.json();
+        if (data.success && data.data && data.data.appId) {
+          // Now PATCH the new draft app with the form content
+          const patchRes = await fetch(`${baseUrl}/api/internal/app/${data.data.appId}/edit`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${sessionId}`,
+            },
+            body: JSON.stringify({
+              subtitle,
+              aboutDesc: description,
+              type: appType !== '' ? Number(appType) : null,
+              webUrl, // always send as string
+              status: 'draft',
+            }),
+            cache: 'no-cache',
+          });
+          const patchData = await patchRes.json();
+          if (patchData.success) {
+            setSaveMessage('Saved as draft!');
+            // Refetch app data to update UI to the new draft
+            const updated = await fetchAppBuilderData(projectId);
+            if (updated.success && updated.data) {
+              setAppData(updated.data);
+              setCurrentAppStatus(updated.data.status);
+            }
+          } else {
+            setSaveMessage(patchData.message || 'Failed to save.');
+          }
+        } else {
+          setSaveMessage(data.message || 'Failed to create draft.');
+        }
+      } else {
+        const data = await saveAppDraft({
+          appId: appData.appId!,
+          subtitle,
+          aboutDesc: description,
+          type: appType !== '' ? Number(appType) : null,
+          webUrl, // always send as string
+        });
+        if (data.success) {
+          setSaveMessage('Saved as draft!');
+        } else {
+          setSaveMessage(data.message || 'Failed to save.');
+        }
+      }
+    } catch (err) {
+      setSaveMessage('Failed to save.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -253,8 +352,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           <label className="block text-sm font-medium">Sub Title</label>
           <input
             type="text"
-            value={appData?.project?.name || 'Loading...'}
-            readOnly
+            value={subtitle}
+            onChange={e => setSubtitle(e.target.value)}
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
           />
           <div className="text-xs text-gray-500">1/30 words</div>
@@ -268,9 +367,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
           >
             <option value="">Select Type</option>
-            <option value="web">Web</option>
-            <option value="mobile">Mobile</option>
-            <option value="desktop">Desktop</option>
+            {appTypeOptions.map((option) => (
+              <option key={option.id} value={option.id}>{option.name}</option>
+            ))}
           </select>
         </div>
 
@@ -322,12 +421,14 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
         <h3 className="text-lg font-semibold">Web URL</h3>
         <input
-          type="url"
+          type="text"
           value={webUrl}
-          onChange={(e) => setWebUrl(e.target.value)}
-          className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-          placeholder="https://example.com"
+          onChange={e => setWebUrl(e.target.value)}
+          className={`w-full px-3 py-1.5 border ${webUrlError ? 'border-red-500' : 'border-gray-300'} rounded-md text-sm`}
+          placeholder="https://yourapp.com"
         />
+        <div className="text-xs text-gray-500">Enter the full URL, including http:// or https://</div>
+        {webUrlError && <div className="text-xs text-red-500 font-semibold">{webUrlError}</div>}
       </div>
 
       {/* App Files */}
@@ -379,9 +480,14 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       </div>
 
       <div className="pt-4">
-        <button className="w-full py-3 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 transition-colors">
-          Save
+        <button
+          onClick={handleSave}
+          disabled={saveLoading || !!webUrlError}
+          className={`w-full py-3 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 ${saveLoading || webUrlError ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {saveLoading ? 'Saving...' : 'Save as Draft'}
         </button>
+        {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}
       </div>
     </div>
   );
