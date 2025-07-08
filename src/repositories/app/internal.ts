@@ -123,8 +123,8 @@ export async function getAppsForManageAllAppsTotalRow(search: string = "") {
             and(
                 like(projects.name, `%${search}%`),
                 eq(projects.isPublic, true),
-                eq(apps.status, "accepted")
-            )
+                eq(apps.status, "accepted"),
+            ),
         );
     return totalRows[0].count;
 }
@@ -162,13 +162,16 @@ export async function getAppsForManageAllApps(
         .from(apps)
         .leftJoin(projects, eq(apps.projectId, projects.id))
         .leftJoin(appTypes, eq(apps.type, appTypes.id))
-        .leftJoin(projectCategories, eq(projects.id, projectCategories.projectId))
+        .leftJoin(
+            projectCategories,
+            eq(projects.id, projectCategories.projectId),
+        )
         .leftJoin(categories, eq(projectCategories.categoryId, categories.id))
         .where(
             and(
                 like(projects.name, `%${search}%`),
-                eq(projects.isPublic, true)
-            )
+                eq(projects.isPublic, true),
+            ),
         )
         .limit(rowsPerPage)
         .offset((page - 1) * rowsPerPage)
@@ -184,16 +187,17 @@ export async function getAppByIdForPublic(app_id: number) {
             id: true,
             subtitle: true,
             aboutDesc: true,
-            content:true,
+            content: true,
             webUrl: true,
             appFile: true,
             cardImage: true,
             bannerImage: true,
+            featuredPriority: true,
+            type: true,
         },
         with: {
-
             project: {
-                columns:{
+                columns: {
                     name: true,
                     description: true,
                     isPublic: true,
@@ -232,12 +236,9 @@ export async function getAppByIdForPublic(app_id: number) {
                     name: true,
                 },
             },
-
-
         },
     });
 }
-
 
 export async function getAssociatedProjectsOfApp(appId: number) {
     return await db
@@ -420,7 +421,9 @@ export type ProjectJoinMembersAndPartners = {
     }[];
 };
 
-export async function getAssociatedProjectsWithMembers(appId: number): Promise<ProjectJoinMembersAndPartners[]> {
+export async function getAssociatedProjectsWithMembers(
+    appId: number,
+): Promise<ProjectJoinMembersAndPartners[]> {
     try {
         const result = await db.query.apps.findFirst({
             where: eq(apps.id, appId),
@@ -457,17 +460,17 @@ export async function getAssociatedProjectsWithMembers(appId: number): Promise<P
 
         return [projectWithMembers];
     } catch (error) {
-        console.error("Error fetching associated projects with members:", error);
+        console.error(
+            "Error fetching associated projects with members:",
+            error,
+        );
         throw error;
     }
 }
 
 export async function getAcceptedAppByProjectId(projectId: number) {
     const result = await db.query.apps.findFirst({
-        where: and(
-            eq(apps.projectId, projectId),
-            eq(apps.status, "accepted"),
-        ),
+        where: and(eq(apps.projectId, projectId), eq(apps.status, "accepted")),
     });
 
     return result ?? undefined;
