@@ -51,7 +51,7 @@ export async function POST(
             return buildNoBearerTokenErrorResponse();
         }
 
-        // safely read and verify the JWT token
+        //Read and verify the JWT token
         const JWT_SECRET = process.env.JWT_SECRET;
         if (!JWT_SECRET) {
             console.error("Missing JWT_SECRET in environment");
@@ -118,24 +118,6 @@ export async function POST(
     }
 
     const body = parsed.data;
-
-    // const existingApps = await getAppByProjectId(projectId);
-    // if (existingApps && existingApps.length > 0) {
-    //   return new Response(
-    //     JSON.stringify({
-    //       message: unsuccessMessage,
-    //       errors: { project_id: "An app already exists for this project" },
-    //       success: false,
-    //       data: {
-    //         bugId: existingApps[0].id,
-    //       },
-    //     }),
-    //     {
-    //       status: HttpStatusCode.BAD_REQUEST_400,
-    //       headers: { "Content-Type": "application/json" },
-    //     }
-    //   );
-    // }
 
     const createResult = await createBugReport({
         title: body.title,

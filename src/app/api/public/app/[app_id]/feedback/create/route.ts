@@ -12,7 +12,7 @@ import jwt from "jsonwebtoken";
 import { getTesterById } from "@/repositories/tester";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
-import { db } from "@/drizzle/db"; // or wherever your db client is
+import { db } from "@/drizzle/db"; 
 import { eq } from "drizzle-orm";
 import { testers } from "@/drizzle/schema";
 import { createFeedbackFormSchema } from "../schema";
@@ -49,7 +49,7 @@ export async function POST(
             return buildNoBearerTokenErrorResponse();
         }
 
-        // safely read and verify the JWT token
+        //Read and verify the JWT token
         const JWT_SECRET = process.env.JWT_SECRET;
         if (!JWT_SECRET) {
             console.error("Missing JWT_SECRET in environment");
