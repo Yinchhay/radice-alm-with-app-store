@@ -7,7 +7,9 @@ import AppActionButton from "./_components/app-action-button";
 import AppScreenshotsCarousel from "./_components/app-screenshots-carousel";
 import AppReviews from "./_components/app-reviews";
 import BugReportForm from "./_components/bug-report-form";
+import Popup from "@/components/Popup";
 import type { App } from "@/types/app_types";
+import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
 
 export default function AppPageWrapper(props: { params: { app_id: string } }) {
     return <AppPage {...props} />;
@@ -55,6 +57,9 @@ function useApp(appId: string) {
 
 function AppPage({ params }: { params: { app_id: string } }) {
     const { app, loading } = useApp(params.app_id);
+    const { isAuthenticated } = useTesterAuth();
+    const [showLoginPopup, setShowLoginPopup] = useState(false);
+    
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-[60vh]">
@@ -259,15 +264,48 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 <AppReviews
                                     appId={app.id}
                                     appName={project?.name || "App"}
+                                    onLoginRequired={() => setShowLoginPopup(true)}
                                 />
                             </div>
                             <div className="mb-12 mt-12">
-                                <BugReportForm appId={app.id} />
+                                <BugReportForm 
+                                    appId={app.id}
+                                    onLoginRequired={() => setShowLoginPopup(true)}
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <Popup
+                isOpen={showLoginPopup}
+                onClose={() => setShowLoginPopup(false)}
+                title="Authentication Required"
+            >
+                <div className="text-center">
+                    <p className="mb-6 text-gray-600">
+                        You need to be logged in to write reviews and report bugs.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => {
+                                setShowLoginPopup(false);
+                                window.location.href = '/tester-registration';
+                            }}
+                            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            Sign Up
+                        </button>
+                        <button
+                            onClick={() => setShowLoginPopup(false)}
+                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </Popup>
         </div>
     );
 }
