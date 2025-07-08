@@ -11,7 +11,7 @@ import {
     getAppsByProjectId,
     getAppByIdForPublic,
 } from "@/repositories/app/internal";
-import { createVersion, getLatestVersionByAppId } from "@/repositories/version";
+import { createVersion, getLatestVersionByProjectId } from "@/repositories/version";
 import { HttpStatusCode } from "@/types/http";
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -148,7 +148,7 @@ export async function POST(
 
         // Check if there's already a draft or rejected app
         const nonAcceptedApp = existingApps.find(
-            (app) => app.status === "draft" || app.status === "rejected",
+            (app) => app.status === "draft" || app.status === "rejected" || app.status === "pending",
         );
 
         if (nonAcceptedApp) {
@@ -277,8 +277,8 @@ export async function POST(
             patch = 0;
 
         if (acceptedApp) {
-            const latestAcceptedVersion = await getLatestVersionByAppId(
-                acceptedApp.id,
+            const latestAcceptedVersion = await getLatestVersionByProjectId(
+                acceptedApp.projectId!,
             );
 
             if (latestAcceptedVersion) {
