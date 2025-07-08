@@ -2,9 +2,17 @@
 import { useState } from "react";
 import AppActionButton from "./app-action-button";
 import { IconX, IconVideo, IconPhoto } from "@tabler/icons-react";
+import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
 
-export default function BugReportForm({ appId }: { appId: number }) {
+export default function BugReportForm({ 
+    appId, 
+    onLoginRequired 
+}: { 
+    appId: number;
+    onLoginRequired?: () => void;
+}) {
     const [showForm, setShowForm] = useState(false);
+    const { isAuthenticated } = useTesterAuth();
     const [bugTitle, setBugTitle] = useState("");
     const [bugDescription, setBugDescription] = useState("");
     const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -92,7 +100,13 @@ export default function BugReportForm({ appId }: { appId: number }) {
             <button
                 type="button"
                 className="text-xl font-semibold mb-2 flex items-center"
-                onClick={() => setShowForm((prev) => !prev)}
+                onClick={() => {
+                    if (!isAuthenticated) {
+                        onLoginRequired?.();
+                        return;
+                    }
+                    setShowForm((prev) => !prev);
+                }}
             >
                 Experienced a Bug?
                 <span className={`ml-2 transition-transform duration-200 ${showForm ? '' : 'rotate-180'}`}>
@@ -107,8 +121,13 @@ export default function BugReportForm({ appId }: { appId: number }) {
                             type="text"
                             value={bugTitle}
                             onChange={(e) => setBugTitle(e.target.value)}
+                            onClick={() => {
+                                if (!isAuthenticated) {
+                                    onLoginRequired?.();
+                                }
+                            }}
                             className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 placeholder:text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                            placeholder="Brief description of the bug"
+                            placeholder={isAuthenticated ? "Brief description of the bug" : "Please log in to report a bug"}
                             maxLength={100}
                         />
                     </div>
@@ -117,8 +136,13 @@ export default function BugReportForm({ appId }: { appId: number }) {
                         <textarea
                             value={bugDescription}
                             onChange={(e) => setBugDescription(e.target.value)}
+                            onClick={() => {
+                                if (!isAuthenticated) {
+                                    onLoginRequired?.();
+                                }
+                            }}
                             className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 placeholder:text-sm placeholder:text-gray-400 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100"
-                            placeholder="Please describe the bug in detail"
+                            placeholder={isAuthenticated ? "Please describe the bug in detail" : "Please log in to report a bug"}
                             maxLength={1000}
                         />
                         <div className="text-xs text-gray-500 mt-1 text-right">
