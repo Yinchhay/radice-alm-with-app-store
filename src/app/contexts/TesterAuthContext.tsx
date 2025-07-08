@@ -66,7 +66,7 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
 
     const checkAuth = async () => {
         try {
-            const response = await fetch("/api/tester/auth/profile", {
+            const response = await fetch("/api/tester/profile", {
                 credentials: "include",
             });
 
@@ -86,7 +86,7 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await fetch("/api/testers/auth/login", {
+            const response = await fetch("/api/tester/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -111,7 +111,7 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
 
     const register = async (data: RegisterData) => {
         try {
-            const response = await fetch("/api/testers/auth/register", {
+            const response = await fetch("/api/tester/auth/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
