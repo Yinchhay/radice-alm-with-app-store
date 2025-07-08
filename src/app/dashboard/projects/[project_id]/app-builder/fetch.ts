@@ -79,11 +79,25 @@ export async function fetchAppBuilderData(
         id: projectData.data.project.id,
         name: projectData.data.project.name,
         description: projectData.data.project.description,
-      }
+      },
+      // Add app details directly from appData if available
+      app: appData.data.app ? {
+        id: appData.data.app.id,
+        subtitle: appData.data.app.subtitle,
+        type: appData.data.app.type,
+        aboutDesc: appData.data.app.aboutDesc,
+        content: appData.data.app.content,
+        webUrl: appData.data.app.webUrl,
+        appFile: appData.data.app.appFile,
+        cardImage: appData.data.app.cardImage,
+        bannerImage: appData.data.app.bannerImage,
+        featuredPriority: appData.data.app.featuredPriority,
+        status: appData.data.app.status,
+      } : undefined
     };
 
-    // If we have an app ID and it's not a new app, try to get the app details
-    if (appData.data.appId && !appData.data.isNewApp) {
+    // If we have an app ID and it's not a new app and status is 'accepted', try to get the public details
+    if (appData.data.appId && !appData.data.isNewApp && (appData.data.status === 'accepted')) {
       try {
         const appDetailsResponse = await fetch(
           `${await getBaseUrl()}/api/public/app/${appData.data.appId}`,
@@ -92,9 +106,7 @@ export async function fetchAppBuilderData(
             cache: "no-cache",
           }
         );
-        
         const appDetails = await appDetailsResponse.json();
-        
         if (appDetails.success && appDetails.data.app) {
           combinedData.app = {
             id: appDetails.data.app.id,
@@ -123,5 +135,33 @@ export async function fetchAppBuilderData(
     };
   } catch (error: any) {
     return returnFetchErrorSomethingWentWrong(error);
+  }
+}
+
+export async function saveAppDraft({ appId, subtitle, aboutDesc, type, webUrl }: { appId: number, subtitle: string, aboutDesc: string, type?: number, webUrl?: string }) {
+  try {
+    const sessionId = await getSessionCookie();
+    if (!sessionId) {
+      return { success: false, message: 'Unauthorized: No session' };
+    }
+    const res = await fetch(`${await getBaseUrl()}/api/internal/app/${appId}/edit`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionId}`,
+      },
+      body: JSON.stringify({
+        subtitle,
+        aboutDesc,
+        type,
+        webUrl,
+        status: 'draft',
+      }),
+      cache: 'no-cache',
+    });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { success: false, message: 'Failed to save draft.' };
   }
 } 
