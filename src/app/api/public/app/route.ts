@@ -1,9 +1,7 @@
 import { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
+
 import {
     buildSuccessResponse,
-    buildNoBearerTokenErrorResponse,
-    buildNoPermissionErrorResponse,
     checkAndBuildErrorResponse,
 } from "@/lib/response";
 import { getAllAcceptedApps } from "@/repositories/app/public";

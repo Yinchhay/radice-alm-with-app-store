@@ -5,6 +5,7 @@ import { cache } from "react";
 import { localDebug } from "./utils";
 import { UserType } from "@/types/user";
 import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
+import { cookies } from "next/headers";
 
 export const SALT_ROUNDS = 10;
 
@@ -157,8 +158,14 @@ export const checkBearerAndPermission = async (
         user: User;
     }
 > => {
+    let sessionId: string | null = null;
     const authorizationHeader = request.headers.get("Authorization");
-    const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+    sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+    if (!sessionId) {
+        // Try to get session from cookies if not in Authorization header
+        const cookieStore = cookies();
+        sessionId = cookieStore.get("auth_session")?.value || cookieStore.get("__session")?.value || null;
+    }
     if (!sessionId) {
         return {
             errorNoBearerToken: true,

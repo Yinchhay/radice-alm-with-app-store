@@ -1,4 +1,3 @@
-import { lucia } from "@/auth/lucia";
 import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import {
     buildNoBearerTokenErrorResponse,
@@ -37,18 +36,6 @@ export async function GET(
     { params }: { params: { app_id: string } },
 ) {
     try {
-        // // Get and validate session/user without permission checks
-        // const authorizationHeader = request.headers.get("Authorization");
-        // const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
-
-        // if (!sessionId) {
-        //     return buildNoBearerTokenErrorResponse();
-        // }
-
-        // const { session, user } = await lucia.validateSession(sessionId);
-        // if (!session || !user) {
-        //     return buildNoBearerTokenErrorResponse();
-        // }
 
         // // Convert and validate appId
         const appId = parseInt(params.app_id, 10);

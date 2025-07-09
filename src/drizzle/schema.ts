@@ -35,7 +35,6 @@ export enum AppStatus {
     PENDING = "pending",
     ACCEPTED = "accepted",
     DENIED = "denied",
-    UNDER_REVIEW = "under_review",
 }
 
 export enum VersionAction {

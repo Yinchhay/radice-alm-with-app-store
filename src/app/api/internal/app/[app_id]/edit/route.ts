@@ -196,81 +196,108 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         let uploadedCardImage: File | null = null;
         let uploadedBannerImage: File | null = null;
         let uploadedScreenshots: File[] = [];
+        
+        // Deletion flags
+        let deleteCardImage = false;
+        let deleteBannerImage = false;
+        let deleteScreenshots = false;
 
         if (contentType?.includes('multipart/form-data')) {
             const formData = await request.formData();
             
-            // Extract card image
-            const cardImageEntry = formData.get('cardImage');
-            if (cardImageEntry && cardImageEntry instanceof File) {
-                uploadedCardImage = cardImageEntry;
+            // Check for deletion flags
+            deleteCardImage = formData.get('deleteCardImage') === 'true';
+            deleteBannerImage = formData.get('deleteBannerImage') === 'true';
+            deleteScreenshots = formData.get('deleteScreenshots') === 'true';
+            
+            // Extract card image (only if not deleting)
+            if (!deleteCardImage) {
+                const cardImageEntry = formData.get('cardImage');
+                if (cardImageEntry && cardImageEntry instanceof File) {
+                    uploadedCardImage = cardImageEntry;
+                    
+                    const fileValidation = validateFile(uploadedCardImage);
+                    if (!fileValidation.valid) {
+                        return buildErrorResponse(
+                            unsuccessMessage,
+                            generateAndFormatZodError("cardImage", fileValidation.error!),
+                            HttpStatusCode.BAD_REQUEST_400,
+                        );
+                    }
+                }
+            }
+            
+            // Extract banner image (only if not deleting)
+            if (!deleteBannerImage) {
+                const bannerImageEntry = formData.get('bannerImage');
+                if (bannerImageEntry && bannerImageEntry instanceof File) {
+                    uploadedBannerImage = bannerImageEntry;
+                    
+                    const fileValidation = validateFile(uploadedBannerImage);
+                    if (!fileValidation.valid) {
+                        return buildErrorResponse(
+                            unsuccessMessage,
+                            generateAndFormatZodError("bannerImage", fileValidation.error!),
+                            HttpStatusCode.BAD_REQUEST_400,
+                        );
+                    }
+                }
+            }
+            
+            // Extract screenshots (only if not deleting all)
+            if (!deleteScreenshots) {
+                const screenshotEntries = formData.getAll('screenshots');
+                for (const entry of screenshotEntries) {
+                    if (entry instanceof File) {
+                        uploadedScreenshots.push(entry);
+                    }
+                }
                 
-                const fileValidation = validateFile(uploadedCardImage);
-                if (!fileValidation.valid) {
+                // Validate screenshots
+                if (uploadedScreenshots.length > MAX_SCREENSHOTS) {
                     return buildErrorResponse(
                         unsuccessMessage,
-                        generateAndFormatZodError("cardImage", fileValidation.error!),
+                        generateAndFormatZodError("screenshots", `Maximum ${MAX_SCREENSHOTS} screenshots allowed`),
                         HttpStatusCode.BAD_REQUEST_400,
                     );
                 }
-            }
-            
-            // Extract banner image
-            const bannerImageEntry = formData.get('bannerImage');
-            if (bannerImageEntry && bannerImageEntry instanceof File) {
-                uploadedBannerImage = bannerImageEntry;
                 
-                const fileValidation = validateFile(uploadedBannerImage);
-                if (!fileValidation.valid) {
-                    return buildErrorResponse(
-                        unsuccessMessage,
-                        generateAndFormatZodError("bannerImage", fileValidation.error!),
-                        HttpStatusCode.BAD_REQUEST_400,
-                    );
-                }
-            }
-            
-            // Extract screenshots (multiple files)
-            const screenshotEntries = formData.getAll('screenshots');
-            for (const entry of screenshotEntries) {
-                if (entry instanceof File) {
-                    uploadedScreenshots.push(entry);
-                }
-            }
-            
-            // Validate screenshots
-            if (uploadedScreenshots.length > MAX_SCREENSHOTS) {
-                return buildErrorResponse(
-                    unsuccessMessage,
-                    generateAndFormatZodError("screenshots", `Maximum ${MAX_SCREENSHOTS} screenshots allowed`),
-                    HttpStatusCode.BAD_REQUEST_400,
-                );
-            }
-            
-            // Validate each screenshot
-            for (let i = 0; i < uploadedScreenshots.length; i++) {
-                const fileValidation = validateFile(uploadedScreenshots[i]);
-                if (!fileValidation.valid) {
-                    return buildErrorResponse(
-                        unsuccessMessage,
-                        generateAndFormatZodError("screenshots", `Screenshot ${i + 1}: ${fileValidation.error}`),
-                        HttpStatusCode.BAD_REQUEST_400,
-                    );
+                // Validate each screenshot
+                for (let i = 0; i < uploadedScreenshots.length; i++) {
+                    const fileValidation = validateFile(uploadedScreenshots[i]);
+                    if (!fileValidation.valid) {
+                        return buildErrorResponse(
+                            unsuccessMessage,
+                            generateAndFormatZodError("screenshots", `Screenshot ${i + 1}: ${fileValidation.error}`),
+                            HttpStatusCode.BAD_REQUEST_400,
+                        );
+                    }
                 }
             }
             
             // Extract other form fields
             for (const [key, value] of formData.entries()) {
-                if (!['cardImage', 'bannerImage', 'screenshots'].includes(key)) {
+                if (!['cardImage', 'bannerImage', 'screenshots', 'deleteCardImage', 'deleteBannerImage', 'deleteScreenshots'].includes(key)) {
                     requestBody[key] = value;
                 }
             }
         } else {
             // Handle JSON requests
-            requestBody = await request.json();
+            const jsonBody = await request.json();
+            requestBody = jsonBody;
+            
+            // Check for deletion flags in JSON
+            deleteCardImage = jsonBody.deleteCardImage === true;
+            deleteBannerImage = jsonBody.deleteBannerImage === true;
+            deleteScreenshots = jsonBody.deleteScreenshots === true;
+            
+            // Remove deletion flags from validation
+            delete requestBody.deleteCardImage;
+            delete requestBody.deleteBannerImage;
+            delete requestBody.deleteScreenshots;
         }
 
-        // Validate the request body against schema (excluding image fields)
+        // Validate the request body against schema (excluding image fields and deletion flags)
         const validationResult = editAppFormSchema.safeParse(requestBody);
         if (!validationResult.success) {
             return buildErrorResponse(
@@ -320,41 +347,56 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             );
         }
 
-        // Handle file uploads and replacements
-        let newCardImagePath: string | undefined = undefined;
-        let newBannerImagePath: string | undefined = undefined;
+        // Handle file uploads, replacements, and deletions
+        let newCardImagePath: string | undefined | null = undefined;
+        let newBannerImagePath: string | undefined | null = undefined;
         let newScreenshotPaths: string[] = [];
         
         try {
-            // Handle card image upload
-            if (uploadedCardImage) {
+            // Handle card image
+            if (deleteCardImage) {
+                // Delete existing card image
+                if (app.cardImage) {
+                    await deleteOldFile(app.cardImage);
+                }
+                newCardImagePath = null; // Set to null to remove from database
+            } else if (uploadedCardImage) {
+                // Replace existing card image
                 if (app.cardImage) {
                     await deleteOldFile(app.cardImage);
                 }
                 newCardImagePath = await saveUploadedFile(uploadedCardImage, appId, 'image');
             }
             
-            // Handle banner image upload
-            if (uploadedBannerImage) {
+            // Handle banner image
+            if (deleteBannerImage) {
+                // Delete existing banner image
+                if (app.bannerImage) {
+                    await deleteOldFile(app.bannerImage);
+                }
+                newBannerImagePath = null; // Set to null to remove from database
+            } else if (uploadedBannerImage) {
+                // Replace existing banner image
                 if (app.bannerImage) {
                     await deleteOldFile(app.bannerImage);
                 }
                 newBannerImagePath = await saveUploadedFile(uploadedBannerImage, appId, 'image');
             }
             
-            // Handle screenshots upload
-            if (uploadedScreenshots.length > 0) {
-                // Delete existing screenshots
+            // Handle screenshots
+            if (deleteScreenshots) {
+                // Delete all existing screenshots
                 await deleteExistingScreenshots(appId);
-                
-                // Process new screenshots
+            } else if (uploadedScreenshots.length > 0) {
+                // Replace all screenshots
+                await deleteExistingScreenshots(appId);
                 newScreenshotPaths = await processScreenshots(uploadedScreenshots, appId);
             }
             
         } catch (fileError: any) {
             return buildErrorResponse(
                 unsuccessMessage,
-                generateAndFormatZodError("files", `File upload failed: ${fileError.message}`),
+                generateAndFormatZodError("files", `File operation failed: ${fileError.message}`),
                 HttpStatusCode.INTERNAL_SERVER_ERROR_500,
             );
         }
@@ -366,17 +408,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             )
         );
 
-        // Add image paths if new files were uploaded
-        if (newCardImagePath) {
+        // Add image paths based on operations performed
+        if (newCardImagePath !== undefined) {
             updateData.cardImage = newCardImagePath;
         }
         
-        if (newBannerImagePath) {
+        if (newBannerImagePath !== undefined) {
             updateData.bannerImage = newBannerImagePath;
         }
 
         // Check if there's actual data to update
-        if (Object.keys(updateData).length === 0 && newScreenshotPaths.length === 0) {
+        const hasDataUpdate = Object.keys(updateData).length > 0;
+        const hasScreenshotUpdate = newScreenshotPaths.length > 0 || deleteScreenshots;
+        
+        if (!hasDataUpdate && !hasScreenshotUpdate) {
             return buildErrorResponse(
                 unsuccessMessage,
                 generateAndFormatZodError("unknown", "No valid data provided for update"),
@@ -384,26 +429,30 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             );
         }
 
-        // Edit app
-        const result = await editAppById(appId, updateData);
-
-        if (!result.updateSuccess || !result.updatedApp) {
-            // If update failed and we uploaded new files, clean them up
-            if (newCardImagePath) {
-                await deleteOldFile(newCardImagePath);
-            }
-            if (newBannerImagePath) {
-                await deleteOldFile(newBannerImagePath);
-            }
-            for (const screenshotPath of newScreenshotPaths) {
-                await deleteOldFile(screenshotPath);
-            }
+        // Edit app (only if there's data to update)
+        let result: any = { updateSuccess: true, updatedApp: app };
+        
+        if (hasDataUpdate) {
+            result = await editAppById(appId, updateData);
             
-            return buildErrorResponse(
-                unsuccessMessage,
-                generateAndFormatZodError("unknown", result.error || "Failed to update app in database"),
-                HttpStatusCode.INTERNAL_SERVER_ERROR_500,
-            );
+            if (!result.updateSuccess || !result.updatedApp) {
+                // If update failed and we uploaded new files, clean them up
+                if (newCardImagePath && typeof newCardImagePath === 'string') {
+                    await deleteOldFile(newCardImagePath);
+                }
+                if (newBannerImagePath && typeof newBannerImagePath === 'string') {
+                    await deleteOldFile(newBannerImagePath);
+                }
+                for (const screenshotPath of newScreenshotPaths) {
+                    await deleteOldFile(screenshotPath);
+                }
+                
+                return buildErrorResponse(
+                    unsuccessMessage,
+                    generateAndFormatZodError("unknown", result.error || "Failed to update app in database"),
+                    HttpStatusCode.INTERNAL_SERVER_ERROR_500,
+                );
+            }
         }
         
         // Insert screenshots if any were uploaded
@@ -421,10 +470,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         const successResponse = buildSuccessResponse(successMessage, {
             updateSuccess: result.updateSuccess,
             updatedApp: result.updatedApp,
-            uploadedFiles: {
-                card_image: newCardImagePath ? true : false,
-                banner_image: newBannerImagePath ? true : false,
-                screenshots: newScreenshotPaths.length,
+            operations: {
+                card_image: deleteCardImage ? 'deleted' : (uploadedCardImage ? 'uploaded' : 'unchanged'),
+                banner_image: deleteBannerImage ? 'deleted' : (uploadedBannerImage ? 'uploaded' : 'unchanged'),
+                screenshots: deleteScreenshots ? 'deleted' : (newScreenshotPaths.length > 0 ? `uploaded_${newScreenshotPaths.length}` : 'unchanged'),
             },
         });
         
