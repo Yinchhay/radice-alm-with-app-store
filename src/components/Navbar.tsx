@@ -21,10 +21,15 @@ const roboto_flex = Roboto_Flex({ subsets: ["latin"] });
 const roboto_mono = Roboto_Mono({ weight: ["400", "700"], subsets: ["latin"] });
 const roboto = Roboto({ weight: ["400", "700"], subsets: ["latin"] });
 
-export type NavbarVariant = "default" | "justLogo" | "loggedIn" | "dashboard" | "tester";
+export type NavbarVariant =
+    | "default"
+    | "justLogo"
+    | "loggedIn"
+    | "dashboard"
+    | "tester";
 
 interface NavbarProps {
-  variant?: NavbarVariant;
+    variant?: NavbarVariant;
 }
 
 export default function Navbar({ variant = "default" }: NavbarProps) {
@@ -32,7 +37,14 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     const { tester, isAuthenticated, logout, isLoading } = useTesterAuth();
     // Logo element
     const logo = (
-        <Link href="/" style={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start" }}>
+        <Link
+            href="/"
+            style={{
+                display: "flex",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+            }}
+        >
             <img
                 src="/RadiceLogo_light.png"
                 alt="Radice Logo"
@@ -41,6 +53,10 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             />
         </Link>
     );
+    
+    const handleLogout = async () => {
+        await logout();
+    };
 
     // Styles
     const navLinkStyle = {
@@ -73,31 +89,51 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         gap: "10px",
         border: "2px solid transparent",
         borderRadius: "8px",
-        background: "linear-gradient(white, white) padding-box, linear-gradient(120deg, #ffb56b, #ff5ec4, #7c5fff, #01cfff, #00ff87) border-box",
+        background:
+            "linear-gradient(white, white) padding-box, linear-gradient(120deg, #ffb56b, #ff5ec4, #7c5fff, #01cfff, #00ff87) border-box",
     };
 
     // Navigation links (shared)
     const navLinks = (
         <div className="flex items-center gap-8">
-            <Link href="/about" style={navLinkStyle}>Who We Are</Link>
-            <Link href="/media" style={navLinkStyle}>Media</Link>
-            <Link href="/dashboard" style={navLinkStyle}>Developer</Link>
-            <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <span style={{
-                    position: "absolute",
-                    top: -10,
-                    right: -10,
-                    background: "#fff",
-                    color: "#6B7280",
-                    fontSize: 10,
-                    fontWeight: 700,
-                    borderRadius: 4,
-                    padding: "2px 6px",
-                    zIndex: 2,
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
-                    border: "2px solid #D1D5DB"
-                }}>New</span>
-                <Link href="/appstore" style={appStoreGradientBorder}>App Store</Link>
+            <Link href="/about" style={navLinkStyle}>
+                Who We Are
+            </Link>
+            <Link href="/media" style={navLinkStyle}>
+                Media
+            </Link>
+            <Link href="/dashboard" style={navLinkStyle}>
+                Developer
+            </Link>
+            <div
+                style={{
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                }}
+            >
+                <span
+                    style={{
+                        position: "absolute",
+                        top: -10,
+                        right: -10,
+                        background: "#fff",
+                        color: "#6B7280",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        borderRadius: 4,
+                        padding: "2px 6px",
+                        zIndex: 2,
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                        border: "2px solid #D1D5DB",
+                    }}
+                >
+                    New
+                </span>
+                <Link href="/appstore" style={appStoreGradientBorder}>
+                    App Store
+                </Link>
             </div>
         </div>
     );
@@ -106,16 +142,45 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     const profileMenu = (
         <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-base font-bold text-gray-700 uppercase">
-                {tester ? `${tester.firstName?.[0] || ''}${tester.lastName?.[0] || ''}` : "?"}
+                {tester
+                    ? `${tester.firstName?.[0] || ""}${tester.lastName?.[0] || ""}`
+                    : "?"}
             </div>
-            <span className="text-sm font-medium text-gray-800">{tester?.firstName} {tester?.lastName}</span>
+            <span className="text-sm font-medium text-gray-800">
+                {tester?.firstName} {tester?.lastName}
+            </span>
+            <button
+                onClick={handleLogout}
+                className="w-9 h-9 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 transition"
+                title="Sign out"
+                type="button"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1"
+                    />
+                </svg>
+            </button>
         </div>
     );
 
     // Auth buttons (default)
     const authButtons = (
-        <div className="flex items-center gap-4" style={{ width: "300px", justifyContent: "flex-end" }}>
-            <Link 
+        <div
+            className="flex items-center gap-4"
+            style={{ width: "300px", justifyContent: "flex-end" }}
+        >
+            <Link
                 href="/tester-login"
                 style={{
                     color: "#000",
@@ -128,7 +193,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             >
                 Login
             </Link>
-            <Link 
+            <Link
                 href="/tester-registration"
                 style={{
                     display: "flex",
@@ -156,14 +221,21 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     const loggedInRight = (
         <div className="flex items-center gap-4">
             {/* Replace with actual avatar/profile logic as needed */}
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#eee" }} />
+            <div
+                style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    background: "#eee",
+                }}
+            />
         </div>
     );
 
     // Dashboard links (example)
     const dashboardLinks = (
         <div className="flex items-center gap-8">
-            <Link 
+            <Link
                 href="/dashboard"
                 style={{
                     color: "#000",
@@ -176,7 +248,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             >
                 Dashboard
             </Link>
-            <Link 
+            <Link
                 href="/dashboard/projects"
                 style={{
                     color: "#000",
@@ -189,7 +261,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             >
                 Projects
             </Link>
-            <Link 
+            <Link
                 href="/dashboard/media"
                 style={{
                     color: "#000",
@@ -207,8 +279,11 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
 
     // Tester auth buttons
     const testerAuthButtons = (
-        <div className="flex items-center gap-4" style={{ width: "300px", justifyContent: "flex-end" }}>
-            <Link 
+        <div
+            className="flex items-center gap-4"
+            style={{ width: "300px", justifyContent: "flex-end" }}
+        >
+            <Link
                 href="/login"
                 style={{
                     color: "#000",
@@ -221,7 +296,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             >
                 Login
             </Link>
-            <Link 
+            <Link
                 href="/join-us"
                 style={{
                     display: "flex",
@@ -247,22 +322,53 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
 
     const navLinksMobile = (
         <div className="flex flex-col items-center space-y-6 w-full">
-            <Link href="/about" className="text-xl font-medium w-full text-center">Who We Are</Link>
-            <Link href="/media" className="text-xl font-medium w-full text-center">Media</Link>
-            <Link href="/dashboard" className="text-xl font-medium w-full text-center">Developer</Link>
+            <Link
+                href="/about"
+                className="text-xl font-medium w-full text-center"
+            >
+                Who We Are
+            </Link>
+            <Link
+                href="/media"
+                className="text-xl font-medium w-full text-center"
+            >
+                Media
+            </Link>
+            <Link
+                href="/dashboard"
+                className="text-xl font-medium w-full text-center"
+            >
+                Developer
+            </Link>
             <div className="relative w-full flex flex-col items-center">
-                <Link href="/appstore" className="text-xl font-medium w-full text-center border-2 border-transparent rounded-lg px-4 py-2 mt-2 mb-1 bg-gradient-to-r from-white to-white bg-clip-padding" style={{background: "linear-gradient(white, white) padding-box, linear-gradient(120deg, #ffb56b, #ff5ec4, #7c5fff, #01cfff, #00ff87) border-box"}}>
+                <Link
+                    href="/appstore"
+                    className="text-xl font-medium w-full text-center border-2 border-transparent rounded-lg px-4 py-2 mt-2 mb-1 bg-gradient-to-r from-white to-white bg-clip-padding"
+                    style={{
+                        background:
+                            "linear-gradient(white, white) padding-box, linear-gradient(120deg, #ffb56b, #ff5ec4, #7c5fff, #01cfff, #00ff87) border-box",
+                    }}
+                >
                     App Store
                 </Link>
-                <span className="absolute -top-4 right-1 bg-white text-gray-500 text-xs font-bold rounded px-2 py-0.5 border border-gray-200 shadow">New</span>
+                <span className="absolute -top-4 right-1 bg-white text-gray-500 text-xs font-bold rounded px-2 py-0.5 border border-gray-200 shadow">
+                    New
+                </span>
             </div>
         </div>
     );
 
     const authButtonsMobile = (
         <div className="flex flex-col items-center space-y-4 w-full mt-4">
-            <Link href="/tester-login" className="text-lg w-full text-center">Login</Link>
-            <Link href="/tester-registration" className="w-full text-center bg-black text-white rounded-lg py-2 text-lg font-semibold">Sign Up</Link>
+            <Link href="/tester-login" className="text-lg w-full text-center">
+                Login
+            </Link>
+            <Link
+                href="/tester-registration"
+                className="w-full text-center bg-black text-white rounded-lg py-2 text-lg font-semibold"
+            >
+                Sign Up
+            </Link>
         </div>
     );
 
@@ -278,21 +384,56 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         return (
             <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
-                <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
-                <div className="hidden md:flex">{isAuthenticated ? profileMenu : loggedInRight}</div>
+                <div className="hidden md:flex flex-1 justify-center">
+                    {navLinks}
+                </div>
+                <div className="hidden md:flex">
+                    {isAuthenticated ? profileMenu : loggedInRight}
+                </div>
                 {/* Hamburger for mobile */}
-                <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <button
+                    className="md:hidden ml-auto"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+                        <path
+                            stroke="#000"
+                            strokeWidth="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                        />
+                    </svg>
                 </button>
                 {mobileMenuOpen && (
-                    <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col" onClick={() => setMobileMenuOpen(false)}>
-                        <div className="bg-white w-full max-w-xs h-full flex flex-col items-center justify-center p-4 mx-auto rounded-l-lg" onClick={e => e.stopPropagation()}>
-                            <button className="mb-6 mx-auto" onClick={() => setMobileMenuOpen(false)}>
-                                <svg width="32" height="32" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M6 6l12 12M6 18L18 6"/></svg>
+                    <div
+                        className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col"
+                        onClick={() => setMobileMenuOpen(false)}
+                    >
+                        <div
+                            className="bg-white w-full max-w-xs h-full flex flex-col items-center justify-center p-4 mx-auto rounded-l-lg"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                className="mb-6 mx-auto"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <svg
+                                    width="32"
+                                    height="32"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke="#000"
+                                        strokeWidth="2"
+                                        d="M6 6l12 12M6 18L18 6"
+                                    />
+                                </svg>
                             </button>
                             <div className="flex flex-col items-center space-y-6 w-full">
                                 {navLinksMobile}
-                                {isAuthenticated ? profileMenu : authButtonsMobile}
+                                {isAuthenticated
+                                    ? profileMenu
+                                    : authButtonsMobile}
                             </div>
                         </div>
                     </div>
@@ -304,16 +445,43 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         return (
             <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
-                <div className="hidden md:flex flex-1 justify-center">{dashboardLinks}</div>
-                <div className="hidden md:flex">{isAuthenticated ? profileMenu : loggedInRight}</div>
-                <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <div className="hidden md:flex flex-1 justify-center">
+                    {dashboardLinks}
+                </div>
+                <div className="hidden md:flex">
+                    {isAuthenticated ? profileMenu : loggedInRight}
+                </div>
+                <button
+                    className="md:hidden ml-auto"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+                        <path
+                            stroke="#000"
+                            strokeWidth="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                        />
+                    </svg>
                 </button>
                 {mobileMenuOpen && (
                     <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col">
                         <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
-                            <button className="self-end mb-6" onClick={() => setMobileMenuOpen(false)}>
-                                <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M6 6l12 12M6 18L18 6"/></svg>
+                            <button
+                                className="self-end mb-6"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke="#000"
+                                        strokeWidth="2"
+                                        d="M6 6l12 12M6 18L18 6"
+                                    />
+                                </svg>
                             </button>
                             <div className="flex flex-col items-start space-y-6 w-full">
                                 {dashboardLinks}
@@ -329,21 +497,50 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         return (
             <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
                 {logo}
-                <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
-                <div className="hidden md:flex">{isAuthenticated ? profileMenu : testerAuthButtons}</div>
+                <div className="hidden md:flex flex-1 justify-center">
+                    {navLinks}
+                </div>
+                <div className="hidden md:flex">
+                    {isAuthenticated ? profileMenu : testerAuthButtons}
+                </div>
                 {/* Hamburger for mobile */}
-                <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <button
+                    className="md:hidden ml-auto"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+                        <path
+                            stroke="#000"
+                            strokeWidth="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                        />
+                    </svg>
                 </button>
                 {mobileMenuOpen && (
                     <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col">
                         <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
-                            <button className="self-end mb-6" onClick={() => setMobileMenuOpen(false)}>
-                                <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M6 6l12 12M6 18L18 6"/></svg>
+                            <button
+                                className="self-end mb-6"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke="#000"
+                                        strokeWidth="2"
+                                        d="M6 6l12 12M6 18L18 6"
+                                    />
+                                </svg>
                             </button>
                             <div className="flex flex-col items-start space-y-6 w-full">
                                 {navLinksMobile}
-                                {isAuthenticated ? profileMenu : authButtonsMobile}
+                                {isAuthenticated
+                                    ? profileMenu
+                                    : authButtonsMobile}
                             </div>
                         </div>
                     </div>
@@ -355,16 +552,46 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     return (
         <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
             {logo}
-            <div className="hidden md:flex flex-1 justify-center">{navLinks}</div>
-            <div className="hidden md:flex">{isAuthenticated ? profileMenu : authButtons}</div>
-            <button className="md:hidden ml-auto" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <div className="hidden md:flex flex-1 justify-center">
+                {navLinks}
+            </div>
+            <div className="hidden md:flex">
+                {isAuthenticated ? profileMenu : authButtons}
+            </div>
+            <button
+                className="md:hidden ml-auto"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+                    <path
+                        stroke="#000"
+                        strokeWidth="2"
+                        d="M4 6h16M4 12h16M4 18h16"
+                    />
+                </svg>
             </button>
             {mobileMenuOpen && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col" onClick={() => setMobileMenuOpen(false)}>
+                <div
+                    className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col"
+                    onClick={() => setMobileMenuOpen(false)}
+                >
                     <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
-                        <button className="self-end mb-6" onClick={() => setMobileMenuOpen(false)}>
-                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="#000" strokeWidth="2" d="M6 6l12 12M6 18L18 6"/></svg>
+                        <button
+                            className="self-end mb-6"
+                            onClick={() => setMobileMenuOpen(false)}
+                        >
+                            <svg
+                                width="28"
+                                height="28"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke="#000"
+                                    strokeWidth="2"
+                                    d="M6 6l12 12M6 18L18 6"
+                                />
+                            </svg>
                         </button>
                         <div className="flex flex-col items-center space-y-8 w-full max-w-xs">
                             {navLinksMobile}
