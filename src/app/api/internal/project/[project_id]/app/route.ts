@@ -152,12 +152,25 @@ export async function POST(
         );
 
         if (nonAcceptedApp) {
-            return buildSuccessResponse<FetchCreateApp>(
+            return buildSuccessResponse(
                 "Found existing app in progress",
                 {
                     appId: nonAcceptedApp.id,
                     isNewApp: false,
                     status: nonAcceptedApp.status ?? "unknown",
+                    app: {
+                        id: nonAcceptedApp.id,
+                        subtitle: nonAcceptedApp.subtitle,
+                        type: nonAcceptedApp.type,
+                        aboutDesc: nonAcceptedApp.aboutDesc,
+                        content: nonAcceptedApp.content,
+                        webUrl: nonAcceptedApp.webUrl,
+                        appFile: nonAcceptedApp.appFile,
+                        cardImage: nonAcceptedApp.cardImage,
+                        bannerImage: nonAcceptedApp.bannerImage,
+                        featuredPriority: nonAcceptedApp.featuredPriority,
+                        status: nonAcceptedApp.status,
+                    },
                 },
             );
         }
