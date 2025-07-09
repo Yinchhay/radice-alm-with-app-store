@@ -175,3 +175,19 @@ export function skillSetToChips(
 
     return chips;
 }
+
+export async function createCodeChallenge(codeVerifier: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(codeVerifier);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
+    return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+}
+
+// lib/server_utils.ts - Add this function if it doesn't exist
+export async function getBaseUrl(): Promise<string> {
+    if (process.env.NODE_ENV === "production") {
+        return process.env.NEXT_PUBLIC_BASE_URL || "https://yourdomain.com";
+    }
+    return "http://localhost:3000";
+}

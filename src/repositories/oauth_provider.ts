@@ -13,6 +13,16 @@ export const getOAuthProviderByGithubId = async (githubId: string) => {
     });
 };
 
+export const getOAuthProviderByGoogleId = async (googleId: string) => {
+    return await db.query.oauthProviders.findFirst({
+        where: (oauthProviders, { eq, and }) =>
+            and(
+                eq(oauthProviders.providerId, OAuthProviderId.Google),
+                eq(oauthProviders.providerUserId, googleId),
+            ),
+    });
+};
+
 export const getOAuthProviderByUserId = async (userId: string) => {
     return await db.query.oauthProviders.findFirst({
         with: {
@@ -56,15 +66,36 @@ export const updateOAuthProviderById = async (
         .where(eq(oauthProviders.id, oauthProvidersId));
 };
 
+// export const createOauthProvider = async (
+//     oauthProvider: typeof oauthProviders.$inferInsert,
+// ) => {
+//     return await db.transaction(async (tx) => {
+//         await tx
+//             .update(users)
+//             .set({ hasLinkedGithub: true })
+//             .where(eq(users.id, oauthProvider.userId));
+
+//         return await tx.insert(oauthProviders).values(oauthProvider);
+//     });
+// };
+
 export const createOauthProvider = async (
     oauthProvider: typeof oauthProviders.$inferInsert,
 ) => {
     return await db.transaction(async (tx) => {
-        await tx
-            .update(users)
-            .set({ hasLinkedGithub: true })
-            .where(eq(users.id, oauthProvider.userId));
-
+        // Update user based on provider type
+        if (oauthProvider.providerId === OAuthProviderId.Github) {
+            await tx
+                .update(users)
+                .set({ hasLinkedGithub: true })
+                .where(eq(users.id, oauthProvider.userId));
+        } else if (oauthProvider.providerId === OAuthProviderId.Google) {
+            await tx
+                .update(users)
+                .set({ hasLinkedGoogle: true }) // Assuming you have this field
+                .where(eq(users.id, oauthProvider.userId));
+        }
+        
         return await tx.insert(oauthProviders).values(oauthProvider);
     });
 };
