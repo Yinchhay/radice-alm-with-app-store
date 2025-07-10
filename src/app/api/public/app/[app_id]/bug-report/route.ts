@@ -13,7 +13,7 @@ import { HttpStatusCode } from "@/types/http";
 import jwt from "jsonwebtoken";
 import { db } from "@/drizzle/db"; // or wherever your db client is
 import { eq } from "drizzle-orm";
-import { testers } from "@/drizzle/schema";
+import { testers, bugReports } from "@/drizzle/schema";
 import { Permissions } from "@/types/IAM";
 import { createBugReportFormSchema} from "./schema";
 import { cookies } from "next/headers";
@@ -140,5 +140,60 @@ export async function POST(
 
   } catch (error: any) {
     return checkAndBuildErrorResponse(unsuccessMessage, error);
+  }
+}
+
+export async function GET(request: Request, { params }: { params: { app_id: string } }) {
+  try {
+    const appId = parseInt(params.app_id, 10);
+    if (isNaN(appId) || appId <= 0) {
+      return new Response(
+        JSON.stringify({
+          message: "Invalid App ID",
+          success: false,
+          data: { bugReports: [] },
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+    // Fetch bug reports for this app, joining testers
+    const reports = await db
+      .select({
+        ...bugReports,
+        tester: {
+          firstName: testers.firstName,
+          lastName: testers.lastName,
+        },
+      })
+      .from(bugReports)
+      .leftJoin(testers, eq(bugReports.testerId, testers.id))
+      .where(eq(bugReports.appId, appId));
+    return new Response(
+      JSON.stringify({
+        message: "Fetched bug reports successfully",
+        success: true,
+        data: { bugReports: reports },
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error: any) {
+    return new Response(
+      JSON.stringify({
+        message: "Failed to fetch bug reports",
+        success: false,
+        data: { bugReports: [] },
+        error: error?.message || error,
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

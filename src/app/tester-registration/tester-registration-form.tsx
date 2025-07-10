@@ -4,6 +4,24 @@ import Button from "@/components/Button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Enhanced friendlyError with HTML formatting
+const friendlyError = (msg: string) => {
+  if (msg.includes("lowercase letter, an uppercase letter, and a number")) {
+    return ` <span>Password must include at least:</span><br />
+      <span class='ml-2'>• One lowercase letter</span><br />
+      <span class='ml-2'>• One uppercase letter</span><br />
+      <span class='ml-2'>• One number</span>`;
+  }
+  if (msg.includes("at least 8 characters")) {
+    return "Your password must be at least <b>8 characters</b> long.";
+  }
+  if (msg.includes("already exists")) {
+    return "An account with this email already exists. <a href='/tester-login' class='underline'>Log in?</a>";
+  }
+  // Add more mappings as needed
+  return msg;
+};
+
 export default function TesterRegistrationForm() {
     const [result, setResult] = useState<{ success: boolean; errors?: string[] }>();
     const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +56,22 @@ export default function TesterRegistrationForm() {
                 setResult({ success: true });
                 router.push("/appstore");
             } else {
-                setResult({ success: false, errors: [data.error || "Registration failed"] });
+                // Show Zod details if present (array or string)
+                if (data.details) {
+                    if (Array.isArray(data.details)) {
+                        setResult({
+                            success: false,
+                            errors: data.details.map((err: any) => err.message || String(err))
+                        });
+                    } else {
+                        setResult({
+                            success: false,
+                            errors: data.details.split('\n')
+                        });
+                    }
+                } else {
+                    setResult({ success: false, errors: [data.error || "Registration failed"] });
+                }
             }
         } catch (error) {
             setResult({ success: false, errors: ["An error occurred. Please try again."] });
@@ -108,7 +141,32 @@ export default function TesterRegistrationForm() {
             </div>
             {result?.errors && (
                 <div className="text-red-600 text-sm text-center">
-                    {result.errors.map((err, i) => <div key={i}>{err}</div>)}
+                    {result.errors.flatMap((err: any, i: number) => {
+                        if (typeof err === 'string') {
+                            return (
+                                <div key={i} className="flex items-start gap-2 justify-center mb-1">
+                                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" /></svg>
+                                    <span dangerouslySetInnerHTML={{ __html: friendlyError(err) }} />
+                                </div>
+                            );
+                        } else if (Array.isArray(err)) {
+                            // If err is an array, flatten and extract messages
+                            return err.map((e: any, j: number) => (
+                                <div key={i + '-' + j} className="flex items-start gap-2 justify-center mb-1">
+                                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" /></svg>
+                                    <span dangerouslySetInnerHTML={{ __html: friendlyError(e.message || '') }} />
+                                </div>
+                            ));
+                        } else if (err && typeof err === 'object' && err.message) {
+                            return (
+                                <div key={i} className="flex items-start gap-2 justify-center mb-1">
+                                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" /></svg>
+                                    <span dangerouslySetInnerHTML={{ __html: friendlyError(err.message) }} />
+                                </div>
+                            );
+                        }
+                        return null;
+                    })}
                 </div>
             )}
             <button

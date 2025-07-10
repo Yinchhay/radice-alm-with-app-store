@@ -15,6 +15,7 @@ import { createVersion, getLatestVersionByProjectId } from "@/repositories/versi
 import { HttpStatusCode } from "@/types/http";
 import { promises as fs } from 'fs';
 import path from 'path';
+import { NextRequest } from "next/server";
 
 export type FetchCreateApp = {
     appId: number;
@@ -352,4 +353,17 @@ export async function POST(
         }
         return checkAndBuildErrorResponse(unsuccessMessage, createError);
     }
+}
+
+export async function GET(request: NextRequest, { params }: { params: { project_id: string } }) {
+  try {
+    const projectId = parseInt(params.project_id, 10);
+    if (isNaN(projectId)) {
+      return new Response(JSON.stringify({ success: false, message: "Invalid project ID" }), { status: 400 });
+    }
+    const apps = await getAppsByProjectId(projectId);
+    return buildSuccessResponse("Fetched apps for project", { apps });
+  } catch (error: any) {
+    return checkAndBuildErrorResponse("Failed to fetch apps for project", error);
+  }
 }
