@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import AppActionButton from "./app-action-button";
 import { IconStar, IconStarFilled } from "@tabler/icons-react";
 import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
+import Popup from "@/components/Popup";
 
 export type Feedback = {
     id: number;
@@ -27,6 +28,7 @@ type AppReviewsProps = {
     showHeader?: boolean;
     showForm?: boolean;
     onLoginRequired?: () => void;
+    onReviewSubmitted?: () => void;
 };
 
 export default function AppReviews({
@@ -37,6 +39,7 @@ export default function AppReviews({
     showHeader = true,
     showForm = true,
     onLoginRequired,
+    onReviewSubmitted,
 }: AppReviewsProps) {
     const [showReviewForm, setShowReviewForm] = useState(false);
     const { isAuthenticated } = useTesterAuth();
@@ -47,6 +50,7 @@ export default function AppReviews({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [reviews, setReviews] = useState<Feedback[]>(propReviews || []);
     const [averageRating, setAverageRating] = useState(0);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     // Fetch reviews only if propReviews is not provided
     const fetchReviews = async () => {
@@ -113,6 +117,13 @@ export default function AppReviews({
             );
             if (!res.ok) {
                 alert("Failed to submit review.");
+            } else {
+                setShowSuccessPopup(true);
+                setReviewTitle("");
+                setReviewText("");
+                setRating(0);
+                setShowReviewForm(false);
+                onReviewSubmitted?.();
             }
         } catch (error) {
             console.error("Error submitting review:", error);
@@ -308,6 +319,31 @@ export default function AppReviews({
                     )}
                 </div>
             )}
+            <Popup
+                isOpen={showSuccessPopup}
+                onClose={() => {
+                    setShowSuccessPopup(false);
+                    window.location.reload();
+                }}
+                title="Review Submitted"
+            >
+                <div className="text-center">
+                    <p className="mb-6 text-gray-600">
+                        Thank you for your feedback! Your review has been submitted successfully.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => {
+                                setShowSuccessPopup(false);
+                                window.location.reload();
+                            }}
+                            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </Popup>
         </div>
     );
 }

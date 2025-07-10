@@ -3,6 +3,7 @@ import { useState } from "react";
 import AppActionButton from "./app-action-button";
 import { IconX, IconVideo, IconPhoto } from "@tabler/icons-react";
 import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
+import Popup from "@/components/Popup";
 
 export default function BugReportForm({ 
     appId, 
@@ -17,6 +18,7 @@ export default function BugReportForm({
     const [bugDescription, setBugDescription] = useState("");
     const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, fileType: 'image' | 'video') => {
         const file = event.target.files?.[0];
@@ -86,7 +88,7 @@ export default function BugReportForm({
             setBugDescription("");
             setUploadedFiles([]);
             setShowForm(false);
-            alert("Bug report submitted successfully!");
+            setShowSuccessPopup(true);
         } catch (error) {
             console.error("Error submitting bug report:", error);
             alert("Failed to submit bug report. Please try again.");
@@ -220,6 +222,31 @@ export default function BugReportForm({
                     </div>
                 </div>
             )}
+            <Popup
+                isOpen={showSuccessPopup}
+                onClose={() => {
+                    setShowSuccessPopup(false);
+                    window.location.reload();
+                }}
+                title="Bug Report Submitted"
+            >
+                <div className="text-center">
+                    <p className="mb-6 text-gray-600">
+                        Thank you for your feedback! Your bug report has been submitted successfully.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => {
+                                setShowSuccessPopup(false); 
+                                window.location.reload();
+                            }}
+                            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </Popup>
         </div>
     );
 }
