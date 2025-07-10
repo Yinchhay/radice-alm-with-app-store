@@ -41,7 +41,6 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
-    const [totalReviews, setTotalReviews] = useState(0);
     const [reviews, setReviews] = useState([]);
     const reviewsPerPage = 5;
 
