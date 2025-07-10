@@ -61,6 +61,7 @@ export async function POST(
                 HttpStatusCode.BAD_REQUEST_400,
             );
         }
+        
         body.appId = appId;
 
         console.log("Request body before validation:", body);

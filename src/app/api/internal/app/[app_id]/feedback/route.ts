@@ -61,7 +61,7 @@ export async function GET(
         let rowsPerPage: number =
             Number(request.nextUrl.searchParams.get("rowsPerPage")) ||
             ROWS_PER_PAGE;
-        const search = request.nextUrl.searchParams.get("search") || "";
+            
 
         // limit to max 100 rows per page
         if (rowsPerPage > 100) {
@@ -71,10 +71,10 @@ export async function GET(
         const feedbacks = await getAllFeedbacksByAppId(
             appId,
             page,
-            rowsPerPage,
-            search,
+            rowsPerPage
         );
-        const totalRows = await getFeedbacksTotalRowByAppId(appId, search);
+
+        const totalRows = await getFeedbacksTotalRowByAppId(appId);
 
         return buildSuccessResponse<FetchFeedbacksData>(successMessage, {
             feedbacks: feedbacks,
