@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import AppActionButton from "./app-action-button";
 import { IconStar, IconStarFilled } from "@tabler/icons-react";
+import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
+import Popup from "@/components/Popup";
 
 export type Feedback = {
     id: number;
@@ -25,6 +27,8 @@ type AppReviewsProps = {
     maxReviews?: number;
     showHeader?: boolean;
     showForm?: boolean;
+    onLoginRequired?: () => void;
+    onReviewSubmitted?: () => void;
 };
 
 export default function AppReviews({
@@ -34,8 +38,11 @@ export default function AppReviews({
     maxReviews = 3,
     showHeader = true,
     showForm = true,
+    onLoginRequired,
+    onReviewSubmitted,
 }: AppReviewsProps) {
     const [showReviewForm, setShowReviewForm] = useState(false);
+    const { isAuthenticated } = useTesterAuth();
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [reviewTitle, setReviewTitle] = useState("");
@@ -43,6 +50,7 @@ export default function AppReviews({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [reviews, setReviews] = useState<Feedback[]>(propReviews || []);
     const [averageRating, setAverageRating] = useState(0);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     // Fetch reviews only if propReviews is not provided
     const fetchReviews = async () => {
@@ -67,18 +75,28 @@ export default function AppReviews({
     }, [appId, propReviews]);
 
     const handleStarClick = (starValue: number) => {
+        if (!isAuthenticated) {
+            onLoginRequired?.();
+            return;
+        }
         setRating(starValue);
     };
 
     const handleStarHover = (starValue: number) => {
+        if (!isAuthenticated) return;
         setHoverRating(starValue);
     };
 
     const handleStarLeave = () => {
+        if (!isAuthenticated) return;
         setHoverRating(0);
     };
 
     const handleSubmitReview = async () => {
+        if (!isAuthenticated) {
+            onLoginRequired?.();
+            return;
+        }
         if (rating === 0) {
             alert("Please select a rating");
             return;
@@ -97,16 +115,18 @@ export default function AppReviews({
                     }),
                 },
             );
-            if (!res.ok) throw new Error("Failed to submit review");
-            setShowReviewForm(false);
-            setRating(0);
-            setReviewTitle("");
-            setReviewText("");
-            await fetchReviews();
-            alert("Review submitted successfully!");
+            if (!res.ok) {
+                alert("Failed to submit review.");
+            } else {
+                setShowSuccessPopup(true);
+                setReviewTitle("");
+                setReviewText("");
+                setRating(0);
+                setShowReviewForm(false);
+                onReviewSubmitted?.();
+            }
         } catch (error) {
             console.error("Error submitting review:", error);
-            alert("Failed to submit review. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -158,9 +178,9 @@ export default function AppReviews({
         `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase();
 
     return (
-        <div className="mb-8">
+        <div>
             {showHeader && (
-                <div className="flex items-center gap-2 mb-6">
+                <div className="flex items-center gap-2 mb-8">
                     <span className="flex items-baseline">
                         <span className="text-xl font-semibold leading-none">
                             Ratings and Reviews
@@ -179,13 +199,13 @@ export default function AppReviews({
                     </a>
                 </div>
             )}
-            <div className="">
+            <div className="mb-10">
                 {reviews.length === 0 ? (
-                    <div className="text-center mb-3 py-8 text-gray-500">
+                    <div className="text-center py-10 text-gray-500">
                         No reviews yet. Be the first to review {appName}!
                     </div>
                 ) : (
-                    <div className="">
+                    <div>
                         {reviews
                             .slice(0, maxReviews)
                             .map((review, idx, arr) => (
@@ -218,16 +238,20 @@ export default function AppReviews({
                 )}
             </div>
             {showForm && (
-                <div className="mb-6">
+                <div className="">
                     <button
                         type="button"
-                        className="text-xl font-semibold mb-2 flex items-center"
-                        onClick={() => setShowReviewForm((prev) => !prev)}
-                    >
+                        className="text-xl font-semibold flex items-center"
+                        onClick={() => {
+                            if (!isAuthenticated) {
+                                onLoginRequired?.();
+                                return;
+                            }
+                            setShowReviewForm((prev) => !prev);
+                        }}>
                         Write a Review
                         <span
-                            className={`ml-2 transition-transformation duration-200 ${showReviewForm ? "" : "rotate-180"}`}
-                        >
+                            className={`ml-2 transition-transformation duration-200 ${showReviewForm ? "" : "rotate-180"}`}>
                             <img
                                 src={"/ui/arrow2.svg"}
                                 alt="arrow"
@@ -236,8 +260,8 @@ export default function AppReviews({
                         </span>
                     </button>
                     {showReviewForm && (
-                        <div className="mt-6 p-5">
-                            <div className="flex gap-2 mb-4">
+                        <div className="mt-8 p-5">
+                            <div className="flex gap-2 mb-5">
                                 {renderStars(rating, true, 28)}
                             </div>
                             <div className="mb-5">
@@ -250,12 +274,17 @@ export default function AppReviews({
                                     onChange={(e) =>
                                         setReviewTitle(e.target.value)
                                     }
+                                    onClick={() => {
+                                        if (!isAuthenticated) {
+                                            onLoginRequired?.();
+                                        }
+                                    }}
                                     className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 placeholder:text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                                    placeholder="Title of your review"
+                                    placeholder={isAuthenticated ? "Title of your review" : "Please log in to write a review"}
                                     maxLength={100}
                                 />
                             </div>
-                            <div className="mb-6">
+                            <div className="mb-5">
                                 <label className="block text-xs text-gray-500 mb-2">
                                     Review
                                 </label>
@@ -265,8 +294,13 @@ export default function AppReviews({
                                     onChange={(e) =>
                                         setReviewText(e.target.value)
                                     }
+                                    onClick={() => {
+                                        if (!isAuthenticated) {
+                                            onLoginRequired?.();
+                                        }
+                                    }}
                                     className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 placeholder:text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                                    placeholder="Share your thoughts about the app"
+                                    placeholder={isAuthenticated ? "Share your thoughts about the app" : "Please log in to write a review"}
                                     maxLength={100}
                                 />
                             </div>
@@ -285,6 +319,31 @@ export default function AppReviews({
                     )}
                 </div>
             )}
+            <Popup
+                isOpen={showSuccessPopup}
+                onClose={() => {
+                    setShowSuccessPopup(false);
+                    window.location.reload();
+                }}
+                title="Review Submitted"
+            >
+                <div className="text-center">
+                    <p className="mb-6 text-gray-600">
+                        Thank you for your feedback! Your review has been submitted successfully.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => {
+                                setShowSuccessPopup(false);
+                                window.location.reload();
+                            }}
+                            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </Popup>
         </div>
     );
 }

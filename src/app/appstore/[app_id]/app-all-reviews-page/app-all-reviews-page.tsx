@@ -4,7 +4,7 @@ import AppReviews from "../_components/app-reviews";
 import { getBaseUrl } from "@/lib/server_utils";
 import AppActionButton from "../_components/app-action-button";
 import AppBanner from "../_components/app-banner";
-import Pagination from "@/components/NonRouterPushPagination";
+import NonRouterPushPagination from "@/components/NonRouterPushPagination";
 
 interface AppAllReviewsPageProps {
     params: { app_id: string };
@@ -41,7 +41,6 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
-    const [totalReviews, setTotalReviews] = useState(0);
     const [reviews, setReviews] = useState([]);
     const reviewsPerPage = 5;
 
@@ -73,7 +72,10 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                 if (!response.ok) throw new Error("Failed to fetch reviews");
                 const data = await response.json();
                 setMaxPage(data.data.maxPage || 1);
-                setReviews(data.data.feedbacks || []);
+                const sortedReviews = (data.data.feedbacks || []).slice().sort((a: any, b: any) => {
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                });
+                setReviews(sortedReviews);
             } catch (error) {
                 console.error(error);
             }
@@ -83,8 +85,11 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <span className="text-3xl text-gray-500">Loading...</span>
+            <div className="flex flex-col justify-center items-center min-h-[60vh] animate-fade-in">
+                <svg className="animate-spin h-12 w-12 text-black mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span className="text-lg text-black">Loading app's reviews…</span>
             </div>
         );
     }
@@ -92,24 +97,20 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
     return (
         <div className="flex justify-center">
             <div className="flex-1 max-w-[1440px] px-4">
-                <div className="max-w-6xl mx-auto px-4 py-8">
+                <div className="max-w-[1440px] mx-auto px-10 py-8">
                     {appData && (
                         <div className="mb-8">
                             <AppBanner
-                                bannerImage={
-                                    appData.bannerImage ||
-                                    "/placeholders/logo_placeholder.png"
-                                }
+                                bannerImage={appData.bannerImage || "/placeholders/placeholder.png"}
                                 title={appName}
                                 subtitle={appData.subtitle}
                             />
                         </div>
                     )}
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="flex-1 min-w-[260px] max-w-sm flex flex-col justify-start">
-                            <h1 className="text-4xl font-bold mb-2">
-                                {appName}
-                            </h1>
+                    <div className="flex flex-col md:flex-row gap-4 min-h-[600px]">
+                        {/* Left column */}
+                        <div className="flex-1 min-w-[260px] max-w-sm flex flex-col justify-center h-full">
+                            <h1 className="text-6xl font-bold mb-2">{appName}</h1>
                             <div className="text-sm text-gray-700 mb-2">
                                 {appData?.subtitle || "No subtitle"}
                             </div>
@@ -167,8 +168,9 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                                 </AppActionButton>
                             )}
                         </div>
-                        <div className="flex-1 min-w-[300px] max-w-3xl">
-                            <div className="mb-6">
+                        {/* Right column */}
+                        <div className="flex-1 min-w-[300px] h-full">
+                            <div className="mb-8">
                                 <button
                                     onClick={() => window.history.back()}
                                     className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
@@ -190,9 +192,7 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                                 </button>
                             </div>
                             <div className="mb-8">
-                                <h2 className="text-xl font-semibold">
-                                    Rating and Reviews
-                                </h2>
+                                <h2 className="text-xl font-semibold">Rating and Reviews</h2>
                             </div>
                             <AppReviews
                                 appId={parseInt(params.app_id)}
@@ -204,7 +204,7 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                             />
                             {maxPage > 1 && (
                                 <div className="flex justify-center mt-6">
-                                    <Pagination
+                                    <NonRouterPushPagination
                                         page={currentPage}
                                         maxPage={maxPage}
                                         onPageChange={setCurrentPage}

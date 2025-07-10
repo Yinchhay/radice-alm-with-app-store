@@ -4,7 +4,7 @@ import { AppCard } from "@/components/AppCard";
 import SearchBar from "@/components/SearchBar";
 import { useSearchParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import Pagination from "@/components/NonRouterPushPagination";
+import NonRouterPushPagination from "@/components/NonRouterPushPagination";
 import type { App } from "@/types/app_types";
 
 export default function AppStorePage() {
@@ -14,7 +14,8 @@ export default function AppStorePage() {
     const [error, setError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get("search")?.toLowerCase() || "";
-    const appsPerPage = 6;
+    const appsPerPage = 3;
+    const page = Number(searchParams.get("page") || 1);
     const [openTestingPage, setOpenTestingPage] = useState(1);
     const [livePage, setLivePage] = useState(1);
 
@@ -104,7 +105,7 @@ export default function AppStorePage() {
     );
 
     const PriorityOrder = [
-        { key: 2, label: "Open for Testing" },
+        { key: 2, label: "Our Best Apps" },
         { key: 1, label: "Live" },
     ];
 
@@ -133,7 +134,7 @@ export default function AppStorePage() {
                         style={{ marginTop: "40px", marginBottom: "40px" }}
                         className="max-w-xl mx-auto"
                     >
-                        <SearchBar placeholder="Search apps..." />
+                        <SearchBar className="bg-white text-black" placeholder="Search apps..." />
                     </div>
                     <div className="flex flex-wrap items-center gap-3 justify-center">
                         <span className="flex items-center gap-2 text-gray-700 text-sm font-medium">
@@ -167,8 +168,11 @@ export default function AppStorePage() {
 
                 <div style={{ marginTop: "60px", marginBottom: "80px" }}>
                     {loading ? (
-                        <div className="flex justify-center items-center py-12">
-                            <div className="text-gray-500">Loading apps...</div>
+                        <div className="flex flex-col justify-center items-center py-24 animate-fade-in">
+                            <svg className="animate-spin h-12 w-12 text-black mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                            <span className="text-lg text-black">Loading apps…</span>
                         </div>
                     ) : error ? (
                         <div className="flex justify-center items-center py-12">
@@ -184,11 +188,11 @@ export default function AppStorePage() {
                         </div>
                     ) : (
                         PriorityOrder.map(({ key, label }) => {
-                            const page = key === 2 ? openTestingPage : livePage;
                             const appsForStatus = groupedByPriority[key] || [];
+                            const sectionPage = key === 2 ? openTestingPage : livePage;
                             const { paginatedApps, maxPage } = getPaginatedApps(
                                 appsForStatus,
-                                page,
+                                sectionPage,
                             );
                             return (
                                 <div key={key} className="mb-12">
@@ -214,18 +218,10 @@ export default function AppStorePage() {
                                     </div>
                                     {maxPage > 1 && (
                                         <div className="flex justify-center mt-6">
-                                            <Pagination
-                                                page={page}
+                                            <NonRouterPushPagination
+                                                page={sectionPage}
                                                 maxPage={maxPage}
-                                                onPageChange={(newPage) => {
-                                                    if (key === 2) {
-                                                        setOpenTestingPage(
-                                                            newPage,
-                                                        );
-                                                    } else {
-                                                        setLivePage(newPage);
-                                                    }
-                                                }}
+                                                onPageChange={key === 2 ? setOpenTestingPage : setLivePage}
                                             />
                                         </div>
                                     )}

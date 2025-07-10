@@ -48,7 +48,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             <img
                 src="/RadiceLogo_light.png"
                 alt="Radice Logo"
-                className="object-contain h-10 w-36 sm:h-12 sm:w-48 md:h-[50px] md:w-[300px]"
+                className="object-contain h-10 w-20 sm:h-12 sm:w-48 md:h-[50px] md:w-[200px]"
                 style={{ objectFit: "contain", display: "block" }}
             />
         </Link>
@@ -372,6 +372,14 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         </div>
     );
 
+    const rightSideWidth = 220; 
+
+    const rightSide = (
+        <div style={{ width: rightSideWidth, display: "flex", justifyContent: "flex-end" }}>
+            {isAuthenticated ? profileMenu : authButtons}
+        </div>
+    );
+
     // Layouts
     if (variant === "justLogo") {
         return (
@@ -552,12 +560,10 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     return (
         <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
             {logo}
-            <div className="hidden md:flex flex-1 justify-center">
+            <div className="flex-1 flex justify-center">
                 {navLinks}
             </div>
-            <div className="hidden md:flex">
-                {isAuthenticated ? profileMenu : authButtons}
-            </div>
+            {rightSide}
             <button
                 className="md:hidden ml-auto"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

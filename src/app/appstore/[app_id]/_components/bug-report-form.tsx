@@ -2,13 +2,23 @@
 import { useState } from "react";
 import AppActionButton from "./app-action-button";
 import { IconX, IconVideo, IconPhoto } from "@tabler/icons-react";
+import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
+import Popup from "@/components/Popup";
 
-export default function BugReportForm({ appId }: { appId: number }) {
+export default function BugReportForm({ 
+    appId, 
+    onLoginRequired 
+}: { 
+    appId: number;
+    onLoginRequired?: () => void;
+}) {
     const [showForm, setShowForm] = useState(false);
+    const { isAuthenticated } = useTesterAuth();
     const [bugTitle, setBugTitle] = useState("");
     const [bugDescription, setBugDescription] = useState("");
     const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, fileType: 'image' | 'video') => {
         const file = event.target.files?.[0];
@@ -78,7 +88,7 @@ export default function BugReportForm({ appId }: { appId: number }) {
             setBugDescription("");
             setUploadedFiles([]);
             setShowForm(false);
-            alert("Bug report submitted successfully!");
+            setShowSuccessPopup(true);
         } catch (error) {
             console.error("Error submitting bug report:", error);
             alert("Failed to submit bug report. Please try again.");
@@ -91,8 +101,14 @@ export default function BugReportForm({ appId }: { appId: number }) {
         <div className="mb-8">
             <button
                 type="button"
-                className="text-xl font-semibold mb-2 flex items-center"
-                onClick={() => setShowForm((prev) => !prev)}
+                className="text-xl font-semibold flex items-center"
+                onClick={() => {
+                    if (!isAuthenticated) {
+                        onLoginRequired?.();
+                        return;
+                    }
+                    setShowForm((prev) => !prev);
+                }}
             >
                 Experienced a Bug?
                 <span className={`ml-2 transition-transform duration-200 ${showForm ? '' : 'rotate-180'}`}>
@@ -100,32 +116,42 @@ export default function BugReportForm({ appId }: { appId: number }) {
                 </span>
             </button>
             {showForm && (
-                <div className="mt-6 p-5">
+                <div className="mt-8 p-5">
                     <div className="mb-5">
                         <label className="block text-xs text-gray-500 mb-2">Bug Title *</label>
                         <input
                             type="text"
                             value={bugTitle}
                             onChange={(e) => setBugTitle(e.target.value)}
+                            onClick={() => {
+                                if (!isAuthenticated) {
+                                    onLoginRequired?.();
+                                }
+                            }}
                             className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 placeholder:text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                            placeholder="Brief description of the bug"
+                            placeholder={isAuthenticated ? "Brief description of the bug" : "Please log in to report a bug"}
                             maxLength={100}
                         />
                     </div>
-                    <div className="mb-6">
+                    <div className="mb-5">
                         <label className="block text-xs text-gray-500 mb-2">Bug Description *</label>
                         <textarea
                             value={bugDescription}
                             onChange={(e) => setBugDescription(e.target.value)}
+                            onClick={() => {
+                                if (!isAuthenticated) {
+                                    onLoginRequired?.();
+                                }
+                            }}
                             className="rounded-lg w-full px-3 py-2 bg-white border border-gray-200 placeholder:text-sm placeholder:text-gray-400 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100"
-                            placeholder="Please describe the bug in detail"
+                            placeholder={isAuthenticated ? "Please describe the bug in detail" : "Please log in to report a bug"}
                             maxLength={1000}
                         />
                         <div className="text-xs text-gray-500 mt-1 text-right">
                             {bugDescription.length}/1000
                         </div>
                     </div>
-                    <div className="mb-6">
+                    <div className="mb-5">
                         <label className="block text-xs text-gray-500 mb-2">Attachments (Optional)</label>
                         <div className="flex gap-4 mb-3 mt-1">
                             <div>
@@ -196,6 +222,31 @@ export default function BugReportForm({ appId }: { appId: number }) {
                     </div>
                 </div>
             )}
+            <Popup
+                isOpen={showSuccessPopup}
+                onClose={() => {
+                    setShowSuccessPopup(false);
+                    window.location.reload();
+                }}
+                title="Bug Report Submitted"
+            >
+                <div className="text-center">
+                    <p className="mb-6 text-gray-600">
+                        Thank you for your feedback! Your bug report has been submitted successfully.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => {
+                                setShowSuccessPopup(false); 
+                                window.location.reload();
+                            }}
+                            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </Popup>
         </div>
     );
 }
