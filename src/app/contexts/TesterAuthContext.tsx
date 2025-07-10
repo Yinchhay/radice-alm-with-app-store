@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 
 // ============================================================================
@@ -23,11 +29,22 @@ export interface TesterAuthContextType {
     tester: Tester | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    login: (
+        email: string,
+        password: string,
+    ) => Promise<{ success: boolean; error?: string }>;
     logout: () => Promise<void>;
-    register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>;
-    updateProfile: (data: Partial<Tester>) => Promise<{ success: boolean; error?: string }>;
-    changePassword: (currentPassword: string, newPassword: string, confirmPassword: string) => Promise<{ success: boolean; error?: string }>;
+    register: (
+        data: RegisterData,
+    ) => Promise<{ success: boolean; error?: string }>;
+    updateProfile: (
+        data: Partial<Tester>,
+    ) => Promise<{ success: boolean; error?: string }>;
+    changePassword: (
+        currentPassword: string,
+        newPassword: string,
+        confirmPassword: string,
+    ) => Promise<{ success: boolean; error?: string }>;
     refreshTester: () => Promise<void>;
 }
 
@@ -44,7 +61,9 @@ export interface RegisterData {
 // CONTEXT
 // ============================================================================
 
-const TesterAuthContext = createContext<TesterAuthContextType | undefined>(undefined);
+const TesterAuthContext = createContext<TesterAuthContextType | undefined>(
+    undefined,
+);
 
 // ============================================================================
 // PROVIDER
@@ -105,7 +124,10 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
             }
         } catch (error) {
             console.error("Login error:", error);
-            return { success: false, error: "Network error. Please try again." };
+            return {
+                success: false,
+                error: "Network error. Please try again.",
+            };
         }
     };
 
@@ -124,17 +146,39 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
             if (response.ok) {
                 return { success: true };
             } else {
-                return { success: false, error: result.error || "Registration failed" };
+                return {
+                    success: false,
+                    error: result.error || "Registration failed",
+                };
             }
         } catch (error) {
             console.error("Registration error:", error);
-            return { success: false, error: "Network error. Please try again." };
+            return {
+                success: false,
+                error: "Network error. Please try again.",
+            };
+        }
+    };
+    const logout = async () => {
+        try {
+            const response = await fetch("/api/tester/auth/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+
+            setTester(null);
+
+            router.push("/testers/login");
+        } catch (error) {
+            console.error("Logout error:", error);
+            setTester(null);
+            router.push("/testers/login");
         }
     };
 
     const updateProfile = async (data: Partial<Tester>) => {
         try {
-            const response = await fetch("/api/testers/profile", {
+            const response = await fetch("/api/tester/profile", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -149,15 +193,25 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
                 setTester(result.tester);
                 return { success: true };
             } else {
-                return { success: false, error: result.error || "Profile update failed" };
+                return {
+                    success: false,
+                    error: result.error || "Profile update failed",
+                };
             }
         } catch (error) {
             console.error("Profile update error:", error);
-            return { success: false, error: "Network error. Please try again." };
+            return {
+                success: false,
+                error: "Network error. Please try again.",
+            };
         }
     };
 
-    const changePassword = async (currentPassword: string, newPassword: string, confirmPassword: string) => {
+    const changePassword = async (
+        currentPassword: string,
+        newPassword: string,
+        confirmPassword: string,
+    ) => {
         try {
             const response = await fetch("/api/testers/auth/change-password", {
                 method: "POST",
@@ -177,11 +231,17 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
             if (response.ok) {
                 return { success: true };
             } else {
-                return { success: false, error: result.error || "Password change failed" };
+                return {
+                    success: false,
+                    error: result.error || "Password change failed",
+                };
             }
         } catch (error) {
             console.error("Password change error:", error);
-            return { success: false, error: "Network error. Please try again." };
+            return {
+                success: false,
+                error: "Network error. Please try again.",
+            };
         }
     };
 
@@ -194,7 +254,7 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
         isLoading,
         isAuthenticated: !!tester,
         login,
-        logout: async () => {},
+        logout,
         register,
         updateProfile,
         changePassword,
@@ -215,7 +275,9 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
 export function useTesterAuth() {
     const context = useContext(TesterAuthContext);
     if (context === undefined) {
-        throw new Error("useTesterAuth must be used within a TesterAuthProvider");
+        throw new Error(
+            "useTesterAuth must be used within a TesterAuthProvider",
+        );
     }
     return context;
 }
@@ -243,7 +305,9 @@ export function useRequireTesterAuth() {
 /**
  * Hook to redirect authenticated testers away from auth pages
  */
-export function useRedirectIfAuthenticated(redirectTo: string = "/testers/dashboard") {
+export function useRedirectIfAuthenticated(
+    redirectTo: string = "/testers/dashboard",
+) {
     const { tester, isLoading } = useTesterAuth();
     const router = useRouter();
 
@@ -263,7 +327,9 @@ export function useRedirectIfAuthenticated(redirectTo: string = "/testers/dashbo
 /**
  * HOC to protect pages that require tester authentication
  */
-export function withTesterAuth<P extends object>(Component: React.ComponentType<P>) {
+export function withTesterAuth<P extends object>(
+    Component: React.ComponentType<P>,
+) {
     return function AuthenticatedComponent(props: P) {
         const { tester, isLoading } = useRequireTesterAuth();
 
@@ -286,7 +352,9 @@ export function withTesterAuth<P extends object>(Component: React.ComponentType<
 /**
  * HOC to redirect authenticated testers away from auth pages
  */
-export function withTesterGuest<P extends object>(Component: React.ComponentType<P>) {
+export function withTesterGuest<P extends object>(
+    Component: React.ComponentType<P>,
+) {
     return function GuestComponent(props: P) {
         const { isLoading } = useRedirectIfAuthenticated();
 
