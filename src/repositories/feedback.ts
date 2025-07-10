@@ -2,7 +2,7 @@ import { db } from "@/drizzle/db";
 import { ROWS_PER_FEEDBACK_PAGE } from "@/lib/pagination";
 import { feedbacks } from "@/drizzle/schema";
 import { testers } from "@/drizzle/schema";
-import { eq, desc, and, or, like, sql } from "drizzle-orm";
+import { eq, asc, desc, and, or, like, sql } from "drizzle-orm";
 
 export const createFeedback = async (
     feedback: typeof feedbacks.$inferInsert,
@@ -60,6 +60,7 @@ export async function getAllFeedbacksByAppId(
             .from(feedbacks)
             .leftJoin(testers, eq(feedbacks.testerId, testers.id))
             .where(eq(feedbacks.appId, appId))
+            .orderBy(desc(feedbacks.createdAt))
             .limit(rowsPerPage)
             .offset(offset);
 
@@ -97,7 +98,7 @@ export async function getAllFeedbacksByTesterId(
             .select()
             .from(feedbacks)
             .where(whereCondition)
-            .orderBy(desc(feedbacks.createdAt))
+            .orderBy(asc(feedbacks.createdAt))
             .limit(rowsPerPage)
             .offset(offset);
 
