@@ -11,10 +11,8 @@ export async function GET(
     try {
         const filePath = params.path.join("/");
 
-        // Handle the 'apps' subfolder - the path will be like ['apps', 'filename.png']
         const fullPath = path.join(FILE_STORAGE_PATH, filePath);
 
-        // Security check - ensure file is within upload directory
         const normalizedPath = path.normalize(fullPath);
         const normalizedUploadPath = path.normalize(FILE_STORAGE_PATH);
 
@@ -26,7 +24,6 @@ export async function GET(
             return new NextResponse("Forbidden", { status: 403 });
         }
 
-        // Check if file exists
         try {
             await fs.access(fullPath);
         } catch (error) {
@@ -34,11 +31,9 @@ export async function GET(
             return new NextResponse("File not found", { status: 404 });
         }
 
-        // Read and return file
         const fileBuffer = await fs.readFile(fullPath);
         const fileExtension = path.extname(fullPath).toLowerCase();
 
-        // Determine content type
         const contentTypeMap: { [key: string]: string } = {
             ".jpg": "image/jpeg",
             ".jpeg": "image/jpeg",
