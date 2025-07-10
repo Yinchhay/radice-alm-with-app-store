@@ -174,6 +174,47 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
         </div>
     );
 
+    // Mobile profile menu
+    const profileMenuMobile = (
+        <div className="flex flex-row items-center justify-center gap-4 w-full rounded-lg">
+            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-700 uppercase">
+                {tester
+                    ? `${tester.firstName?.[0] || ""}${tester.lastName?.[0] || ""}`
+                    : "?"}
+            </div>
+            <span className="text-lg font-medium text-gray-800 text-center">
+                {tester?.firstName} {tester?.lastName}
+            </span>
+        </div>
+    );
+
+    const signOutMobile = (
+        <div className="flex items-center gap-4 w-full">
+            <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition py-3 px-4 text-black font-medium"
+                type="button"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1"
+                    />
+                </svg>
+                Sign Out
+            </button>
+        </div>
+    );
+
     // Auth buttons (default)
     const authButtons = (
         <div
@@ -413,15 +454,15 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                 </button>
                 {mobileMenuOpen && (
                     <div
-                        className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col"
+                        className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center md:hidden"
                         onClick={() => setMobileMenuOpen(false)}
                     >
                         <div
-                            className="bg-white w-full max-w-xs h-full flex flex-col items-center justify-center p-4 mx-auto rounded-l-lg"
+                            className="bg-white w-full max-w-sm mx-4 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
-                                className="mb-6 mx-auto"
+                                className="self-end mb-6"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 <svg
@@ -440,7 +481,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                             <div className="flex flex-col items-center space-y-6 w-full">
                                 {navLinksMobile}
                                 {isAuthenticated
-                                    ? profileMenu
+                                    ? profileMenuMobile
                                     : authButtonsMobile}
                             </div>
                         </div>
@@ -472,8 +513,14 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                     </svg>
                 </button>
                 {mobileMenuOpen && (
-                    <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col">
-                        <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
+                    <div 
+                        className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center md:hidden"
+                        onClick={() => setMobileMenuOpen(false)}
+                    >
+                        <div 
+                            className="bg-white w-full max-w-sm mx-4 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
                             <button
                                 className="self-end mb-6"
                                 onClick={() => setMobileMenuOpen(false)}
@@ -491,9 +538,31 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                                     />
                                 </svg>
                             </button>
-                            <div className="flex flex-col items-start space-y-6 w-full">
-                                {dashboardLinks}
-                                {isAuthenticated ? profileMenu : loggedInRight}
+                            <div className="flex flex-col items-center space-y-6 w-full">
+                                <Link
+                                    href="/dashboard"
+                                    className="text-xl font-medium w-full text-center"
+                                >
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    href="/dashboard/projects"
+                                    className="text-xl font-medium w-full text-center"
+                                >
+                                    Projects
+                                </Link>
+                                <Link
+                                    href="/dashboard/media"
+                                    className="text-xl font-medium w-full text-center"
+                                >
+                                    Media
+                                </Link>
+                                {isAuthenticated ? (
+                                    <div className="flex flex-col items-center space-y-4 w-full">
+                                        {profileMenuMobile}
+                                        {signOutMobile}
+                                    </div>
+                                ) : authButtonsMobile}
                             </div>
                         </div>
                     </div>
@@ -525,8 +594,14 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                     </svg>
                 </button>
                 {mobileMenuOpen && (
-                    <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col">
-                        <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
+                    <div 
+                        className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center md:hidden"
+                        onClick={() => setMobileMenuOpen(false)}
+                    >
+                        <div 
+                            className="bg-white w-full max-w-sm mx-4 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
                             <button
                                 className="self-end mb-6"
                                 onClick={() => setMobileMenuOpen(false)}
@@ -544,11 +619,28 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                                     />
                                 </svg>
                             </button>
-                            <div className="flex flex-col items-start space-y-6 w-full">
+                            <div className="flex flex-col items-center space-y-6 w-full">
                                 {navLinksMobile}
                                 {isAuthenticated
-                                    ? profileMenu
-                                    : authButtonsMobile}
+                                    ? (
+                                        <div className="flex flex-col items-center space-y-4 w-full">
+                                            {profileMenuMobile}
+                                            {signOutMobile}
+                                        </div>
+                                    )
+                                    : (
+                                        <div className="flex flex-col items-center space-y-4 w-full mt-4">
+                                            <Link href="/login" className="text-lg w-full text-center">
+                                                Login
+                                            </Link>
+                                            <Link
+                                                href="/join-us"
+                                                className="w-full text-center bg-black text-white rounded-lg py-2 text-lg font-semibold"
+                                            >
+                                                Sign Up
+                                            </Link>
+                                        </div>
+                                    )}
                             </div>
                         </div>
                     </div>
@@ -560,10 +652,12 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     return (
         <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
             {logo}
-            <div className="flex-1 flex justify-center">
+            <div className="hidden md:flex flex-1 justify-center">
                 {navLinks}
             </div>
-            {rightSide}
+            <div className="hidden md:flex">
+                {rightSide}
+            </div>
             <button
                 className="md:hidden ml-auto"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -578,10 +672,13 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             </button>
             {mobileMenuOpen && (
                 <div
-                    className="fixed inset-0 z-50 bg-black bg-opacity-40 flex flex-col"
+                    className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center md:hidden"
                     onClick={() => setMobileMenuOpen(false)}
                 >
-                    <div className="bg-white w-4/5 max-w-xs h-full p-6 flex flex-col">
+                    <div
+                        className="bg-white w-full max-w-sm mx-4 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <button
                             className="self-end mb-6"
                             onClick={() => setMobileMenuOpen(false)}
@@ -599,9 +696,14 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                                 />
                             </svg>
                         </button>
-                        <div className="flex flex-col items-center space-y-8 w-full max-w-xs">
+                        <div className="flex flex-col items-center space-y-6 w-full">
                             {navLinksMobile}
-                            {isAuthenticated ? profileMenu : authButtonsMobile}
+                            {isAuthenticated ? (
+                                <div className="flex flex-col items-center space-y-4 w-full">
+                                    {profileMenuMobile}
+                                    {signOutMobile}
+                                </div>
+                            ) : authButtonsMobile}
                         </div>
                     </div>
                 </div>
