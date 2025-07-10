@@ -48,7 +48,7 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             <img
                 src="/RadiceLogo_light.png"
                 alt="Radice Logo"
-                className="object-contain h-10 w-36 sm:h-12 sm:w-48 md:h-[50px] md:w-[300px]"
+                className="object-contain h-10 w-20 sm:h-12 sm:w-48 md:h-[50px] md:w-[200px]"
                 style={{ objectFit: "contain", display: "block" }}
             />
         </Link>
