@@ -1,3 +1,5 @@
+import { z } from "zod"; // <--- ✅ Import Zod
+
 import { generateAndFormatZodError } from "@/lib/form";
 import { checkBearerAndPermission } from "@/lib/IAM";
 import {
@@ -9,6 +11,7 @@ import {
 } from "@/lib/response";
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
+import { updateVersionPartsOnPublish } from "@/repositories/version";
 import { updateAppStatus } from "@/repositories/app/internal";
 import { HttpStatusCode } from "@/types/http";
 import { apps } from "@/drizzle/schema";
@@ -20,20 +23,50 @@ type Params = { params: { app_id: string } };
 const successMessage = "App published (status set to pending)";
 const unsuccessMessage = "Failed to publish app";
 
+const schema = z.object({
+    updateType: z.enum(["major", "minor", "patch", "initialize"]),
+});
+
 export async function PATCH(request: Request, { params }: Params) {
     try {
-        const requiredPermission = new Set([]); // Add permissions if needed
+        const requiredPermission = new Set([]);
         const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(request, requiredPermission);
 
-        if (errorNoBearerToken) {
-            return buildNoBearerTokenErrorResponse();
-        }
-        if (errorNoPermission) {
-            return buildNoPermissionErrorResponse();
-        }
+        if (errorNoBearerToken) return buildNoBearerTokenErrorResponse();
+        if (errorNoPermission) return buildNoPermissionErrorResponse();
 
         const appId = Number(params.app_id);
+        if (!appId || isNaN(appId)) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("app_id", "Invalid app ID"),
+                HttpStatusCode.BAD_REQUEST_400
+            );
+        }
+
+        const body = await request.json();
+        const parsed = schema.safeParse(body);
+
+        if (!parsed.success) {
+            const errorMap = Object.fromEntries(
+                Object.entries(parsed.error.format()).map(([field, value]) => {
+                    if ("_errors" in value && Array.isArray(value._errors)) {
+                        return [field, value._errors.join(", ")];
+                    }
+                    return [field, "Invalid input"];
+                })
+            );
+
+            return buildErrorResponse(
+                unsuccessMessage,
+                errorMap,
+                HttpStatusCode.BAD_REQUEST_400
+            );
+        }
+
+        const { updateType } = parsed.data;
+
         const existingApp = await db.query.apps.findFirst({
             where: eq(apps.id, appId),
         });
@@ -45,9 +78,18 @@ export async function PATCH(request: Request, { params }: Params) {
                 HttpStatusCode.NOT_FOUND_404
             );
         }
+        
+        if (existingApp.status === "accepted") {
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError("status", "App with 'accepted' status cannot be published"),
+                HttpStatusCode.FORBIDDEN_403
+            );
+        }
+
+        await updateVersionPartsOnPublish(appId, updateType);
 
         const updatedApp = await updateAppStatus(appId, "pending");
-
         if (!updatedApp) {
             return buildErrorResponse(
                 unsuccessMessage,

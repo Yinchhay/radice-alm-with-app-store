@@ -1,7 +1,7 @@
 import { db } from "@/drizzle/db";
 import { apps } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
-import { getCurrentAndAllPreviousVersionsByProjectId } from "@/repositories/version"; // adjust path
+import { getCurrentAndAllPreviousVersionsByProjectId } from "@/repositories/version";
 import {
     buildErrorResponse,
     buildSuccessResponse,

@@ -284,7 +284,7 @@ export async function POST(
             if (latestAcceptedVersion) {
                 major = latestAcceptedVersion.majorVersion ?? 1;
                 minor = latestAcceptedVersion.minorVersion ?? 0;
-                patch = (latestAcceptedVersion.patchVersion ?? 0) + 1;
+                patch = latestAcceptedVersion.patchVersion ?? 0;
             }
         }
 
