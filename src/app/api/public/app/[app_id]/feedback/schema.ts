@@ -24,9 +24,6 @@ export const createFeedbackFormSchema = z.object({
     starRating: z.enum(["1", "2", "3", "4", "5"], {
         errorMap: () => ({ message: "Rating must be between 1 and 5" }),
     }),
-    testerId: z.string().trim().min(1, {
-        message: "Tester id is required",
-    }),
     appId: z.number().int().min(1, {
         message: "App id is required",
     }),
