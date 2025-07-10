@@ -60,8 +60,11 @@ function AppPage({ params }: { params: { app_id: string } }) {
     
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <span className="text-3xl text-gray-500">Loading...</span>
+            <div className="flex flex-col justify-center items-center min-h-[60vh] animate-fade-in">
+                <svg className="animate-spin h-12 w-12 text-black mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span className="text-lg text-black">Loading app details…</span>
             </div>
         );
     }
@@ -285,7 +288,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 setShowLoginPopup(false);
                                 window.location.href = '/tester-registration';
                             }}
-                            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-600 transition-colors"
                         >
                             Sign Up
                         </button>
