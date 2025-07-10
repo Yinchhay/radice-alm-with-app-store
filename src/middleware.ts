@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { readBearerToken } from "./lib/utils";
+import { readBearerToken, readSessionCookie } from "./auth/lucia-middleware";
 import { buildNoBearerTokenErrorResponse } from "./lib/response";
 
 export function middleware(request: NextRequest) {
@@ -30,7 +30,12 @@ export function middleware(request: NextRequest) {
 
     if (pathname.startsWith("/api/internal")) {
         const authorizationHeader = request.headers.get("Authorization");
-        const sessionId = readBearerToken(authorizationHeader ?? "");
+        let sessionId = readBearerToken(authorizationHeader ?? "");
+
+        if (!sessionId) {
+            const cookieHeader = request.headers.get("cookie");
+            sessionId = readSessionCookie(cookieHeader ?? "");
+        }
 
         if (!sessionId) {
             return buildNoBearerTokenErrorResponse();
