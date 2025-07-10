@@ -105,7 +105,7 @@ export default function AppStorePage() {
     );
 
     const PriorityOrder = [
-        { key: 2, label: "Open for Testing" },
+        { key: 2, label: "Our Best Apps" },
         { key: 1, label: "Live" },
     ];
 
@@ -168,8 +168,11 @@ export default function AppStorePage() {
 
                 <div style={{ marginTop: "60px", marginBottom: "80px" }}>
                     {loading ? (
-                        <div className="flex justify-center items-center py-12">
-                            <div className="text-gray-500">Loading apps...</div>
+                        <div className="flex flex-col justify-center items-center py-24 animate-fade-in">
+                            <svg className="animate-spin h-12 w-12 text-black mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                            <span className="text-lg text-black">Loading apps…</span>
                         </div>
                     ) : error ? (
                         <div className="flex justify-center items-center py-12">
