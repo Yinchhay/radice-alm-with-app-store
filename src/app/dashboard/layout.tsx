@@ -7,6 +7,13 @@ import { cache } from "react";
 import { UserType } from "@/types/user";
 import { ThemeProvider } from "next-themes";
 import { getUserRolesAndRolePermissions_C } from "@/repositories/users";
+import React from 'react';
+import { headers } from 'next/headers';
+
+function isMobileUserAgent(userAgent: string | undefined) {
+  if (!userAgent) return false;
+  return /mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+}
 
 export type CanAccessRoutes = {
     manageUsers: boolean;
@@ -69,6 +76,11 @@ export default async function DashboardManageLayout({
 
     const userWithRoles = await getUserRolesAndRolePermissions_C(user.id);
     // console.log(userWithRoles);
+
+    // SSR: get user-agent from headers
+    const userAgent = headers().get('user-agent');
+    const isMobile = isMobileUserAgent(userAgent);
+
     return (
         <ThemeProvider enableSystem={false} attribute="class">
             <DashboardLayout
@@ -76,7 +88,22 @@ export default async function DashboardManageLayout({
                 canAccessRoutes={canAccessRoutes()}
                 userWithRoles={userWithRoles}
             >
-                {children}
+                {isMobile ? (
+                    <div
+                        className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black bg-opacity-80 text-white text-center px-6 min-h-screen"
+                        style={{ display: 'flex' }}
+                    >
+                        <div className="bg-white bg-opacity-90 text-black rounded-xl p-8 shadow-lg max-w-xs">
+                            <h2 className="text-xl font-bold mb-4">Screen Too Small</h2>
+                            <p className="mb-2">The dashboard is best experienced on a desktop or larger screen.</p>
+                            <p>Please switch to a bigger device to access this page.</p>
+                        </div>
+                    </div>
+                ) : (
+                    <div>
+                        {children}
+                    </div>
+                )}
             </DashboardLayout>
         </ThemeProvider>
     );

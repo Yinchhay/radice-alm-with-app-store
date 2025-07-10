@@ -62,13 +62,13 @@ export default function SideNav({
                         </NavItem>
                     )}
                     {canAccessRoutes.manageApplicationForms && (
-                        <NavItem link="/dashboard/app-store-requests">
+                        <NavItem link="/dashboard/app-store-request">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
                               <path d="M8.99137 12.1635V8.48096" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               <path d="M8.9916 5.83695H8.99993" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               <path fillRule="evenodd" clipRule="evenodd" d="M12.612 1.29187H5.38783C2.87033 1.29187 1.29199 3.07437 1.29199 5.59687V12.4035C1.29199 14.926 2.86283 16.7085 5.38783 16.7085H12.6112C15.137 16.7085 16.7087 14.926 16.7087 12.4035V5.59687C16.7087 3.07437 15.137 1.29187 12.612 1.29187Z" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
-                            <h2>App Store Requests</h2>
+                            <h2>App Store Request</h2>
                         </NavItem>
                     )}
                     {canAccessRoutes.manageApplicationForms && (
