@@ -7,6 +7,10 @@ import React, { useEffect, useState } from 'react';
 interface Feedback {
   id: number;
   testerId?: string;
+  tester?: {
+    firstName?: string;
+    lastName?: string;
+  };
   title: string;
   review: string;
   starRating: number;
@@ -121,7 +125,7 @@ export default function FeedbackTab({ projectId }: FeedbackTabProps) {
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-gray-300" />
                   <div className="text-sm font-medium">
-                    {feedback.tester && feedback.tester.firstName
+                    {feedback.testerId && feedback.tester?.firstName
                       ? `${feedback.tester.firstName} ${feedback.tester.lastName ?? ''}`.trim()
                       : feedback.testerId || 'User'}
                   </div>
