@@ -65,8 +65,8 @@ export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientW
       {/* Tab Content */}
       <div className="py-4">
         {activeTab === 'information' && <InformationTab projectId={projectId} />}
-        {activeTab === 'feedback' && (loading ? <div>Loading...</div> : error ? <div className="text-red-500">{error}</div> : appId ? <FeedbackTab appId={appId} /> : null)}
-        {activeTab === 'bug-reports' && (loading ? <div>Loading...</div> : error ? <div className="text-red-500">{error}</div> : appId ? <BugReportsTab appId={appId} /> : null)}
+        {activeTab === 'feedback' && (loading ? <div>Loading...</div> : error ? <div className="text-red-500">{error}</div> : <FeedbackTab projectId={Number(projectId)} />)}
+        {activeTab === 'bug-reports' && (loading ? <div>Loading...</div> : error ? <div className="text-red-500">{error}</div> : <BugReportsTab projectId={Number(projectId)} />)}
         {activeTab === 'version-logs' && <VersionLogsTab />}
       </div>
     </div>

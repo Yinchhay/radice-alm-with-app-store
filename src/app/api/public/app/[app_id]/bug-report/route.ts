@@ -13,7 +13,7 @@ import { HttpStatusCode } from "@/types/http";
 import jwt from "jsonwebtoken";
 import { db } from "@/drizzle/db"; // or wherever your db client is
 import { eq } from "drizzle-orm";
-import { testers } from "@/drizzle/schema";
+import { testers, bugReports } from "@/drizzle/schema";
 import { Permissions } from "@/types/IAM";
 import { createBugReportFormSchema} from "./schema";
 import { cookies } from "next/headers";
