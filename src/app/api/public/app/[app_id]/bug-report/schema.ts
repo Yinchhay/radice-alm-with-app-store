@@ -18,9 +18,6 @@ export const createBugReportFormSchema = z.object({
         }),
     image: z.string().url().max(500).optional(),
     video: z.string().url().max(500).optional(),
-    testerId: z.string().trim().min(1, {
-        message: "Tester id is required",
-    }),
     appId: z.number().int().min(1, {
         message: "App id is required",
     }),

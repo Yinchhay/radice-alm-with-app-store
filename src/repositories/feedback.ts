@@ -1,6 +1,7 @@
 import { db } from "@/drizzle/db";
 import { ROWS_PER_FEEDBACK_PAGE } from "@/lib/pagination";
 import { feedbacks } from "@/drizzle/schema";
+import { testers } from "@/drizzle/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 
 export const createFeedback = async (
@@ -28,29 +29,37 @@ export async function getAllFeedbacksByAppId(
     appId: number,
     page: number = 1,
     rowsPerPage: number = ROWS_PER_FEEDBACK_PAGE,
-    search: string = "",
 ) {
     try {
         const offset = (page - 1) * rowsPerPage;
-        let whereCondition;
 
-        if (search) {
-            whereCondition = and(
-                eq(feedbacks.appId, appId),
-                or(
-                    like(feedbacks.review, `%${search}%`),
-                    like(feedbacks.title, `%${search}%`),
-                ),
-            );
-        } else {
-            whereCondition = eq(feedbacks.appId, appId);
-        }
+        // const result = await db
+        //     .select()
+        //     .from(feedbacks)
+        //     .where(eq(feedbacks.appId, appId))
+        //     .orderBy(desc(feedbacks.createdAt))
+        //     .limit(rowsPerPage)
+        //     .offset(offset);
+
 
         const result = await db
-            .select()
+            .select({
+                id: feedbacks.id,
+                testerId: feedbacks.testerId,
+                appId: feedbacks.appId,
+                title: feedbacks.title,
+                review: feedbacks.review,
+                starRating: feedbacks.starRating,
+                createdAt: feedbacks.createdAt,
+                updatedAt: feedbacks.updatedAt,
+                tester: {
+                    firstName: testers.firstName,
+                    lastName: testers.lastName,
+                }
+            })
             .from(feedbacks)
-            .where(whereCondition)
-            .orderBy(desc(feedbacks.createdAt))
+            .leftJoin(testers, eq(feedbacks.testerId, testers.id))
+            .where(eq(feedbacks.appId, appId))
             .limit(rowsPerPage)
             .offset(offset);
 
@@ -111,29 +120,13 @@ export async function deleteFeedback(feedbackId: number) {
     }
 }
 
-export async function getFeedbacksTotalRowByAppId(
-    appId: number,
-    search: string = "",
-) {
+export async function getFeedbacksTotalRowByAppId( appId: number) {
     try {
-        let whereCondition;
-
-        if (search) {
-            whereCondition = and(
-                eq(feedbacks.appId, appId),
-                or(
-                    like(feedbacks.review, `%${search}%`),
-                    like(feedbacks.title, `%${search}%`),
-                ),
-            );
-        } else {
-            whereCondition = eq(feedbacks.appId, appId);
-        }
 
         const result = await db
             .select({ count: sql<number>`count(*)` })
             .from(feedbacks)
-            .where(whereCondition);
+            .where(eq(feedbacks.appId, appId));
 
         return result[0].count;
     } catch (error) {
