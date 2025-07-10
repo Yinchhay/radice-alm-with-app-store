@@ -10,7 +10,7 @@ interface AppActionButtonProps {
 const AppActionButton: React.FC<AppActionButtonProps> = ({
     children, onClick, disabled = false, className = ""
 }) => {
-    const baseClasses = "bg-black text-white py-2 px-10 rounded-lg transition-colors w-fit";
+    const baseClasses = "text-sm bg-black text-white py-2 px-10 rounded-lg transition-colors w-fit";
     const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "";
     return (
         <button 

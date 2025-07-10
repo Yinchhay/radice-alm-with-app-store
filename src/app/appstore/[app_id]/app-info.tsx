@@ -9,7 +9,6 @@ import AppReviews from "./_components/app-reviews";
 import BugReportForm from "./_components/bug-report-form";
 import Popup from "@/components/Popup";
 import type { App } from "@/types/app_types";
-import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
 
 export default function AppPageWrapper(props: { params: { app_id: string } }) {
     return <AppPage {...props} />;
@@ -57,7 +56,6 @@ function useApp(appId: string) {
 
 function AppPage({ params }: { params: { app_id: string } }) {
     const { app, loading } = useApp(params.app_id);
-    const { isAuthenticated } = useTesterAuth();
     const [showLoginPopup, setShowLoginPopup] = useState(false);
     
     if (loading) {
@@ -70,7 +68,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
     if (!app) {
         notFound();
     }
-    const { project, appType, webUrl, appFile, apiDocUrl } = app;
+    const { project, appType, webUrl, appFile } = app;
 
     const screenshots =
         app.screenshots?.map((screenshot: any, index: number) => ({
@@ -108,21 +106,17 @@ function AppPage({ params }: { params: { app_id: string } }) {
     return (
         <div className="flex justify-center">
             <div className="flex-1 max-w-[1440px] px-4">
-                <div className="max-w-6xl mx-auto px-4 py-8">
+                <div className="max-w-[1440px] mx-auto px-10 py-8">
                     <div className="mb-8">
-                        {/* Right column */}
                         <AppBanner
-                            bannerImage={
-                                app.bannerImage ||
-                                "/placeholders/logo_placeholder.png"
-                            }
+                            bannerImage={app.bannerImage || "/placeholders/placeholder.png"}
                             title={project?.name || "No Name"}
                             subtitle={app.subtitle}
                         />
                     </div>
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="flex-1 min-w-[260px] max-w-sm flex flex-col justify-start">
-                            <h1 className="text-4xl font-bold mb-2">
+                    <div className="flex flex-col md:flex-row gap-4 min-h-[600px]">
+                        <div className="flex-1 min-w-[260px] max-w-sm flex flex-col justify-center h-full">
+                            <h1 className="text-6xl font-bold mb-2">
                                 {project?.name || "No Name"}
                             </h1>
                             <div className="text-sm text-gray-700 mb-2">
@@ -148,7 +142,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 {action.label}
                             </AppActionButton>
                         </div>
-                        <div className="flex-1 min-w-[300px] max-w-3xl">
+                        <div className="flex-1 min-w-[300px] h-full">
                             <AppScreenshotsCarousel
                                 screenshots={screenshots}
                                 appName={project?.name || "App"}
@@ -157,9 +151,8 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 <h2 className="text-xl mb-4 font-semibold">
                                     About
                                 </h2>
-                                <p className="text-sm text-gray-700">
-                                    {app.aboutDesc ||
-                                        "No description available."}
+                                <p className="text-sm leading-5" style={{ color: "rgba(0,0,0,0.64)" }}>
+                                    {app.aboutDesc || "No description available."}
                                 </p>
                             </div>
                             <div className="mb-10">
@@ -175,21 +168,19 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         Version History
                                     </a>
                                 </div>
-                                <p className="text-sm text-gray-700">
-                                    {app.content ||
-                                        "No update information available."}
+                                <p className="text-sm leading-5" style={{ color: "rgba(0,0,0,0.64)" }}>
+                                    {app.content || "No update information available."}
                                 </p>
                             </div>
                             <div className="mb-10">
-                                <div className="flex flex-col md:flex-row">
+                                <div className="flex flex-col md:flex-row items-start gap-x-80">
                                     {/* Left column */}
-                                    <div className="min-w-[260px] max-w-sm flex flex-col">
+                                    <div className="flex flex-col">
                                         <div className="mb-6">
                                             <h3 className="text-lg font-semibold mb-2">
                                                 Updated on
                                             </h3>
-
-                                            <div className="text-base text-gray-600 mb-2">
+                                            <div className="text-base text-gray-600 mb-3">
                                                 {app.updatedAt
                                                     ? new Date(
                                                         app.updatedAt,
@@ -212,11 +203,12 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="min-w-[260px] max-w-sm flex flex-col md:items-end">
-                                        <h3 className="text-lg font-semibold mb-2">
+                                    {/* Right column */}
+                                    <div className="flex flex-col">
+                                        <h3 className="text-lg font-semibold mb-4">
                                             Compatibility
                                         </h3>
-                                        <div className="flex flex-col gap-2">
+                                        <div className="flex flex-col gap-4">
                                             <div className="flex items-center gap-2">
                                                 <img
                                                     src={
@@ -227,7 +219,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                                     alt="Web"
                                                     className="w-6 h-6"
                                                 />
-                                                <span className="text-base">
+                                                <span className="text-sm">
                                                     Web
                                                 </span>
                                             </div>
@@ -242,7 +234,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                                     alt="Mobile"
                                                     className="w-6 h-6"
                                                 />
-                                                <span className="text-base">
+                                                <span className="text-sm">
                                                     Andriod
                                                 </span>
                                             </div>
@@ -252,7 +244,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                                     alt="iOS"
                                                     className="w-6 h-6"
                                                 />
-                                                <span className="text-base">
+                                                <span className="text-sm">
                                                     iOS
                                                 </span>
                                             </div>
@@ -260,14 +252,14 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mb-12 mt-12">
+                            <div className="mb-10">
                                 <AppReviews
                                     appId={app.id}
                                     appName={project?.name || "App"}
                                     onLoginRequired={() => setShowLoginPopup(true)}
                                 />
                             </div>
-                            <div className="mb-12 mt-12">
+                            <div className="mb-10">
                                 <BugReportForm 
                                     appId={app.id}
                                     onLoginRequired={() => setShowLoginPopup(true)}

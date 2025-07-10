@@ -167,9 +167,9 @@ export default function AppReviews({
         `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase();
 
     return (
-        <div className="mb-8">
+        <div>
             {showHeader && (
-                <div className="flex items-center gap-2 mb-6">
+                <div className="flex items-center gap-2 mb-8">
                     <span className="flex items-baseline">
                         <span className="text-xl font-semibold leading-none">
                             Ratings and Reviews
@@ -188,13 +188,13 @@ export default function AppReviews({
                     </a>
                 </div>
             )}
-            <div className="">
+            <div className="mb-10">
                 {reviews.length === 0 ? (
-                    <div className="text-center mb-3 py-8 text-gray-500">
+                    <div className="text-center py-10 text-gray-500">
                         No reviews yet. Be the first to review {appName}!
                     </div>
                 ) : (
-                    <div className="">
+                    <div>
                         {reviews
                             .slice(0, maxReviews)
                             .map((review, idx, arr) => (
@@ -227,22 +227,20 @@ export default function AppReviews({
                 )}
             </div>
             {showForm && (
-                <div className="mb-6">
+                <div className="">
                     <button
                         type="button"
-                        className="text-xl font-semibold mb-2 flex items-center"
+                        className="text-xl font-semibold flex items-center"
                         onClick={() => {
                             if (!isAuthenticated) {
                                 onLoginRequired?.();
                                 return;
                             }
                             setShowReviewForm((prev) => !prev);
-                        }}
-                    >
+                        }}>
                         Write a Review
                         <span
-                            className={`ml-2 transition-transformation duration-200 ${showReviewForm ? "" : "rotate-180"}`}
-                        >
+                            className={`ml-2 transition-transformation duration-200 ${showReviewForm ? "" : "rotate-180"}`}>
                             <img
                                 src={"/ui/arrow2.svg"}
                                 alt="arrow"
@@ -251,8 +249,8 @@ export default function AppReviews({
                         </span>
                     </button>
                     {showReviewForm && (
-                        <div className="mt-6 p-5">
-                            <div className="flex gap-2 mb-4">
+                        <div className="mt-8 p-5">
+                            <div className="flex gap-2 mb-5">
                                 {renderStars(rating, true, 28)}
                             </div>
                             <div className="mb-5">
@@ -275,7 +273,7 @@ export default function AppReviews({
                                     maxLength={100}
                                 />
                             </div>
-                            <div className="mb-6">
+                            <div className="mb-5">
                                 <label className="block text-xs text-gray-500 mb-2">
                                     Review
                                 </label>

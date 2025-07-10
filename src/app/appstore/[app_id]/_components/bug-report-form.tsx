@@ -99,7 +99,7 @@ export default function BugReportForm({
         <div className="mb-8">
             <button
                 type="button"
-                className="text-xl font-semibold mb-2 flex items-center"
+                className="text-xl font-semibold flex items-center"
                 onClick={() => {
                     if (!isAuthenticated) {
                         onLoginRequired?.();
@@ -114,7 +114,7 @@ export default function BugReportForm({
                 </span>
             </button>
             {showForm && (
-                <div className="mt-6 p-5">
+                <div className="mt-8 p-5">
                     <div className="mb-5">
                         <label className="block text-xs text-gray-500 mb-2">Bug Title *</label>
                         <input
@@ -131,7 +131,7 @@ export default function BugReportForm({
                             maxLength={100}
                         />
                     </div>
-                    <div className="mb-6">
+                    <div className="mb-5">
                         <label className="block text-xs text-gray-500 mb-2">Bug Description *</label>
                         <textarea
                             value={bugDescription}
@@ -149,7 +149,7 @@ export default function BugReportForm({
                             {bugDescription.length}/1000
                         </div>
                     </div>
-                    <div className="mb-6">
+                    <div className="mb-5">
                         <label className="block text-xs text-gray-500 mb-2">Attachments (Optional)</label>
                         <div className="flex gap-4 mb-3 mt-1">
                             <div>
