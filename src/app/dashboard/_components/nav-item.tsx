@@ -11,6 +11,11 @@ export default function NavItem({
 }) {
     const pathName = usePathname();
 
+    const isActive =
+        pathName === link ||
+        (link === "/dashboard/projects" && pathName.startsWith("/dashboard/appstore/")) ||
+        (link === "/dashboard/app-store-request" && pathName.startsWith("/dashboard/app-store-request"));
+
     return (
         <li className="w-full list-none">
             <Link
@@ -27,7 +32,7 @@ export default function NavItem({
                     "w-full",
                     "cursor-pointer",
                     "transition-colors",
-                    (pathName === link || (link === "/dashboard/projects" && pathName.startsWith("/dashboard/appstore/")))
+                    isActive
                         ? "bg-gray-100 font-semibold"
                         : "hover:bg-gray-100",
                 ].join(" ")}

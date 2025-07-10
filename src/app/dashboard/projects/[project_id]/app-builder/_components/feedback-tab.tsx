@@ -11,6 +11,10 @@ interface Feedback {
   review: string;
   starRating: number;
   createdAt: string;
+  tester?: {
+    firstName: string;
+    lastName?: string;
+  };
 }
 
 interface FeedbackTabProps {

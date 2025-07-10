@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 interface BugReport {
   id: number;
@@ -31,7 +31,27 @@ export default function BugReportsTab({ projectId }: BugReportsTabProps) {
   const [bugReports, setBugReports] = useState<BugReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   // Removed debugLogs and addLog
+
+  // ESC key support for closing overlay
+  useEffect(() => {
+    if (!fullscreenImage) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFullscreenImage(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [fullscreenImage]);
+
+  // Helper to extract filename for caption
+  const getImageFilename = useCallback((url: string) => {
+    try {
+      return url.split('/').pop();
+    } catch {
+      return '';
+    }
+  }, []);
 
   useEffect(() => {
     const fetchAllBugReports = async () => {
@@ -136,13 +156,52 @@ export default function BugReportsTab({ projectId }: BugReportsTabProps) {
                 </p>
                 {report.image && (
                   <div className="flex gap-4 flex-wrap">
-                    <img src={report.image} alt="Bug report" className="w-48 h-36 object-cover rounded-lg" />
+                    <img
+                      src={report.image}
+                      alt="Bug report"
+                      className="w-48 h-36 object-cover rounded-lg cursor-pointer"
+                      onClick={() => setFullscreenImage(report.image!)}
+                    />
                   </div>
                 )}
               </div>
             ))
         )}
       </div>
+      {/* Fullscreen image overlay */}
+      {fullscreenImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 animate-fadein"
+          style={{ animation: 'fadein 0.2s' }}
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button
+            className="absolute top-8 right-10 text-white text-4xl font-bold bg-black bg-opacity-60 rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-90 focus:outline-none shadow-lg border border-white/30 transition"
+            onClick={e => { e.stopPropagation(); setFullscreenImage(null); }}
+            aria-label="Close"
+            title="Close"
+          >
+            ×
+          </button>
+          <div className="flex flex-col items-center" onClick={e => e.stopPropagation()}>
+            <img
+              src={fullscreenImage}
+              alt="Full screen bug report"
+              className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white/80 bg-white"
+              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+            />
+            <div className="mt-4 text-white text-sm bg-black bg-opacity-50 px-4 py-1 rounded-lg shadow">
+              {getImageFilename(fullscreenImage)}
+            </div>
+          </div>
+          <style>{`
+            @keyframes fadein {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+          `}</style>
+        </div>
+      )}
     </div>
   );
 }
