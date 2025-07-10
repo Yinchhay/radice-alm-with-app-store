@@ -4,13 +4,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
+type SearchBarProps = {
+    placeholder?: string;
+    searchDelay?: number;
+    className?: string;
+};
+
 export default function SearchBar({
     placeholder = "",
     searchDelay = 250,
-}: {
-    placeholder?: string;
-    searchDelay?: number;
-}) {
+    className,
+}: SearchBarProps) {
     const searchRef = useRef<HTMLInputElement>(null);
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -27,6 +31,7 @@ export default function SearchBar({
             isSearch={true}
             ref={searchRef}
             placeholder={placeholder}
+            className={className}
             onChange={(e) => searchDebounced(e.target.value)}
         />
     );
