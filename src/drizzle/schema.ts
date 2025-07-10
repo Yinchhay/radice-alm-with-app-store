@@ -647,9 +647,9 @@ export const versions = mysqlTable("versions", {
     appId: int("app_id").references(() => apps.id, { onDelete: "set null" }),
     projectId: int("project_id").references(() => projects.id),
     versionNumber: varchar("version_number", { length: 50 }), // e.g., 1.0.0, 1.0.1, 1.1.0
-    majorVersion: int("major_version"),
-    minorVersion: int("minor_version"),
-    patchVersion: int("patch_version"),
+    majorVersion: int("major_version").notNull(),
+    minorVersion: int("minor_version").notNull(),
+    patchVersion: int("patch_version").notNull(),
     isCurrent: boolean("is_current").default(false), // only one current version per project
     content: text("content"), // description of the version
     createdAt: timestamp("created_at").defaultNow(),

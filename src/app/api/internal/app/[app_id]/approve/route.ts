@@ -11,6 +11,10 @@ import { db } from "@/drizzle/db";
 import { eq, and } from "drizzle-orm";
 import { getAcceptedAppByProjectId } from "@/repositories/app/internal";
 import { updateAppStatus } from "@/repositories/app/internal";
+import {
+    setCurrentVersionByAppIdWithTransaction,
+    finalizeVersionNumberOnAccept,
+} from "@/repositories/version";
 import { sendMail } from "@/smtp/mail";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
@@ -20,15 +24,15 @@ import { apps } from "@/drizzle/schema";
 export type FetchApproveAppForm = Record<string, never>;
 
 type Params = { params: { app_id: string } };
+
 const successMessage = "Approve app successfully";
 const unsuccessMessage = "Approve app failed";
 
 export async function PATCH(request: Request, { params }: Params) {
     try {
-        const requiredPermission = new Set([]);
+        const requiredPermission = new Set([Permissions.CHANGE_PROJECT_STATUS]);
         const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(request, requiredPermission);
-
         if (errorNoBearerToken) {
             return buildNoBearerTokenErrorResponse();
         }
@@ -37,6 +41,7 @@ export async function PATCH(request: Request, { params }: Params) {
         }
 
         const appId = Number(params.app_id);
+
         const currentApp = await db.query.apps.findFirst({
             where: eq(apps.id, appId),
         });
@@ -49,6 +54,16 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
+        if (currentApp.status !== "pending")
+            return buildErrorResponse(
+                unsuccessMessage,
+                generateAndFormatZodError(
+                    "unknown",
+                    "Cannot approve app that is not pending"
+                ),
+                HttpStatusCode.FORBIDDEN_403,
+            );
+
         if (currentApp.projectId === null) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -57,34 +72,54 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        const existingAcceptedApp = await getAcceptedAppByProjectId(
-            currentApp.projectId,
-        );
+        const projectId = currentApp.projectId;
 
-        if (existingAcceptedApp && existingAcceptedApp.id !== appId) {
-            await db.delete(apps).where(eq(apps.id, existingAcceptedApp.id));
-        }
-
-        if (existingAcceptedApp) {
-            await db.delete(apps).where(eq(apps.id, existingAcceptedApp.id));
-        }
-
-        const updatedApp = await updateAppStatus(appId, "accepted");
-
-        if (!updatedApp) {
+        // FINALIZE versionNumber based on major/minor/patch
+        const versionFinalized = await finalizeVersionNumberOnAccept(appId);
+        if (!versionFinalized) {
             return buildErrorResponse(
                 unsuccessMessage,
                 generateAndFormatZodError(
                     "unknown",
-                    "Failed to approve app because it does not exist or is not pending",
+                    "Failed to finalize version number",
                 ),
-                HttpStatusCode.NOT_FOUND_404,
+                HttpStatusCode.INTERNAL_SERVER_ERROR_500,
             );
         }
+
+        // Start a transaction to ensure data consistency
+        await db.transaction(async (tx) => {
+            // Check for existing accepted app and delete if different
+            const existingAcceptedApp =
+                await getAcceptedAppByProjectId(projectId);
+            if (existingAcceptedApp && existingAcceptedApp.id !== appId) {
+                await tx
+                    .delete(apps)
+                    .where(eq(apps.id, existingAcceptedApp.id));
+            }
+
+            // Update app status to accepted
+            const updatedApp = await updateAppStatus(appId, "accepted");
+            if (!updatedApp) {
+                throw new Error(
+                    "Failed to approve app because it does not exist or is not pending",
+                );
+            }
+
+            // Set latest version as current (transaction-aware)
+            const versionUpdateSuccess =
+                await setCurrentVersionByAppIdWithTransaction(
+                    tx,
+                    appId,
+                    projectId,
+                );
+            if (!versionUpdateSuccess) {
+                throw new Error("Failed to update version status");
+            }
+        });
 
         return buildSuccessResponse<FetchApproveAppForm>(successMessage, {});
     } catch (error: any) {
         return checkAndBuildErrorResponse(unsuccessMessage, error);
     }
 }
-
