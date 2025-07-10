@@ -680,6 +680,7 @@ export const bugReports = mysqlTable("bug_reports", {
         { onDelete: "cascade" },
     ),
     appId: int("app_id").references(() => apps.id, { onDelete: "cascade" }),
+    projectId: int("project_id").references(() => projects.id),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -691,6 +692,7 @@ export const feedbacks = mysqlTable("feedbacks", {
         { onDelete: "cascade" },
     ),
     appId: int("app_id").references(() => apps.id, { onDelete: "cascade" }),
+    projectId: int("project_id").references(() => projects.id),
     title: varchar("title", { length: 255 }),
     review: text("review"),
     starRating: starRatingEnum,
@@ -910,6 +912,10 @@ export const bugReportRelations = relations(bugReports, ({ one }) => ({
         fields: [bugReports.appId],
         references: [apps.id],
     }),
+    project: one(projects, {
+        fields: [bugReports.id],
+        references: [projects.id]
+    }),
 }));
 
 export const feedbackRelations = relations(feedbacks, ({ one }) => ({
@@ -920,5 +926,9 @@ export const feedbackRelations = relations(feedbacks, ({ one }) => ({
     app: one(apps, {
         fields: [feedbacks.appId],
         references: [apps.id],
+    }),
+    project: one(projects, {
+        fields: [feedbacks.id],
+        references: [projects.id]
     }),
 }));
