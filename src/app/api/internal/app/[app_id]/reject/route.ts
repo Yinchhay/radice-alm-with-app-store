@@ -38,8 +38,19 @@ export async function PATCH(
             return buildNoPermissionErrorResponse();
         }
 
-        const appId = Number(params);
+        const appId = Number(params.app_id);
         
+        // Parse request body for reasoning
+        let reason = "";
+        try {
+            const body = await request.json();
+            if (body && typeof body.reason === "string") {
+                reason = body.reason;
+            }
+        } catch (e) {
+            // ignore, keep reason as empty string
+        }
+
         if (!params.app_id || isNaN(appId)) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -111,8 +122,7 @@ export async function PATCH(
         await sendMail({
             subject: "Radice App Application rejected",
             to: submitter.email,
-            text: `Dear ${submitter.firstName} ${submitter.lastName}, we regret to inform you that your App application has been rejected.
-            `,
+            text: `Dear ${submitter.firstName} ${submitter.lastName}, we regret to inform you that your App application has been rejected.<br /><br /><strong>Reason:</strong> ${reason || "No reason provided."}`,
         });
 
         return buildSuccessResponse<FetchRejectAppForm>(successMessage, {});

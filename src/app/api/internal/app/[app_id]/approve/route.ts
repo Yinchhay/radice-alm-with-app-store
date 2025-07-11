@@ -43,7 +43,18 @@ export async function PATCH(
             return buildNoPermissionErrorResponse();
         }
 
-        const appId = Number(params);
+        const appId = Number(params.app_id);
+
+        // Parse request body for reasoning
+        let reason = "";
+        try {
+            const body = await request.json();
+            if (body && typeof body.reason === "string") {
+                reason = body.reason;
+            }
+        } catch (e) {
+            // ignore, keep reason as empty string
+        }
 
         const currentApp = await db.query.apps.findFirst({
             where: eq(apps.id, appId),
@@ -152,6 +163,8 @@ export async function PATCH(
                 <br />
                 Email: ${submitter.email}
                 <br />
+                <br />
+                <strong>Reason:</strong> ${reason || "No reason provided."}
                 <br />
                 <br />
                 Thanks you`,
