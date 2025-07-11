@@ -8,7 +8,7 @@ import {
     buildSuccessResponse,
 } from "@/lib/response";
 import { db } from "@/drizzle/db";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getAcceptedAppByProjectId } from "@/repositories/app/internal";
 import { updateAppStatus } from "@/repositories/app/internal";
 import {
@@ -19,7 +19,7 @@ import { updateIsAppStatus } from "@/repositories/project";
 import { sendMail } from "@/smtp/mail";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
-import { apps, users, projects } from "@/drizzle/schema";
+import { apps, users, projects, projectMembers } from "@/drizzle/schema";
 
 // update type if we were to return any data back to the response
 export type FetchApproveAppForm = Record<string, never>;
@@ -154,27 +154,43 @@ export async function PATCH(
             await updateIsAppStatus(Number(updatedApp.projectId), true);
         });
 
-        try {
-            await sendMail({
-                subject: "App have been Approved",
-                to: submitter.email,
-                text: `Dear ${submitter.firstName} ${submitter.lastName}, we are pleased to inform you that your App application has been approved.
-                <br />
-                <br />
-                Email: ${submitter.email}
-                <br />
-                <br />
-                <strong>Reason:</strong> ${reason || "No reason provided."}
-                <br />
-                <br />
-                Thanks you`,
-            })
-        }
-        catch(mailError){
-            console.error("Failed to send approval email:", mailError);
-            // Optional: Don't fail the whole request just because of email failure
+        const members = await db.query.projectMembers.findMany({
+            where: eq(projectMembers.projectId, currentApp.projectId!),
+            with: {
+                user: true,
+            },
+        });
+
+        const allRecipients = new Set<string>();
+        allRecipients.add(submitter.email);
+
+        for (const member of members) {
+            if (member.user?.email) {
+                allRecipients.add(member.user.email);
+            }
         }
 
+        
+        for(const email of allRecipients){
+            try {
+
+                await sendMail({
+                    subject: "App have been Approved",
+                    to: email,
+                    text: `Dear Team Member, we are pleased to inform you that your App application has been approved.
+                    <br />
+                    <br />
+                    <strong>Reason:</strong> ${reason || "No reason provided."}
+                    <br />
+                    <br />
+                    Thanks you`,
+                });
+
+            } catch (mailError){
+                console.error(`Failed to send email to ${email}:`, mailError);
+            // Optional: Don't fail the whole request just because of email failure
+            }
+        }
 
         return buildSuccessResponse<FetchApproveAppForm>(successMessage, {});
     } catch (error: any) {

@@ -14,7 +14,7 @@ import { revertVersionNumberOnReject } from "@/repositories/version";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
 import { sendMail } from "@/smtp/mail";
-import { apps, users, projects } from "@/drizzle/schema";
+import { apps, users, projects, projectMembers } from "@/drizzle/schema";
 
 // update type if we were to return any data back to the response
 export type FetchRejectAppForm = Record<string, never>;
@@ -119,11 +119,44 @@ export async function PATCH(
             );
         }
 
-        await sendMail({
-            subject: "Radice App Application rejected",
-            to: submitter.email,
-            text: `Dear ${submitter.firstName} ${submitter.lastName}, we regret to inform you that your App application has been rejected.<br /><br /><strong>Reason:</strong> ${reason || "No reason provided."}`,
+        
+        const members = await db.query.projectMembers.findMany({
+            where: eq(projectMembers.projectId, currentApp.projectId!),
+            with: {
+                user: true,
+            },
         });
+
+        const allRecipients = new Set<string>();
+        allRecipients.add(submitter.email);
+
+        for (const member of members) {
+            if (member.user?.email) {
+                allRecipients.add(member.user.email);
+            }
+        }
+
+        
+        for(const email of allRecipients){
+            try {
+
+                await sendMail({
+                    subject: "App have been Approved",
+                    to: email,
+                    text: `Dear Team Member, we regret to inform you that your App application has been rejected.
+                    <br />
+                    <br />
+                    <strong>Reason:</strong> ${reason || "No reason provided."}
+                    <br />
+                    <br />
+                    Thanks you`,
+                });
+
+            } catch (mailError){
+                console.error(`Failed to send email to ${email}:`, mailError);
+            // Optional: Don't fail the whole request just because of email failure
+            }
+        } 
 
         return buildSuccessResponse<FetchRejectAppForm>(successMessage, {});
     } catch (error: any) {
