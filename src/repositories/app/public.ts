@@ -79,9 +79,15 @@ export async function getAllAcceptedApps() {
             .from(apps)
             .leftJoin(projects, eq(apps.projectId, projects.id))
             .leftJoin(appTypes, eq(apps.type, appTypes.id))
-            .leftJoin(projectCategories, eq(projects.id, projectCategories.projectId))
-            .leftJoin(categories, eq(projectCategories.categoryId, categories.id))
-            .where(eq(apps.status, "accepted"))
+            .leftJoin(
+                projectCategories,
+                eq(projects.id, projectCategories.projectId),
+            )
+            .leftJoin(
+                categories,
+                eq(projectCategories.categoryId, categories.id),
+            )
+            .where(and(eq(apps.status, "accepted"), eq(projects.isApp, true)))
             .orderBy(sql`${apps.id} DESC`);
 
         return acceptedApps;

@@ -15,6 +15,7 @@ import {
     setCurrentVersionByAppIdWithTransaction,
     finalizeVersionNumberOnAccept,
 } from "@/repositories/version";
+import { updateIsAppStatus } from "@/repositories/project";
 import { sendMail } from "@/smtp/mail";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
@@ -87,9 +88,7 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        // Start a transaction to ensure data consistency
         await db.transaction(async (tx) => {
-            // Check for existing accepted app and delete if different
             const existingAcceptedApp =
                 await getAcceptedAppByProjectId(projectId);
             if (existingAcceptedApp && existingAcceptedApp.id !== appId) {
@@ -106,7 +105,6 @@ export async function PATCH(request: Request, { params }: Params) {
                 );
             }
 
-            // Set latest version as current (transaction-aware)
             const versionUpdateSuccess =
                 await setCurrentVersionByAppIdWithTransaction(
                     tx,
@@ -116,6 +114,7 @@ export async function PATCH(request: Request, { params }: Params) {
             if (!versionUpdateSuccess) {
                 throw new Error("Failed to update version status");
             }
+            await updateIsAppStatus(Number(updatedApp.projectId), true);
         });
 
         return buildSuccessResponse<FetchApproveAppForm>(successMessage, {});
