@@ -13,9 +13,8 @@ import { HttpStatusCode } from "@/types/http";
 import jwt from "jsonwebtoken";
 import { db } from "@/drizzle/db"; // or wherever your db client is
 import { eq } from "drizzle-orm";
-import { testers, bugReports } from "@/drizzle/schema";
-import { Permissions } from "@/types/IAM";
-import { createBugReportFormSchema} from "./schema";
+import { testers, bugReports, projects, apps } from "@/drizzle/schema";
+import { createBugReportFormSchema } from "./schema";
 import { cookies } from "next/headers";
 
 export type FetchCreateBugReport = { 
@@ -96,6 +95,18 @@ export async function POST(
         }
       );
     }
+        // Fetch app to get projectId
+    const app = await db.query.apps.findFirst({
+      where: eq(apps.id, appId),
+    });
+
+    if (!app || !app.projectId) {
+      return buildErrorResponse(
+        unsuccessMessage,
+        { app: "App not found or has no project ID" },
+        HttpStatusCode.NOT_FOUND_404
+      );
+    }
 
     const jsonBody = await request.json();
     const parsed = createBugReportFormSchema.safeParse({
@@ -126,6 +137,7 @@ export async function POST(
         video: body.video,
         testerId: testerId,
         appId: body.appId,
+        projectId: app.projectId
     });
 
     if (createResult[0].affectedRows < 1) {

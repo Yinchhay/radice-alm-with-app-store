@@ -1,7 +1,6 @@
 import { db } from "@/drizzle/db";
 import { ROWS_PER_FEEDBACK_PAGE } from "@/lib/pagination";
-import { feedbacks } from "@/drizzle/schema";
-import { testers } from "@/drizzle/schema";
+import { feedbacks, testers, apps } from "@/drizzle/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 
 export const createFeedback = async (
@@ -24,7 +23,7 @@ export async function getFeedbackById(feedbackId: number) {
     }
 }
 
-//Get Feedback By App
+//Get Feedback By Project ID Using App ID
 export async function getAllFeedbacksByAppId(
     appId: number,
     page: number = 1,
@@ -33,20 +32,21 @@ export async function getAllFeedbacksByAppId(
     try {
         const offset = (page - 1) * rowsPerPage;
 
-        // const result = await db
-        //     .select()
-        //     .from(feedbacks)
-        //     .where(eq(feedbacks.appId, appId))
-        //     .orderBy(desc(feedbacks.createdAt))
-        //     .limit(rowsPerPage)
-        //     .offset(offset);
+        const app = await db.query.apps.findFirst({
+            where: eq(apps.id, appId),
+        });
 
+        if (!app || !app.projectId) {
+            throw new Error("App Id is not found");
+        }
+        
 
         const result = await db
             .select({
                 id: feedbacks.id,
                 testerId: feedbacks.testerId,
                 appId: feedbacks.appId,
+                projectId: feedbacks.projectId,
                 title: feedbacks.title,
                 review: feedbacks.review,
                 starRating: feedbacks.starRating,
@@ -59,7 +59,7 @@ export async function getAllFeedbacksByAppId(
             })
             .from(feedbacks)
             .leftJoin(testers, eq(feedbacks.testerId, testers.id))
-            .where(eq(feedbacks.appId, appId))
+            .where(eq(feedbacks.projectId, app.projectId))
             .limit(rowsPerPage)
             .offset(offset);
 
@@ -120,13 +120,21 @@ export async function deleteFeedback(feedbackId: number) {
     }
 }
 
+//Get Feedback Total Row By Project ID Using App ID
 export async function getFeedbacksTotalRowByAppId( appId: number) {
     try {
+        const app = await db.query.apps.findFirst({
+            where: eq(apps.id, appId),
+        });
+
+        if (!app || !app.projectId) {
+            throw new Error("App Id is not found");
+        }
 
         const result = await db
             .select({ count: sql<number>`count(*)` })
             .from(feedbacks)
-            .where(eq(feedbacks.appId, appId));
+            .where(eq(feedbacks.projectId, app.projectId));
 
         return result[0].count;
     } catch (error) {

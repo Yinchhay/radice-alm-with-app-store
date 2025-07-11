@@ -12,9 +12,7 @@ import {
 import { HttpStatusCode } from "@/types/http";
 import { NextRequest } from "next/server";
 import { db } from "@/drizzle/db";
-import { feedbacks } from "@/drizzle/schema";
-import { testers } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { feedbacks, testers } from "@/drizzle/schema";
 
 export type GetFeedbacksReturnType = Awaited<
     ReturnType<typeof getAllFeedbacksByAppId>

@@ -14,7 +14,7 @@ import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import { db } from "@/drizzle/db"; 
 import { eq } from "drizzle-orm";
-import { testers } from "@/drizzle/schema";
+import { testers, apps } from "@/drizzle/schema";
 import { createFeedbackFormSchema } from "../schema";
 import { cookies } from "next/headers";
 
@@ -89,6 +89,18 @@ export async function POST(
             );
         }
 
+        const app = await db.query.apps.findFirst({
+            where: eq(apps.id, appId),
+        });
+    
+        if (!app || !app.projectId) {
+            return buildErrorResponse(
+                unsuccessMessage,
+                { app: "App not found or has no project ID" },
+                HttpStatusCode.NOT_FOUND_404
+            );
+        }
+
         const jsonBody = await request.json();
         const parsed = createFeedbackFormSchema.safeParse({
             ...jsonBody, 
@@ -108,6 +120,7 @@ export async function POST(
         const createResult = await createFeedback({
             appId: body.appId,
             testerId: testerId,
+            projectId: app.projectId,
             title: body.title,
             review: body.review,
             starRating: body.starRating,
