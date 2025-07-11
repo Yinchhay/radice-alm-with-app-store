@@ -560,6 +560,7 @@ export async function getProjectByIdForPublic(project_id: number) {
     });
 }
 
+
 export async function transferProjectOwnership(
     projectId: number,
     transferToUserId: string,
@@ -583,4 +584,11 @@ export async function transferProjectOwnership(
         //     });
         // }
     });
+}
+
+export async function updateIsAppStatus(projectId: number, status: boolean) {
+    return await db
+        .update(projects)
+        .set({ isApp: status, updatedAt: new Date() })
+        .where(eq(projects.id, projectId));
 }

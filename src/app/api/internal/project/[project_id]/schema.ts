@@ -193,3 +193,10 @@ export const updateProjectPublicStatusSchema = z.object({
         invalid_type_error: "Status must be a boolean",
     }),
 });
+
+export const updateProjectAppStatusSchema = z.object({
+    status: z.boolean({
+        required_error: "Status is required",
+        invalid_type_error: "Status must be a boolean",
+    })
+})

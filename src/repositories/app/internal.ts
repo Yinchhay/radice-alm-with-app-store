@@ -6,21 +6,9 @@ import {
     appTypes,
     categories,
     projectCategories,
-    appPriority,
 } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
-import { UserType } from "@/types/user";
-import {
-    sql,
-    or,
-    inArray,
-    count,
-    and,
-    getTableColumns,
-    like,
-    exists,
-} from "drizzle-orm";
-import { z } from "zod";
+import { sql, count, and, like } from "drizzle-orm";
 
 export type AppWithRelations = {
     app: typeof apps.$inferSelect;
