@@ -57,14 +57,14 @@ export default async function Home() {
                     src={"/ui/paragon.svg"}
                     width={240}
                     height={784}
-                    className="absolute left-0 mt-[58px]"
+                    className="absolute right-0 lg:left-0 mt-[58px] w-[180px] h-[588px] lg:w-[240px] lg:h-[784px]"
                 />
             </div>
-            <div className="h-[690px] container m-auto grid grid-cols-2">
-                <div className="w-[560px] flex flex-col justify-end h-full pb-16">
+            <div className="min-h-[500px] md:min-h-[600px] lg:h-[690px] container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-0">
+                <div className="w-full max-w-full lg:w-[560px] flex flex-col justify-center lg:justify-end h-full py-8 lg:pb-16">
                     <div className={roboto_condensed.className}>
                         <div className="overflow-hidden">
-                            <h2 className="uppercase text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal">
+                            <h2 className="uppercase text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal">
                                 Where Ideas<br></br>Come to Life
                             </h2>
                         </div>
@@ -75,7 +75,7 @@ export default async function Home() {
                             development initiatives of Paragon International
                             University.
                         </h1>
-                        <p className="text mt-4">
+                        <p className="text-sm sm:text-base mt-4 max-w-full lg:max-w-none">
                             Radice is a center for applied research and
                             development initiatives of{" "}
                             <span>
@@ -95,14 +95,14 @@ export default async function Home() {
                         </p>
                     </div>
                     <div className={roboto_flex.className}>
-                        <div className="flex relative mt-12 items-center">
+                        <div className="flex flex-col sm:flex-row relative mt-8 lg:mt-12 items-start sm:items-center gap-4 sm:gap-0">
                             <TechButton
                                 link="#r&d"
                                 variant="dark"
                                 text="R & D"
                             />
-                            <div className="ml-6 relative">
-                                <div className="w-24 text-sm h-[36px] leading-[1.25]">
+                            <div className="sm:ml-6 relative">
+                                <div className="w-20 sm:w-24 text-xs sm:text-sm h-[30px] sm:h-[36px] leading-[1.25]">
                                     <RandomText originalText={"RESEARCH &"} />
                                     <RandomText originalText={"DEVELOPMENT"} />
                                 </div>
@@ -111,7 +111,7 @@ export default async function Home() {
                         </div>
                     </div>
                 </div>
-                <div className="relative mt-[300px]">
+                <div className="relative mt-[300px] hidden lg:block">
                     <Eye />
                 </div>
             </div>

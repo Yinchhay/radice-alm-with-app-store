@@ -32,28 +32,28 @@ export default function CategorySection({
                 <>
                     {projects && projects.length > 0 && (
                         <div
-                            className="bg-white py-16 min-h-[700px]"
+                            className="bg-white py-8 lg:py-16 min-h-[400px] lg:min-h-[700px]"
                             id={`${category.name}`}
                         >
-                            <div className="container mx-auto">
+                            <div className="container mx-auto px-4">
                                 <h2
                                     className={[
-                                        "text-6xl font-bold",
+                                        "text-3xl md:text-4xl lg:text-6xl font-bold",
                                         roboto_condensed.className,
                                     ].join(" ")}
                                 >
                                     {category.name}
                                 </h2>
                                 <div>
-                                    <div className="flex justify-between mt-8">
-                                        <div className="w-[600px]">
+                                    <div className="flex flex-col lg:flex-row lg:justify-between mt-6 lg:mt-8 gap-8">
+                                        <div className="w-full lg:w-[600px]">
                                             <CategoryProjectLogo
                                                 variant="light"
                                                 src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
                                             />
                                             <h2
                                                 className={[
-                                                    "font-bold text-4xl mt-8 break-words max-w-[600px]",
+                                                    "font-bold text-2xl md:text-3xl lg:text-4xl mt-6 lg:mt-8 break-words max-w-full lg:max-w-[600px]",
                                                     roboto_condensed.className,
                                                 ].join(" ")}
                                             >
@@ -68,7 +68,7 @@ export default function CategorySection({
                                                     }
                                                 />
                                             </h2>
-                                            <p className="mt-2 mb-12 line-clamp-6 max-w-[510px]">
+                                            <p className="mt-2 mb-8 lg:mb-12 line-clamp-6 max-w-full lg:max-w-[510px]">
                                                 <SpecialEffectSentence
                                                     delay={50}
                                                     shuffleSpeed={25}
@@ -87,19 +87,19 @@ export default function CategorySection({
                                                 text="VIEW"
                                             />
                                         </div>
-                                        <div className="w-[600px]">
-                                            <div className="w-[480px]">
+                                        <div className="w-full lg:w-[600px] order-first lg:order-last">
+                                            <div className="w-full lg:w-[480px] lg:ml-auto">
                                                 <div className="ml-2 flex mb-2">
                                                     <h3
                                                         className={[
-                                                            "border-b-[3px] border-black pb-[2px] uppercase",
+                                                            "border-b-[3px] border-black pb-[2px] uppercase text-sm lg:text-base",
                                                             roboto_flex.className,
                                                         ].join(" ")}
                                                     >
                                                         {category.name}
                                                     </h3>
                                                 </div>
-                                                <ul className="grid grid-cols-5">
+                                                <ul className="grid grid-cols-5 gap-0">
                                                     {projects.map(
                                                         (project, i) => {
                                                             return (
@@ -126,7 +126,7 @@ export default function CategorySection({
                                                                             80
                                                                         }
                                                                         className={[
-                                                                            "aspect-square object-cover duration-200 border border-gray-200 bg-white",
+                                                                            "aspect-square object-cover duration-200 border border-gray-200 bg-white w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20",
                                                                             selectedProject ==
                                                                             i
                                                                                 ? "scale-[90%]"
@@ -136,47 +136,47 @@ export default function CategorySection({
                                                                         )}
                                                                         alt=""
                                                                     />{" "}
-                                                                    <div className="w-[80px] h-[80px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+                                                                    <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
                                                                         <div
                                                                             className={[
-                                                                                "duration-150 group-active:duration-75 border-t border-l border-black w-5 h-5 bg-transparent absolute",
+                                                                                "duration-150 group-active:duration-75 border-t border-l border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
                                                                                 selectedProject !=
                                                                                 i
-                                                                                    ? "top-[-.4rem] left-[-.4rem] opacity-0"
-                                                                                    : "top-[-.15rem] left-[-.15rem]",
+                                                                                    ? "top-[-0.3rem] left-[-0.3rem] sm:top-[-0.35rem] sm:left-[-0.35rem] lg:top-[-0.4rem] lg:left-[-0.4rem] opacity-0"
+                                                                                    : "top-[-0.1rem] left-[-0.1rem] sm:top-[-0.125rem] sm:left-[-0.125rem] lg:top-[-0.15rem] lg:left-[-0.15rem]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
                                                                         ></div>
                                                                         <div
                                                                             className={[
-                                                                                "duration-150 group-active:duration-75 border-b border-l border-black w-5 h-5 bg-transparent absolute",
+                                                                                "duration-150 group-active:duration-75 border-b border-l border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
                                                                                 selectedProject !=
                                                                                 i
-                                                                                    ? "bottom-[-.4rem] left-[-.4rem] opacity-0"
-                                                                                    : "bottom-[-.15rem] left-[-.15rem]",
+                                                                                    ? "bottom-[-0.3rem] left-[-0.3rem] sm:bottom-[-0.35rem] sm:left-[-0.35rem] lg:bottom-[-0.4rem] lg:left-[-0.4rem] opacity-0"
+                                                                                    : "bottom-[-0.1rem] left-[-0.1rem] sm:bottom-[-0.125rem] sm:left-[-0.125rem] lg:bottom-[-0.15rem] lg:left-[-0.15rem]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
                                                                         ></div>
                                                                         <div
                                                                             className={[
-                                                                                "duration-150 group-active:duration-75 border-t border-r border-black w-5 h-5 bg-transparent absolute",
+                                                                                "duration-150 group-active:duration-75 border-t border-r border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
                                                                                 selectedProject !=
                                                                                 i
-                                                                                    ? "top-[-.4rem] right-[-.4rem] opacity-0"
-                                                                                    : "top-[-.15rem] right-[-.15rem]",
+                                                                                    ? "top-[-0.3rem] right-[-0.3rem] sm:top-[-0.35rem] sm:right-[-0.35rem] lg:top-[-0.4rem] lg:right-[-0.4rem] opacity-0"
+                                                                                    : "top-[-0.1rem] right-[-0.1rem] sm:top-[-0.125rem] sm:right-[-0.125rem] lg:top-[-0.15rem] lg:right-[-0.15rem]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
                                                                         ></div>
                                                                         <div
                                                                             className={[
-                                                                                "duration-150 group-active:duration-75 border-b border-r border-black w-5 h-5 bg-transparent absolute",
+                                                                                "duration-150 group-active:duration-75 border-b border-r border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
                                                                                 selectedProject !=
                                                                                 i
-                                                                                    ? "bottom-[-.4rem] right-[-.4rem] opacity-0"
-                                                                                    : "bottom-[-.15rem] right-[-.15rem]",
+                                                                                    ? "bottom-[-0.3rem] right-[-0.3rem] sm:bottom-[-0.35rem] sm:right-[-0.35rem] lg:bottom-[-0.4rem] lg:right-[-0.4rem] opacity-0"
+                                                                                    : "bottom-[-0.1rem] right-[-0.1rem] sm:bottom-[-0.125rem] sm:right-[-0.125rem] lg:bottom-[-0.15rem] lg:right-[-0.15rem]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
@@ -201,28 +201,28 @@ export default function CategorySection({
                 <>
                     {projects && projects.length > 0 && (
                         <div
-                            className="bg-black py-16 text-white min-h-[700px]"
+                            className="bg-black py-8 lg:py-16 text-white min-h-[400px] lg:min-h-[700px]"
                             id={`${category.name}`}
                         >
-                            <div className="container mx-auto">
-                                <div className="flex justify-end">
-                                    <div className="w-[600px]">
-                                        <h2 className="text-5xl font-bold">
+                            <div className="container mx-auto px-4">
+                                <div className="flex justify-start lg:justify-end">
+                                    <div className="w-full lg:w-[600px]">
+                                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
                                             {category.name}
                                         </h2>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <div className="flex justify-between mt-8">
-                                        <div className="w-[600px]">
-                                            <div className="w-[480px]">
+                                    <div className="flex flex-col lg:flex-row lg:justify-between mt-6 lg:mt-8 gap-8">
+                                        <div className="w-full lg:w-[600px] order-last lg:order-first">
+                                            <div className="w-full lg:w-[480px]">
                                                 <div className="ml-2 flex mb-2">
-                                                    <h3 className="border-b-[3px] border-white pb-[2px] uppercase">
+                                                    <h3 className="border-b-[3px] border-white pb-[2px] uppercase text-sm lg:text-base">
                                                         {category.name}
                                                     </h3>
                                                 </div>
-                                                <ul className="grid grid-cols-5">
+                                                <ul className="grid grid-cols-5 gap-0">
                                                     {projects.map(
                                                         (project, i) => {
                                                             return (
@@ -249,7 +249,7 @@ export default function CategorySection({
                                                                             80
                                                                         }
                                                                         className={[
-                                                                            "aspect-square object-cover duration-200 border border-gray-100/25 bg-white",
+                                                                            "aspect-square object-cover duration-200 border border-gray-100/25 bg-white w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20",
                                                                             selectedProject ==
                                                                             i
                                                                                 ? "scale-[90%]"
@@ -259,47 +259,47 @@ export default function CategorySection({
                                                                         )}
                                                                         alt=""
                                                                     />{" "}
-                                                                    <div className="w-[80px] h-[80px] absolute top-2 left-2">
+                                                                    <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
                                                                         <div
                                                                             className={[
-                                                                                "duration-150 group-active:duration-75 border-t border-l border-white w-5 h-5 bg-transparent absolute",
+                                                                                "duration-150 group-active:duration-75 border-t border-l border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
                                                                                 selectedProject !=
                                                                                 i
-                                                                                    ? "top-[-.4rem] left-[-.4rem] opacity-0"
-                                                                                    : "top-[-.15rem] left-[-.15rem]",
+                                                                                    ? "top-[-0.3rem] left-[-0.3rem] sm:top-[-0.35rem] sm:left-[-0.35rem] lg:top-[-0.4rem] lg:left-[-0.4rem] opacity-0"
+                                                                                    : "top-[-0.1rem] left-[-0.1rem] sm:top-[-0.125rem] sm:left-[-0.125rem] lg:top-[-0.15rem] lg:left-[-0.15rem]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
                                                                         ></div>
                                                                         <div
                                                                             className={[
-                                                                                "duration-150 group-active:duration-75 border-b border-l border-white w-5 h-5 bg-transparent absolute",
+                                                                                "duration-150 group-active:duration-75 border-b border-l border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
                                                                                 selectedProject !=
                                                                                 i
-                                                                                    ? "bottom-[-.4rem] left-[-.4rem] opacity-0"
-                                                                                    : "bottom-[-.15rem] left-[-.15rem]",
+                                                                                    ? "bottom-[-0.3rem] left-[-0.3rem] sm:bottom-[-0.35rem] sm:left-[-0.35rem] lg:bottom-[-0.4rem] lg:left-[-0.4rem] opacity-0"
+                                                                                    : "bottom-[-0.1rem] left-[-0.1rem] sm:bottom-[-0.125rem] sm:left-[-0.125rem] lg:bottom-[-0.15rem] lg:left-[-0.15rem]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
                                                                         ></div>
                                                                         <div
                                                                             className={[
-                                                                                "duration-150 group-active:duration-75 border-t border-r border-white w-5 h-5 bg-transparent absolute",
+                                                                                "duration-150 group-active:duration-75 border-t border-r border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
                                                                                 selectedProject !=
                                                                                 i
-                                                                                    ? "top-[-.4rem] right-[-.4rem] opacity-0"
-                                                                                    : "top-[-.15rem] right-[-.15rem]",
+                                                                                    ? "top-[-0.3rem] right-[-0.3rem] sm:top-[-0.35rem] sm:right-[-0.35rem] lg:top-[-0.4rem] lg:right-[-0.4rem] opacity-0"
+                                                                                    : "top-[-0.1rem] right-[-0.1rem] sm:top-[-0.125rem] sm:right-[-0.125rem] lg:top-[-0.15rem] lg:right-[-0.15rem]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
                                                                         ></div>
                                                                         <div
                                                                             className={[
-                                                                                "duration-150 group-active:duration-75 border-b border-r border-white w-5 h-5 bg-transparent absolute",
+                                                                                "duration-150 group-active:duration-75 border-b border-r border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
                                                                                 selectedProject !=
                                                                                 i
-                                                                                    ? "bottom-[-.4rem] right-[-.4rem] opacity-0"
-                                                                                    : "bottom-[-.15rem] right-[-.15rem]",
+                                                                                    ? "bottom-[-0.3rem] right-[-0.3rem] sm:bottom-[-0.35rem] sm:right-[-0.35rem] lg:bottom-[-0.4rem] lg:right-[-0.4rem] opacity-0"
+                                                                                    : "bottom-[-0.1rem] right-[-0.1rem] sm:bottom-[-0.125rem] sm:right-[-0.125rem] lg:bottom-[-0.15rem] lg:right-[-0.15rem]",
                                                                             ].join(
                                                                                 " ",
                                                                             )}
@@ -312,12 +312,12 @@ export default function CategorySection({
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div className="w-[600px]">
+                                        <div className="w-full lg:w-[600px] order-first lg:order-last">
                                             <CategoryProjectLogo
                                                 variant="dark"
                                                 src={`/api/file?filename=${projects[selectedProject].logoUrl}`}
                                             />
-                                            <h2 className="font-bold text-4xl mt-8 break-words max-w-[600px]">
+                                            <h2 className="font-bold text-2xl md:text-3xl lg:text-4xl mt-6 lg:mt-8 break-words max-w-full lg:max-w-[600px]">
                                                 <SpecialEffectText
                                                     delay={50}
                                                     shuffleSpeed={15}
@@ -329,7 +329,7 @@ export default function CategorySection({
                                                     }
                                                 />
                                             </h2>
-                                            <p className="mt-2 mb-12 line-clamp-6 max-w-[510px]">
+                                            <p className="mt-2 mb-8 lg:mb-12 line-clamp-6 max-w-full lg:max-w-[510px]">
                                                 <SpecialEffectSentence
                                                     delay={50}
                                                     shuffleSpeed={25}

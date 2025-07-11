@@ -176,13 +176,13 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
 
     // Mobile profile menu
     const profileMenuMobile = (
-        <div className="flex flex-row items-center justify-center gap-4 w-full rounded-lg">
-            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-700 uppercase">
+        <div className="flex flex-row items-center justify-center gap-3 w-full rounded-lg">
+            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-base font-bold text-gray-700 uppercase">
                 {tester
                     ? `${tester.firstName?.[0] || ""}${tester.lastName?.[0] || ""}`
                     : "?"}
             </div>
-            <span className="text-lg font-medium text-gray-800 text-center">
+            <span className="text-base font-medium text-gray-800 text-center">
                 {tester?.firstName} {tester?.lastName}
             </span>
         </div>
@@ -261,7 +261,6 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     // LoggedIn right side
     const loggedInRight = (
         <div className="flex items-center gap-4">
-            {/* Replace with actual avatar/profile logic as needed */}
             <div
                 style={{
                     width: 32,
@@ -362,29 +361,29 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     );
 
     const navLinksMobile = (
-        <div className="flex flex-col items-center space-y-6 w-full">
+        <div className="flex flex-col items-center space-y-4 w-full">
             <Link
                 href="/about"
-                className="text-xl font-medium w-full text-center"
+                className="text-base font-medium w-full text-center"
             >
                 Who We Are
             </Link>
             <Link
                 href="/media"
-                className="text-xl font-medium w-full text-center"
+                className="text-base font-medium w-full text-center"
             >
                 Media
             </Link>
             <Link
                 href="/dashboard"
-                className="text-xl font-medium w-full text-center"
+                className="text-base font-medium w-full text-center"
             >
                 Developer
             </Link>
             <div className="relative w-full flex flex-col items-center">
                 <Link
                     href="/appstore"
-                    className="text-xl font-medium w-full text-center border-2 border-transparent rounded-lg px-4 py-2 mt-2 mb-1 bg-gradient-to-r from-white to-white bg-clip-padding"
+                    className="text-base font-medium w-full text-center border-2 border-transparent rounded-lg px-4 py-2 mt-2 mb-1 bg-gradient-to-r from-white to-white bg-clip-padding"
                     style={{
                         background:
                             "linear-gradient(white, white) padding-box, linear-gradient(120deg, #ffb56b, #ff5ec4, #7c5fff, #01cfff, #00ff87) border-box",
@@ -400,13 +399,13 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
     );
 
     const authButtonsMobile = (
-        <div className="flex flex-col items-center space-y-4 w-full mt-4">
-            <Link href="/tester-login" className="text-lg w-full text-center">
+        <div className="flex flex-col items-center space-y-3 w-full mt-4">
+            <Link href="/tester-login" className="text-base w-full text-center">
                 Login
             </Link>
             <Link
                 href="/tester-registration"
-                className="w-full text-center bg-black text-white rounded-lg py-2 text-lg font-semibold"
+                className="w-full text-center bg-black text-white rounded-lg py-2 text-base font-semibold"
             >
                 Sign Up
             </Link>
@@ -538,22 +537,22 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                                     />
                                 </svg>
                             </button>
-                            <div className="flex flex-col items-center space-y-6 w-full">
+                            <div className="flex flex-col items-center space-y-4 w-full">
                                 <Link
                                     href="/dashboard"
-                                    className="text-xl font-medium w-full text-center"
+                                    className="text-base font-medium w-full text-center"
                                 >
                                     Dashboard
                                 </Link>
                                 <Link
                                     href="/dashboard/projects"
-                                    className="text-xl font-medium w-full text-center"
+                                    className="text-base font-medium w-full text-center"
                                 >
                                     Projects
                                 </Link>
                                 <Link
                                     href="/dashboard/media"
-                                    className="text-xl font-medium w-full text-center"
+                                    className="text-base font-medium w-full text-center"
                                 >
                                     Media
                                 </Link>
@@ -619,23 +618,23 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                                     />
                                 </svg>
                             </button>
-                            <div className="flex flex-col items-center space-y-6 w-full">
+                            <div className="flex flex-col items-center space-y-4 w-full">
                                 {navLinksMobile}
                                 {isAuthenticated
                                     ? (
-                                        <div className="flex flex-col items-center space-y-4 w-full">
+                                        <div className="flex flex-col items-center space-y-3 w-full">
                                             {profileMenuMobile}
                                             {signOutMobile}
                                         </div>
                                     )
                                     : (
-                                        <div className="flex flex-col items-center space-y-4 w-full mt-4">
-                                            <Link href="/login" className="text-lg w-full text-center">
+                                        <div className="flex flex-col items-center space-y-3 w-full mt-4">
+                                            <Link href="/login" className="text-base w-full text-center">
                                                 Login
                                             </Link>
                                             <Link
                                                 href="/join-us"
-                                                className="w-full text-center bg-black text-white rounded-lg py-2 text-lg font-semibold"
+                                                className="w-full text-center bg-black text-white rounded-lg py-2 text-base font-semibold"
                                             >
                                                 Sign Up
                                             </Link>
@@ -676,11 +675,11 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                     onClick={() => setMobileMenuOpen(false)}
                 >
                     <div
-                        className="bg-white w-full max-w-sm mx-4 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
+                        className="bg-white w-full mx-8 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button
-                            className="self-end mb-6"
+                            className="self-end mb-2"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             <svg
@@ -696,10 +695,10 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                                 />
                             </svg>
                         </button>
-                        <div className="flex flex-col items-center space-y-6 w-full">
+                        <div className="flex flex-col items-center space-y-4 w-full">
                             {navLinksMobile}
                             {isAuthenticated ? (
-                                <div className="flex flex-col items-center space-y-4 w-full">
+                                <div className="flex flex-col items-center space-y-3 w-full">
                                     {profileMenuMobile}
                                     {signOutMobile}
                                 </div>

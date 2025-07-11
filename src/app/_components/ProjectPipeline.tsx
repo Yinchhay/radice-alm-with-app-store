@@ -102,10 +102,10 @@ export default function ProjectPipeline({
     return (
         <>
             {hasProjects && (
-                <div className="bg-black py-16 text-white">
-                    <div className="container mx-auto">
+                <div className="bg-black py-8 lg:py-16 text-white">
+                    <div className="container mx-auto px-4">
                         <h2
-                            className={`text-6xl font-bold mb-6 ${roboto_condensed.className}`}
+                            className={`text-3xl md:text-4xl lg:text-6xl font-bold mb-4 lg:mb-6 ${roboto_condensed.className}`}
                         >
                             Project Pipeline
                         </h2>
@@ -114,11 +114,11 @@ export default function ProjectPipeline({
                                 <div key={status}>
                                     {pipeline[status] && (
                                         <div
-                                            className={`grid grid-cols-6 border-white border-b ${index === statusOrder.length - 1 ? "border-b-0" : ""}`}
+                                            className={`grid grid-cols-1 lg:grid-cols-6 border-white border-b ${index === statusOrder.length - 1 ? "border-b-0" : ""}`}
                                         >
-                                            <div className="grid place-items-center border-r border-white">
+                                            <div className="grid place-items-start lg:place-items-center lg:border-r border-white">
                                                 <h3
-                                                    className={`text-2xl font-bold p-4 ${roboto_condensed.className}`}
+                                                    className={`text-xl lg:text-2xl font-bold p-3 lg:p-4 ${roboto_condensed.className}`}
                                                 >
                                                     {status
                                                         .charAt(0)
@@ -126,7 +126,7 @@ export default function ProjectPipeline({
                                                         status.slice(1)}
                                                 </h3>
                                             </div>
-                                            <ul className="col-span-5 p-4 flex flex-wrap gap-4">
+                                            <ul className="lg:col-span-5 p-3 lg:p-4 flex flex-wrap gap-3 lg:gap-4">
                                                 {pipeline[status].map(
                                                     (project) => (
                                                         <Link
