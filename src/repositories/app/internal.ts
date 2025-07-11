@@ -25,11 +25,6 @@ export type AppWithRelations = {
         name: string;
         description: string | null;
     } | null;
-    priority: {
-        id: number;
-        name: string;
-        description: string | null;
-    } | null;
     categories: {
         id: number;
         name: string;
@@ -55,7 +50,6 @@ export async function getAppWithAllRelations(
                     },
                 },
                 appType: true,
-                priority: true,
             },
         });
 
@@ -82,7 +76,6 @@ export async function getAppWithAllRelations(
                 userId: appData.project.userId ?? "",
             },
             appType: appData.appType,
-            priority: appData.priority,
             categories: projectCategoriesResult.map((pc) => pc.category),
         };
     } catch (error) {
@@ -251,7 +244,6 @@ export async function getAppWithAssociations(id: number) {
                     },
                 },
                 appType: true,
-                priority: true,
             },
         });
 
@@ -274,7 +266,7 @@ export async function editAppById(
         status: string;
         cardImage: string;
         bannerImage: string;
-        featuredPriority: number;
+        featuredPriority: boolean;
     }>,
 ) {
     try {
@@ -316,7 +308,6 @@ export async function editAppById(
                     },
                 },
                 appType: true,
-                priority: true,
             },
         });
 

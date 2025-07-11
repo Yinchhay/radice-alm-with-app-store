@@ -6,7 +6,6 @@ import {
     appTypes,
     categories,
     projectCategories,
-    appPriority,
 } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
@@ -33,11 +32,6 @@ export type AppWithRelations = {
         userId: string;
     };
     appType: {
-        id: number;
-        name: string;
-        description: string | null;
-    } | null;
-    priority: {
         id: number;
         name: string;
         description: string | null;

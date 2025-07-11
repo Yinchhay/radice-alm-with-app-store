@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1751003515317,
-      "tag": "0000_lonely_hairball",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1751706524017,
-      "tag": "0001_slimy_surge",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1751708366050,
-      "tag": "0002_supreme_mandarin",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1751816080472,
-      "tag": "0003_parallel_black_tarantula",
+      "when": 1752225937720,
+      "tag": "0000_quiet_dracula",
       "breakpoints": true
     }
   ]

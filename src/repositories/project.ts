@@ -179,7 +179,6 @@ export async function getProjectsForManageAllProjects(
                     category: true,
                 },
             },
-            apps: true,
         },
         where: (table, { like }) => like(table.name, `%${search}%`),
         limit: rowsPerPage,
@@ -592,4 +591,9 @@ export async function updateIsAppStatus(projectId: number, status: boolean) {
         .update(projects)
         .set({ isApp: status, updatedAt: new Date() })
         .where(eq(projects.id, projectId));
+}
+
+export async function deleteProject(projectId: number) {
+    const result = await db.delete(projects).where(eq(projects.id, projectId));
+    return result;
 }

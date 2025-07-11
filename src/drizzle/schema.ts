@@ -616,15 +616,6 @@ export const appTypes = mysqlTable("app_types", {
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const appPriority = mysqlTable("app_priority", {
-    id: int("id").primaryKey().autoincrement(),
-    name: varchar("name", { length: 255 }).unique().notNull(),
-    description: varchar("description", { length: 500 }),
-    isActive: boolean("is_active").default(true),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-});
-
 export const apps = mysqlTable("apps", {
     id: int("id").primaryKey().autoincrement(),
     projectId: int("project_id").references(() => projects.id),

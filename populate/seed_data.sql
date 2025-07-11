@@ -47,63 +47,18 @@ SET
   /*!80000 '+'*/
   'dda393a2-5589-11f0-8522-daec5656b813:1-529';
 
---
--- Table structure for table `app_priority`
---
-DROP TABLE IF EXISTS `app_priority`;
-
 /*!40101 SET @saved_cs_client     = @@character_set_client */
 ;
 
 /*!50503 SET character_set_client = utf8mb4 */
 ;
 
-CREATE TABLE `app_priority` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `description` varchar(500) DEFAULT NULL,
-  `is_active` tinyint(1) DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT (now()),
-  `updated_at` timestamp NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `app_priority_name_unique` (`name`)
-) ENGINE = InnoDB AUTO_INCREMENT = 3 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 /*!40101 SET character_set_client = @saved_cs_client */
 ;
 
---
--- Dumping data for table `app_priority`
---
-LOCK TABLES `app_priority` WRITE;
-
-/*!40000 ALTER TABLE `app_priority` DISABLE KEYS */
 ;
 
-INSERT INTO
-  `app_priority`
-VALUES
-  (
-    1,
-    'Live',
-    'Live applications',
-    1,
-    '2025-06-30 09:31:56',
-    '2025-06-30 09:31:56'
-  ),
-  (
-    2,
-    'Open for Testing',
-    'Applications open for testing',
-    1,
-    '2025-06-30 09:31:56',
-    '2025-06-30 09:31:56'
-  );
-
-/*!40000 ALTER TABLE `app_priority` ENABLE KEYS */
 ;
-
-UNLOCK TABLES;
 
 --
 -- Table structure for table `app_types`
@@ -1452,7 +1407,7 @@ CREATE TABLE `files` (
   UNIQUE KEY `files_filename_unique` (`filename`),
   KEY `files_user_id_users_id_fk` (`user_id`),
   KEY `files_project_id_projects_id_fk` (`project_id`),
-  CONSTRAINT `files_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
+  CONSTRAINT `files_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `files_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE
   SET
     NULL
@@ -2179,9 +2134,6 @@ DROP TABLE IF EXISTS `apps`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */
 ;
 
-/*!50503 SET character_set_client = utf8mb4 */
-;
-
 CREATE TABLE `apps` (
   `id` int NOT NULL AUTO_INCREMENT,
   `project_id` int DEFAULT NULL,
@@ -2191,48 +2143,60 @@ CREATE TABLE `apps` (
   `content` text,
   `web_url` varchar(500) DEFAULT NULL,
   `app_file` varchar(500) DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'pending',
+  `status` varchar(50) DEFAULT 'draft',
   `card_image` varchar(500) DEFAULT NULL,
   `banner_image` varchar(500) DEFAULT NULL,
-  `featured_priority` int DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT (now()),
-  `updated_at` timestamp NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+  `featured_priority` boolean DEFAULT FALSE,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `apps_project_id_projects_id_fk` (`project_id`),
   KEY `apps_type_app_types_id_fk` (`type`),
-  KEY `apps_featured_priority_app_priority_id_fk` (`featured_priority`),
-  CONSTRAINT `apps_featured_priority_app_priority_id_fk` FOREIGN KEY (`featured_priority`) REFERENCES `app_priority` (`id`),
-  CONSTRAINT `apps_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
-  CONSTRAINT `apps_type_app_types_id_fk` FOREIGN KEY (`type`) REFERENCES `app_types` (`id`)
+  CONSTRAINT `apps_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `apps_type_app_types_id_fk` FOREIGN KEY (`type`) REFERENCES `app_types` (`id`) ON DELETE
+  SET
+    NULL,
 ) ENGINE = InnoDB AUTO_INCREMENT = 20 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
-/*!40101 SET character_set_client = @saved_cs_client */
+/*!50503 SET character_set_client = utf8mb4 */
 ;
 
---
--- Dumping data for table `apps`
---
 LOCK TABLES `apps` WRITE;
 
-/*!40000 ALTER TABLE `apps` DISABLE KEYS */
-;
+ALTER TABLE
+  `apps` DISABLE KEYS;
 
 INSERT INTO
-  `apps`
+  `apps` (
+    `id`,
+    `project_id`,
+    `subtitle`,
+    `type`,
+    `about_desc`,
+    `content`,
+    `web_url`,
+    `app_file`,
+    `status`,
+    `card_image`,
+    `banner_image`,
+    `featured_priority`,
+    `created_at`,
+    `updated_at`
+  )
 VALUES
   (
     1,
     3,
     'Educational Platform',
     3,
-    'This application is made to satisfy Neil\'s needs.',
-    'I WANT TO KILL MYSELF',
+    'This application is made to support learners.',
+    'Educational content here.',
     NULL,
     NULL,
     'pending',
     NULL,
     NULL,
-    1,
+    TRUE,
     '2025-06-30 08:37:35',
     '2025-07-02 13:09:08'
   ),
@@ -2241,46 +2205,46 @@ VALUES
     1,
     'This is Scholarize',
     2,
-    'This application is made to satisfy Neil\'s needs.',
-    'I WANT TO KILL MYSELF',
+    'Academic support tool for students.',
+    'Scholarize intro content.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    2,
+    FALSE,
     '2025-06-30 08:48:48',
     '2025-07-03 08:50:14'
   ),
   (
     6,
     2,
-    'TESTING ',
+    'Testing App',
     1,
-    'chhay is gay chhay is gay chhay is gay chhay is gay chhay is gay chhay is gay chhay is gay ',
-    'chhay is gay chhay is gay chhay is gay ',
+    'Internal QA testing platform.',
+    'Testing notes and logs.',
     'https://radice.paragoniu.app/',
     NULL,
     'accepted',
     NULL,
     NULL,
-    1,
+    TRUE,
     '2025-07-01 17:04:44',
     '2025-07-02 06:36:15'
   ),
   (
     11,
     1,
-    'This is Scholarize',
+    'Scholarize Clone',
     3,
-    'This application is made to satisfy Neil\'s needs.',
-    'I WANT TO KILL MYSELF',
+    'An alternative take on Scholarize.',
+    'More features coming soon.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    1,
+    TRUE,
     '2025-07-03 08:50:26',
     '2025-07-03 09:38:03'
   ),
@@ -2289,129 +2253,132 @@ VALUES
     4,
     'LOL',
     2,
-    'fuck neil fuck neil fuck neil fuck neil fuck neil fuck neil fuck neil fuck neil fuck neil fuck neil fuck neil fuck neil ',
-    'fuck neil fuck neil ',
+    'Humor-based content app.',
+    'Placeholder content.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    2,
+    FALSE,
     '2025-07-03 09:31:42',
     '2025-07-03 09:38:03'
   ),
   (
     13,
     2,
-    'chealinh',
+    'Chealinh',
     1,
-    'wtf is this',
-    'huh huh huh huh huh huh huh huh ',
+    'Fun and informal content.',
+    'Placeholder.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    1,
+    TRUE,
     '2025-07-03 09:31:48',
     '2025-07-03 09:38:03'
   ),
   (
     14,
     5,
-    'chan',
+    'Chan',
     3,
-    'tf boom boom boom boom ',
-    'lol lol lol lol lol lol lol lol lol lol ',
+    'Creative project showcase.',
+    'Visual gallery and description.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    2,
+    FALSE,
     '2025-07-03 09:31:54',
     '2025-07-03 09:38:03'
   ),
   (
     15,
     6,
-    'pen',
+    'Pen',
     2,
-    'boom boom boom boom ',
-    'boom boom boom boom boom boom boom boom boom boom boom boom ',
+    'Productivity tool for notes.',
+    'Organize your ideas.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    1,
+    TRUE,
     '2025-07-03 09:31:58',
     '2025-07-03 09:38:03'
   ),
   (
     16,
     7,
-    'kol',
+    'Kol',
     1,
-    'info info info info info info info info ',
-    'info info info info ',
+    'Information management app.',
+    'Knowledge tracker.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    2,
+    FALSE,
     '2025-07-03 09:32:02',
     '2025-07-03 09:38:03'
   ),
   (
     17,
     8,
-    'bot',
+    'Bot',
     3,
-    'HELOSA SADON SALKD sadpasj d',
-    'dsaiojdoiasjndio a',
+    'Automation and chatbot platform.',
+    'AI powered assistant.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    2,
+    FALSE,
     '2025-07-03 09:32:05',
     '2025-07-03 09:40:10'
   ),
   (
     18,
     9,
-    'so',
+    'So',
     2,
-    'saidjiapsdjaspid',
-    'dsakldnaskndasd',
+    'Communication tool.',
+    'Messaging and collaboration.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    2,
+    FALSE,
     '2025-07-03 09:32:11',
     '2025-07-03 09:38:03'
   ),
   (
     19,
     10,
-    'tea',
+    'Tea',
     1,
-    'saandlksadalsnkd',
-    'anskldnalskndasd',
+    'Lifestyle and wellness platform.',
+    'Daily mindfulness routines.',
     NULL,
     NULL,
     'accepted',
     NULL,
     NULL,
-    2,
+    FALSE,
     '2025-07-03 09:32:16',
     '2025-07-03 09:39:53'
   );
+
+ALTER TABLE
+  `apps` ENABLE KEYS;
 
 /*!40000 ALTER TABLE `apps` ENABLE KEYS */
 ;
