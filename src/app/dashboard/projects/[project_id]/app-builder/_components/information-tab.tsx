@@ -78,6 +78,11 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const [webUrlError, setWebUrlError] = useState('');
   const [debugInfo, setDebugInfo] = useState<any>(null);
 
+  // Add state for update type and what's new
+  const [updateType, setUpdateType] = useState<'major' | 'minor' | 'patch'>('major');
+  const [whatsNew, setWhatsNew] = useState('');
+  const [latestAcceptedVersion, setLatestAcceptedVersion] = useState<{major: number, minor: number, patch: number} | null>(null);
+
   // Static app type options
   const appTypeOptions = [
     { id: 1, name: 'Web' },
@@ -154,8 +159,37 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   }, [projectId]);
 
   useEffect(() => {
+    if (appData && (appData as any).updateType) {
+      setUpdateType((appData as any).updateType as 'major' | 'minor' | 'patch');
+    }
+  }, [appData]);
+
+  useEffect(() => {
     setWebUrlError(validateWebUrl(webUrl));
   }, [webUrl]);
+
+  // Fetch latest accepted version on mount or when appData changes
+  useEffect(() => {
+    async function fetchLatestAcceptedVersion() {
+      if (!appData?.appId) return;
+      try {
+        const res = await fetch(`http://localhost:3000/api/public/app/${appData.appId}/version`);
+        const data = await res.json();
+        if (data.success && data.data && data.data.current && data.data.current.versionNumber) {
+          setLatestAcceptedVersion({
+            major: data.data.current.majorVersion ?? 0,
+            minor: data.data.current.minorVersion ?? 0,
+            patch: data.data.current.patchVersion ?? 0,
+          });
+        } else {
+          setLatestAcceptedVersion(null);
+        }
+      } catch {
+        setLatestAcceptedVersion(null);
+      }
+    }
+    fetchLatestAcceptedVersion();
+  }, [appData?.appId]);
 
   const formatSize = (bytes: number) =>
     bytes < 1024
@@ -278,6 +312,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           aboutDesc: description,
           type: appType !== '' ? Number(appType) : null,
           webUrl, // always send as string
+          updateType,
+          existingContent: appData.app?.content || '',
         });
         if (data.success) {
           setSaveMessage('Saved as draft!');
@@ -298,6 +334,16 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     setSaveMessage(null);
     setDebugInfo(null);
     try {
+      // Save updateType in draft before publishing
+      await saveAppDraft({
+        appId: appData.appId!,
+        subtitle,
+        aboutDesc: description,
+        type: appType !== '' ? Number(appType) : null,
+        webUrl,
+        updateType,
+        existingContent: appData.app?.content || '',
+      });
       // If the current app is accepted, create a new draft app (then set to pending)
       if (currentAppStatus === 'accepted') {
         const res = await fetch(`/api/internal/project/${projectId}/app`, {
@@ -330,6 +376,13 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           const patchData = await patchRes.json();
           setDebugInfo((prev: any) => ({ ...prev, step: 'patch-pending', patchData }));
           if (patchData.success) {
+            // Call publish endpoint to increment version and save what's new
+            await fetch(`/api/internal/app/${data.data.appId}/publish`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ updateType, whatsNew }),
+              credentials: 'include',
+            });
             setSaveMessage('Submitted for review!');
             const updated = await fetchAppBuilderData(projectId);
             if (updated.success && updated.data) {
@@ -362,6 +415,15 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         const data = await res.json();
         setDebugInfo({ step: 'patch-pending', data });
         if (data.success) {
+          // Only call publish endpoint if there is an accepted version
+          if (latestAcceptedVersion) {
+            await fetch(`/api/internal/app/${appData.appId}/publish`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ updateType, whatsNew }),
+              credentials: 'include',
+            });
+          }
           setSaveMessage('Submitted for review!');
         } else {
           setSaveMessage(data.message || 'Failed to submit.');
@@ -374,6 +436,30 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       setSaveLoading(false);
     }
   };
+
+  // Helper to compute next version
+  function getNextVersion() {
+    const v = latestAcceptedVersion;
+    if (!v) return '1.0.0'; // Always show 1.0.0 for brand new app
+    let major = v.major;
+    let minor = v.minor;
+    let patch = v.patch;
+    switch (updateType) {
+      case 'major':
+        major += 1;
+        minor = 0;
+        patch = 0;
+        break;
+      case 'minor':
+        minor += 1;
+        patch = 0;
+        break;
+      case 'patch':
+        patch += 1;
+        break;
+    }
+    return `${major}.${minor}.${patch}`;
+  }
 
   if (loading) {
     return (
@@ -457,6 +543,19 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           </select>
         </div>
 
+        <div className="space-y-1 mt-3">
+          <label className="block text-sm font-medium">About</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+            rows={5}
+            maxLength={300}
+            placeholder="Describe your app..."
+          />
+          <div className="text-xs text-gray-500">{description.length}/300 words</div>
+        </div>
+
         <div className="space-y-1 mt-4">
           <label className="block text-sm font-medium">Request Testing Priority</label>
           <p className="text-xs text-gray-500">
@@ -489,18 +588,37 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         </div>
       </div>
 
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">About</h3>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-          rows={5}
-          maxLength={300}
-          placeholder="Describe your app..."
-        />
-        <div className="text-xs text-gray-500">{description.length}/300 words</div>
-      </div>
+      {/* Update Information Section */}
+      {latestAcceptedVersion && (
+        <div className="space-y-4 bg-white rounded-lg shadow-sm p-4">
+          <h3 className="text-lg font-semibold">Update Information</h3>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium">Update Type</label>
+            <select
+              value={updateType}
+              onChange={e => setUpdateType(e.target.value as 'major' | 'minor' | 'patch')}
+              className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="major">Major</option>
+              <option value="minor">Minor</option>
+              <option value="patch">Patch</option>
+            </select>
+            <div className="text-xs text-gray-600 mt-1">Next version: <span className="font-mono">{getNextVersion()}</span></div>
+          </div>
+          <div className="space-y-1 mt-3">
+            <label className="block text-sm font-medium">What's New</label>
+            <textarea
+              value={whatsNew}
+              onChange={e => setWhatsNew(e.target.value)}
+              className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+              rows={5}
+              maxLength={300}
+              placeholder="Describe what's new in this update..."
+            />
+            <div className="text-xs text-gray-500">{whatsNew.length}/300 words</div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
         <h3 className="text-lg font-semibold">Web URL</h3>

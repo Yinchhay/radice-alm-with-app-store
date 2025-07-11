@@ -306,7 +306,7 @@ export async function POST(
 
         const versionContent = acceptedApp
             ? "- Draft created by cloning accepted app"
-            : "- New draft app created from scratch";
+            : "App Created";
 
         const versionResult = await createVersion({
             appId,

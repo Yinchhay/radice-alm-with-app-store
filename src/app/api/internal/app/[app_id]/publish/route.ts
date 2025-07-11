@@ -14,7 +14,7 @@ import { eq } from "drizzle-orm";
 import { updateVersionPartsOnPublish } from "@/repositories/version";
 import { updateAppStatus } from "@/repositories/app/internal";
 import { HttpStatusCode } from "@/types/http";
-import { apps } from "@/drizzle/schema";
+import { apps, versions } from "@/drizzle/schema";
 
 export type FetchPublishAppForm = Record<string, never>;
 
@@ -25,6 +25,7 @@ const unsuccessMessage = "Failed to publish app";
 
 const schema = z.object({
     updateType: z.enum(["major", "minor", "patch", "initialize"]),
+    whatsNew: z.string().max(300).optional(),
 });
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -65,7 +66,7 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        const { updateType } = parsed.data;
+        const { updateType, whatsNew } = parsed.data;
 
         const existingApp = await db.query.apps.findFirst({
             where: eq(apps.id, appId),
@@ -87,7 +88,28 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        await updateVersionPartsOnPublish(appId, updateType);
+        // Check if there is an accepted version for this app
+        const acceptedVersion = await db.query.versions.findFirst({
+            where: eq(versions.appId, appId),
+            // Only consider versions with a finalized versionNumber (i.e., accepted)
+            // This assumes versionNumber is only set on acceptance
+            // If you have a status field, you can also check for status === 'accepted'
+            // but here we just check for versionNumber
+            orderBy: [versions.createdAt],
+        });
+
+        // Only increment version if there is an accepted version
+        if (acceptedVersion && acceptedVersion.versionNumber) {
+            await updateVersionPartsOnPublish(appId, updateType);
+        }
+
+        // Save 'whatsNew' content to the current version
+        if (typeof whatsNew === 'string' && whatsNew.trim().length > 0) {
+            const version = await db.query.versions.findFirst({ where: eq(versions.appId, appId) });
+            if (version) {
+                await db.update(versions).set({ content: whatsNew, updatedAt: new Date() }).where(eq(versions.id, version.id));
+            }
+        }
 
         const updatedApp = await updateAppStatus(appId, "pending");
         if (!updatedApp) {
