@@ -9,7 +9,7 @@ import {
     fontAligns,
     fontWeights,
     headingFontSizes,
-    paragraphFontSizes, 
+    paragraphFontSizes,
 } from "@/types/content";
 import MemberProfile from "@/app/about/_components/MemberProfile";
 import ImageWithFallback from "@/components/ImageWithFallback";
@@ -35,7 +35,6 @@ export async function generateMetadata(
         redirect("/");
     }
     if (JSON.stringify(fetchProject.data) === "{}") {
-        //console.log("project does not exist");
         redirect("/");
     }
     if (!fetchProject.data.project) {
@@ -109,186 +108,173 @@ export default async function ProjectPage({
     return (
         <div>
             <Navbar />
-            <div className="relative grid grid-cols-[270px_minmax(auto,920px)_270px] w-full max-w-[1500px] mx-auto mt-4">
-                <div className="grid gap-2 w-full z-10 relative h-fit">
-                    <div className="absolute ">
-                        <div className="fixed w-[270px]">
-                            <div className="grid gap-2 w-full px-6 pb-4">
-                                <h2 className="font-bold text-xl">
-                                    {(chapters.length > 0 ||
-                                            project.projectPartners.length >
-                                                0 ||
-                                            project.projectMembers.length >
-                                                0) &&
-                                            "Content"}
-                                        </h2>
-                                <div className="grid">
-                                    {chapters.map((chapter, i) => {
-                                        return (
-                                            <Link
-                                                key={`chapter-${i}`}
-                                                href={`#${chapter.name}-${i}`}
-                                                className="text-gray-500 hover:text-black transition-all py-1"
-                                            >
-                                                {chapter.name}
-                                            </Link>
-                                        );
-                                    })}
-                                    {chapters.length > 0 &&
-                                        (project.projectPartners.length > 0 ||
-                                            project.projectMembers.length >
-                                                0) && (
-                                            <div className="w-[50%] h-[1px] bg-gray-300 my-4"></div>
-                                        )}
-                                    {project.projectPartners.length > 0 && (
-                                        <Link
-                                            href={"#partners"}
-                                            className="text-gray-500 hover:text-black transition-all py-1"
-                                        >
-                                            Partners
-                                        </Link>
-                                    )}
-                                    {project.projectMembers.length > 0 && (
-                                        <Link
-                                            href={"#members"}
-                                            className="text-gray-500 hover:text-black transition-all py-1"
-                                        >
-                                            Members
-                                        </Link>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="z-[5] relative bg-transparent">
-                    <div className="w-full px-8 grid gap-4">
-                        <div className="flex gap-8 items-center">
-                            <ImageWithFallback
-                                className="border border-gray-300 object-cover aspect-square"
-                                width={80}
-                                height={80}
-                                src={fileToUrl(project.logoUrl)}
-                                alt=""
-                            />
-                            <h1 className="text-5xl font-bold">
-                                {project.name}
-                            </h1>
-                        </div>
-                        <p>{project.description}</p>
-                        <ChipsHolder className="mb-4">
-                            {project.projectCategories.map((category, i) => (
-                                <Chip key={`category-${category.id}}`}>
-                                    {category.category.name}
-                                </Chip>
-                            ))}
-                        </ChipsHolder>
-                        {chapters.length > 0 && (
-                            <div className="grid gap-8 border-t border-gray-300 py-8">
-                                {chapters.map((chapter, j) => {
-                                    return (
-                                        <div
-                                            key={`${chapter.name}-${j}`}
-                                            className="grid gap-8"
-                                            id={`${chapter.name}-${j}`}
-                                        >
-                                            {chapter.components.map(
-                                                (component, i) => {
-                                                    let componentBlock;
-                                                    switch (component.type) {
-                                                        case "heading":
-                                                            componentBlock = (
-                                                                <h1
-                                                                    key={i}
-                                                                    className="w-full resize-none focus:outline-none overflow-hidden bg-transparent"
+            <div className="relative w-full max-w-[1500px] mx-auto mt-4">
+                {/* Mobile Layout */}
+                <div className="block lg:hidden px-4 sm:px-6">
+                    <div className="flex flex-col items-center text-center mb-6">
+                        <ImageWithFallback
+                            className="border border-gray-300 object-cover aspect-square mb-4"
+                            width={120}
+                            height={120}
+                            src={fileToUrl(project.logoUrl)}
+                            alt=""
+                        />
+                        <h1 className="text-3xl font-bold">
+                            {project.name}
+                        </h1>
+                        <ChipsHolder className="">
+                                {project.projectCategories.map((category, i) => (
+                                    <Chip key={`category-${category.id}}`}>
+                                        {category.category.name}
+                                    </Chip>
+                                ))}
+                            </ChipsHolder>
+                    </div> 
+                    <p className="mb-5 text-sm">{project.description}</p>
+
+
+                    {/* Mobile Content */}
+                    {chapters.length > 0 && (
+                        <div className="grid gap-6 border-t border-gray-300 py-6">
+                            {chapters.map((chapter, j) => (
+                                <div
+                                    key={`${chapter.name}-${j}`}
+                                    className="grid gap-4"
+                                    id={`${chapter.name}-${j}`}
+                                >
+                                    {chapter.components.map((component, i) => {
+                                        let componentBlock;
+                                        switch (component.type) {
+                                            case "heading":
+                                                componentBlock = (
+                                                    <h1
+                                                        key={i}
+                                                        style={{
+                                                            fontSize: '22px',
+                                                            lineHeight: '1.6',
+                                                            fontWeight:
+                                                                component.style &&
+                                                                component
+                                                                    .style
+                                                                    .fontWeight !==
+                                                                    undefined
+                                                                    ? fontWeights[
+                                                                          component
+                                                                              .style
+                                                                              .fontWeight
+                                                                      ]
+                                                                          .value
+                                                                    : fontWeights[2]
+                                                                          .value,
+                                                            textAlign:
+                                                                component.style &&
+                                                                component
+                                                                    .style
+                                                                    .fontAlign !==
+                                                                    undefined
+                                                                    ? (fontAligns[
+                                                                          component
+                                                                              .style
+                                                                              .fontAlign
+                                                                      ]
+                                                                          .value as TextAlign)
+                                                                    : (fontAligns[1]
+                                                                          .value as TextAlign),
+                                                        }}
+                                                    >
+                                                        {component.text}
+                                                    </h1>
+                                                );
+                                                break;
+                                            case "image":
+                                                componentBlock = (
+                                                    <Image
+                                                        key={i}
+                                                        src={fileToUrl(component.text)}
+                                                        alt={""}
+                                                        width={100}
+                                                        height={100}
+                                                        layout="responsive"
+                                                        style={{
+                                                            width: "100%",
+                                                            height: "auto",
+                                                        }}
+                                                    />
+                                                );
+                                                break;
+                                            case "paragraph":
+                                                componentBlock = (
+                                                    <p
+                                                        className="w-full resize-none focus:outline-none overflow-hidden bg-transparent text-sm sm:text-base"
+                                                        style={{
+                                                            fontSize: '14px',
+                                                            lineHeight: '1.6',
+                                                            fontWeight:
+                                                                component.style &&
+                                                                component
+                                                                    .style
+                                                                    .fontWeight !==
+                                                                    undefined
+                                                                    ? fontWeights[
+                                                                          component
+                                                                              .style
+                                                                              .fontWeight
+                                                                      ]
+                                                                          .value
+                                                                    : fontWeights[1]
+                                                                          .value,
+                                                            textAlign:
+                                                                component.style &&
+                                                                component
+                                                                    .style
+                                                                    .fontAlign !==
+                                                                    undefined
+                                                                    ? (fontAligns[
+                                                                          component
+                                                                              .style
+                                                                              .fontAlign
+                                                                      ]
+                                                                          .value as TextAlign)
+                                                                    : (fontAligns[0]
+                                                                          .value as TextAlign),
+                                                        }}
+                                                    >
+                                                        {component.text}
+                                                    </p>
+                                                );
+                                                break;
+                                            case "list":
+                                                componentBlock = (
+                                                    <div>
+                                                        <h3
+                                                            className="w-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                                            style={{
+                                                                fontSize: '14px',
+                                                                lineHeight: '1.6',
+                                                                fontWeight:
+                                                                    component.style &&
+                                                                    component
+                                                                        .style
+                                                                        .fontWeight !==
+                                                                        undefined
+                                                                        ? fontWeights[
+                                                                              component
+                                                                                  .style
+                                                                                  .fontWeight
+                                                                          ]
+                                                                              .value
+                                                                        : fontWeights[1]
+                                                                              .value,
+                                                            }}
+                                                        >
+                                                            {component.text}
+                                                        </h3>
+                                                        <ul className="list-disc pl-6">
+                                                            {component.rows?.map((row, i) => (
+                                                                <li
                                                                     style={{
-                                                                        fontSize:
-                                                                            component.style &&
-                                                                            component
-                                                                                .style
-                                                                                .fontSize !==
-                                                                                undefined
-                                                                                ? headingFontSizes[
-                                                                                      component
-                                                                                          .style
-                                                                                          .fontSize
-                                                                                  ]
-                                                                                      .value
-                                                                                : headingFontSizes[2]
-                                                                                      .value,
-                                                                        fontWeight:
-                                                                            component.style &&
-                                                                            component
-                                                                                .style
-                                                                                .fontWeight !==
-                                                                                undefined
-                                                                                ? fontWeights[
-                                                                                      component
-                                                                                          .style
-                                                                                          .fontWeight
-                                                                                  ]
-                                                                                      .value
-                                                                                : fontWeights[2]
-                                                                                      .value,
-                                                                        textAlign:
-                                                                            component.style &&
-                                                                            component
-                                                                                .style
-                                                                                .fontAlign !==
-                                                                                undefined
-                                                                                ? (fontAligns[
-                                                                                      component
-                                                                                          .style
-                                                                                          .fontAlign
-                                                                                  ]
-                                                                                      .value as TextAlign)
-                                                                                : (fontAligns[1]
-                                                                                      .value as TextAlign),
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        component.text
-                                                                    }
-                                                                </h1>
-                                                            );
-                                                            break;
-                                                        case "image":
-                                                            componentBlock = (
-                                                                <Image
-                                                                    key={i}
-                                                                    src={fileToUrl(
-                                                                        component.text,
-                                                                    )}
-                                                                    alt={""}
-                                                                    width={100}
-                                                                    height={100}
-                                                                    layout="responsive"
-                                                                    style={{
-                                                                        width: "100%",
-                                                                        height: "auto",
-                                                                    }}
-                                                                />
-                                                            );
-                                                            break;
-                                                        case "paragraph":
-                                                            componentBlock = (
-                                                                <p
-                                                                    className="w-full resize-none focus:outline-none overflow-hidden bg-transparent"
-                                                                    style={{
-                                                                        fontSize:
-                                                                            component.style &&
-                                                                            component
-                                                                                .style
-                                                                                .fontSize !==
-                                                                                undefined
-                                                                                ? paragraphFontSizes[
-                                                                                      component
-                                                                                          .style
-                                                                                          .fontSize
-                                                                                  ]
-                                                                                      .value
-                                                                                : paragraphFontSizes[1]
-                                                                                      .value,
+                                                                        fontSize: '14px',
+                                                                        lineHeight: '1.6',
                                                                         fontWeight:
                                                                             component.style &&
                                                                             component
@@ -303,48 +289,213 @@ export default async function ProjectPage({
                                                                                       .value
                                                                                 : fontWeights[1]
                                                                                       .value,
-                                                                        textAlign:
-                                                                            component.style &&
-                                                                            component
-                                                                                .style
-                                                                                .fontAlign !==
-                                                                                undefined
-                                                                                ? (fontAligns[
-                                                                                      component
-                                                                                          .style
-                                                                                          .fontAlign
-                                                                                  ]
-                                                                                      .value as TextAlign)
-                                                                                : (fontAligns[0]
-                                                                                      .value as TextAlign),
                                                                     }}
+                                                                    key={`row-${component.id}-${i}`}
                                                                 >
-                                                                    {
-                                                                        component.text
-                                                                    }
-                                                                </p>
-                                                            );
-                                                            break;
-                                                        case "list":
-                                                            componentBlock = (
-                                                                <div>
-                                                                    <h3
-                                                                        className="w-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                                                    {row}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                );
+                                                break;
+                                        }
+                                        return componentBlock;
+                                    })}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Mobile Partners/Members sections */}
+                    {project.projectPartners.length > 0 && (
+                        <div className="py-6 border-t border-gray-300" id="partners">
+                            <h1 className="text-center font-bold text-2xl sm:text-3xl mb-6">
+                                Our Partners
+                            </h1>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 place-items-center">
+                                {project.projectPartners.map((projectPartner, i) => (
+                                    <MemberProfile
+                                        userType="partner"
+                                        key={`member-${projectPartner.partner.id}-${i}`}
+                                        member={projectPartner.partner}
+                                        variant="light"
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {project.projectMembers.length > 0 && (
+                        <div className="py-6 border-t border-gray-300" id="members">
+                            <h1 className="text-center font-bold text-2xl sm:text-3xl mb-6">
+                                Our Members
+                            </h1>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 place-items-center">
+                                {project.projectMembers.map((member, i) => {
+                                    if (member.title.length > 0) {
+                                        return (
+                                            <MemberProfile
+                                                useTitle
+                                                customTitle={member.title}
+                                                key={`member-${member.user.id}-${i}`}
+                                                member={member.user}
+                                                variant="light"
+                                            />
+                                        );
+                                    }
+                                    return (
+                                        <MemberProfile
+                                            key={`member-${member.user.id}-${i}`}
+                                            member={member.user}
+                                            variant="light"
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Mobile Stepper */}
+                    <div className="mt-6">
+                        <Stepper projectStatus={projectStatusElements} />
+                    </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden lg:grid grid-cols-[270px_minmax(auto,920px)_270px]">
+                    <div className="grid gap-2 w-full z-10 relative h-fit">
+                        <div className="absolute ">
+                            <div className="fixed w-[270px]">
+                                <div className="grid gap-2 w-full px-6 pb-4">
+                                    <h2 className="font-bold text-xl">
+                                        {(chapters.length > 0 ||
+                                            project.projectPartners.length > 0 ||
+                                            project.projectMembers.length > 0) &&
+                                            "Content"}
+                                    </h2>
+                                    <div className="grid">
+                                        {chapters.map((chapter, i) => {
+                                            return (
+                                                <Link
+                                                    key={`chapter-${i}`}
+                                                    href={`#${chapter.name}-${i}`}
+                                                    className="text-gray-500 hover:text-black transition-all py-1"
+                                                >
+                                                    {chapter.name}
+                                                </Link>
+                                            );
+                                        })}
+                                        {chapters.length > 0 &&
+                                            (project.projectPartners.length > 0 ||
+                                                project.projectMembers.length > 0) && (
+                                                <div className="w-[50%] h-[1px] bg-gray-300 my-4"></div>
+                                            )}
+                                        {project.projectPartners.length > 0 && (
+                                            <Link
+                                                href={"#partners"}
+                                                className="text-gray-500 hover:text-black transition-all py-1"
+                                            >
+                                                Partners
+                                            </Link>
+                                        )}
+                                        {project.projectMembers.length > 0 && (
+                                            <Link
+                                                href={"#members"}
+                                                className="text-gray-500 hover:text-black transition-all py-1"
+                                            >
+                                                Members
+                                            </Link>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="z-[5] relative bg-transparent">
+                        <div className="w-full px-8 grid gap-4">
+                            <div className="flex gap-8 items-center">
+                                <ImageWithFallback
+                                    className="border border-gray-300 object-cover aspect-square"
+                                    width={80}
+                                    height={80}
+                                    src={fileToUrl(project.logoUrl)}
+                                    alt=""
+                                />
+                                <h1 className="text-5xl font-bold">
+                                    {project.name}
+                                </h1>
+                            </div>
+                            <p>{project.description}</p>
+                            <ChipsHolder className="mb-4">
+                                {project.projectCategories.map((category, i) => (
+                                    <Chip key={`category-${category.id}}`}>
+                                        {category.category.name}
+                                    </Chip>
+                                ))}
+                            </ChipsHolder>
+                            {chapters.length > 0 && (
+                                <div className="grid gap-8 border-t border-gray-300 py-8">
+                                    {chapters.map((chapter, j) => {
+                                        return (
+                                            <div
+                                                key={`${chapter.name}-${j}`}
+                                                className="grid gap-8"
+                                                id={`${chapter.name}-${j}`}
+                                            >
+                                                {chapter.components.map(
+                                                    (component, i) => {
+                                                        let componentBlock;
+                                                        switch (component.type) {
+                                                            case "heading":
+                                                                componentBlock = (
+                                                                    <h1
+                                                                        key={i}
+                                                                        className="w-full resize-none focus:outline-none overflow-hidden bg-transparent text-sm sm:text-base"
                                                                         style={{
-                                                                            fontSize:
+                                                                            fontSize: `clamp(14px, 4vw, 18px)`,
+                                                                            lineHeight: '1.6',
+                                                                            fontWeight:
                                                                                 component.style &&
-                                                                                component
-                                                                                    .style
-                                                                                    .fontSize !==
-                                                                                    undefined
-                                                                                    ? paragraphFontSizes[
-                                                                                          component
-                                                                                              .style
-                                                                                              .fontSize
-                                                                                      ]
-                                                                                          .value
-                                                                                    : paragraphFontSizes[1]
-                                                                                          .value,
+                                                                                component.style.fontWeight !==undefined? fontWeights[
+                                                                                component.style.fontWeight].value: fontWeights[2].value,
+                                                                            textAlign:
+                                                                                component.style &&
+                                                                                component.style.fontAlign !==undefined? (fontAligns[
+                                                                                component.style.fontAlign].value as TextAlign): (fontAligns[1].value as TextAlign),
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            component.text
+                                                                        }
+                                                                    </h1>
+                                                                );
+                                                                break;
+                                                            case "image":
+                                                                componentBlock = (
+                                                                    <Image
+                                                                        key={i}
+                                                                        src={fileToUrl(
+                                                                            component.text,
+                                                                        )}
+                                                                        alt={""}
+                                                                        width={100}
+                                                                        height={100}
+                                                                        layout="responsive"
+                                                                        style={{
+                                                                            width: "100%",
+                                                                            height: "auto",
+                                                                        }}
+                                                                    />
+                                                                );
+                                                                break;
+                                                            case "paragraph":
+                                                                componentBlock = (
+                                                                    <p
+                                                                        className="w-full resize-none focus:outline-none overflow-hidden bg-transparent text-sm sm:text-base"
+                                                                        style={{
+                                                                            fontSize: `clamp(14px, 4vw, 18px)`,
+                                                                            lineHeight: '1.6',
                                                                             fontWeight:
                                                                                 component.style &&
                                                                                 component
@@ -359,134 +510,166 @@ export default async function ProjectPage({
                                                                                           .value
                                                                                     : fontWeights[1]
                                                                                           .value,
+                                                                            textAlign:
+                                                                                component.style &&
+                                                                                component
+                                                                                    .style
+                                                                                    .fontAlign !==
+                                                                                    undefined
+                                                                                    ? (fontAligns[
+                                                                                          component
+                                                                                              .style
+                                                                                              .fontAlign
+                                                                                      ]
+                                                                                          .value as TextAlign)
+                                                                                    : (fontAligns[0]
+                                                                                          .value as TextAlign),
                                                                         }}
                                                                     >
                                                                         {
                                                                             component.text
                                                                         }
-                                                                    </h3>
-                                                                    <ul className="list-disc pl-6">
-                                                                        {component.rows?.map(
-                                                                            (
-                                                                                row,
-                                                                                i,
-                                                                            ) => {
-                                                                                return (
-                                                                                    <li
-                                                                                        style={{
-                                                                                            fontSize:
-                                                                                                component.style &&
-                                                                                                component
-                                                                                                    .style
-                                                                                                    .fontSize !==
-                                                                                                    undefined
-                                                                                                    ? paragraphFontSizes[
-                                                                                                          component
-                                                                                                              .style
-                                                                                                              .fontSize
-                                                                                                      ]
-                                                                                                          .value
-                                                                                                    : paragraphFontSizes[1]
-                                                                                                          .value,
-                                                                                            fontWeight:
-                                                                                                component.style &&
-                                                                                                component
-                                                                                                    .style
-                                                                                                    .fontWeight !==
-                                                                                                    undefined
-                                                                                                    ? fontWeights[
-                                                                                                          component
-                                                                                                              .style
-                                                                                                              .fontWeight
-                                                                                                      ]
-                                                                                                          .value
-                                                                                                    : fontWeights[1]
-                                                                                                          .value,
-                                                                                        }}
-                                                                                        key={`row-${component.id}-${i}`}
-                                                                                    >
-                                                                                        {
-                                                                                            row
-                                                                                        }
-                                                                                    </li>
-                                                                                );
-                                                                            },
-                                                                        )}
-                                                                    </ul>
-                                                                </div>
-                                                            );
-                                                            break;
-                                                    }
-                                                    return componentBlock;
-                                                },
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                        {project.projectPartners.length > 0 && (
-                            <div
-                                className="py-8 border-t border-gray-300"
-                                id="partners"
-                            >
-                                <h1 className="text-center font-bold text-4xl mb-8">
-                                    Our Partners
-                                </h1>
-                                <div className="flex justify-center gap-8 flex-wrap">
-                                    {project.projectPartners.map(
-                                        (projectPartner, i) => {
-                                            return (
-                                                <MemberProfile
-                                                    userType="partner"
-                                                    key={`member-${projectPartner.partner.id}-${i}`}
-                                                    member={
-                                                        projectPartner.partner
-                                                    }
-                                                    variant="light"
-                                                />
-                                            );
-                                        },
-                                    )}
+                                                                    </p>
+                                                                );
+                                                                break;
+                                                            case "list":
+                                                                componentBlock = (
+                                                                    <div>
+                                                                        <h3
+                                                                            className="w-full resize-none focus:outline-none overflow-hidden bg-transparent"
+                                                                            style={{
+                                                                                fontSize: `clamp(14px, 4vw, 18px)`,
+                                                                                fontWeight:
+                                                                                    component.style &&
+                                                                                    component
+                                                                                        .style
+                                                                                        .fontWeight !==
+                                                                                        undefined
+                                                                                        ? fontWeights[
+                                                                                              component
+                                                                                                  .style
+                                                                                                  .fontWeight
+                                                                                          ]
+                                                                                              .value
+                                                                                        : fontWeights[1]
+                                                                                              .value,
+                                                                            }}
+                                                                        >
+                                                                            {
+                                                                                component.text
+                                                                            }
+                                                                        </h3>
+                                                                        <ul className="list-disc pl-6">
+                                                                            {component.rows?.map(
+                                                                                (
+                                                                                    row,
+                                                                                    i,
+                                                                                ) => {
+                                                                                    return (
+                                                                                        <li
+                                                                                            style={{
+                                                                                                fontSize: `clamp(14px, 4vw, 18px)`,
+                                                                                                lineHeight: '1.6',
+                                                                                                fontWeight:
+                                                                                                    component.style &&
+                                                                                                    component
+                                                                                                        .style
+                                                                                                        .fontWeight !==
+                                                                                                        undefined
+                                                                                                        ? fontWeights[
+                                                                                                              component
+                                                                                                                  .style
+                                                                                                                  .fontWeight
+                                                                                                          ]
+                                                                                                              .value
+                                                                                                        : fontWeights[1]
+                                                                                                              .value,
+                                                                                            }}
+                                                                                            key={`row-${component.id}-${i}`}
+                                                                                        >
+                                                                                            {
+                                                                                                row
+                                                                                            }
+                                                                                        </li>
+                                                                                    );
+                                                                                },
+                                                                            )}
+                                                                        </ul>
+                                                                    </div>
+                                                                );
+                                                                break;
+                                                        }
+                                                        return componentBlock;
+                                                    },
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            </div>
-                        )}
-                        {project.projectMembers.length > 0 && (
-                            <div
-                                className="py-8 border-t border-gray-300"
-                                id="members"
-                            >
-                                <h1 className="text-center font-bold text-4xl mb-8">
-                                    Our Members
-                                </h1>
-                                <div className="flex justify-center gap-8 flex-wrap">
-                                    {project.projectMembers.map((member, i) => {
-                                        if (member.title.length > 0) {
+                            )}
+                            {project.projectPartners.length > 0 && (
+                                <div
+                                    className="py-8 border-t border-gray-300"
+                                    id="partners"
+                                >
+                                    <h1 className="text-center font-bold text-4xl mb-8">
+                                        Our Partners
+                                    </h1>
+                                    <div className="flex justify-center gap-8 flex-wrap">
+                                        {project.projectPartners.map(
+                                            (projectPartner, i) => {
+                                                return (
+                                                    <MemberProfile
+                                                        userType="partner"
+                                                        key={`member-${projectPartner.partner.id}-${i}`}
+                                                        member={
+                                                            projectPartner.partner
+                                                        }
+                                                        variant="light"
+                                                    />
+                                                );
+                                            },
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {project.projectMembers.length > 0 && (
+                                <div
+                                    className="py-8 border-t border-gray-300"
+                                    id="members"
+                                >
+                                    <h1 className="text-center font-bold text-4xl mb-8">
+                                        Our Members
+                                    </h1>
+                                    <div className="flex justify-center gap-8 flex-wrap">
+                                        {project.projectMembers.map((member, i) => {
+                                            if (member.title.length > 0) {
+                                                return (
+                                                    <MemberProfile
+                                                        useTitle
+                                                        customTitle={member.title}
+                                                        key={`member-${member.user.id}-${i}`}
+                                                        member={member.user}
+                                                        variant="light"
+                                                    />
+                                                );
+                                            }
                                             return (
                                                 <MemberProfile
-                                                    useTitle
-                                                    customTitle={member.title}
                                                     key={`member-${member.user.id}-${i}`}
                                                     member={member.user}
                                                     variant="light"
                                                 />
                                             );
-                                        }
-                                        return (
-                                            <MemberProfile
-                                                key={`member-${member.user.id}-${i}`}
-                                                member={member.user}
-                                                variant="light"
-                                            />
-                                        );
-                                    })}
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
-                <div className="w-full z-10 relative h-fit pb-8">
-                    <Stepper projectStatus={projectStatusElements} />
+                    <div className="w-full z-10 relative h-fit pb-8">
+                        <Stepper projectStatus={projectStatusElements} />
+                    </div>
                 </div>
             </div>
 
