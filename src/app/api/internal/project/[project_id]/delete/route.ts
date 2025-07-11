@@ -23,15 +23,13 @@ type Params = { params: { project_id: string } };
 
 export async function DELETE(request: NextRequest, { params }: Params) {
     try {
-        // Permission check
-        const requiredPermission = new Set([Permissions.CREATE_OWN_PROJECTS]);
+        const requiredPermission = new Set([]);
         const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(request, requiredPermission);
 
         if (errorNoBearerToken) return buildNoBearerTokenErrorResponse();
         if (errorNoPermission) return buildNoPermissionErrorResponse();
 
-        // Validate project ID
         const projectId = Number(params.project_id);
         if (isNaN(projectId) || projectId <= 0) {
             return buildErrorResponse(
@@ -41,7 +39,6 @@ export async function DELETE(request: NextRequest, { params }: Params) {
             );
         }
 
-        // Check if project exists
         const project = await db.query.projects.findFirst({
             where: eq(projects.id, projectId),
         });
@@ -54,7 +51,6 @@ export async function DELETE(request: NextRequest, { params }: Params) {
             );
         }
 
-        // Delete project
         const result = deleteProject(projectId);
         return buildSuccessResponse<FetchDeleteProject>(
             successMessage,
