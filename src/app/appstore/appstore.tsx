@@ -45,11 +45,12 @@ export default function AppStorePage() {
                             category: item.category,
                             projectCategories: item.projectCategories,
                         }))
-                        .sort(
-                            (a: App, b: App) =>
-                                (b.featuredPriority ?? 0) -
-                                (a.featuredPriority ?? 0),
-                        );
+                        .sort((a: App, b: App) => {
+                            // Treat NULL/undefined as 0, only truthy is featured
+                            const aPriority = a.featuredPriority ? 1 : 0;
+                            const bPriority = b.featuredPriority ? 1 : 0;
+                            return bPriority - aPriority; // Featured (1) first, then Live (0/NULL)
+                        });
                     setApps(sortedApps);
                 } else {
                     setApps([]);
@@ -90,23 +91,29 @@ export default function AppStorePage() {
                 app.category?.name === "Humanitarian Engineering") ||
             (activeType === "Gamification" &&
                 app.category?.name === "Gamification");
-
         return matchesSearch && matchesType;
     });
 
-    const groupedByPriority: Record<number, App[]> = filteredApps.reduce(
+    const groupedByPriority: Record<string, App[]> = filteredApps.reduce(
         (groups, app) => {
-            const priority = app.featuredPriority ?? 0;
+            let priority: string;
+
+            if (app.featuredPriority === true) {
+                priority = "featured";
+            } else {
+                priority = "live";
+            }
+
             if (!groups[priority]) groups[priority] = [];
             groups[priority].push(app);
             return groups;
         },
-        {} as Record<number, App[]>,
+        {} as Record<string, App[]>,
     );
 
     const PriorityOrder = [
-        { key: 1, label: "Our Best Apps" },
-        { key: 0, label: "Live" },
+        { key: "featured", label: "Our Best Apps" },
+        { key: "live", label: "Live" }
     ];
 
     function getPaginatedApps(appsForStatus: App[], page: number) {
@@ -121,6 +128,11 @@ export default function AppStorePage() {
         return { paginatedApps, maxPage };
     }
 
+    useEffect(() => {
+        setOpenTestingPage(1);
+        setLivePage(1);
+    }, [activeType, searchQuery]);
+
     return (
         <div className="flex justify-center">
             <div className="flex-1 max-w-[1440px] px-4">
@@ -134,12 +146,15 @@ export default function AppStorePage() {
                         style={{ marginTop: "40px", marginBottom: "40px" }}
                         className="max-w-xl mx-auto"
                     >
-                        <SearchBar className="bg-white text-black" placeholder="Search apps..." />
+                        <SearchBar
+                            className="bg-white text-black"
+                            placeholder="Search apps..."
+                        />
                     </div>
                     <div className="flex flex-wrap items-center gap-3 justify-center">
                         <span className="flex items-center gap-2 text-gray-700 text-sm font-medium">
                             <span className="w-2 h-2 bg-green-500 rounded-full" />
-                            UAT
+                            Filter by Type:
                         </span>
                         {[
                             "All",
@@ -158,7 +173,11 @@ export default function AppStorePage() {
                                         ? "bg-gray-300 text-black"
                                         : "bg-white text-black-700 hover:bg-gray-100 border"
                                 }`}
-                                onClick={() => setActiveType(type)}
+                                onClick={() => {
+                                    setActiveType(type);
+                                    setOpenTestingPage(1);
+                                    setLivePage(1);
+                                }}
                             >
                                 {type}
                             </button>
@@ -169,10 +188,21 @@ export default function AppStorePage() {
                 <div style={{ marginTop: "60px", marginBottom: "80px" }}>
                     {loading ? (
                         <div className="flex flex-col justify-center items-center py-24 animate-fade-in">
-                            <svg className="animate-spin h-12 w-12 text-black mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            <svg
+                                className="animate-spin h-12 w-12 text-black mb-4"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                />
                             </svg>
-                            <span className="text-lg text-black">Loading apps…</span>
+                            <span className="text-lg text-black">
+                                Loading apps…
+                            </span>
                         </div>
                     ) : error ? (
                         <div className="flex justify-center items-center py-12">
@@ -189,7 +219,8 @@ export default function AppStorePage() {
                     ) : (
                         PriorityOrder.map(({ key, label }) => {
                             const appsForStatus = groupedByPriority[key] || [];
-                            const sectionPage = key === 2 ? openTestingPage : livePage;
+                            const sectionPage =
+                                key === "featured" ? openTestingPage : livePage;
                             const { paginatedApps, maxPage } = getPaginatedApps(
                                 appsForStatus,
                                 sectionPage,
@@ -221,7 +252,11 @@ export default function AppStorePage() {
                                             <NonRouterPushPagination
                                                 page={sectionPage}
                                                 maxPage={maxPage}
-                                                onPageChange={key === 2 ? setOpenTestingPage : setLivePage}
+                                                onPageChange={
+                                                    key === "featured"
+                                                        ? setOpenTestingPage
+                                                        : setLivePage
+                                                }
                                             />
                                         </div>
                                     )}
