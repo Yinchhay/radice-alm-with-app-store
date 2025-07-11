@@ -27,7 +27,7 @@ const TechButton = forwardRef<HTMLButtonElement, ButtonProps>(
                                 href={link}
                                 className="relative group inline-block"
                             >
-                                <div className="bg-black grid place-items-center text-white text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all group-active:text-2xl group-active:duration-75">
+                                <div className="bg-black grid place-items-center text-white text-lg lg:text-2xl font-bold w-[120px] h-[40px] lg:w-[160px] lg:h-[50px] group-hover:text-base lg:group-hover:text-[1.7rem] transition-all group-active:text-lg lg:group-active:text-2xl group-active:duration-75">
                                     {text}
                                 </div>
                                 <div className="duration-200 group-active:duration-75 border-t border-l border-black w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group-active:top-[-0.5rem] group-active:left-[-0.5rem]"></div>
@@ -41,7 +41,7 @@ const TechButton = forwardRef<HTMLButtonElement, ButtonProps>(
                     return (
                         <div className={["flex mx-[8px]", className].join(" ")}>
                             <Link href={link} className="relative group">
-                                <div className="bg-white grid place-items-center text-black text-2xl font-bold w-[160px] h-[50px] group-hover:text-[1.7rem] transition-all group-active:text-2xl group-active:duration-75">
+                                <div className="bg-white grid place-items-center text-black text-lg lg:text-2xl font-bold w-[120px] h-[40px] lg:w-[160px] lg:h-[50px] group-hover:text-base lg:group-hover:text-[1.7rem] transition-all group-active:text-lg lg:group-active:text-2xl group-active:duration-75">
                                     {text}
                                 </div>
                                 <div className="duration-200 group-active:duration-75 border-t border-l border-white w-6 h-6 bg-transparent absolute top-[-0.5rem] left-[-0.5rem] group-hover:top-[-0.25rem] group-hover:left-[-0.25rem] group-active:top-[-0.5rem] group-active:left-[-0.5rem]"></div>
