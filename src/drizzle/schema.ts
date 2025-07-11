@@ -446,6 +446,7 @@ export const projectsRelations = relations(projects, ({ many, one }) => ({
         fields: [projects.userId],
         references: [users.id],
     }),
+    apps: many(apps),
 }));
 
 export enum FileBelongTo {
