@@ -105,8 +105,8 @@ export default function AppStorePage() {
     );
 
     const PriorityOrder = [
-        { key: 2, label: "Our Best Apps" },
-        { key: 1, label: "Live" },
+        { key: 1, label: "Our Best Apps" },
+        { key: 0, label: "Live" },
     ];
 
     function getPaginatedApps(appsForStatus: App[], page: number) {
