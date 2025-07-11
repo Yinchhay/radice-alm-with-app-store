@@ -637,7 +637,7 @@ export const apps = mysqlTable("apps", {
     status: varchar("status", { length: 50 }).default(AppStatus.DRAFT),
     cardImage: varchar("card_image", { length: 500 }),
     bannerImage: varchar("banner_image", { length: 500 }),
-    featuredPriority: int("featured_priority").references(() => appPriority.id),
+    featuredPriority: boolean("featured_priority").default(false),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
