@@ -242,7 +242,7 @@ export default function AppStorePage() {
                                                 />
                                             ))
                                         ) : (
-                                            <div className="col-span-full text-gray-400 text-center">
+                                            <div className="col-span-full text-gray-400 text-center mt-5">
                                                 No apps in this section
                                             </div>
                                         )}
