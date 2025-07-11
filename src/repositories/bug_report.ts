@@ -1,9 +1,8 @@
 import { db } from "@/drizzle/db";
 import { ROWS_PER_BUG_REPORT_PAGE } from "@/lib/pagination";
-import { bugReports } from "@/drizzle/schema";
-import { testers } from "@/drizzle/schema";
+import { bugReports, testers, apps } from "@/drizzle/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
-import { getFeedbackById } from "./feedback";
+
 
 export const createBugReport = async (
     bugReport: typeof bugReports.$inferInsert,
@@ -11,6 +10,7 @@ export const createBugReport = async (
     return await db.insert(bugReports).values(bugReport);
 };
 
+// Get Bug Report By Project ID using App ID
 export async function getAllBugReportsByAppId(
     appId: number,
     page: number = 1,
@@ -19,11 +19,20 @@ export async function getAllBugReportsByAppId(
     try {
         const offset = (page - 1) * rowsPerPage;
 
+        const app = await db.query.apps.findFirst({
+            where: eq(apps.id, appId),
+        });
+
+        if (!app || !app.projectId) {
+            throw new Error("App Id is not found");
+        }
+
         const result = await db
         .select({
             id: bugReports.id,
             testerId: bugReports.testerId,
             appId: bugReports.appId,
+            projectId: bugReports.projectId,
             title: bugReports.title,
             description: bugReports.description,
             image: bugReports.image,
@@ -35,7 +44,7 @@ export async function getAllBugReportsByAppId(
         })
         .from(bugReports)
         .leftJoin(testers, eq(bugReports.testerId, testers.id))
-        .where(eq(bugReports.appId, appId))
+        .where(eq(bugReports.projectId, app.projectId))
         .limit(rowsPerPage)
         .offset(offset);
 
@@ -47,13 +56,22 @@ export async function getAllBugReportsByAppId(
     }
 }
 
+//Get Bug Report Total Row By Project ID Using App ID
 export async function getBugReportsTotalRowByAppId( appId: number) {
     try {
+
+        const app = await db.query.apps.findFirst({
+            where: eq(apps.id, appId),
+        });
+
+        if (!app || !app.projectId) {
+            throw new Error("App Id is not found");
+        }
 
         const result = await db
             .select({ count: sql<number>`count(*)` })
             .from(bugReports)
-            .where(eq(bugReports.appId, appId));
+            .where(eq(bugReports.projectId, app.projectId));
 
         return result[0].count;
     } catch (error) {
