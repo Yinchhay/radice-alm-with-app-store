@@ -17,28 +17,28 @@ export default function ToggleProjectPublic({
     const { addToast } = useToast();
 
     return (
-        <Tooltip title="Toggle project public state" position="top">
-            <ToggleSwitch
-                defaultState={Boolean(project.isPublic)}
-                onChange={async (state: boolean) => {
-                    const res = await fetchUpdateProjectPublicStatus(
-                        project.id,
-                        {
-                            status: state,
-                        },
-                        pathname,
-                    );
+        <ToggleSwitch
+            defaultState={Boolean(project.isPublic)}
+            yesLabel="Live"
+            noLabel="Off"
+            onChange={async (state: boolean) => {
+                const res = await fetchUpdateProjectPublicStatus(
+                    project.id,
+                    {
+                        status: state,
+                    },
+                    pathname,
+                );
 
-                    if (res.success) {
-                        addToast(
-                            <div className="flex gap-2">
-                                <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
-                                <p>Successfully updated project public status</p>
-                            </div>,
-                        );
-                    }
-                }}
-            />
-        </Tooltip>
+                if (res.success) {
+                    addToast(
+                        <div className="flex gap-2">
+                            <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
+                            <p>Successfully updated project public status</p>
+                        </div>,
+                    );
+                }
+            }}
+        />
     );
 }

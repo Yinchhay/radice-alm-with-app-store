@@ -81,35 +81,35 @@ export const hasPermission = cache(
                 };
             }
 
-            for (const userRole of user?.userRoles ?? []) {
-                if (!userRole.role.isActive) {
-                    continue;
-                }
+            // for (const userRole of user?.userRoles ?? []) {
+            //     if (!userRole.role.isActive) {
+            //         continue;
+            //     }
 
-                for (const rolePermission of userRole.role.rolePermissions) {
-                    if (!rolePermission.permission.isActive) {
-                        continue;
-                    }
+            //     for (const rolePermission of userRole.role.rolePermissions) {
+            //         if (!rolePermission.permission.isActive) {
+            //             continue;
+            //         }
 
-                    if (requiredPermissions.has(rolePermission.permissionId)) {
-                        userPermissions.add(rolePermission.permissionId);
+            //         if (requiredPermissions.has(rolePermission.permissionId)) {
+            //             userPermissions.add(rolePermission.permissionId);
 
-                        if (!checkAllRequiredPermissions) {
-                            localDebug(
-                                `User has ${rolePermission.permission.name} permission.`,
-                                "hasPermission()",
-                            );
-                            return {
-                                canAccess: true,
-                                message: `The user has and uses ${rolePermission.permission.name} permission.`,
-                                userPermissions,
-                            };
-                        }
+            //             if (!checkAllRequiredPermissions) {
+            //                 localDebug(
+            //                     `User has ${rolePermission.permission.name} permission.`,
+            //                     "hasPermission()",
+            //                 );
+            //                 return {
+            //                     canAccess: true,
+            //                     message: `The user has and uses ${rolePermission.permission.name} permission.`,
+            //                     userPermissions,
+            //                 };
+            //             }
 
-                        canAccess = true;
-                    }
-                }
-            }
+            //             canAccess = true;
+            //         }
+            //     }
+            // }
 
             if (canAccess) {
                 localDebug(
