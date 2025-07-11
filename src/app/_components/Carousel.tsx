@@ -32,33 +32,35 @@ export default function Carousel({
     return (
         <div>
             {categories.length > 0 && (
-                <div className="container grid grid-cols-5 m-auto pt-24 gap-10">
-                    <div className="relative col-span-3">
-                        <div className="absolute w-full h-[400px] flex items-center justify-between z-20">
+                <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 pt-12 lg:pt-24 gap-6 lg:gap-10">
+                    <div className="relative lg:col-span-3 order-1 lg:order-1">
+                        <div className="absolute w-full h-[220px] sm:h-[260px] lg:h-[340px] flex items-center justify-between z-20">
                             <button
-                                className="ml-4 text-white -scale-100 hover:-scale-75 duration-200 p-4"
+                                className="ml-2 lg:ml-4 text-white -scale-100 hover:-scale-75 duration-200 p-2 lg:p-4"
                                 onClick={() => changeSlide(-1)}
                             >
                                 <Image
                                     src={"/ui/arrow.svg"}
-                                    width={32}
-                                    height={58}
+                                    width={20}
+                                    height={36}
+                                    className="lg:w-6 lg:h-[46px]"
                                     alt=""
                                 />
                             </button>
                             <button
-                                className="ml-4 text-white hover:scale-75 duration-200 p-4"
+                                className="mr-2 lg:mr-4 text-white hover:scale-75 duration-200 p-2 lg:p-4"
                                 onClick={() => changeSlide(1)}
                             >
                                 <Image
                                     src={"/ui/arrow.svg"}
-                                    width={32}
-                                    height={58}
+                                    width={20}
+                                    height={36}
+                                    className="lg:w-6 lg:h-[46px]"
                                     alt=""
                                 />
                             </button>
                         </div>
-                        <ul className="relative h-[400px]">
+                        <ul className="relative h-[220px] sm:h-[260px] lg:h-[340px]">
                             {categories.map((category, i) => {
                                 return (
                                     <CarouselCard
@@ -74,7 +76,7 @@ export default function Carousel({
                         </ul>
                         <h2
                             className={[
-                                "text-white text-6xl font-bold leading-[0.90] translate-y-[100%] animate-reveal text-center mt-8",
+                                "text-white text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold leading-[0.90] translate-y-[100%] animate-reveal text-center mt-4 lg:mt-8",
                                 roboto_condensed.className,
                             ].join(" ")}
                         >
@@ -83,18 +85,18 @@ export default function Carousel({
                                 : ""}
                         </h2>
                     </div>
-                    <div className="col-span-2 relative ">
+                    <div className="lg:col-span-2 relative order-2 lg:order-2">
                         <div className="overflow-hidden">
                             <h2
                                 className={[
-                                    "w-[580px] uppercase text-white text-8xl font-bold leading-[0.90] translate-y-[100%] animate-reveal",
+                                    "w-full lg:w-[580px] uppercase text-white text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-[0.90] translate-y-[100%] animate-reveal",
                                     roboto_condensed.className,
                                 ].join(" ")}
                             >
                                 Research & Development
                             </h2>
                         </div>
-                        <p className="text-white mt-4">
+                        <p className="text-white mt-3 lg:mt-4 text-sm sm:text-base">
                             <SpecialEffectSentence
                                 delay={50}
                                 shuffleSpeed={20}
@@ -108,7 +110,7 @@ export default function Carousel({
                         <TechButton
                             link={`#${categories[currentSlide].name}`}
                             variant="light"
-                            className="mt-12"
+                            className="mt-6 lg:mt-12"
                             text="VIEW"
                         />
                     </div>
@@ -134,7 +136,7 @@ function CarouselCard({
     return (
         <li
             className={[
-                "absolute top-[50%] left-[50%] w-[687px] duration-200",
+                "absolute top-[50%] left-[50%] w-[260px] sm:w-[340px] lg:w-[580px] duration-200",
                 active ? "translate-x-[-50%] translate-y-[-50%] z-10" : "",
                 index == 0 && currentSlide == maxSlides - 1
                     ? "translate-x-[-20%] translate-y-[-50%] scale-75 brightness-[.4]"
@@ -154,7 +156,7 @@ function CarouselCard({
         >
             <div
                 className={[
-                    "absolute w-[687px] h-[378px] top-3 left-3",
+                    "absolute w-[260px] h-[143px] sm:w-[340px] sm:h-[187px] lg:w-[580px] lg:h-[319px] top-1 left-1 sm:top-2 sm:left-2 lg:top-3 lg:left-3",
                     active ? "" : "hidden",
                 ].join(" ")}
             >
@@ -168,18 +170,18 @@ function CarouselCard({
                 />
             </div>
             <div
-                className="relative w-[687px] h-[378px]"
+                className="relative w-[260px] h-[143px] sm:w-[340px] sm:h-[187px] lg:w-[580px] lg:h-[319px]"
                 style={{
                     maskImage: "url(/ui/carousel_card.svg)",
                     WebkitMaskImage: "url(/ui/carousel_card.svg)",
-                    WebkitMaskSize: "687px 378px",
+                    WebkitMaskSize: "100% 100%",
                     WebkitMaskRepeat: "no-repeat",
                 }}
             >
                 <ImageWithFallback
-                    width={687}
-                    height={378}
-                    className="object-cover"
+                    width={580}
+                    height={319}
+                    className="object-cover w-full h-full"
                     src={src}
                     alt=""
                 />
