@@ -12,6 +12,7 @@ import {
     projectPartners,
     ProjectPipelineStatus,
     projects,
+    apps,
 } from "@/drizzle/schema";
 import { ROWS_PER_PAGE } from "@/lib/pagination";
 import { UserType } from "@/types/user";
@@ -27,6 +28,16 @@ import {
     exists,
 } from "drizzle-orm";
 import { z } from "zod";
+// import type { apps, projectCategories, projectMembers, projectPartners } from "@/drizzle/schema";
+
+type ProjectWithApps = typeof projects.$inferSelect & {
+    projectCategories: Array<{
+        category: any;
+    }>;
+    projectMembers?: Array<typeof projectMembers.$inferSelect>;
+    projectPartners?: Array<typeof projectPartners.$inferSelect>;
+    apps?: Array<typeof apps.$inferSelect>;
+};
 
 export const createProject = async (project: typeof projects.$inferInsert) => {
     return await db.insert(projects).values(project);
@@ -89,13 +100,11 @@ export const getAssociatedProjectsByUserId = async (
     rowsPerPage: number = ROWS_PER_PAGE,
     search: string = "",
 ) => {
-    return db.query.projects.findMany({
+    const projectsResult = await db.query.projects.findMany({
         where: (table, { or, inArray, and }) =>
             and(
                 or(
-                    // check if the user is the owner of the project
                     eq(table.userId, userId),
-                    // if not, check if the user is associated with the project
                     exists(memberAssociatedProjectSubQuery(userId)),
                     exists(partnerAssociatedProjectIds(userId)),
                 ),
@@ -113,7 +122,15 @@ export const getAssociatedProjectsByUserId = async (
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,
-    });
+    }) as ProjectWithApps[];
+
+    // Fetch apps for each project
+    for (const project of projectsResult) {
+        project.apps = await db.query.apps.findMany({
+            where: (app, { eq }) => eq(app.projectId, project.id),
+        });
+    }
+    return projectsResult;
 };
 
 export type OneAssociatedProject_C_Tag = `OneAssociatedProject_C_Tag`;
@@ -172,20 +189,27 @@ export async function getProjectsForManageAllProjects(
     rowsPerPage: number = ROWS_PER_PAGE,
     search: string = "",
 ) {
-    return await db.query.projects.findMany({
+    const projectsResult = await db.query.projects.findMany({
         with: {
             projectCategories: {
                 with: {
                     category: true,
                 },
             },
-            apps: true,
         },
         where: (table, { like }) => like(table.name, `%${search}%`),
         limit: rowsPerPage,
         offset: (page - 1) * rowsPerPage,
         orderBy: sql`id DESC`,
-    });
+    }) as ProjectWithApps[];
+
+    // Fetch apps for each project
+    for (const project of projectsResult) {
+        project.apps = await db.query.apps.findMany({
+            where: (app, { eq }) => eq(app.projectId, project.id),
+        });
+    }
+    return projectsResult;
 }
 
 export async function editProjectContentById(

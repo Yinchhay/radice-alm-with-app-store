@@ -62,10 +62,7 @@ export default async function DashboardManageLayout({
                 "manageCategories",
                 userPermissions,
             ),
-            manageAllProjects: userCanAccessRoute(
-                "manageAllProjects",
-                userPermissions,
-            ),
+            manageAllProjects: true, // Always show All Projects for all users
             manageApplicationForms: userCanAccessRoute(
                 "manageApplicationForms",
                 userPermissions,

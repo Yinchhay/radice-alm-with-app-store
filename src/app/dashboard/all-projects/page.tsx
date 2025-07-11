@@ -6,7 +6,7 @@ import { getAuthUser } from "@/auth/lucia";
 import { fileToUrl } from "@/lib/file";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import Chip from "@/components/Chip";
-import { fetchProjectsForManageAllProjects } from "./fetch";
+import { fetchAssociatedProjects } from "../projects/fetch";
 import { FetchProjectsForManageAllProjectsData } from "@/app/api/internal/project/route";
 import ToggleProjectPublic from "./toggle_project_public";
 import ToggleAppPublic from "./toggle_app_public";
@@ -43,7 +43,7 @@ export default async function ManageAllProject({
         page = 1;
     }
 
-    const result = await fetchProjectsForManageAllProjects(
+    const result = await fetchAssociatedProjects(
         page,
         4,
         searchParams?.search,
@@ -89,7 +89,7 @@ function Project({
 }: {
     project: SuccessResponse<FetchProjectsForManageAllProjectsData>["data"]["projects"][number] & {
         projectCategories?: { category: { id: number; name: string } }[];
-        apps?: { status: string }[];
+        apps?: { status: string | null }[];
     };
 }) {
     // Check if the project has any accepted apps
