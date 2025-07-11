@@ -15,6 +15,8 @@ import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 import DashboardPageTitle from "@/components/DashboardPageTitle";
 import Loading from "@/components/Loading";
+import Link from "next/link";
+import Button from "@/components/Button";
 
 export const metadata: Metadata = {
     title: "Manage All Projects - Dashboard - Radice",
@@ -85,8 +87,14 @@ export default async function ManageAllProject({
 function Project({
     project,
 }: {
-    project: SuccessResponse<FetchProjectsForManageAllProjectsData>["data"]["projects"][number];
+    project: SuccessResponse<FetchProjectsForManageAllProjectsData>["data"]["projects"][number] & {
+        projectCategories?: { category: { id: number; name: string } }[];
+        apps?: { status: string }[];
+    };
 }) {
+    // Check if the project has any accepted apps
+    const hasAcceptedApp = Array.isArray(project.apps) && project.apps.some(app => app.status === "accepted");
+
     return (
         <Card square className="p-6 h-[200px] flex overflow-hidden">
             {/* Project Logo */}
@@ -105,7 +113,7 @@ function Project({
                 {/* Info */}
                 <div className="flex flex-col gap-4 flex-1 min-w-0">
                     <div className="flex gap-2 flex-wrap">
-                        {project.projectCategories.map((catJoin) => (
+                        {(project.projectCategories || []).map((catJoin) => (
                             <Chip
                                 key={catJoin.category.id}
                                 textClassName="text-[#7F56D9] font-bold text-sm"
@@ -124,14 +132,24 @@ function Project({
                 <div className="flex flex-col justify-between items-end h-full py-2 gap-2">
                     {/* Public Toggle */}
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Public</span>
+                        <span className="text-xs text-gray-500">Project</span>
                         <ToggleProjectPublic project={project} />
                     </div>
 
-                    {/* App Toggle */}
+                    {/* App Toggle or App Builder Button */}
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">App</span>
-                        <ToggleAppPublic project={project} />
+                        {hasAcceptedApp ? (
+                            <>
+                                <span className="text-xs text-gray-500">App</span>
+                                <ToggleAppPublic project={project} />
+                            </>
+                        ) : (
+                            <div className="flex flex-col items-end">
+                                <Link href={`/dashboard/projects/${project.id}/app-builder`}>
+                                    <Button className="text-sm px-2 py-1">Create App</Button>
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

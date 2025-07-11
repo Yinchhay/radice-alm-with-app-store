@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 
 export default function ToggleSwitch({
     defaultState = false,
-    variant = "default",
     onChange,
+    yesLabel = "Yes",
+    noLabel = "No",
 }: {
     defaultState?: boolean;
-    variant?: string;
     onChange?: (state: boolean) => void;
+    yesLabel?: string;
+    noLabel?: string;
 }) {
     const [toggleOn, setToggleOn] = useState<boolean>(defaultState);
     const [hydrated, setHydrated] = useState(false);
@@ -19,60 +21,39 @@ export default function ToggleSwitch({
     }, [defaultState]);
 
     if (!hydrated) {
-        // Render nothing or some skeleton while hydration is in process
         return null;
     }
 
-    switch (variant) {
-        case "secondary":
-            return (
-                <button
-                    type="button"
-                    className={[
-                        "rounded-full w-[50px] h-[24px] flex items-center relative",
-                        toggleOn ? "bg-blue-500" : "bg-gray-400",
-                    ].join(" ")}
-                    onClick={() => {
-                        setToggleOn(!toggleOn);
-                        if (onChange) {
-                            onChange(!toggleOn);
-                        }
-                    }}
-                >
-                    <div
-                        className={[
-                            "rounded-full w-[18px] h-[18px] bg-white transition-all absolute outline outline-1",
-                            toggleOn
-                                ? "left-[28px] outline-transparent"
-                                : "left-[4px] outline-gray-300",
-                        ].join(" ")}
-                    ></div>
-                </button>
-            );
-        default:
-            return (
-                <button
-                    type="button"
-                    className={[
-                        "rounded-full w-[50px] h-[24px] outline outline-1 outline-gray-300 flex items-center relative dark:outline-transparent",
-                        toggleOn ? "bg-blue-500" : "bg-gray-200",
-                    ].join(" ")}
-                    onClick={() => {
-                        setToggleOn(!toggleOn);
-                        if (onChange) {
-                            onChange(!toggleOn);
-                        }
-                    }}
-                >
-                    <div
-                        className={[
-                            "rounded-full w-[18px] h-[18px] bg-white transition-all absolute outline outline-1",
-                            toggleOn
-                                ? "left-[28px] outline-transparent"
-                                : "left-[4px] outline-gray-300",
-                        ].join(" ")}
-                    ></div>
-                </button>
-            );
-    }
+    return (
+        <div className="p-1 border border-gray-300 rounded-md inline-flex bg-white gap-1">
+            <button
+                type="button"
+                onClick={() => {
+                    setToggleOn(true);
+                    if (onChange) onChange(true);
+                }}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                    toggleOn
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-100'
+                }`}
+            >
+                {yesLabel}
+            </button>
+            <button
+                type="button"
+                onClick={() => {
+                    setToggleOn(false);
+                    if (onChange) onChange(false);
+                }}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                    !toggleOn
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-100'
+                }`}
+            >
+                {noLabel}
+            </button>
+        </div>
+    );
 }

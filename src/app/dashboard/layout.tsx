@@ -78,7 +78,7 @@ export default async function DashboardManageLayout({
     // console.log(userWithRoles);
 
     // SSR: get user-agent from headers
-    const userAgent = headers().get('user-agent');
+    const userAgent = headers().get('user-agent') ?? undefined;
     const isMobile = isMobileUserAgent(userAgent);
 
     return (

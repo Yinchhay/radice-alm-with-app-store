@@ -179,6 +179,7 @@ export async function getProjectsForManageAllProjects(
                     category: true,
                 },
             },
+            apps: true,
         },
         where: (table, { like }) => like(table.name, `%${search}%`),
         limit: rowsPerPage,
