@@ -861,10 +861,6 @@ export const appTypeRelations = relations(appTypes, ({ many }) => ({
     apps: many(apps),
 }));
 
-export const appPriorityRelations = relations(appPriority, ({ many }) => ({
-    apps: many(apps),
-}));
-
 export const appRelations = relations(apps, ({ one, many }) => ({
     project: one(projects, {
         fields: [apps.projectId],
@@ -873,10 +869,6 @@ export const appRelations = relations(apps, ({ one, many }) => ({
     appType: one(appTypes, {
         fields: [apps.type],
         references: [appTypes.id],
-    }),
-    priority: one(appPriority, {
-        fields: [apps.featuredPriority],
-        references: [appPriority.id],
     }),
     versions: many(versions),
     screenshots: many(appScreenshots),
