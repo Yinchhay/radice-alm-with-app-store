@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface VersionLog {
   id: string;
@@ -12,85 +12,92 @@ interface VersionLog {
   summary: string;
 }
 
-const versionLogs: VersionLog[] = [
-  {
-    id: '1',
-    version: '2.1.0',
-    releaseDate: '11 Jun 2025',
-    type: 'minor',
-    timeAgo: '1w ago',
-    summary: 'We’re always working to make your experience better! This update focuses on behind-the-scenes improvements to make the app smoother and more reliable.',
-    changes: [
-      'Added new bug reporting feature',
-      'Improved user interface responsiveness',
-      'Fixed memory leak in image processing',
-      'Enhanced security measures'
-    ]
-  },
-  {
-    id: '2',
-    version: '2.0.5',
-    releaseDate: '28 May 2025',
-    type: 'patch',
-    timeAgo: '2w ago',
-    summary: 'We’ve optimized the system to run faster and more efficiently. This update includes key fixes and minor improvements.',
-    changes: [
-      'Fixed crash when uploading large files',
-      'Improved error handling',
-      'Updated dependencies for security'
-    ]
-  },
-  {
-    id: '3',
-    version: '2.0.0',
-    releaseDate: '15 May 2025',
-    type: 'major',
-    timeAgo: '3w ago',
-    summary: 'This major update brings a brand-new UI, performance improvements, and more accessibility.',
-    changes: [
-      'Complete UI redesign',
-      'New dashboard layout',
-      'Enhanced performance',
-      'Added dark mode support',
-      'Improved accessibility features'
-    ]
-  }
-];
+interface VersionLogsTabProps {
+  appId: number;
+}
 
-export default function VersionLogsTab() {
+async function fetchVersionLogs(appId: number): Promise<VersionLog[]> {
+  // Use absolute URL for local dev
+  const res = await fetch(`http://localhost:3000/api/public/app/${appId}/version`);
+  const data = await res.json();
+  if (!data.success || !data.data) return [];
+  // Map the API response to VersionLog[]
+  const versions = [data.data.current, ...(data.data.previous || [])]
+    .filter(Boolean)
+    .filter((v: any) => v.versionNumber); // Only accepted versions
+  return versions.map((v: any) => ({
+    id: v.id?.toString() ?? '',
+    version: v.versionNumber || `${v.majorVersion}.${v.minorVersion}.${v.patchVersion}`,
+    releaseDate: v.createdAt ? new Date(v.createdAt).toLocaleDateString() : '',
+    type: v.majorVersion > 0 && v.minorVersion === 0 && v.patchVersion === 0 ? 'major' : v.minorVersion > 0 && v.patchVersion === 0 ? 'minor' : 'patch',
+    timeAgo: v.createdAt ? timeAgo(new Date(v.createdAt)) : '',
+    summary: v.content || '',
+    changes: v.changes || [], // If you store changes as an array in content, otherwise parse from content
+  }));
+}
+
+function timeAgo(date: Date): string {
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return date.toLocaleDateString();
+}
+
+export default function VersionLogsTab({ appId }: VersionLogsTabProps) {
+  const [versionLogs, setVersionLogs] = useState<VersionLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetchVersionLogs(appId)
+      .then(setVersionLogs)
+      .catch(() => setError('Failed to fetch version logs'))
+      .finally(() => setLoading(false));
+  }, [appId]);
+
   return (
     <div className="max-w-3xl">
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-gray-900 mb-1">Version Logs</h2>
         <p className="text-gray-600 text-sm">This is where you can view the version history</p>
       </div>
-
-      <div className="space-y-10">
-        {versionLogs.map((log) => (
-          <div key={log.id}>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-semibold text-gray-900"> {log.version} </h3>
-              <span className="text-sm text-gray-500">{log.timeAgo}</span>
-            </div>
-
-            {/* Summary */}
-            <p className="text-gray-700 text-sm mb-3">{log.summary}</p>
-
-            {/* Bullet list */}
-            <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
-              {log.changes.map((change, index) => (
-                <li key={index}>{change}</li>
-              ))}
-            </ul>
-
-            {/* End note */}
-            <p className="text-gray-700 text-sm mt-3">
-              Update now to enjoy a more polished and dependable experience!
-            </p>
-          </div>
-        ))}
-      </div>
+      {loading ? (
+        <div>Loading version logs...</div>
+      ) : error ? (
+        <div className="text-red-500">{error}</div>
+      ) : (
+        <div className="space-y-10">
+          {versionLogs.length === 0 ? (
+            <div className="text-gray-500">No version logs found.</div>
+          ) : (
+            versionLogs.map((log) => (
+              <div key={log.id}>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900"> {log.version} </h3>
+                  <span className="text-sm text-gray-500">{log.timeAgo}</span>
+                </div>
+                {/* Summary */}
+                <p className="text-gray-700 text-sm mb-3">{log.summary}</p>
+                {/* Bullet list */}
+                {log.changes && log.changes.length > 0 && (
+                  <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
+                    {log.changes.map((change, index) => (
+                      <li key={index}>{change}</li>
+                    ))}
+                  </ul>
+                )}
+                {/* End note */}
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

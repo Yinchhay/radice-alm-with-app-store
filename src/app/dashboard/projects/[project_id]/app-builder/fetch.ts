@@ -29,7 +29,7 @@ export type FetchAppBuilderData = {
 
 export async function fetchAppBuilderData(
   projectId: string
-): ResponseJson<FetchAppBuilderData> {
+): ResponseJson<FetchAppBuilderData & { updateType?: string }> {
   try {
     const sessionId = await getSessionCookie();
     
@@ -71,7 +71,7 @@ export async function fetchAppBuilderData(
     }
 
     // Combine the data
-    const combinedData: FetchAppBuilderData = {
+    const combinedData: FetchAppBuilderData & { updateType?: string } = {
       appId: appData.data.appId,
       isNewApp: appData.data.isNewApp,
       status: appData.data.status,
@@ -95,6 +95,16 @@ export async function fetchAppBuilderData(
         status: appData.data.app.status,
       } : undefined
     };
+
+    // Parse updateType from content if present
+    if (combinedData.app && combinedData.app.content) {
+      try {
+        const parsed = JSON.parse(combinedData.app.content);
+        if (parsed && typeof parsed.updateType === 'string') {
+          combinedData.updateType = parsed.updateType;
+        }
+      } catch {}
+    }
 
     // If we have an app ID and it's not a new app and status is 'accepted', try to get the public details
     if (appData.data.appId && !appData.data.isNewApp && (appData.data.status === 'accepted')) {
@@ -138,12 +148,18 @@ export async function fetchAppBuilderData(
   }
 }
 
-export async function saveAppDraft({ appId, subtitle, aboutDesc, type, webUrl }: { appId: number, subtitle: string, aboutDesc: string, type?: number, webUrl?: string }) {
+export async function saveAppDraft({ appId, subtitle, aboutDesc, type, webUrl, updateType, existingContent }: { appId: number, subtitle: string, aboutDesc: string, type?: number, webUrl?: string, updateType: string, existingContent?: string }) {
   try {
     const sessionId = await getSessionCookie();
     if (!sessionId) {
       return { success: false, message: 'Unauthorized: No session' };
     }
+    // Merge updateType into content JSON
+    let contentObj: any = {};
+    if (existingContent) {
+      try { contentObj = JSON.parse(existingContent) || {}; } catch {}
+    }
+    contentObj.updateType = updateType;
     const res = await fetch(`${await getBaseUrl()}/api/internal/app/${appId}/edit`, {
       method: 'PATCH',
       headers: {
@@ -155,6 +171,7 @@ export async function saveAppDraft({ appId, subtitle, aboutDesc, type, webUrl }:
         aboutDesc,
         type,
         webUrl,
+        content: JSON.stringify(contentObj),
         status: 'draft',
       }),
       cache: 'no-cache',
