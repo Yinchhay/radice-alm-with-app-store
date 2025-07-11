@@ -76,6 +76,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [webUrlError, setWebUrlError] = useState('');
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   // Static app type options
   const appTypeOptions = [
@@ -291,6 +292,89 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     }
   };
 
+  const handleContinue = async () => {
+    if (!appData) return;
+    setSaveLoading(true);
+    setSaveMessage(null);
+    setDebugInfo(null);
+    try {
+      // If the current app is accepted, create a new draft app (then set to pending)
+      if (currentAppStatus === 'accepted') {
+        const res = await fetch(`/api/internal/project/${projectId}/app`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-cache',
+          credentials: 'include',
+        });
+        const data = await res.json();
+        setDebugInfo({ step: 'create-draft', data });
+        if (data.success && data.data && data.data.appId) {
+          // Now PATCH the new draft app with the form content and status 'pending'
+          const patchRes = await fetch(`/api/internal/app/${data.data.appId}/edit`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              subtitle,
+              aboutDesc: description,
+              type: appType !== '' ? Number(appType) : null,
+              webUrl,
+              status: 'pending',
+            }),
+            cache: 'no-cache',
+            credentials: 'include',
+          });
+          const patchData = await patchRes.json();
+          setDebugInfo((prev: any) => ({ ...prev, step: 'patch-pending', patchData }));
+          if (patchData.success) {
+            setSaveMessage('Submitted for review!');
+            const updated = await fetchAppBuilderData(projectId);
+            if (updated.success && updated.data) {
+              setAppData(updated.data);
+              setCurrentAppStatus(updated.data.status);
+            }
+          } else {
+            setSaveMessage(patchData.message || 'Failed to submit.');
+          }
+        } else {
+          setSaveMessage(data.message || 'Failed to create draft.');
+        }
+      } else {
+        // Save as pending
+        const res = await fetch(`/api/internal/app/${appData.appId}/edit`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subtitle,
+            aboutDesc: description,
+            type: appType !== '' ? Number(appType) : null,
+            webUrl,
+            status: 'pending',
+          }),
+          cache: 'no-cache',
+          credentials: 'include',
+        });
+        const data = await res.json();
+        setDebugInfo({ step: 'patch-pending', data });
+        if (data.success) {
+          setSaveMessage('Submitted for review!');
+        } else {
+          setSaveMessage(data.message || 'Failed to submit.');
+        }
+      }
+    } catch (err) {
+      setDebugInfo({ step: 'exception', error: String(err) });
+      setSaveMessage('Failed to submit.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -474,8 +558,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       </div>
 
       <div className="flex justify-center pt-4">
-        <button className="w-64 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-900">
-          Continue
+        <button
+          className="w-64 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-900"
+          onClick={handleContinue}
+          disabled={saveLoading || !!webUrlError}
+        >
+          {saveLoading ? 'Submitting...' : 'Continue'}
         </button>
       </div>
 
@@ -489,6 +577,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         </button>
         {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}
       </div>
+      {debugInfo && (
+        <div className="bg-yellow-50 border border-yellow-300 rounded p-3 text-xs text-yellow-900 overflow-x-auto">
+          <strong>Debug Info:</strong>
+          <pre className="whitespace-pre-wrap break-all">{JSON.stringify(debugInfo, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
 }

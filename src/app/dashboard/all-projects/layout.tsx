@@ -13,13 +13,7 @@ export default async function ManageAllProjectsLayout({
         return redirect("/login");
     }
 
-    const userPermission = await hasPermission(
-        user.id,
-        RouteRequiredPermissions.get("manageAllProjects")!,
-    );
-    if (!userPermission.canAccess) {
-        throw new Error(ErrorMessage.NoPermissionToThisPage);
-    }
+    // Permission check removed to allow all authenticated users
 
     return <>{children}</>;
 }

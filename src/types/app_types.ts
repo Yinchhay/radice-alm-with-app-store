@@ -17,7 +17,7 @@ export interface App {
     status?: string;
     cardImage?: string;
     bannerImage?: string;
-    featuredPriority?: number;
+    featuredPriority?: boolean;
     createdAt?: string;
     updatedAt?: string;
     project?: Project;
