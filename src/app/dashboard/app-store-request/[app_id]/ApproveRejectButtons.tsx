@@ -8,6 +8,7 @@ export default function ApproveRejectButtons({ appId }: { appId: string }) {
   const [message, setMessage] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [showRejectOverlay, setShowRejectOverlay] = useState(false);
+  const [debugError, setDebugError] = useState<any>(null);
   const router = useRouter();
 
   async function handleAction(action: "approve" | "reject") {
@@ -27,7 +28,6 @@ export default function ApproveRejectButtons({ appId }: { appId: string }) {
       if (res.ok) {
         setMessage(action === "approve" ? "App approved!" : "App rejected!");
         setShowRejectOverlay(false);
-        // Redirect to app store request list after success
         setTimeout(() => {
           router.push("/dashboard/app-store-request");
         }, 500);

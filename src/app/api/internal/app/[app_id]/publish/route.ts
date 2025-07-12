@@ -107,7 +107,7 @@ export async function PATCH(request: Request, { params }: Params) {
         if (typeof whatsNew === 'string' && whatsNew.trim().length > 0) {
             const version = await db.query.versions.findFirst({ where: eq(versions.appId, appId) });
             if (version) {
-                await db.update(versions).set({ content: whatsNew, updatedAt: new Date() }).where(eq(versions.id, version.id));
+                await db.update(versions).set({ contentId: whatsNew, updatedAt: new Date() }).where(eq(versions.id, version.id));
             }
         }
 

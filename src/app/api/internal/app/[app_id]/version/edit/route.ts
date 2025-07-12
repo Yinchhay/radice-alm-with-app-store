@@ -22,7 +22,7 @@ const unsuccessMessage = "Version update failed";
 
 // Validation schema
 const schema = z.object({
-    content: z.string().optional(),
+    contentId: z.string().optional(),
     isCurrent: z.boolean().optional(),
 });
 
@@ -71,7 +71,7 @@ export async function PATCH(request: Request, { params }: Params) {
             );
         }
 
-        const { content, isCurrent } = parsed.data;
+        const { contentId, isCurrent } = parsed.data;
 
         // 1. Check if app exists and is not accepted
         const app = await db.query.apps.findFirst({
@@ -118,7 +118,7 @@ export async function PATCH(request: Request, { params }: Params) {
         await db
             .update(versions)
             .set({
-                content: content ?? version.content,
+                contentId: contentId ?? version.contentId,
                 isCurrent: isCurrent ?? version.isCurrent,
                 updatedAt: new Date(),
             })

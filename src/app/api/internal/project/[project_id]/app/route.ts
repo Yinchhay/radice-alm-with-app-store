@@ -316,7 +316,7 @@ export async function POST(
             minorVersion: minor,
             patchVersion: patch,
             isCurrent: false,
-            content: versionContent,
+            contentId: versionContent,
         });
 
         let versionId: number;

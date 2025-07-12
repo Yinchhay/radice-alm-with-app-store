@@ -9,28 +9,26 @@ import {
 } from "@/lib/response";
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
-import { getAcceptedAppByProjectId } from "@/repositories/app/internal";
-import { updateAppStatus } from "@/repositories/app/internal";
+import { getAcceptedAppByProjectId, updateAppStatus } from "@/repositories/app/internal";
 import {
     setCurrentVersionByAppIdWithTransaction,
     finalizeVersionNumberOnAccept,
+    createVersion,
 } from "@/repositories/version";
 import { updateIsAppStatus } from "@/repositories/project";
 import { sendMail } from "@/smtp/mail";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
-import { apps, users, projects, projectMembers } from "@/drizzle/schema";
+import { apps, users, projects, projectMembers, versions } from "@/drizzle/schema";
 
-// update type if we were to return any data back to the response
 export type FetchApproveAppForm = Record<string, never>;
-
 
 const successMessage = "Approve app successfully";
 const unsuccessMessage = "Approve app failed";
 
 export async function PATCH(
-    request: Request, 
-    { params }:  { params: { app_id: string }},
+    request: Request,
+    { params }: { params: { app_id: string } },
 ) {
     try {
         const requiredPermission = new Set([Permissions.CHANGE_PROJECT_STATUS]);
@@ -68,7 +66,7 @@ export async function PATCH(
             );
         }
 
-        if (currentApp.status !== "pending")
+        if (currentApp.status !== "pending") {
             return buildErrorResponse(
                 unsuccessMessage,
                 generateAndFormatZodError(
@@ -77,6 +75,7 @@ export async function PATCH(
                 ),
                 HttpStatusCode.FORBIDDEN_403,
             );
+        }
 
         if (!currentApp.projectId) {
             return buildErrorResponse(
@@ -89,7 +88,6 @@ export async function PATCH(
         const project = await db.query.projects.findFirst({
             where: eq(projects.id, currentApp.projectId),
         });
-        // const projectId = currentApp.projectId;
 
         if (!project || !project.userId) {
             return buildErrorResponse(
@@ -103,7 +101,6 @@ export async function PATCH(
             where: eq(users.id, project.userId),
         });
 
-        
         if (!submitter) {
             return buildErrorResponse(
                 unsuccessMessage,
@@ -112,7 +109,27 @@ export async function PATCH(
             );
         }
 
-        // FINALIZE versionNumber based on major/minor/patch
+        // ✅ FIXED: use .select().from(...).limit(1) instead of findFirst()
+        const existingVersion = await db
+            .select()
+            .from(versions)
+            .where(eq(versions.appId, appId))
+            .limit(1)
+            .then((rows) => rows[0]);
+
+        if (!existingVersion) {
+            await createVersion({
+                appId,
+                projectId: currentApp.projectId!,
+                versionNumber: "1.0.0",
+                majorVersion: 1,
+                minorVersion: 0,
+                patchVersion: 0,
+                isCurrent: false,
+                contentId: "App Created (auto-generated safeguard)",
+            });
+        }
+
         const versionFinalized = await finalizeVersionNumberOnAccept(appId);
         if (!versionFinalized) {
             return buildErrorResponse(
@@ -129,9 +146,7 @@ export async function PATCH(
             const existingAcceptedApp =
                 await getAcceptedAppByProjectId(currentApp.projectId!);
             if (existingAcceptedApp && existingAcceptedApp.id !== appId) {
-                await tx
-                    .delete(apps)
-                    .where(eq(apps.id, existingAcceptedApp.id));
+                await tx.delete(apps).where(eq(apps.id, existingAcceptedApp.id));
             }
 
             // Update app status to accepted
@@ -151,6 +166,7 @@ export async function PATCH(
             if (!versionUpdateSuccess) {
                 throw new Error("Failed to update version status");
             }
+
             await updateIsAppStatus(Number(updatedApp.projectId), true);
         });
 
@@ -170,25 +186,15 @@ export async function PATCH(
             }
         }
 
-        
-        for(const email of allRecipients){
+        for (const email of allRecipients) {
             try {
-
                 await sendMail({
                     subject: "App have been Approved",
                     to: email,
-                    text: `Dear Team Member, we are pleased to inform you that your App application has been approved.
-                    <br />
-                    <br />
-                    <strong>Reason:</strong> ${reason || "No reason provided."}
-                    <br />
-                    <br />
-                    Thanks you`,
+                    text: `Dear Team Member, we are pleased to inform you that your App application has been approved.\n<br />\n<br /><strong>Reason:</strong> ${reason || "No reason provided."}\n<br />\n<br />Thanks you`,
                 });
-
-            } catch (mailError){
-                console.error(`Failed to send email to ${email}:`, mailError);
-            // Optional: Don't fail the whole request just because of email failure
+            } catch (mailError) {
+                // Optional: Don't fail the whole request just because of email failure
             }
         }
 

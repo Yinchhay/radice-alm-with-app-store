@@ -643,7 +643,7 @@ export const versions = mysqlTable("versions", {
     minorVersion: int("minor_version").notNull(),
     patchVersion: int("patch_version").notNull(),
     isCurrent: boolean("is_current").default(false), // only one current version per project
-    content: text("content"), // description of the version
+    contentId: text("content_id"), // description of the version
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });

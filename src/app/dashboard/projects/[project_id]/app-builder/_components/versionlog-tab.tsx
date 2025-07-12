@@ -31,7 +31,7 @@ async function fetchVersionLogs(appId: number): Promise<VersionLog[]> {
     releaseDate: v.createdAt ? new Date(v.createdAt).toLocaleDateString() : '',
     type: v.majorVersion > 0 && v.minorVersion === 0 && v.patchVersion === 0 ? 'major' : v.minorVersion > 0 && v.patchVersion === 0 ? 'minor' : 'patch',
     timeAgo: v.createdAt ? timeAgo(new Date(v.createdAt)) : '',
-    summary: v.content || '',
+    summary: v.contentId || '',
     changes: v.changes || [], // If you store changes as an array in content, otherwise parse from content
   }));
 }

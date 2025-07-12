@@ -5,7 +5,7 @@ import type { MySqlTransaction } from "drizzle-orm/mysql-core";
 
 type UpdateVersionContent = {
     versionId: number;
-    content?: string;
+    contentId?: string;
 };
 
 /*
@@ -19,7 +19,7 @@ export async function createVersion(data: {
     minorVersion: number;
     patchVersion: number;
     isCurrent?: boolean;
-    content: string;
+    contentId: string;
 }) {
     return db.insert(versions).values({
         appId: data.appId,
@@ -29,7 +29,7 @@ export async function createVersion(data: {
         minorVersion: data.minorVersion,
         patchVersion: data.patchVersion,
         isCurrent: data.isCurrent ?? false,
-        content: data.content,
+        contentId: data.contentId,
     });
 }
 
@@ -176,7 +176,7 @@ export async function setCurrentVersionByAppIdWithTransaction(
 
 export async function updateVersionContent({
     versionId,
-    content,
+    contentId,
 }: UpdateVersionContent) {
     try {
         const current = await db.query.versions.findFirst({
@@ -189,7 +189,7 @@ export async function updateVersionContent({
         await db
             .update(versions)
             .set({
-                content: content ?? current.content,
+                contentId: contentId ?? current.contentId,
                 updatedAt: new Date(),
             })
             .where(eq(versions.id, versionId));
