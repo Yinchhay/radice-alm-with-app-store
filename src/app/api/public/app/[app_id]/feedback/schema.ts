@@ -27,9 +27,6 @@ export const createFeedbackFormSchema = z.object({
     appId: z.number().int().min(1, {
         message: "App id is required",
     }),
-    projectId: z.number().int().min(1, {
-        message: "project id is required",
-    }),
 });
 
 export const getAssociatedFeedbackFormSchema = z.object({

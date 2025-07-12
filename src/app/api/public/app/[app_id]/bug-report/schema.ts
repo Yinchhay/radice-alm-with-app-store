@@ -21,7 +21,4 @@ export const createBugReportFormSchema = z.object({
     appId: z.number().int().min(1, {
         message: "App id is required",
     }),
-    projectId: z.number().int().min(1, {
-        message: "project id is required",
-    }),
 });
