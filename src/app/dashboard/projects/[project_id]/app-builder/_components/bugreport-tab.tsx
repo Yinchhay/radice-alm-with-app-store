@@ -32,7 +32,15 @@ export default function BugReportsTab({ projectId }: BugReportsTabProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-  // Removed debugLogs and addLog
+
+  // Helper to get auth_session from cookies (not HttpOnly)
+  const getSessionToken = () => {
+    if (typeof document === 'undefined') return undefined;
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('auth_session='))
+      ?.split('=')[1];
+  };
 
   // ESC key support for closing overlay
   useEffect(() => {
@@ -71,19 +79,33 @@ export default function BugReportsTab({ projectId }: BugReportsTabProps) {
           setLoading(false);
           return;
         }
-        const allBugReports: BugReport[] = [];
-        await Promise.all(apps.map(async (app) => {
-          try {
-            const res = await fetch(`/api/public/app/${app.id}/bug-report`);
-            const data = await res.json();
-            if (data.success && data.data && data.data.bugReports) {
-              allBugReports.push(...data.data.bugReports);
-            }
-          } catch (err) {
-            // Ignore per-app fetch errors
+        if (apps.length === 0) {
+          setBugReports([]);
+          setLoading(false);
+          return;
+        }
+
+        // Use the new internal API endpoint that directly uses project ID
+        const sessionToken = getSessionToken();
+        let headers = {};
+        if (sessionToken) {
+          headers = { Authorization: `Bearer ${sessionToken}` };
+        }
+        
+        try {
+          const res = await fetch(`/api/internal/project/${projectId}/bug-report`, {
+            headers,
+            credentials: 'include',
+          });
+          const data = await res.json();
+          if (data.success && data.data && data.data.bugReports) {
+            setBugReports(data.data.bugReports);
+          } else {
+            setBugReports([]);
           }
-        }));
-        setBugReports(allBugReports);
+        } catch (err) {
+          setBugReports([]);
+        }
       } catch (err) {
         setError('Failed to fetch bug reports');
       } finally {

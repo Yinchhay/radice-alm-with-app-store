@@ -177,3 +177,57 @@ export async function getFeedbacksTotalRowByTesterId(
         throw error;
     }
 }
+
+// New function to get feedbacks by project ID directly
+export async function getAllFeedbacksByProjectId(
+    projectId: number,
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_FEEDBACK_PAGE,
+) {
+    try {
+        const offset = (page - 1) * rowsPerPage;
+
+        const result = await db
+            .select({
+                id: feedbacks.id,
+                testerId: feedbacks.testerId,
+                appId: feedbacks.appId,
+                projectId: feedbacks.projectId,
+                title: feedbacks.title,
+                review: feedbacks.review,
+                starRating: feedbacks.starRating,
+                createdAt: feedbacks.createdAt,
+                updatedAt: feedbacks.updatedAt,
+                tester: {
+                    firstName: testers.firstName,
+                    lastName: testers.lastName,
+                }
+            })
+            .from(feedbacks)
+            .leftJoin(testers, eq(feedbacks.testerId, testers.id))
+            .where(eq(feedbacks.projectId, projectId))
+            .orderBy(desc(feedbacks.createdAt))
+            .limit(rowsPerPage)
+            .offset(offset);
+
+        return result;
+    } catch (error) {
+        console.error("Error getting feedbacks by project ID:", error);
+        throw error;
+    }
+}
+
+// New function to get total feedback count by project ID
+export async function getFeedbacksTotalRowByProjectId(projectId: number) {
+    try {
+        const result = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(feedbacks)
+            .where(eq(feedbacks.projectId, projectId));
+
+        return result[0].count;
+    } catch (error) {
+        console.error("Error getting feedbacks total count by project ID:", error);
+        throw error;
+    }
+}

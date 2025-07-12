@@ -79,3 +79,57 @@ export async function getBugReportsTotalRowByAppId( appId: number) {
         throw error;
     }
 }
+
+// New function to get bug reports by project ID directly
+export async function getAllBugReportsByProjectId(
+    projectId: number,
+    page: number = 1,
+    rowsPerPage: number = ROWS_PER_BUG_REPORT_PAGE,
+) {
+    try {
+        const offset = (page - 1) * rowsPerPage;
+
+        const result = await db
+        .select({
+            id: bugReports.id,
+            testerId: bugReports.testerId,
+            appId: bugReports.appId,
+            projectId: bugReports.projectId,
+            title: bugReports.title,
+            description: bugReports.description,
+            image: bugReports.image,
+            video: bugReports.video,
+            tester: {
+                firstName: testers.firstName,
+                lastName: testers.lastName,
+            }
+        })
+        .from(bugReports)
+        .leftJoin(testers, eq(bugReports.testerId, testers.id))
+        .where(eq(bugReports.projectId, projectId))
+        .orderBy(desc(bugReports.createdAt))
+        .limit(rowsPerPage)
+        .offset(offset);
+
+        return result;
+
+    } catch (error) {
+        console.error("Error getting bug reports by project ID:", error);
+        throw error;
+    }
+}
+
+// New function to get total bug report count by project ID
+export async function getBugReportsTotalRowByProjectId(projectId: number) {
+    try {
+        const result = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(bugReports)
+            .where(eq(bugReports.projectId, projectId));
+
+        return result[0].count;
+    } catch (error) {
+        console.error("Error getting bug reports total count by project ID:", error);
+        throw error;
+    }
+}

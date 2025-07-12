@@ -77,15 +77,23 @@ export default function FeedbackTab({ projectId }: FeedbackTabProps) {
           return;
         }
 
-        const allFeedback: Feedback[] = [];
-        await Promise.all(apps.map(async (app) => {
-          const res = await fetch(`/api/public/app/${app.id}/feedback`);
-          const data = await res.json();
-          if (data.success && data.data && data.data.feedbacks) {
-            allFeedback.push(...data.data.feedbacks);
-          }
-        }));
-        setFeedbackList(allFeedback);
+        if (apps.length === 0) {
+          setFeedbackList([]);
+          setLoading(false);
+          return;
+        }
+
+        // Use the new internal API endpoint that directly uses project ID
+        const res = await fetch(`/api/internal/project/${projectId}/feedback`, {
+          headers,
+          credentials: 'include',
+        });
+        const data = await res.json();
+        if (data.success && data.data && data.data.feedbacks) {
+          setFeedbackList(data.data.feedbacks);
+        } else {
+          setFeedbackList([]);
+        }
       } catch (err) {
         setError('Failed to fetch feedback');
       } finally {
