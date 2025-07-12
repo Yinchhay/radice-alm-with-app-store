@@ -33,19 +33,19 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */
 ;
 
-SET
-  @MYSQLDUMP_TEMP_LOG_BIN = @ @SESSION.SQL_LOG_BIN;
+-- Save the current value of sql_log_bin to a user variable
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.sql_log_bin;
 
-SET
-  @ @SESSION.SQL_LOG_BIN = 0;
+-- Temporarily disable binary logging
+SET SESSION sql_log_bin = 0;
 
---
--- GTID state at the beginning of the backup 
---
-SET
-  @ @GLOBAL.GTID_PURGED =
-  /*!80000 '+'*/
-  'dda393a2-5589-11f0-8522-daec5656b813:1-529';
+-- GTID state at the beginning of the backup
+SET @@GLOBAL.gtid_purged =
+  /*!80000 '+'*/ 'dda393a2-5589-11f0-8522-daec5656b813:1-529';
+
+-- Save character set client setting
+/*!40101 SET @saved_cs_client = @@character_set_client */;
+
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */
 ;
@@ -283,11 +283,14 @@ CREATE TABLE `bug_reports` (
   `video` varchar(500) DEFAULT NULL,
   `tester_id` varchar(255) DEFAULT NULL,
   `app_id` int DEFAULT NULL,
+  `project_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT (now()),
   `updated_at` timestamp NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `bug_reports_tester_id_testers_id_fk` (`tester_id`),
   KEY `bug_reports_app_id_apps_id_fk` (`app_id`),
+  KEY `bug_reports_project_id_projects_id_fk` (`project_id`),
+  CONSTRAINT `bug_reports_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `bug_reports_app_id_apps_id_fk` FOREIGN KEY (`app_id`) REFERENCES `apps` (`id`) ON DELETE SET NULL,
   CONSTRAINT `bug_reports_tester_id_testers_id_fk` FOREIGN KEY (`tester_id`) REFERENCES `testers` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 8 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
@@ -301,79 +304,6 @@ CREATE TABLE `bug_reports` (
 LOCK TABLES `bug_reports` WRITE;
 
 /*!40000 ALTER TABLE `bug_reports` DISABLE KEYS */
-;
-
-INSERT INTO
-  `bug_reports`
-VALUES
-  (
-    2,
-    'Test bug report',
-    'This is a description of the bug',
-    'https://example.com/image.png',
-    'https://example.com/video.mp4',
-    NULL,
-    1,
-    '2025-07-01 08:24:31',
-    '2025-07-01 08:24:31'
-  ),
-  (
-    3,
-    'mega report report bug report',
-    'This damn daniel of bug',
-    'https://nude.com/image.png',
-    'https://sex.com/video.mp4',
-    NULL,
-    NULL,
-    '2025-07-01 15:01:29',
-    '2025-07-01 15:01:29'
-  ),
-  (
-    4,
-    'sadsa',
-    'sadas',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '2025-07-02 10:11:07',
-    '2025-07-02 10:11:07'
-  ),
-  (
-    5,
-    'chhay is a bitch',
-    'yes he is',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '2025-07-02 10:31:56',
-    '2025-07-02 10:31:56'
-  ),
-  (
-    6,
-    'alsidj',
-    'awldijalwi',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '2025-07-02 15:20:57',
-    '2025-07-02 15:20:57'
-  ),
-  (
-    7,
-    'best bug report ever report',
-    'leeroyy jenkinnnnnn',
-    'https://god.com/image.png',
-    'https://godess.com/video.mp4',
-    'ef1712c0-57ed-11f0-952a-daec5656b813',
-    1,
-    '2025-07-03 15:17:18',
-    '2025-07-03 15:17:18'
-  );
-
-/*!40000 ALTER TABLE `bug_reports` ENABLE KEYS */
 ;
 
 UNLOCK TABLES;
@@ -769,44 +699,6 @@ VALUES
 
 UNLOCK TABLES;
 
---
--- Table structure for table `version_logs`
---
-DROP TABLE IF EXISTS `version_logs`;
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-
-/*!50503 SET character_set_client = utf8mb4 */
-;
-
-CREATE TABLE `version_logs` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `version_id` int DEFAULT NULL,
-  `action` varchar(50) DEFAULT NULL,
-  `content` text,
-  `created_by` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT (now()),
-  PRIMARY KEY (`id`),
-  KEY `version_logs_version_id_versions_id_fk` (`version_id`),
-  CONSTRAINT `version_logs_version_id_versions_id_fk` FOREIGN KEY (`version_id`) REFERENCES `versions` (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 5 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
-/*!40101 SET character_set_client = @saved_cs_client */
-;
-
---
--- Dumping data for table `version_logs`
---
-LOCK TABLES `version_logs` WRITE;
-
-/*!40000 ALTER TABLE `version_logs` DISABLE KEYS */
-;
-
-/*!40000 ALTER TABLE `version_logs` ENABLE KEYS */
-;
-
-UNLOCK TABLES;
 
 --
 -- Table structure for table `projects`
@@ -1351,7 +1243,7 @@ CREATE TABLE `versions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `app_id` int DEFAULT NULL,
   `project_id` int DEFAULT NULL,
-  `content_id` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
   `version_number` varchar(50) DEFAULT NULL,
   `major_version` int DEFAULT NULL,
   `minor_version` int DEFAULT NULL,
@@ -2153,10 +2045,9 @@ CREATE TABLE `apps` (
   KEY `apps_project_id_projects_id_fk` (`project_id`),
   KEY `apps_type_app_types_id_fk` (`type`),
   CONSTRAINT `apps_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `apps_type_app_types_id_fk` FOREIGN KEY (`type`) REFERENCES `app_types` (`id`) ON DELETE
-  SET
-    NULL,
+  CONSTRAINT `apps_type_app_types_id_fk` FOREIGN KEY (`type`) REFERENCES `app_types` (`id`) ON DELETE SET NULL
 ) ENGINE = InnoDB AUTO_INCREMENT = 20 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
 
 /*!50503 SET character_set_client = utf8mb4 */
 ;
@@ -2876,6 +2767,7 @@ CREATE TABLE `feedbacks` (
   `id` int NOT NULL AUTO_INCREMENT,
   `tester_id` varchar(255) DEFAULT NULL,
   `app_id` int DEFAULT NULL,
+  `project_id` int DEFAULT NULL,
   `title` varchar(255) DEFAULT NULL,
   `review` text,
   `star_rating` enum('1', '2', '3', '4', '5') DEFAULT NULL,
@@ -2884,7 +2776,9 @@ CREATE TABLE `feedbacks` (
   PRIMARY KEY (`id`),
   KEY `feedbacks_tester_id_testers_id_fk` (`tester_id`),
   KEY `feedbacks_app_id_apps_id_fk` (`app_id`),
+  KEY `feedbacks_project_id_projects_id_fk` (`project_id`),
   CONSTRAINT `feedbacks_app_id_apps_id_fk` FOREIGN KEY (`app_id`) REFERENCES `apps` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `feedbacks_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `feedbacks_tester_id_testers_id_fk` FOREIGN KEY (`tester_id`) REFERENCES `testers` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 17 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -2898,170 +2792,6 @@ LOCK TABLES `feedbacks` WRITE;
 
 /*!40000 ALTER TABLE `feedbacks` DISABLE KEYS */
 ;
-
-INSERT INTO
-  `feedbacks`
-VALUES
-  (
-    1,
-    NULL,
-    6,
-    'Test feedback',
-    'This is a description of the feedback',
-    '1',
-    '2025-07-01 14:54:38',
-    '2025-07-02 07:58:01'
-  ),
-  (
-    2,
-    NULL,
-    6,
-    'best fucking feedback',
-    'This is the best app ever',
-    '5',
-    '2025-07-01 15:06:36',
-    '2025-07-02 07:58:02'
-  ),
-  (
-    3,
-    NULL,
-    6,
-    'fuckass app',
-    'chhay is gay',
-    '4',
-    '2025-07-02 08:39:14',
-    '2025-07-02 08:39:14'
-  ),
-  (
-    4,
-    NULL,
-    6,
-    'kolbot small pp',
-    'ponloe is gay',
-    '1',
-    '2025-07-02 08:40:40',
-    '2025-07-02 08:40:40'
-  ),
-  (
-    5,
-    NULL,
-    2,
-    'testing1',
-    'testing ?',
-    '3',
-    '2025-07-02 09:23:56',
-    '2025-07-02 09:23:56'
-  ),
-  (
-    6,
-    NULL,
-    6,
-    'dick',
-    'ponloe is a dick',
-    '4',
-    '2025-07-02 10:31:38',
-    '2025-07-02 10:31:38'
-  ),
-  (
-    7,
-    NULL,
-    2,
-    'test',
-    'does this work?',
-    '5',
-    '2025-07-02 15:20:30',
-    '2025-07-02 15:20:30'
-  ),
-  (
-    8,
-    'ef1712c0-57ed-11f0-952a-daec5656b813',
-    1,
-    'best fucking feedback',
-    'This is the best app ever',
-    '5',
-    '2025-07-03 09:14:03',
-    '2025-07-03 09:14:03'
-  ),
-  (
-    9,
-    NULL,
-    6,
-    'asdas',
-    'sadasdd asdkopasd',
-    '4',
-    '2025-07-03 09:42:45',
-    '2025-07-03 09:42:45'
-  ),
-  (
-    10,
-    NULL,
-    6,
-    'sadasda s',
-    'asdasd',
-    '3',
-    '2025-07-03 09:43:02',
-    '2025-07-03 09:43:02'
-  ),
-  (
-    11,
-    NULL,
-    6,
-    'sadas',
-    'sadasd',
-    '4',
-    '2025-07-03 09:45:17',
-    '2025-07-03 09:45:17'
-  ),
-  (
-    12,
-    NULL,
-    6,
-    'gay is chhay',
-    'gay',
-    '4',
-    '2025-07-03 09:48:55',
-    '2025-07-03 09:48:55'
-  ),
-  (
-    13,
-    NULL,
-    6,
-    'sadas',
-    'sadasd',
-    '3',
-    '2025-07-03 09:57:21',
-    '2025-07-03 09:57:21'
-  ),
-  (
-    14,
-    NULL,
-    6,
-    'sadas',
-    'sadasd',
-    '4',
-    '2025-07-03 10:03:21',
-    '2025-07-03 10:03:21'
-  ),
-  (
-    15,
-    NULL,
-    6,
-    'rctfyvg',
-    'vuhjk',
-    '1',
-    '2025-07-03 10:15:34',
-    '2025-07-03 10:15:34'
-  ),
-  (
-    16,
-    'ef1712c0-57ed-11f0-952a-daec5656b813',
-    1,
-    'best feedback',
-    'This is the best nude ever',
-    '4',
-    '2025-07-03 14:40:32',
-    '2025-07-03 14:40:32'
-  );
 
 /*!40000 ALTER TABLE `feedbacks` ENABLE KEYS */
 ;
