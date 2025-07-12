@@ -45,18 +45,18 @@ export default function ApproveRejectButtons({ appId }: { appId: string }) {
   return (
     <div className="flex flex-col items-center gap-4 pt-6">
       <div className="flex gap-4 justify-center w-full">
-        <button
-          type="button"
-          className="px-6 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 transition disabled:opacity-50"
-          disabled={loading === "approve" || loading === "reject"}
-          onClick={() => handleAction("approve")}
-        >
-          {loading === "approve" ? "Approving..." : "Accept"}
-        </button>
-        <button
-          type="button"
-          className="px-6 py-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
-          disabled={loading === "approve" || loading === "reject"}
+      <button
+        type="button"
+        className="px-6 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 transition disabled:opacity-50"
+        disabled={loading === "approve" || loading === "reject"}
+        onClick={() => handleAction("approve")}
+      >
+        {loading === "approve" ? "Approving..." : "Accept"}
+      </button>
+      <button
+        type="button"
+        className="px-6 py-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
+        disabled={loading === "approve" || loading === "reject"}
           onClick={() => setShowRejectOverlay(true)}
         >
           Reject
@@ -83,10 +83,10 @@ export default function ApproveRejectButtons({ appId }: { appId: string }) {
               type="button"
               className="w-full px-6 py-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
               disabled={loading === "reject"}
-              onClick={() => handleAction("reject")}
-            >
-              {loading === "reject" ? "Rejecting..." : "Reject"}
-            </button>
+        onClick={() => handleAction("reject")}
+      >
+        {loading === "reject" ? "Rejecting..." : "Reject"}
+      </button>
             <button
               type="button"
               className="mt-2 w-full px-6 py-2 rounded-md bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"

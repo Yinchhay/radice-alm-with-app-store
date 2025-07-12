@@ -14,12 +14,13 @@ import { updateAppStatus } from "@/repositories/app/internal";
 import {
     setCurrentVersionByAppIdWithTransaction,
     finalizeVersionNumberOnAccept,
+    createVersion,
 } from "@/repositories/version";
 import { updateIsAppStatus } from "@/repositories/project";
 import { sendMail } from "@/smtp/mail";
 import { HttpStatusCode } from "@/types/http";
 import { Permissions } from "@/types/IAM";
-import { apps, users, projects, projectMembers } from "@/drizzle/schema";
+import { apps, users, projects, projectMembers, versions } from "@/drizzle/schema";
 
 // update type if we were to return any data back to the response
 export type FetchApproveAppForm = Record<string, never>;
@@ -113,6 +114,22 @@ export async function PATCH(
         }
 
         // FINALIZE versionNumber based on major/minor/patch
+        // Safeguard: ensure a version exists for this app
+        const existingVersion = await db.query.versions.findFirst({
+            where: eq(versions.appId, appId),
+        });
+        if (!existingVersion) {
+            await createVersion({
+                appId,
+                projectId: currentApp.projectId!,
+                versionNumber: "1.0.0",
+                majorVersion: 1,
+                minorVersion: 0,
+                patchVersion: 0,
+                isCurrent: false,
+                content: "App Created (auto-generated safeguard)",
+            });
+        }
         const versionFinalized = await finalizeVersionNumberOnAccept(appId);
         if (!versionFinalized) {
             return buildErrorResponse(

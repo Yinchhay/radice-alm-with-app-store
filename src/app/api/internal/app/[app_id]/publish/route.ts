@@ -100,7 +100,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
         // Only increment version if there is an accepted version
         if (acceptedVersion && acceptedVersion.versionNumber) {
-            await updateVersionPartsOnPublish(appId, updateType);
+        await updateVersionPartsOnPublish(appId, updateType);
         }
 
         // Save 'whatsNew' content to the current version

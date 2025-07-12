@@ -111,7 +111,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           // Populate form fields with fetched data
           if (response.data.app) {
             setSubtitle(response.data.app.subtitle || '');
-            setDescription(response.data.app.aboutDesc || '');
+            // Use aboutDesc from content field if available, otherwise fall back to app.aboutDesc
+            const aboutDesc = (response.data as any).aboutDesc || response.data.app.aboutDesc || '';
+            setDescription(aboutDesc);
             setWebUrl(response.data.app.webUrl || '');
             setPriorityTesting(response.data.app.featuredPriority === 1);
             setAppType(response.data.app.type ? String(response.data.app.type) : '');
@@ -175,7 +177,14 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       try {
         const res = await fetch(`http://localhost:3000/api/public/app/${appData.appId}/version`);
         const data = await res.json();
-        if (data.success && data.data && data.data.current && data.data.current.versionNumber) {
+        console.log('Version API response:', data);
+        // Only set latestAcceptedVersion if there's a current version with a finalized versionNumber
+        // This means the version has been accepted and finalized
+        if (data.success && data.data && data.data.current && 
+            data.data.current.versionNumber && 
+            data.data.current.versionNumber !== null && 
+            data.data.current.versionNumber !== '' &&
+            data.data.current.isCurrent === true) {
           setLatestAcceptedVersion({
             major: data.data.current.majorVersion ?? 0,
             minor: data.data.current.minorVersion ?? 0,
@@ -184,7 +193,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         } else {
           setLatestAcceptedVersion(null);
         }
-      } catch {
+      } catch (error) {
+        console.log('Error fetching version:', error);
         setLatestAcceptedVersion(null);
       }
     }

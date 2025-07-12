@@ -39,9 +39,7 @@ export default async function AppStoreRequestPage({ searchParams }: { searchPara
                 <div className="mb-1">
                   <span className="font-semibold">Type:</span> {item.appType?.name || "-"}
                 </div>
-                <div className="mb-1">
-                  <span className="font-semibold">Update Type:</span> {item.app.updateType || "-"}
-                </div>
+
                 <div>
                   <span className="font-semibold">Status:</span> {item.app.status || "-"}
                 </div>

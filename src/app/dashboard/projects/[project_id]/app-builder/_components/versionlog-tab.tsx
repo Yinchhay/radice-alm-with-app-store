@@ -71,32 +71,32 @@ export default function VersionLogsTab({ appId }: VersionLogsTabProps) {
       ) : error ? (
         <div className="text-red-500">{error}</div>
       ) : (
-        <div className="space-y-10">
+      <div className="space-y-10">
           {versionLogs.length === 0 ? (
             <div className="text-gray-500">No version logs found.</div>
           ) : (
             versionLogs.map((log) => (
-              <div key={log.id}>
-                {/* Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900"> {log.version} </h3>
-                  <span className="text-sm text-gray-500">{log.timeAgo}</span>
-                </div>
-                {/* Summary */}
-                <p className="text-gray-700 text-sm mb-3">{log.summary}</p>
-                {/* Bullet list */}
+          <div key={log.id}>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-900"> {log.version} </h3>
+              <span className="text-sm text-gray-500">{log.timeAgo}</span>
+            </div>
+            {/* Summary */}
+            <p className="text-gray-700 text-sm mb-3">{log.summary}</p>
+            {/* Bullet list */}
                 {log.changes && log.changes.length > 0 && (
-                  <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
-                    {log.changes.map((change, index) => (
-                      <li key={index}>{change}</li>
-                    ))}
-                  </ul>
+            <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
+              {log.changes.map((change, index) => (
+                <li key={index}>{change}</li>
+              ))}
+            </ul>
                 )}
-                {/* End note */}
-              </div>
+            {/* End note */}
+          </div>
             ))
           )}
-        </div>
+      </div>
       )}
     </div>
   );

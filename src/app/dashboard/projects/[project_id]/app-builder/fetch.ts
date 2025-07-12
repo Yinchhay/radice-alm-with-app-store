@@ -29,7 +29,7 @@ export type FetchAppBuilderData = {
 
 export async function fetchAppBuilderData(
   projectId: string
-): ResponseJson<FetchAppBuilderData & { updateType?: string }> {
+): ResponseJson<FetchAppBuilderData & { updateType?: string; aboutDesc?: string }> {
   try {
     const sessionId = await getSessionCookie();
     
@@ -96,12 +96,15 @@ export async function fetchAppBuilderData(
       } : undefined
     };
 
-    // Parse updateType from content if present
+    // Parse updateType and aboutDesc from content if present
     if (combinedData.app && combinedData.app.content) {
       try {
         const parsed = JSON.parse(combinedData.app.content);
         if (parsed && typeof parsed.updateType === 'string') {
           combinedData.updateType = parsed.updateType;
+        }
+        if (parsed && typeof parsed.aboutDesc === 'string') {
+          combinedData.aboutDesc = parsed.aboutDesc;
         }
       } catch {}
     }
@@ -154,12 +157,13 @@ export async function saveAppDraft({ appId, subtitle, aboutDesc, type, webUrl, u
     if (!sessionId) {
       return { success: false, message: 'Unauthorized: No session' };
     }
-    // Merge updateType into content JSON
+    // Merge updateType and aboutDesc into content JSON
     let contentObj: any = {};
     if (existingContent) {
       try { contentObj = JSON.parse(existingContent) || {}; } catch {}
     }
     contentObj.updateType = updateType;
+    contentObj.aboutDesc = aboutDesc;
     const res = await fetch(`${await getBaseUrl()}/api/internal/app/${appId}/edit`, {
       method: 'PATCH',
       headers: {
