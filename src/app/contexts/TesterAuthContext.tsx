@@ -25,6 +25,14 @@ export interface Tester {
     updatedAt: string;
 }
 
+export interface PasswordResetTokenPayload {
+    id: string;
+    email: string;
+    type: "password-reset";
+    iat?: number;
+    exp?: number;
+}
+
 export interface TesterAuthContextType {
     tester: Tester | null;
     isLoading: boolean;
@@ -45,6 +53,14 @@ export interface TesterAuthContextType {
         newPassword: string,
         confirmPassword: string,
     ) => Promise<{ success: boolean; error?: string }>;
+    forgotPassword: (
+        email: string,
+    ) => Promise<{ success: boolean; error?: string; message?: string }>;
+    resetPassword: (
+        token: string,
+        newPassword: string,
+        confirmPassword: string,
+    ) => Promise<{ success: boolean; error?: string; message?: string }>;
     refreshTester: () => Promise<void>;
 }
 
@@ -159,6 +175,7 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
             };
         }
     };
+
     const logout = async () => {
         try {
             const response = await fetch("/api/tester/auth/logout", {
@@ -213,7 +230,7 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
         confirmPassword: string,
     ) => {
         try {
-            const response = await fetch("/api/testers/auth/change-password", {
+            const response = await fetch("/api/tester/auth/change-password", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -245,6 +262,78 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
         }
     };
 
+    const forgotPassword = async (email: string) => {
+        try {
+            const response = await fetch("/api/tester/auth/forgot-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                return { 
+                    success: true, 
+                    message: result.message || "Password reset email sent" 
+                };
+            } else {
+                return {
+                    success: false,
+                    error: result.error || "Failed to send reset email",
+                };
+            }
+        } catch (error) {
+            console.error("Forgot password error:", error);
+            return {
+                success: false,
+                error: "Network error. Please try again.",
+            };
+        }
+    };
+
+    const resetPassword = async (
+        token: string,
+        newPassword: string,
+        confirmPassword: string,
+    ) => {
+        try {
+            const response = await fetch("/api/tester/auth/reset-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    token,
+                    newPassword,
+                    confirmPassword,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                return { 
+                    success: true, 
+                    message: result.message || "Password reset successfully" 
+                };
+            } else {
+                return {
+                    success: false,
+                    error: result.error || "Failed to reset password",
+                };
+            }
+        } catch (error) {
+            console.error("Reset password error:", error);
+            return {
+                success: false,
+                error: "Network error. Please try again.",
+            };
+        }
+    };
+
     const refreshTester = async () => {
         await checkAuth();
     };
@@ -258,6 +347,8 @@ export function TesterAuthProvider({ children }: TesterAuthProviderProps) {
         register,
         updateProfile,
         changePassword,
+        forgotPassword,
+        resetPassword,
         refreshTester,
     };
 

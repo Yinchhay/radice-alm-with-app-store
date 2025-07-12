@@ -34,7 +34,11 @@ export async function PATCH(request: Request, { params }: Params) {
             return buildNoPermissionErrorResponse();
         }
 
-        const generatedPw = generatePassword();
+        const generatedPw =
+            process.env.NODE_ENV === "development"
+                ? "12345678"
+                : generatePassword();
+
         // during approve, we approve and return back the application form data
         const applicationForm = await approveApplicationFormById(
             Number(params.application_form_id),
