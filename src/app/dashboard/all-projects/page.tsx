@@ -119,7 +119,15 @@ function Project({
     // Check if the project has any accepted apps
     const hasAcceptedApp = Array.isArray(project.apps) && project.apps.some(app => app.status === "accepted");
     // Permission check
-    const { projectRole } = checkProjectRole(user.id, project, user.type);
+    const { projectRole } = checkProjectRole(
+        user.id,
+        {
+            ...project,
+            projectMembers: project.projectMembers ?? [],
+            projectPartners: project.projectPartners ?? [],
+        },
+        user.type
+    );
     const canShowToggles = projectRole === ProjectRole.OWNER || projectRole === ProjectRole.SUPER_ADMIN || canEditAnyProject;
 
     return (
