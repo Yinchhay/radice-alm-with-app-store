@@ -28,7 +28,7 @@ export type FetchUpdateProjectAppStatus = Record<string, unknown>;
 
 export async function PATCH(request: Request, { params }: Params) {
     try {
-        const requiredPermission = new Set([]);
+        const requiredPermission = new Set([Permissions.CHANGE_PROJECT_STATUS]);
         const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(request, requiredPermission);
         if (errorNoBearerToken) {
