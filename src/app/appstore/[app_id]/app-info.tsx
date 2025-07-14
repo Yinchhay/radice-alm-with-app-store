@@ -39,23 +39,50 @@ async function getAppById(appId: string) {
     }
 }
 
+async function fetchCurrentVersion(appId: string) {
+    try {
+        const response = await fetch(
+            `${await getBaseUrl()}/api/public/app/${appId}/version`,
+            {
+                method: "GET",
+                cache: "no-store",
+            },
+        );
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const data = await response.json();
+        return data.success ? data.data.current : null;
+    } catch (error) {
+        console.error("Error fetching current version:", error);
+        return null;
+    }
+}
+
 function useApp(appId: string) {
     const [app, setApp] = useState<App | null>(null);
+    const [currentVersion, setCurrentVersion] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         (async () => {
-            const fetchedApp = await getAppById(appId);
+            const [fetchedApp, versionData] = await Promise.all([
+                getAppById(appId),
+                fetchCurrentVersion(appId)
+            ]);
             setApp(fetchedApp);
+            setCurrentVersion(versionData);
             setLoading(false);
         })();
     }, [appId]);
 
-    return { app, loading };
+    return { app, currentVersion, loading };
 }
 
 function AppPage({ params }: { params: { app_id: string } }) {
-    const { app, loading } = useApp(params.app_id);
+    const { app, currentVersion, loading } = useApp(params.app_id);
     const [showLoginPopup, setShowLoginPopup] = useState(false);
     
     if (loading) {
@@ -109,7 +136,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
     return (
         <div className="flex justify-center">
             <div className="flex-1 max-w-[1440px] px-4">
-                <div className="max-w-[1440px] mx-auto px-10 py-8">
+                <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-8">
                     <div className="mb-8">
                         <AppBanner
                             bannerImage={app.bannerImage || "/placeholders/placeholder.png"}
@@ -117,9 +144,9 @@ function AppPage({ params }: { params: { app_id: string } }) {
                             subtitle={app.subtitle}
                         />
                     </div>
-                    <div className="flex flex-col md:flex-row gap-4 min-h-[600px]">
-                        <div className="flex-1 min-w-[260px] max-w-sm flex flex-col justify-center h-full">
-                            <h1 className="text-6xl font-bold mb-2">
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-4 min-h-[600px]">
+                        <div className="flex-1 lg:min-w-[260px] lg:max-w-sm flex flex-col justify-center h-full">
+                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2">
                                 {project?.name || "No Name"}
                             </h1>
                             <div className="text-sm text-gray-700 mb-2">
@@ -145,7 +172,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 {action.label}
                             </AppActionButton>
                         </div>
-                        <div className="flex-1 min-w-[300px] h-full">
+                        <div className="flex-1 lg:min-w-[300px]">
                             <AppScreenshotsCarousel
                                 screenshots={screenshots}
                                 appName={project?.name || "App"}
@@ -154,7 +181,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 <h2 className="text-xl mb-4 font-semibold">
                                     About
                                 </h2>
-                                <p className="text-sm leading-5" style={{ color: "rgba(0,0,0,0.64)" }}>
+                                <p className="text-sm leading-5 break-words whitespace-pre-wrap max-w-none overflow-wrap-anywhere word-break-break-all sm:word-break-normal" style={{ color: "rgba(0,0,0,0.64)", overflowWrap: "anywhere", wordBreak: "break-word" }}>
                                     {app.aboutDesc || "No description available."}
                                 </p>
                             </div>
@@ -164,29 +191,51 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         What's New
                                     </h2>
                                     <a
-                                        href="#"
+                                        href={`/appstore/${params.app_id}/app-version-history-page`}
                                         className="text-xs"
                                         style={{ color: "#0000FF" }}
                                     >
                                         Version History
                                     </a>
                                 </div>
-                                <p className="text-sm leading-5" style={{ color: "rgba(0,0,0,0.64)" }}>
-                                    {app.content || "No update information available."}
-                                </p>
+                                <div className="text-sm leading-5" style={{ color: "rgba(0,0,0,0.64)" }}>
+                                    {currentVersion?.content ? (
+                                        <div className="space-y-2 max-w-none overflow-wrap-anywhere">
+                                            {currentVersion.content.split('\n').map((line: string, index: number) => (
+                                                <p key={index} className={line.trim() === '' ? 'h-2' : 'break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal'} style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>
+                                                    {line.startsWith('- ') ? (
+                                                        <span className="flex items-start gap-2">
+                                                            <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
+                                                            <span className="break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>{line.substring(2)}</span>
+                                                        </span>
+                                                    ) : line.startsWith('* ') ? (
+                                                        <span className="flex items-start gap-2">
+                                                            <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
+                                                            <span className="break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>{line.substring(2)}</span>
+                                                        </span>
+                                                    ) : (
+                                                        line || <br />
+                                                    )}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        "No update information available."
+                                    )}
+                                </div>
                             </div>
                             <div className="mb-10">
-                                <div className="flex flex-col md:flex-row items-start gap-x-80">
+                                <div className="flex flex-col md:flex-row md:items-start gap-6 md:gap-x-80">
                                     {/* Left column */}
                                     <div className="flex flex-col">
                                         <div className="mb-6">
-                                            <h3 className="text-lg font-semibold mb-2">
+                                            <h3 className="text-base sm:text-lg font-semibold mb-2">
                                                 Updated on
                                             </h3>
-                                            <div className="text-base text-gray-600 mb-3">
-                                                {app.updatedAt
+                                            <div className="text-sm sm:text-base text-gray-600 mb-3">
+                                                {currentVersion?.updatedAt
                                                     ? new Date(
-                                                        app.updatedAt,
+                                                        currentVersion.updatedAt,
                                                     ).toLocaleDateString(
                                                         undefined,
                                                         {
@@ -197,18 +246,17 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                                     )
                                                     : "N/A"}
                                             </div>
-                                            <h3 className="text-lg font-semibold mb-2">
+                                            <h3 className="text-base sm:text-lg font-semibold mb-2">
                                                 Version
                                             </h3>
-                                            <div className="text-base text-gray-600">
-                                                {/* @ts-expect-error version may not exist on App type */}
-                                                {app.version || "N/A"}
+                                            <div className="text-sm sm:text-base text-gray-600">
+                                                {currentVersion?.versionNumber || "N/A"}
                                             </div>
                                         </div>
                                     </div>
                                     {/* Right column */}
                                     <div className="flex flex-col">
-                                        <h3 className="text-lg font-semibold mb-4">
+                                        <h3 className="text-base sm:text-lg font-semibold mb-4">
                                             Compatibility
                                         </h3>
                                         <div className="flex flex-col gap-4">
