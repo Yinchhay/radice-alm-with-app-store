@@ -60,12 +60,17 @@ export default function VersionLogsTab({ appId }: VersionLogsTabProps) {
       .finally(() => setLoading(false));
   }, [appId]);
 
+  // Standard heading for all states
+  const MainHeading = (
+    <div className="space-y-1 mb-6">
+      <h1 className="text-[24px] font-semibold">Version Logs</h1>
+      <p className="text-gray-500 text-sm">This is where you can view the version history</p>
+    </div>
+  );
+
   return (
     <div className="max-w-3xl">
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-1">Version Logs</h2>
-        <p className="text-gray-600 text-sm">This is where you can view the version history</p>
-      </div>
+      {MainHeading}
       {loading ? (
         <div>Loading version logs...</div>
       ) : error ? (

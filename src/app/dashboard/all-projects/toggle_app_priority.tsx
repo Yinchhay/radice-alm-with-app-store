@@ -28,7 +28,7 @@ export default function ToggleAppPriority({
             noLabel="Normal"
             onChange={async (state: boolean) => {
                 const res = await fetchUpdateAppPriority(
-                    project.id, // Use project.id for the PATCH
+                    acceptedApp.id,
                     state,
                     pathname,
                 );

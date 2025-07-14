@@ -29,14 +29,14 @@ export async function fetchProjectsForManageAllProjects(
 }
 
 export async function fetchUpdateAppPriority(
-    projectId: number,
+    appId: number,
     featuredPriority: boolean,
     pathname: string,
 ) {
     try {
         const sessionId = await getSessionCookie();
         const response = await fetch(
-            `${await getBaseUrl()}/api/internal/project/${projectId}/settings/toggle-is-featured`,
+            `${await getBaseUrl()}/api/internal/app/${appId}/edit`,
             {
                 method: "PATCH",
                 headers: {
