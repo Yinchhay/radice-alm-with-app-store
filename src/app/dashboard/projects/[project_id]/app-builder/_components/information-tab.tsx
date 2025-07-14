@@ -2,6 +2,10 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { fetchAppBuilderData, FetchAppBuilderData, saveAppDraft } from '../fetch';
+import Button from '@/components/Button';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 
 function FileDropzone({
   label,
@@ -56,6 +60,45 @@ interface InformationTabProps {
   projectId: string;
 }
 
+// Enhanced helper for inserting markdown at cursor or line start
+function insertAtCursor(
+  textarea: HTMLTextAreaElement | null,
+  before: string,
+  after: string = '',
+  placeholder: string = '',
+  block = false,
+  linePrefix = ''
+) {
+  if (!textarea) return;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const value = textarea.value;
+  const selected = value.substring(start, end) || placeholder;
+  let newValue, cursorPos;
+  if (block) {
+    // Insert as block (e.g., code block, hr)
+    newValue =
+      value.substring(0, start) + before + selected + after + value.substring(end);
+    cursorPos = start + before.length + selected.length + after.length;
+  } else if (linePrefix) {
+    // Insert at start of each selected line
+    const lines = value.substring(start, end).split('\n');
+    const modified = lines.map(line => linePrefix + (line || placeholder)).join('\n');
+    newValue = value.substring(0, start) + modified + value.substring(end);
+    cursorPos = start + linePrefix.length;
+  } else {
+    // Inline wrap
+    newValue =
+      value.substring(0, start) + before + selected + after + value.substring(end);
+    cursorPos = start + before.length + selected.length + after.length;
+  }
+  textarea.value = newValue;
+  textarea.setSelectionRange(cursorPos, cursorPos);
+  textarea.focus();
+  const event = new Event('input', { bubbles: true });
+  textarea.dispatchEvent(event);
+}
+
 export default function InformationTab({ projectId }: InformationTabProps) {
   const [loading, setLoading] = useState(true);
   const [appData, setAppData] = useState<FetchAppBuilderData | null>(null);
@@ -96,6 +139,27 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     if (/^https?:\/\//.test(url)) return '';
     return 'URL must start with http:// or https://';
   };
+
+  const [errors, setErrors] = useState<any>({});
+
+  const validateFields = () => {
+    const newErrors: any = {};
+    if (!subtitle.trim()) newErrors.subtitle = 'Required';
+    if (!appType) newErrors.appType = 'Required';
+    if (!description.trim()) newErrors.description = 'Required';
+    if (!webUrl.trim()) newErrors.webUrl = 'Required';
+    if (appFiles.length === 0) newErrors.appFiles = 'Required';
+    if (cardImages.length === 0) newErrors.cardImages = 'Required';
+    if (bannerImages.length === 0) newErrors.bannerImages = 'Required';
+    if (screenshots.length === 0) newErrors.screenshots = 'Required';
+    if (latestAcceptedVersion && !whatsNew.trim()) newErrors.whatsNew = 'Required';
+    if (latestAcceptedVersion && !updateType) newErrors.updateType = 'Required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const aboutRef = useRef<HTMLTextAreaElement>(null);
+  const whatsNewRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch app data on component mount
   useEffect(() => {
@@ -266,6 +330,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
 
   const handleSave = async () => {
     if (!appData) return;
+    if (!validateFields()) return;
     setSaveLoading(true);
     setSaveMessage(null);
     try {
@@ -340,6 +405,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
 
   const handleContinue = async () => {
     if (!appData) return;
+    if (!validateFields()) return;
     setSaveLoading(true);
     setSaveMessage(null);
     setDebugInfo(null);
@@ -471,15 +537,17 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     return `${major}.${minor}.${patch}`;
   }
 
+  const MainHeading = (
+    <div className="space-y-1 mb-6">
+      <h1 className="text-[24px] font-semibold">Information</h1>
+      <p className="text-gray-500 text-sm">Fill in your app information and prepare it for listing on our store.</p>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Information</h1>
-          <p className="text-gray-500 text-sm">
-            Loading app information...
-          </p>
-        </div>
+        {MainHeading}
         <div className="animate-pulse">
           <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="h-32 bg-gray-200 rounded mb-4"></div>
@@ -492,6 +560,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   if (error) {
     return (
       <div className="space-y-6">
+        {MainHeading}
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Information</h1>
           <p className="text-red-500 text-sm">
@@ -504,18 +573,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Information</h1>
-        <p className="text-gray-500 text-sm">
-          Fill in your app information and prepare it for listing on our store.
-          {appData?.isNewApp && (
-            <span className="text-blue-600 font-medium"> Creating new app...</span>
-          )}
-        </p>
-      </div>
+      {MainHeading}
 
-      <div className="space-y-4 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Basic Information</h3>
+      <h3 className="text-[20px] font-semibold mb-2">Basic Information</h3>
 
         <div className="space-y-1">
           <label className="block text-sm font-medium">App Name</label>
@@ -529,21 +589,24 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         </div>
 
         <div className="space-y-1 mt-3">
-          <label className="block text-sm font-medium">Sub Title</label>
+          <label className="block text-sm font-medium">Sub Title <span className="text-red-500">*</span></label>
           <input
             type="text"
             value={subtitle}
             onChange={e => setSubtitle(e.target.value)}
+            required
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
           />
+          {errors.subtitle && <div className="text-xs text-red-500">{errors.subtitle}</div>}
           <div className="text-xs text-gray-500">1/30 words</div>
         </div>
 
         <div className="space-y-1 mt-3">
-          <label className="block text-sm font-medium">Type</label>
+          <label className="block text-sm font-medium">Type <span className="text-red-500">*</span></label>
           <select 
             value={appType}
             onChange={(e) => setAppType(e.target.value)}
+            required
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
           >
             <option value="">Select Type</option>
@@ -551,19 +614,50 @@ export default function InformationTab({ projectId }: InformationTabProps) {
               <option key={option.id} value={option.id}>{option.name}</option>
             ))}
           </select>
+          {errors.appType && <div className="text-xs text-red-500">{errors.appType}</div>}
         </div>
 
         <div className="space-y-1 mt-3">
-          <label className="block text-sm font-medium">About</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-            rows={5}
-            maxLength={300}
-            placeholder="Describe your app..."
-          />
+          <label className="block text-sm font-medium">About <span className="text-red-500">*</span></label>
+          {/* Integrated Markdown Toolbar + Textarea */}
+          <div className="rounded-md border border-gray-300 bg-white overflow-hidden">
+            <div className="flex flex-nowrap gap-1 px-2 py-2 bg-white border-b border-gray-200 shadow-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 rounded-t-md">
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bold" onClick={() => insertAtCursor(aboutRef.current, '**', '**', 'bold text')}><span style={{fontWeight:'bold'}}>B</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Italic" onClick={() => insertAtCursor(aboutRef.current, '*', '*', 'italic text')}><span style={{fontStyle:'italic'}}>I</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Inline Code" onClick={() => insertAtCursor(aboutRef.current, '`', '`', 'code')}><span style={{fontFamily:'monospace'}}>&lt;/&gt;</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Code Block" onClick={() => insertAtCursor(aboutRef.current, '\n```\n', '\n```\n', 'code block', true)}><span style={{fontFamily:'monospace'}}>```</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Quote" onClick={() => insertAtCursor(aboutRef.current, '', '', 'quote', false, '> ')}><span>"</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 1" onClick={() => insertAtCursor(aboutRef.current, '', '', 'Heading 1', false, '# ')}><span>H1</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 2" onClick={() => insertAtCursor(aboutRef.current, '', '', 'Heading 2', false, '## ')}><span>H2</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 3" onClick={() => insertAtCursor(aboutRef.current, '', '', 'Heading 3', false, '### ')}><span>H3</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bullet List" onClick={() => insertAtCursor(aboutRef.current, '', '', 'list item', false, '- ')}><span>&#8226;</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Horizontal Rule" onClick={() => insertAtCursor(aboutRef.current, '\n---\n', '', '', true)}><span>&mdash;</span></button>
+            </div>
+            <textarea
+              ref={aboutRef}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+              className="w-full px-3 py-1.5 text-sm bg-white border-0 focus:ring-0 focus:outline-none resize-none min-h-[100px]"
+              rows={5}
+              maxLength={300}
+              placeholder="Describe your app..."
+              style={{borderRadius: 0}}
+            />
+          </div>
+          {errors.description && <div className="text-xs text-red-500">{errors.description}</div>}
           <div className="text-xs text-gray-500">{description.length}/300 words</div>
+          {/* Markdown Preview for About */}
+          <div className="mt-2 p-2 border border-dashed border-gray-300 rounded bg-gray-50">
+            <div className="text-xs text-gray-500 mb-1">Markdown Preview:</div>
+            <ReactMarkdown
+              className="prose max-w-none text-sm leading-5"
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSanitize]}
+            >
+              {description || "Nothing to preview."}
+            </ReactMarkdown>
+          </div>
         </div>
 
         <div className="space-y-1 mt-4">
@@ -596,86 +690,113 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             </button>
           </div>
         </div>
-      </div>
 
       {/* Update Information Section */}
       {latestAcceptedVersion && (
-        <div className="space-y-4 bg-white rounded-lg shadow-sm p-4">
-          <h3 className="text-lg font-semibold">Update Information</h3>
+        <>
+          <h3 className="text-[20px] font-semibold mb-2">Update Information</h3>
           <div className="space-y-1">
-            <label className="block text-sm font-medium">Update Type</label>
+            <label className="block text-sm font-medium">Update Type <span className="text-red-500">*</span></label>
             <select
               value={updateType}
               onChange={e => setUpdateType(e.target.value as 'major' | 'minor' | 'patch')}
+              required
               className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
             >
               <option value="major">Major</option>
               <option value="minor">Minor</option>
               <option value="patch">Patch</option>
             </select>
+            {errors.updateType && <div className="text-xs text-red-500">{errors.updateType}</div>}
             <div className="text-xs text-gray-600 mt-1">Next version: <span className="font-mono">{getNextVersion()}</span></div>
           </div>
           <div className="space-y-1 mt-3">
-            <label className="block text-sm font-medium">What's New</label>
-            <textarea
-              value={whatsNew}
-              onChange={e => setWhatsNew(e.target.value)}
-              className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-              rows={5}
-              maxLength={1000}
-              placeholder="Describe what's new in this update..."
-            />
-            <div className="text-xs text-gray-500">{whatsNew.length}/1000 words</div>
+            <label className="block text-sm font-medium">What's New <span className="text-red-500">*</span></label>
+            {/* Integrated Markdown Toolbar + Textarea */}
+            <div className="rounded-md border border-gray-300 bg-white overflow-hidden">
+              <div className="flex flex-nowrap gap-1 px-2 py-2 bg-white border-b border-gray-200 shadow-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 rounded-t-md">
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bold" onClick={() => insertAtCursor(whatsNewRef.current, '**', '**', 'bold text')}><span style={{fontWeight:'bold'}}>B</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Italic" onClick={() => insertAtCursor(whatsNewRef.current, '*', '*', 'italic text')}><span style={{fontStyle:'italic'}}>I</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Inline Code" onClick={() => insertAtCursor(whatsNewRef.current, '`', '`', 'code')}><span style={{fontFamily:'monospace'}}>&lt;/&gt;</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Code Block" onClick={() => insertAtCursor(whatsNewRef.current, '\n```\n', '\n```\n', 'code block', true)}><span style={{fontFamily:'monospace'}}>```</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Quote" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'quote', false, '> ')}><span>"</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 1" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'Heading 1', false, '# ')}><span>H1</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 2" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'Heading 2', false, '## ')}><span>H2</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 3" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'Heading 3', false, '### ')}><span>H3</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bullet List" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'list item', false, '- ')}><span>&#8226;</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Horizontal Rule" onClick={() => insertAtCursor(whatsNewRef.current, '\n---\n', '', '', true)}><span>&mdash;</span></button>
+              </div>
+              <textarea
+                ref={whatsNewRef}
+                value={whatsNew}
+                onChange={e => setWhatsNew(e.target.value)}
+                required
+                className="w-full px-3 py-1.5 text-sm bg-white border-0 focus:ring-0 focus:outline-none resize-none min-h-[100px]"
+                rows={5}
+                maxLength={300}
+                placeholder="Describe what's new in this update..."
+                style={{borderRadius: 0}}
+              />
+            </div>
+            {errors.whatsNew && <div className="text-xs text-red-500">{errors.whatsNew}</div>}
+            <div className="text-xs text-gray-500">{whatsNew.length}/300 words</div>
+            {/* Markdown Preview for What's New */}
+            <div className="mt-2 p-2 border border-dashed border-gray-300 rounded bg-gray-50">
+              <div className="text-xs text-gray-500 mb-1">Markdown Preview:</div>
+              <ReactMarkdown
+                className="prose max-w-none text-sm leading-5"
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeSanitize]}
+              >
+                {whatsNew || "Nothing to preview."}
+              </ReactMarkdown>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Web URL</h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Web URL <span className="text-red-500">*</span></h3>
         <input
           type="text"
           value={webUrl}
           onChange={e => setWebUrl(e.target.value)}
+          required
           className={`w-full px-3 py-1.5 border ${webUrlError ? 'border-red-500' : 'border-gray-300'} rounded-md text-sm`}
           placeholder="https://yourapp.com"
         />
+        {errors.webUrl && <div className="text-xs text-red-500">{errors.webUrl}</div>}
         <div className="text-xs text-gray-500">Enter the full URL, including http:// or https://</div>
         {webUrlError && <div className="text-xs text-red-500 font-semibold">{webUrlError}</div>}
-      </div>
 
       {/* App Files */}
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">App File</h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">App File <span className="text-red-500">*</span></h3>
         <FileDropzone label="App file only" onChange={(f) => simulateUpload(f, setAppFiles)} />
         {renderUploadList(appFiles, setAppFiles)}
-      </div>
+        {errors.appFiles && <div className="text-xs text-red-500">{errors.appFiles}</div>}
 
       {/* Card Images */}
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Image</h3>
-        <p className="text-sm font-medium">Card</p>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Image <span className="text-red-500">*</span></h3>
+      <p className="text-sm font-medium">Card <span className="text-red-500">*</span></p>
         <FileDropzone
           label="Card image only"
           accept="image/*"
           onChange={(f) => simulateUpload(f, setCardImages)}
         />
         {renderUploadList(cardImages, setCardImages)}
-      </div>
+        {errors.cardImages && <div className="text-xs text-red-500">{errors.cardImages}</div>}
 
       {/* Banner Images */}
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Banner</h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Banner <span className="text-red-500">*</span></h3>
         <FileDropzone
           label="Banner image only"
           accept="image/*"
           onChange={(f) => simulateUpload(f, setBannerImages)}
         />
         {renderUploadList(bannerImages, setBannerImages)}
-      </div>
+        {errors.bannerImages && <div className="text-xs text-red-500">{errors.bannerImages}</div>}
 
       {/* Screenshots */}
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Screenshots (Max 8)</h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Screenshots (Max 8) <span className="text-red-500">*</span></h3>
         <FileDropzone
           label="Screenshot images"
           accept="image/*"
@@ -683,34 +804,27 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           onChange={(f) => simulateUpload(f, setScreenshots)}
         />
         {renderUploadList(screenshots, setScreenshots, true)}
-      </div>
+        {errors.screenshots && <div className="text-xs text-red-500">{errors.screenshots}</div>}
 
-      <div className="flex justify-center pt-4">
-        <button
-          className="w-64 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-900"
+      <div className="flex flex-col md:flex-row justify-center gap-4 pt-4">
+        <Button
+          variant="purple"
+          className="flex-1 basis-1/2 py-3 text-base font-semibold h-full justify-center"
           onClick={handleContinue}
           disabled={saveLoading || !!webUrlError}
         >
           {saveLoading ? 'Submitting...' : 'Continue'}
-        </button>
-      </div>
-
-      <div className="pt-4">
-        <button
+        </Button>
+        <Button
+          variant="outline"
+          className="flex-1 basis-1/2 py-3 text-base font-semibold h-full justify-center"
           onClick={handleSave}
           disabled={saveLoading || !!webUrlError}
-          className={`w-full py-3 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 ${saveLoading || webUrlError ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {saveLoading ? 'Saving...' : 'Save as Draft'}
-        </button>
-        {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}
+        </Button>
       </div>
-      {debugInfo && (
-        <div className="bg-yellow-50 border border-yellow-300 rounded p-3 text-xs text-yellow-900 overflow-x-auto">
-          <strong>Debug Info:</strong>
-          <pre className="whitespace-pre-wrap break-all">{JSON.stringify(debugInfo, null, 2)}</pre>
-        </div>
-      )}
+      {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}
     </div>
   );
 }

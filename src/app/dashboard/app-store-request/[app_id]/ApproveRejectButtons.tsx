@@ -67,7 +67,9 @@ export default function ApproveRejectButtons({ appId }: { appId: string }) {
         <Overlay onClose={() => setShowRejectOverlay(false)}>
           <div className="bg-white rounded-lg shadow-lg w-[400px] max-w-full p-6 flex flex-col items-center">
             <h2 className="text-xl font-bold mb-4 text-center">Reject Application</h2>
-            <label className="w-full text-sm font-medium mb-1" htmlFor="reject-reason">Reasoning</label>
+            <label className="w-full text-sm font-medium mb-1" htmlFor="reject-reason">
+              Reasoning <span className="text-red-500">*</span>
+            </label>
             <textarea
               id="reject-reason"
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm mb-2"
@@ -77,13 +79,20 @@ export default function ApproveRejectButtons({ appId }: { appId: string }) {
               value={reason}
               onChange={e => setReason(e.target.value)}
               disabled={loading === "reject"}
+              required
             />
             <div className="w-full text-xs text-gray-500 mb-4 text-right">{reason.length}/300 words</div>
             <button
               type="button"
               className="w-full px-6 py-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
               disabled={loading === "reject"}
-        onClick={() => handleAction("reject")}
+        onClick={() => {
+          if (!reason.trim()) {
+            setMessage("Please provide a reason before proceeding.");
+            return;
+          }
+          handleAction("reject");
+        }}
       >
         {loading === "reject" ? "Rejecting..." : "Reject"}
       </button>
