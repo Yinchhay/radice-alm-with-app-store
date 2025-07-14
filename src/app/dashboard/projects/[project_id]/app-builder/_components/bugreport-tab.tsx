@@ -108,7 +108,7 @@ export default function BugReportsTab({ projectId }: BugReportsTabProps) {
         }
       } catch (err) {
         setError('Failed to fetch bug reports');
-      } finally {
+    } finally {
         setLoading(false);
       }
     };
