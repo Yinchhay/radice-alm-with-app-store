@@ -34,7 +34,7 @@ export enum Permissions {
 
     // Manage all projects
     CHANGE_PROJECT_STATUS = 15,
-    CHANGE_PROJECT_PRIORITY = 20,
+    // CHANGE_PROJECT_PRIORITY = 20,
 
     // Manage media
     CREATE_MEDIA = 17,

@@ -3,6 +3,7 @@ import "./globals.css";
 import Toaster from "@/components/Toaster";
 import { Metadata } from "next";
 import { TesterAuthProvider } from "@/app/contexts/TesterAuthContext";
+import SessionWrapper from "@/components/SessionWrapper";
 
 const inter = Inter({
   weight: [
@@ -81,9 +82,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={inter.className}>
-        <TesterAuthProvider>
-          <Toaster>{children}</Toaster>
-        </TesterAuthProvider>
+        <SessionWrapper>
+          <TesterAuthProvider>
+            <Toaster>{children}</Toaster>
+          </TesterAuthProvider>
+        </SessionWrapper>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

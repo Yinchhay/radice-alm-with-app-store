@@ -21,10 +21,15 @@ export const getTesterByEmail = async (email: string) => {
 };
 
 /**
- * Create a new tester account
+ * Create a new tester account (updated to handle Google users)
  */
 export const createTester = async (tester: typeof testers.$inferInsert) => {
-    const hashedPassword = await bcrypt.hash(tester.password, SALT_ROUNDS);
+    let hashedPassword = "";
+
+    // Only hash password if it's provided (not for Google users)
+    if (tester.password) {
+        hashedPassword = await bcrypt.hash(tester.password, SALT_ROUNDS);
+    }
 
     const testerWithHashedPassword = {
         ...tester,
@@ -82,7 +87,9 @@ export const getTesterById = async (testerId: string) => {
 /**
  * Get tester by ID with cache (safe for client - excludes password)
  */
-export type GetTesterById_C_Tag = `getTesterById_C:${string}` | `getTesterById_C`;
+export type GetTesterById_C_Tag =
+    | `getTesterById_C:${string}`
+    | `getTesterById_C`;
 
 export const getTesterById_C = async (testerId: string) => {
     return await cache(
@@ -96,10 +103,7 @@ export const getTesterById_C = async (testerId: string) => {
         },
         [], // Dependencies for cache
         {
-            tags: [
-                `getTesterById_C:${testerId}`,
-                `getTesterById_C`,
-            ],
+            tags: [`getTesterById_C:${testerId}`, `getTesterById_C`],
         },
     )(testerId);
 };
@@ -115,7 +119,7 @@ export const updateTesterProfileInformation = async (
         phoneNumber?: string | null;
         profileUrl?: string | null;
         description?: string | null;
-    }
+    },
 ) => {
     return await db
         .update(testers)
@@ -157,12 +161,13 @@ export const getTesters = async (
         columns: {
             password: false, // Exclude password for safety
         },
-        where: search ? 
-            or(
-                like(testers.firstName, `%${search}%`),
-                like(testers.lastName, `%${search}%`),
-                like(testers.email, `%${search}%`),
-            ) : undefined,
+        where: search
+            ? or(
+                  like(testers.firstName, `%${search}%`),
+                  like(testers.lastName, `%${search}%`),
+                  like(testers.email, `%${search}%`),
+              )
+            : undefined,
     });
 };
 
@@ -174,12 +179,13 @@ export const getTestersTotalRow = async (search: string = "") => {
         .select({ count: count() })
         .from(testers)
         .where(
-            search ? 
-                or(
-                    like(testers.firstName, `%${search}%`),
-                    like(testers.lastName, `%${search}%`),
-                    like(testers.email, `%${search}%`),
-                ) : undefined
+            search
+                ? or(
+                      like(testers.firstName, `%${search}%`),
+                      like(testers.lastName, `%${search}%`),
+                      like(testers.email, `%${search}%`),
+                  )
+                : undefined,
         );
     return totalRows[0].count;
 };
@@ -211,9 +217,7 @@ export const getTestersBySearch = async (
  * Delete tester by ID
  */
 export const deleteTesterById = async (testerId: string) => {
-    return await db
-        .delete(testers)
-        .where(eq(testers.id, testerId));
+    return await db.delete(testers).where(eq(testers.id, testerId));
 };
 
 // ============================================================================
@@ -237,16 +241,14 @@ export const testerExistsByEmail = async (email: string): Promise<boolean> => {
  * Get tester count
  */
 export const getTesterCount = async (): Promise<number> => {
-    const result = await db
-        .select({ count: count() })
-        .from(testers);
+    const result = await db.select({ count: count() }).from(testers);
     return result[0].count;
 };
 
 /**
  * Update tester profile
- * @param testerId 
- * @param data 
+ * @param testerId
+ * @param data
  */
 export async function updateTester(
     testerId: string,
@@ -256,7 +258,7 @@ export async function updateTester(
         phoneNumber: string | null;
         profileUrl: string | null;
         description: string | null;
-    }>
+    }>,
 ) {
     try {
         await db
@@ -278,7 +280,40 @@ export async function updateTester(
 
 export type TesterSelect = typeof testers.$inferSelect;
 export type TesterInsert = typeof testers.$inferInsert;
-export type TesterSelectSafe = Omit<TesterSelect, 'password'>;
+export type TesterSelectSafe = Omit<TesterSelect, "password">;
 
 // Cache tag types
-export type GetTesterById_C_ReturnType = Awaited<ReturnType<typeof getTesterById_C>>;
+export type GetTesterById_C_ReturnType = Awaited<
+    ReturnType<typeof getTesterById_C>
+>;
+
+/**
+ * Check if tester has a password (to determine if they're a Google user)
+ */
+export const testerHasPassword = async (testerId: string): Promise<boolean> => {
+    const tester = await db.query.testers.findFirst({
+        columns: {
+            password: true,
+        },
+        where: eq(testers.id, testerId),
+    });
+
+    return !!(tester?.password && tester.password.length > 0);
+};
+
+/**
+ * Update tester to add password (for Google users who want to set up password login)
+ */
+export const addPasswordToTester = async (
+    testerId: string,
+    password: string,
+) => {
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    return await db
+        .update(testers)
+        .set({
+            password: hashedPassword,
+        })
+        .where(eq(testers.id, testerId));
+};
