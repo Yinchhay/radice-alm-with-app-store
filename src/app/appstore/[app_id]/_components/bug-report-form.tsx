@@ -24,6 +24,7 @@ export default function BugReportForm({
         const file = event.target.files?.[0];
         if (file) {
             const newFile = {
+                id: Date.now() + Math.random(), // Unique ID for each file
                 name: file.name,
                 size: formatFileSize(file.size),
                 type: fileType,
