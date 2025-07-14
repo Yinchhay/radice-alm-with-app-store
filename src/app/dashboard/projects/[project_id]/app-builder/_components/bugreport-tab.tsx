@@ -115,17 +115,30 @@ export default function BugReportsTab({ projectId }: BugReportsTabProps) {
     if (projectId) fetchAllBugReports();
   }, [projectId]);
 
-  if (loading) return <div>Loading bug reports...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  // Standard heading for all states
+  const MainHeading = (
+    <div className="space-y-1 mb-6">
+      <h1 className="text-[24px] font-semibold">Bug Reports</h1>
+      <p className="text-gray-500 text-sm">This is where you can view bug reports submitted by your users for all apps in this project</p>
+    </div>
+  );
+
+  if (loading) return (
+    <div>
+      {MainHeading}
+      <div>Loading bug reports...</div>
+    </div>
+  );
+  if (error) return (
+    <div>
+      {MainHeading}
+      <div className="text-red-500">{error}</div>
+    </div>
+  );
 
   return (
     <div className="max-w-4xl">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Bug Reports</h2>
-        <p className="text-gray-600">
-          This is where you can view bug reports submitted by your users for all apps in this project
-        </p>
-      </div>
+      {MainHeading}
       <div className="space-y-10">
         {bugReports.length === 0 ? (
           <div className="text-center py-12">
