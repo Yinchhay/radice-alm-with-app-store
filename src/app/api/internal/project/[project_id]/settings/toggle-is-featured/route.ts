@@ -1,3 +1,4 @@
+
 import { checkBearerAndPermission, hasPermission } from "@/lib/IAM";
 import { formatZodError, generateAndFormatZodError } from "@/lib/form";
 import {
@@ -28,7 +29,7 @@ export type FetchUpdateProjectAppStatus = Record<string, unknown>;
 
 export async function PATCH(request: Request, { params }: Params) {
     try {
-        const requiredPermission = new Set([Permissions.CHANGE_PROJECT_STATUS]);
+        const requiredPermission = new Set([Permissions.CHANGE_PROJECT_STATUS, Permissions.CHANGE_PROJECT_PRIORITY]);
         const { errorNoBearerToken, errorNoPermission, user } =
             await checkBearerAndPermission(request, requiredPermission);
         if (errorNoBearerToken) {
@@ -74,7 +75,7 @@ export async function PATCH(request: Request, { params }: Params) {
         const hasChangeProjectStatusPermission = (
             await hasPermission(
                 user.id,
-                new Set([Permissions.CHANGE_PROJECT_STATUS]),
+                new Set([Permissions.CHANGE_PROJECT_STATUS, Permissions.CHANGE_PROJECT_PRIORITY]),
             )
         ).canAccess;
 

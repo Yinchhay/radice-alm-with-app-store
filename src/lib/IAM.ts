@@ -230,7 +230,7 @@ type RouteKey =
     | "manageUsers"
     | "manageMedia";
 export const RouteRequiredPermissions = new Map<RouteKey, Set<Permissions>>([
-    ["manageAllProjects", new Set([Permissions.CHANGE_PROJECT_STATUS])],
+    ["manageAllProjects", new Set([Permissions.CHANGE_PROJECT_STATUS, Permissions.CHANGE_PROJECT_PRIORITY])],
     [
         "manageApplicationForms",
         new Set([Permissions.APPROVE_AND_REJECT_APPLICATION_FORMS]),
