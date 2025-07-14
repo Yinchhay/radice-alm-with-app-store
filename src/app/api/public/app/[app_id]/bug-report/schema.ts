@@ -16,9 +16,6 @@ export const createBugReportFormSchema = z.object({
         .min(1, {
             message: "Bug report description is required"
         }),
-    image: z.string().url().max(500).optional(),
-    video: z.string().url().max(500).optional(),
-    appId: z.number().int().min(1, {
-        message: "App id is required",
-    }),
+    image: z.string().max(500).optional(),
+    video: z.string().max(500).optional(),
 });

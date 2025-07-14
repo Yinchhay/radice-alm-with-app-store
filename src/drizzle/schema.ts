@@ -619,7 +619,9 @@ export const appTypes = mysqlTable("app_types", {
 
 export const apps = mysqlTable("apps", {
     id: int("id").primaryKey().autoincrement(),
-    projectId: int("project_id").references(() => projects.id),
+    projectId: int("project_id").references(() => projects.id, {
+        onDelete: "cascade",
+    }),
     subtitle: varchar("subtitle", { length: 255 }),
     type: int("type").references(() => appTypes.id),
     aboutDesc: varchar("about_desc", { length: 1000 }),
@@ -637,7 +639,9 @@ export const apps = mysqlTable("apps", {
 export const versions = mysqlTable("versions", {
     id: int("id").primaryKey().autoincrement(),
     appId: int("app_id").references(() => apps.id, { onDelete: "set null" }),
-    projectId: int("project_id").references(() => projects.id),
+    projectId: int("project_id").references(() => projects.id, {
+        onDelete: "set null",
+    }),
     versionNumber: varchar("version_number", { length: 50 }), // e.g., 1.0.0, 1.0.1, 1.1.0
     majorVersion: int("major_version").notNull(),
     minorVersion: int("minor_version").notNull(),
@@ -671,8 +675,10 @@ export const bugReports = mysqlTable("bug_reports", {
         () => testers.id,
         { onDelete: "cascade" },
     ),
-    appId: int("app_id").references(() => apps.id, { onDelete: "cascade" }),
-    projectId: int("project_id").references(() => projects.id),
+    appId: int("app_id").references(() => apps.id, { onDelete: "set null" }),
+    projectId: int("project_id").references(() => projects.id, {
+        onDelete: "cascade",
+    }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -683,8 +689,10 @@ export const feedbacks = mysqlTable("feedbacks", {
         () => testers.id,
         { onDelete: "cascade" },
     ),
-    appId: int("app_id").references(() => apps.id, { onDelete: "cascade" }),
-    projectId: int("project_id").references(() => projects.id),
+    appId: int("app_id").references(() => apps.id, { onDelete: "set null" }),
+    projectId: int("project_id").references(() => projects.id, {
+        onDelete: "cascade",
+    }),
     title: varchar("title", { length: 255 }),
     review: text("review"),
     starRating: starRatingEnum,
@@ -898,7 +906,7 @@ export const bugReportRelations = relations(bugReports, ({ one }) => ({
     }),
     project: one(projects, {
         fields: [bugReports.id],
-        references: [projects.id]
+        references: [projects.id],
     }),
 }));
 
@@ -913,6 +921,6 @@ export const feedbackRelations = relations(feedbacks, ({ one }) => ({
     }),
     project: one(projects, {
         fields: [feedbacks.id],
-        references: [projects.id]
+        references: [projects.id],
     }),
 }));

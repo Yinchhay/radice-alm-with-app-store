@@ -11,11 +11,17 @@ import { createBugReport } from "@/repositories/bug_report";
 import { ErrorMessage } from "@/types/error";
 import { HttpStatusCode } from "@/types/http";
 import jwt from "jsonwebtoken";
-import { db } from "@/drizzle/db"; // or wherever your db client is
+import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
 import { testers, bugReports, projects, apps } from "@/drizzle/schema";
 import { createBugReportFormSchema } from "./schema";
 import { cookies } from "next/headers";
+import { 
+  saveUploadedFile, 
+  validateFile, 
+  validateVideoFile,
+  deleteOldFile 
+} from "@/repositories/app/images";
 
 export type FetchCreateBugReport = { 
   bugReportId: number;
@@ -35,52 +41,48 @@ export async function POST(
     { params }: { params: { app_id: string } }
 ) {
   try {
+    let token: string | undefined = undefined;
+    const authorizationHeader = request.headers.get("Authorization");
+    if (authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
+        token = authorizationHeader.replace("Bearer ", "");
+    }
+    if (!token) {
+        const cookieStore = cookies();
+        token = cookieStore.get("tester-token")?.value;
+    }
+    if (!token) {
+        return buildNoBearerTokenErrorResponse();
+    }
 
-     //Extract and validate authorization header
-        let token: string | undefined = undefined;
-        const authorizationHeader = request.headers.get("Authorization");
-        if (authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.replace("Bearer ", "");
-        }
-        if (!token) {
-            const cookieStore = cookies();
-            token = cookieStore.get("tester-token")?.value;
-        }
-        if (!token) {
-            return buildNoBearerTokenErrorResponse();
-        }
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+        console.error("Missing JWT_SECRET in environment");
+        throw new Error("Server misconfiguration: JWT secret is not set");
+    }
 
-        //Read and verify the JWT token
-        const JWT_SECRET = process.env.JWT_SECRET;
-        if (!JWT_SECRET) {
-            console.error("Missing JWT_SECRET in environment");
-            throw new Error("Server misconfiguration: JWT secret is not set");
-        }
+    let payload: TesterJwtPayload;
+    try {
+        payload = jwt.verify(token, JWT_SECRET!) as TesterJwtPayload;
+    } catch (err) {
+        console.error("JWT Verification Failed:", err);
+        return buildNoPermissionErrorResponse();
+    }
 
-        let payload: TesterJwtPayload;
-        try {
-            payload = jwt.verify(token, JWT_SECRET!) as TesterJwtPayload;
-        } catch (err) {
-            console.error("JWT Verification Failed:", err);
-            return buildNoPermissionErrorResponse();
-        }
+    const testerId = payload.id;
+    if (!testerId) {
+        return buildNoPermissionErrorResponse();
+    }
 
-        const testerId = payload.id;
-        if (!testerId) {
-            return buildNoPermissionErrorResponse();
-        }
+    const [tester] = await db
+        .select()
+        .from(testers)
+        .where(eq(testers.id, testerId))
+        .limit(1);
 
-        const [tester] = await db
-            .select()
-            .from(testers)
-            .where(eq(testers.id, testerId))
-            .limit(1);
+    if (!tester) {
+        return buildNoPermissionErrorResponse();
+    }
 
-        if (!tester) {
-            return buildNoPermissionErrorResponse();
-        }
-
-        // Convert and validate appId
     const appId = parseInt(params.app_id);
     if (isNaN(appId) || appId <= 0) {
       return new Response(
@@ -95,7 +97,7 @@ export async function POST(
         }
       );
     }
-        // Fetch app to get projectId
+
     const app = await db.query.apps.findFirst({
       where: eq(apps.id, appId),
     });
@@ -108,13 +110,90 @@ export async function POST(
       );
     }
 
-    const jsonBody = await request.json();
+    const formData = await request.formData();
+    
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    
+    const imageFile = formData.get("image") as File | null;
+    const videoFile = formData.get("video") as File | null;
+
+    if (!title || !description) {
+      return buildErrorResponse(
+        unsuccessMessage,
+        { 
+          title: !title ? "Title is required" : undefined,
+          description: !description ? "Description is required" : undefined,
+        },
+        HttpStatusCode.BAD_REQUEST_400
+      );
+    }
+
+    let imagePath: string | null = null;
+    let videoPath: string | null = null;
+
+    if (imageFile && imageFile.size > 0) {
+      const imageValidation = validateFile(imageFile);
+      if (!imageValidation.valid) {
+        return buildErrorResponse(
+          unsuccessMessage,
+          { image: imageValidation.error },
+          HttpStatusCode.BAD_REQUEST_400
+        );
+      }
+      
+      try {
+        imagePath = await saveUploadedFile(imageFile, appId, "image");
+      } catch (error) {
+        console.error("Error saving image file:", error);
+        return buildErrorResponse(
+          unsuccessMessage,
+          { image: "Failed to save image file" },
+          HttpStatusCode.INTERNAL_SERVER_ERROR_500
+        );
+      }
+    }
+
+    if (videoFile && videoFile.size > 0) {
+      const videoValidation = validateVideoFile(videoFile);
+      if (!videoValidation.valid) {
+        if (imagePath) {
+          await deleteOldFile(imagePath);
+        }
+        return buildErrorResponse(
+          unsuccessMessage,
+          { video: videoValidation.error },
+          HttpStatusCode.BAD_REQUEST_400
+        );
+      }
+      
+      try {
+        videoPath = await saveUploadedFile(videoFile, appId, "video");
+      } catch (error) {
+        console.error("Error saving video file:", error);
+        if (imagePath) {
+          await deleteOldFile(imagePath);
+        }
+        return buildErrorResponse(
+          unsuccessMessage,
+          { video: "Failed to save video file" },
+          HttpStatusCode.INTERNAL_SERVER_ERROR_500
+        );
+      }
+    }
+
     const parsed = createBugReportFormSchema.safeParse({
-      ...jsonBody,
+      title,
+      description,
+      image: imagePath,
+      video: videoPath,
       appId,
     });
     
     if (!parsed.success) {
+      if (imagePath) await deleteOldFile(imagePath);
+      if (videoPath) await deleteOldFile(videoPath);
+      
       return new Response(
         JSON.stringify({
           message: unsuccessMessage,
@@ -136,11 +215,13 @@ export async function POST(
         image: body.image,
         video: body.video,
         testerId: testerId,
-        appId: body.appId,
-        projectId: app.projectId
+        projectId: app.projectId,
+        appId: appId,
     });
 
     if (createResult[0].affectedRows < 1) {
+      if (imagePath) await deleteOldFile(imagePath);
+      if (videoPath) await deleteOldFile(videoPath);
       throw new Error(ErrorMessage.SomethingWentWrong);
     }
 
