@@ -34,7 +34,7 @@ export default function ToggleAppPublic({
                     addToast(
                         <div className="flex gap-2">
                             <IconCheck className="text-white bg-green-500 p-1 text-sm rounded-full flex-shrink-0" />
-                            <p>Successfully updated app status</p>
+                            <p>Successfully updated project app status</p>
                         </div>,
                     );
                 }
