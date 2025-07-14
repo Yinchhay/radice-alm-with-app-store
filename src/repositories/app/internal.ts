@@ -454,3 +454,27 @@ export async function getAcceptedAppByProjectId(projectId: number) {
 
     return result ?? undefined;
 }
+
+export async function updateAppFeaturedPriority(
+    appId: number,
+    featuredPriority: boolean,
+) {
+    try {
+        await db
+            .update(apps)
+            .set({
+                featuredPriority,
+                updatedAt: new Date(),
+            })
+            .where(eq(apps.id, appId));
+
+        const updatedApp = await db.query.apps.findFirst({
+            where: eq(apps.id, appId),
+        });
+
+        return updatedApp || null;
+    } catch (error) {
+        console.error("Error updating app featured priority:", error);
+        throw error;
+    }
+}

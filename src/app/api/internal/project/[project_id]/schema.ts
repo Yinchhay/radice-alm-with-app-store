@@ -200,3 +200,10 @@ export const updateProjectAppStatusSchema = z.object({
         invalid_type_error: "Status must be a boolean",
     })
 })
+
+export const updateProjectFeaturedPrioritySchema = z.object({
+    featuredPriority: z.boolean({
+        required_error: "Featured priority is required",
+        invalid_type_error: "Featured priority must be a boolean",
+    })
+})
