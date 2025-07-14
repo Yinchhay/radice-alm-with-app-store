@@ -22,16 +22,16 @@ export default function BugReportForm({
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, fileType: 'image' | 'video') => {
         const file = event.target.files?.[0];
-        if (file) {
-            const newFile = {
-                id: Date.now() + Math.random(), // Unique ID for each file
-                name: file.name,
-                size: formatFileSize(file.size),
-                type: fileType,
-                raw: file,
-            };
-            setUploadedFiles(prev => [...prev, newFile]);
-        }
+        if (!file) return;
+        if (fileType === 'image' && uploadedFiles.some(f => f.type === 'image')) return;
+        if (fileType === 'video' && uploadedFiles.some(f => f.type === 'video')) return;
+        const newFile = {
+            name: file.name,
+            size: formatFileSize(file.size),
+            type: fileType,
+            raw: file,
+        };
+        setUploadedFiles(prev => [...prev, newFile]);
     };
 
     const removeFile = (index: number) => {
@@ -46,15 +46,6 @@ export default function BugReportForm({
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
 
-    const uploadFile = async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        const res = await fetch('/api/file', { method: 'POST', body: formData });
-        if (!res.ok) throw new Error('File upload failed');
-        const data = await res.json();
-        return data.url;
-    };
-
     const handleSubmit = async () => {
         if (!bugTitle.trim() || !bugDescription.trim()) {
             alert("Please fill in both title and description");
@@ -62,23 +53,21 @@ export default function BugReportForm({
         }
         setIsSubmitting(true);
         try {
-            let imageUrl, videoUrl;
-            for (const file of uploadedFiles) {
-                if (file.type === 'image') {
-                    imageUrl = await uploadFile(file.raw as File);
-                } else if (file.type === 'video') {
-                    videoUrl = await uploadFile(file.raw as File);
-                }
+            // Use FormData to send files directly
+            const formData = new FormData();
+            formData.append('title', bugTitle);
+            formData.append('description', bugDescription);
+            const imageFile = uploadedFiles.find(f => f.type === 'image');
+            const videoFile = uploadedFiles.find(f => f.type === 'video');
+            if (imageFile) {
+                formData.append('image', imageFile.raw as File);
+            }
+            if (videoFile) {
+                formData.append('video', videoFile.raw as File);
             }
             const res = await fetch(`/api/public/app/${appId}/bug-report`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    title: bugTitle,
-                    description: bugDescription,
-                    ...(imageUrl && { image: imageUrl }),
-                    ...(videoUrl && { video: videoUrl }),
-                }),
+                body: formData,
             });
             if (!res.ok) {
                 const errorData = await res.json();
@@ -162,10 +151,11 @@ export default function BugReportForm({
                                     onChange={(e) => handleFileUpload(e, 'image')}
                                     className="hidden"
                                     id="image-upload"
+                                    disabled={uploadedFiles.some(f => f.type === 'image')}
                                 />
                                 <label
                                     htmlFor="image-upload"
-                                    className="border px-4 py-2 rounded cursor-pointer hover:bg-gray-50 transition-colors duration-200 inline-flex items-center gap-2"
+                                    className={`border px-4 py-2 rounded cursor-pointer transition-colors duration-200 inline-flex items-center gap-2 ${uploadedFiles.some(f => f.type === 'image') ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50'}`}
                                 >
                                     <IconPhoto size={16} />
                                     Image
