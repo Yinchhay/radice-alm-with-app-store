@@ -97,7 +97,7 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
     return (
         <div className="flex justify-center">
             <div className="flex-1 max-w-[1440px] px-4">
-                <div className="max-w-[1440px] mx-auto px-10 py-8">
+                <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-8">
                     {appData && (
                         <div className="mb-8">
                             <AppBanner
@@ -107,10 +107,10 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                             />
                         </div>
                     )}
-                    <div className="flex flex-col md:flex-row gap-4 min-h-[600px]">
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-4 min-h-[600px]">
                         {/* Left column */}
-                        <div className="flex-1 min-w-[260px] max-w-sm flex flex-col justify-center h-full">
-                            <h1 className="text-6xl font-bold mb-2">{appName}</h1>
+                        <div className="flex-1 lg:min-w-[260px] lg:max-w-sm flex flex-col justify-center h-full">
+                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2">{appName}</h1>
                             <div className="text-sm text-gray-700 mb-2">
                                 {appData?.subtitle || "No subtitle"}
                             </div>
@@ -169,8 +169,8 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                             )}
                         </div>
                         {/* Right column */}
-                        <div className="flex-1 min-w-[300px] h-full">
-                            <div className="mb-8">
+                        <div className="flex-1 lg:min-w-[300px]">
+                            <div className="mb-6 lg:mb-8 hidden sm:block">
                                 <button
                                     onClick={() => window.history.back()}
                                     className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
@@ -191,7 +191,7 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                                     Back
                                 </button>
                             </div>
-                            <div className="mb-8">
+                            <div className="mb-6 lg:mb-8">
                                 <h2 className="text-xl font-semibold">Rating and Reviews</h2>
                             </div>
                             <AppReviews
@@ -203,7 +203,7 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                                 showForm={false}
                             />
                             {maxPage > 1 && (
-                                <div className="flex justify-center mt-6">
+                                <div className="flex justify-center mt-8">
                                     <NonRouterPushPagination
                                         page={currentPage}
                                         maxPage={maxPage}
