@@ -4,28 +4,27 @@ import { checkProjectRole } from "@/lib/project";
 import { validateFile, saveUploadedFile, deleteOldFile } from "./images";
 
 export async function validateAppPermissions(appId: number, userId: string, userType: string) {
+    // Allow superadmin to always pass
+    if (userType === 'superadmin' || userType === 'SUPER_ADMIN') {
+        return await getAppById(appId);
+    }
     const app = await getAppById(appId);
     if (!app) {
         throw new Error("App does not exist");
     }
-
     const associatedProjects = await getAssociatedProjectsOfApp(appId);
     if (!associatedProjects || associatedProjects.length === 0) {
         throw new Error("Associated project not found");
     }
-
     const projectId = associatedProjects[0].project.id;
     const projectWithMembersAndPartners = await getOneAssociatedProject(projectId);
-    
     if (!projectWithMembersAndPartners) {
         throw new Error("Project data not found");
     }
-
     const { canEdit } = checkProjectRole(userId, projectWithMembersAndPartners, userType);
     if (!canEdit) {
         throw new Error("Unauthorized to edit this app");
     }
-
     return app;
 }
 export async function processScreenshots(screenshots: File[], appId: number, startIndex: number = 0): Promise<string[]> {

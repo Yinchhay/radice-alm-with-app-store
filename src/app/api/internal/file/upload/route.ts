@@ -6,8 +6,9 @@ import { getOneAssociatedProject } from '@/repositories/project';
 import { checkProjectRole, ProjectRole } from '@/lib/project';
 import { lucia } from '@/auth/lucia';
 import { getUserById } from '@/repositories/users';
+import { UserType } from '@/types/user';
 
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'apps');
+const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'apps');
 
 export async function POST(req: NextRequest) {
   if (!existsSync(UPLOAD_DIR)) {
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
   const { projectRole } = checkProjectRole(user.id, project, user.type);
   console.log('[UPLOAD DEBUG] user.type:', user.type);
   console.log('[UPLOAD DEBUG] projectRole:', projectRole);
-  if (!(user.type === "SUPER_ADMIN" || projectRole !== ProjectRole.NONE)) {
+  if (!(user.type === UserType.SUPER_ADMIN || projectRole !== ProjectRole.NONE)) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

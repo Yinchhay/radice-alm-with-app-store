@@ -33,15 +33,17 @@ export default async function AppStoreRequestPage({ searchParams }: { searchPara
           pendingApps.map((item) => (
             <div key={item.app.id} className="bg-white border border-gray-200 rounded-2xl p-6 flex items-start justify-between mb-6">
               <div>
-                <div className="font-bold text-md mb-1">
-                  <span className="font-semibold">Project / App Name:</span> {item.project?.name || "-"}
+                <div className="text-md mb-1">
+                  <span className="font-semibold">Project / App Name:</span> <span className="font-normal">{item.project?.name || "-"}</span>
                 </div>
                 <div className="mb-1">
                   <span className="font-semibold">Type:</span> {item.appType?.name || "-"}
                 </div>
-
+                {/* <div className="mb-1">
+                  <span className="font-semibold">Update Type:</span> {item.app.updateType || "-"}
+                </div> */}
                 <div>
-                  <span className="font-semibold">Status:</span> {item.app.status || "-"}
+                  <span className="font-semibold">Status:</span> {item.app.status ? item.app.status.charAt(0).toUpperCase() + item.app.status.slice(1) : "-"}
                 </div>
               </div>
               <div className="flex items-center">

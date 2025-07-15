@@ -266,6 +266,7 @@ export async function editAppById(
         cardImage: string;
         bannerImage: string;
         featuredPriority: boolean;
+        updateType: string;
     }>,
 ) {
     try {
