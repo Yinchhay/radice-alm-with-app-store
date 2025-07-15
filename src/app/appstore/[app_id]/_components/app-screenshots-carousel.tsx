@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+
 import { useState, useEffect, useRef } from "react";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import Overlay from "@/components/Overlay";
@@ -112,7 +112,6 @@ export default function AppScreenshotsCarousel({
         setShowFullscreen(false);
     };
 
-    // Arrow button base style
     const arrowBtnBase =
         "absolute top-1/2 -translate-y-1/2 hover:bg-black/10 text-white p-2 md:p-3 transition-all duration-200 focus:outline-none focus:scale-110 hover:scale-110 z-10 bg-transparent";
 
@@ -211,7 +210,6 @@ export default function AppScreenshotsCarousel({
                                             if (e.key === "ArrowRight") nextImage();
                                         }}
                                     />
-                                    {/* Fullscreen Navigation */}
                                     {screenshots.length > 1 && (
                                         <>
                                             <button
