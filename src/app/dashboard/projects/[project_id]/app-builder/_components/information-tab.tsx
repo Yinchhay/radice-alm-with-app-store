@@ -6,17 +6,21 @@ import Button from '@/components/Button';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+
 
 function FileDropzone({
   label,
   accept = '*',
   multiple = false,
   onChange,
+  disabled = false,
 }: {
   label: string;
   accept?: string;
   multiple?: boolean;
   onChange?: (files: FileList) => void;
+  disabled?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -67,7 +71,8 @@ function insertAtCursor(
   after: string = '',
   placeholder: string = '',
   block = false,
-  linePrefix = ''
+  linePrefix = '',
+  setValue?: (val: string) => void
 ) {
   if (!textarea) return;
   const start = textarea.selectionStart;
@@ -76,20 +81,15 @@ function insertAtCursor(
   const selected = value.substring(start, end) || placeholder;
   let newValue, cursorPos;
   if (block) {
-    // Insert as block (e.g., code block, hr)
-    newValue =
-      value.substring(0, start) + before + selected + after + value.substring(end);
+    newValue = value.substring(0, start) + before + selected + after + value.substring(end);
     cursorPos = start + before.length + selected.length + after.length;
   } else if (linePrefix) {
-    // Insert at start of each selected line
     const lines = value.substring(start, end).split('\n');
     const modified = lines.map(line => linePrefix + (line || placeholder)).join('\n');
     newValue = value.substring(0, start) + modified + value.substring(end);
     cursorPos = start + linePrefix.length;
   } else {
-    // Inline wrap
-    newValue =
-      value.substring(0, start) + before + selected + after + value.substring(end);
+    newValue = value.substring(0, start) + before + selected + after + value.substring(end);
     cursorPos = start + before.length + selected.length + after.length;
   }
   textarea.value = newValue;
@@ -97,6 +97,7 @@ function insertAtCursor(
   textarea.focus();
   const event = new Event('input', { bubbles: true });
   textarea.dispatchEvent(event);
+  if (setValue) setValue(newValue);
 }
 
 export default function InformationTab({ projectId }: InformationTabProps) {
@@ -125,6 +126,22 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const [updateType, setUpdateType] = useState<'major' | 'minor' | 'patch'>('major');
   const [whatsNew, setWhatsNew] = useState('');
   const [latestAcceptedVersion, setLatestAcceptedVersion] = useState<{major: number, minor: number, patch: number} | null>(null);
+
+  // Add debug state for UI console
+  const [debugLog, setDebugLog] = useState<any>({});
+
+  // Add at the top of the component
+  const [sessionCookie, setSessionCookie] = useState<string | null>(null);
+  const [userAgent, setUserAgent] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';').map(c => c.trim());
+      const authSession = cookies.find(c => c.startsWith('auth_session='));
+      setSessionCookie(authSession || null);
+      setUserAgent(window.navigator.userAgent);
+    }
+  }, []);
 
   // Static app type options
   const appTypeOptions = [
@@ -161,6 +178,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const aboutRef = useRef<HTMLTextAreaElement>(null);
   const whatsNewRef = useRef<HTMLTextAreaElement>(null);
 
+  // Update file state handlers to store actual File objects
+  const handleAppFileChange = (files: FileList) => setAppFiles(Array.from(files));
+  const handleCardImageChange = (files: FileList) => setCardImages(Array.from(files));
+  const handleBannerImageChange = (files: FileList) => setBannerImages(Array.from(files));
+  const handleScreenshotsChange = (files: FileList) => setScreenshots(Array.from(files));
+
   // Fetch app data on component mount
   useEffect(() => {
     const loadAppData = async () => {
@@ -181,33 +204,18 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             setWebUrl(response.data.app.webUrl || '');
             setPriorityTesting(response.data.app.featuredPriority === 1);
             setAppType(response.data.app.type ? String(response.data.app.type) : '');
-            
-            // If there are existing files, populate them
+            // If there are existing files, populate them as {url: ...}
             if (response.data.app.appFile) {
-              setAppFiles([{
-                name: 'Existing App File',
-                size: 'Uploaded',
-                progress: 100,
-                url: response.data.app.appFile
-              }]);
+              setAppFiles([{ url: response.data.app.appFile }]);
             }
-            
             if (response.data.app.cardImage) {
-              setCardImages([{
-                name: 'Existing Card Image',
-                size: 'Uploaded',
-                progress: 100,
-                url: response.data.app.cardImage
-              }]);
+              setCardImages([{ url: response.data.app.cardImage }]);
             }
-            
             if (response.data.app.bannerImage) {
-              setBannerImages([{
-                name: 'Existing Banner Image',
-                size: 'Uploaded',
-                progress: 100,
-                url: response.data.app.bannerImage
-              }]);
+              setBannerImages([{ url: response.data.app.bannerImage }]);
+            }
+            if (response.data.app.screenshots && Array.isArray(response.data.app.screenshots)) {
+              setScreenshots(response.data.app.screenshots.map((url: string) => ({ url })));
             }
           }
         } else {
@@ -224,9 +232,17 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     loadAppData();
   }, [projectId]);
 
+  // Prefill updateType from appData.updateType
   useEffect(() => {
-    if (appData && (appData as any).updateType) {
-      setUpdateType((appData as any).updateType as 'major' | 'minor' | 'patch');
+    if (appData && appData.app && typeof appData.app.updateType === 'string') {
+      setUpdateType(appData.app.updateType as 'major' | 'minor' | 'patch');
+    }
+  }, [appData]);
+
+  // Prefill what's new from appData.aboutDesc
+  useEffect(() => {
+    if (appData && appData.app && typeof appData.app.aboutDesc === 'string') {
+      setWhatsNew(appData.app.aboutDesc);
     }
   }, [appData]);
 
@@ -295,38 +311,82 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     });
   };
 
+  // Update renderUploadList to preview both File and {url: ...} objects
   const renderUploadList = (uploads: any[], setter: Function, showHandle: boolean = false) => (
     <div className="space-y-2">
-      {uploads.map((file, idx) => (
-        <div
-          key={idx}
-          className="relative flex items-center gap-2 p-3 bg-gray-50 rounded overflow-hidden"
-        >
-          {showHandle && <div className="text-gray-400 text-lg select-none">⋮⋮</div>}
-          <div className="flex-1">
-            <div className="flex justify-between text-sm mb-1">
-              <span className="truncate">{file.name}</span>
-              <span className="text-xs text-gray-500">
-                {file.size} • {file.progress < 100 ? `${file.progress}%` : 'Uploaded'}
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 h-1.5 rounded">
-              <div
-                className="h-1.5 bg-black rounded transition-all duration-200"
-                style={{ width: `${file.progress}%` }}
-              />
-            </div>
-          </div>
-          <button
-            className="text-gray-500 hover:text-red-500 text-sm ml-2"
-            onClick={() => setter((prev: any) => prev.filter((_: any, i: number) => i !== idx))}
+      {uploads.map((file, idx) => {
+        let previewUrl = '';
+        if (file instanceof File) {
+          previewUrl = URL.createObjectURL(file);
+        } else if (file.url) {
+          previewUrl = file.url;
+        }
+        const isImage = previewUrl && (previewUrl.endsWith('.png') || previewUrl.endsWith('.jpg') || previewUrl.endsWith('.jpeg') || previewUrl.endsWith('.gif'));
+        return (
+          <div
+            key={idx}
+            className="relative flex items-center gap-2 p-3 bg-gray-50 rounded overflow-hidden"
           >
-            ✕
-          </button>
-        </div>
-      ))}
+            {showHandle && <div className="text-gray-400 text-lg select-none">⋮⋮</div>}
+            <div className="flex-1 flex items-center gap-3">
+              {isImage && previewUrl && (
+                <img src={previewUrl} alt="preview" className="w-12 h-12 object-cover rounded" />
+              )}
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="truncate">{file.name || file.url || 'File'}</span>
+                  <span className="text-xs text-gray-500">
+                    {file.size ? file.size : ''} {file.progress !== undefined ? (file.progress < 100 ? `${file.progress}%` : 'Uploaded') : ''}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 h-1.5 rounded">
+                  <div
+                    className="h-1.5 bg-black rounded transition-all duration-200"
+                    style={{ width: `${file.progress !== undefined ? file.progress : 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+            <button
+              className="text-gray-500 hover:text-red-500 text-sm ml-2"
+              onClick={() => setter((prev: any) => prev.filter((_: any, i: number) => i !== idx))}
+            >
+              ✕
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
+
+  async function uploadFilesIfNeeded(files: any[], projectId: string) {
+    // files: array of File or {url: string} objects
+    // returns: array of URLs (string)
+    const uploadable = files.filter(f => f instanceof File);
+    const existing = files.filter(f => !(f instanceof File) && f.url);
+    let uploadedUrls: string[] = [];
+    if (uploadable.length > 0) {
+      const formData = new FormData();
+      formData.append('projectId', projectId);
+      uploadable.forEach(file => formData.append('files', file));
+      const res = await fetch('/api/internal/file/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success && data.paths) {
+        uploadedUrls = data.paths.map((p: string) => '/uploads/' + p);
+      } else {
+        throw new Error(data.message || 'File upload failed');
+      }
+    }
+    // Return all URLs (existing + uploaded)
+    return [
+      ...existing.map(f => f.url),
+      ...uploadedUrls,
+    ];
+  }
 
   const handleSave = async () => {
     if (!appData) return;
@@ -334,38 +394,68 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     setSaveLoading(true);
     setSaveMessage(null);
     try {
+      // 1. Upload new screenshots if any
+      let screenshotUrls = screenshots;
+      if (screenshots.some(f => f instanceof File)) {
+        const formData = new FormData();
+        screenshots.filter(f => f instanceof File).forEach(file => formData.append('screenshots', file));
+        const res = await fetch(`/api/internal/app/${projectId}/images/screenshots`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        const data = await res.json();
+        if (data.success && data.newScreenshotPaths) {
+          // Combine already-uploaded and newly-uploaded URLs
+          screenshotUrls = [
+            ...screenshots.filter(f => !(f instanceof File)),
+            ...data.newScreenshotPaths.map((url: string) => ({ url })),
+          ];
+          setScreenshots(screenshotUrls); // update local state
+        }
+      }
+
+      // 2. Upload other files if needed (appFiles, cardImages, bannerImages)
+      const [appFileUrl] = await uploadFilesIfNeeded(appFiles, projectId);
+      const [cardImageUrl] = await uploadFilesIfNeeded(cardImages, projectId);
+      const [bannerImageUrl] = await uploadFilesIfNeeded(bannerImages, projectId);
+
+      // 3. Save the draft, using the URLs
+      const payload = {
+        subtitle,
+        aboutDesc: description,
+        type: appType !== '' ? Number(appType) : undefined,
+        webUrl,
+        status: 'draft',
+        appFile: appFileUrl,
+        cardImage: cardImageUrl,
+        bannerImage: bannerImageUrl,
+      };
+      setDebugLog((prev: any) => ({ ...prev, payload }));
       // If the current app is accepted, create a new draft app
       if (currentAppStatus === 'accepted') {
-        // Call the internal project app POST endpoint to create a new draft
-        const sessionId = await (await import('../fetch')).getSessionCookie();
-        const baseUrl = await (await import('../fetch')).getBaseUrl();
-        const res = await fetch(`${baseUrl}/api/internal/project/${projectId}/app`, {
+        const res = await fetch(`/api/internal/project/${projectId}/app`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${sessionId}`,
           },
           cache: 'no-cache',
+          credentials: 'include',
         });
         const data = await res.json();
         if (data.success && data.data && data.data.appId) {
           // Now PATCH the new draft app with the form content
-          const patchRes = await fetch(`${baseUrl}/api/internal/app/${data.data.appId}/edit`, {
+          const patchRes = await fetch(`/api/internal/app/${data.data.appId}/edit`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${sessionId}`,
             },
-            body: JSON.stringify({
-              subtitle,
-              aboutDesc: description,
-              type: appType !== '' ? Number(appType) : null,
-              webUrl, // always send as string
-              status: 'draft',
-            }),
+            body: JSON.stringify(payload),
             cache: 'no-cache',
+            credentials: 'include',
           });
           const patchData = await patchRes.json();
+          setDebugLog((prev: any) => ({ ...prev, response: patchData }));
           if (patchData.success) {
             setSaveMessage('Saved as draft!');
             // Refetch app data to update UI to the new draft
@@ -381,15 +471,17 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           setSaveMessage(data.message || 'Failed to create draft.');
         }
       } else {
-        const data = await saveAppDraft({
-          appId: appData.appId!,
-          subtitle,
-          aboutDesc: description,
-          type: appType !== '' ? Number(appType) : null,
-          webUrl, // always send as string
-          updateType,
-          existingContent: appData.app?.content || '',
+        const res = await fetch(`/api/internal/app/${appData.appId}/edit`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          cache: 'no-cache',
+          credentials: 'include',
         });
+        const data = await res.json();
+        setDebugLog((prev: any) => ({ ...prev, response: data }));
         if (data.success) {
           setSaveMessage('Saved as draft!');
         } else {
@@ -398,6 +490,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       }
     } catch (err) {
       setSaveMessage('Failed to save.');
+      setDebugLog((prev: any) => ({ ...prev, error: String(err) }));
     } finally {
       setSaveLoading(false);
     }
@@ -410,16 +503,42 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     setSaveMessage(null);
     setDebugInfo(null);
     try {
-      // Save updateType in draft before publishing
+      // 1. Upload new screenshots if any
+      let screenshotUrls = screenshots;
+      if (screenshots.some(f => f instanceof File)) {
+        const formData = new FormData();
+        screenshots.filter(f => f instanceof File).forEach(file => formData.append('screenshots', file));
+        const res = await fetch(`/api/internal/app/${projectId}/images/screenshots`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        const data = await res.json();
+        if (data.success && data.newScreenshotPaths) {
+          screenshotUrls = [
+            ...screenshots.filter(f => !(f instanceof File)),
+            ...data.newScreenshotPaths.map((url: string) => ({ url })),
+          ];
+          setScreenshots(screenshotUrls); // update local state
+        }
+      }
+
+      // 2. Upload other files if needed (appFiles, cardImages, bannerImages)
+      const [appFileUrl] = await uploadFilesIfNeeded(appFiles, projectId);
+      const [cardImageUrl] = await uploadFilesIfNeeded(cardImages, projectId);
+      const [bannerImageUrl] = await uploadFilesIfNeeded(bannerImages, projectId);
+      const screenshotUrlList = screenshotUrls.map((f: any) => f.url || f.name);
+
+      // 3. Save updateType in draft before publishing
       await saveAppDraft({
         appId: appData.appId!,
         subtitle,
         aboutDesc: description,
-        type: appType !== '' ? Number(appType) : null,
+        type: appType !== '' ? Number(appType) : undefined,
         webUrl,
         updateType,
-        existingContent: appData.app?.content || '',
       });
+
       // If the current app is accepted, create a new draft app (then set to pending)
       if (currentAppStatus === 'accepted') {
         const res = await fetch(`/api/internal/project/${projectId}/app`, {
@@ -442,9 +561,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             body: JSON.stringify({
               subtitle,
               aboutDesc: description,
-              type: appType !== '' ? Number(appType) : null,
+              type: appType !== '' ? Number(appType) : undefined,
               webUrl,
               status: 'pending',
+              appFile: appFileUrl,
+              cardImage: cardImageUrl,
+              bannerImage: bannerImageUrl,
             }),
             cache: 'no-cache',
             credentials: 'include',
@@ -481,9 +603,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           body: JSON.stringify({
             subtitle,
             aboutDesc: description,
-            type: appType !== '' ? Number(appType) : null,
+            type: appType !== '' ? Number(appType) : undefined,
             webUrl,
             status: 'pending',
+            appFile: appFileUrl,
+            cardImage: cardImageUrl,
+            bannerImage: bannerImageUrl,
           }),
           cache: 'no-cache',
           credentials: 'include',
@@ -571,6 +696,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     );
   }
 
+  // Limit for screenshots
+  const MAX_SCREENSHOTS = 8;
+
   return (
     <div className="space-y-6">
       {MainHeading}
@@ -585,7 +713,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             readOnly
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
           />
-          <div className="text-xs text-gray-500">Project name (read-only)</div>
+          <div className="text-xs text-gray-500">Project name</div>
         </div>
 
         <div className="space-y-1 mt-3">
@@ -595,7 +723,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             value={subtitle}
             onChange={e => setSubtitle(e.target.value)}
             required
-            className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-white text-sm"
           />
           {errors.subtitle && <div className="text-xs text-red-500">{errors.subtitle}</div>}
           <div className="text-xs text-gray-500">1/30 words</div>
@@ -622,16 +750,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           {/* Integrated Markdown Toolbar + Textarea */}
           <div className="rounded-md border border-gray-300 bg-white overflow-hidden">
             <div className="flex flex-nowrap gap-1 px-2 py-2 bg-white border-b border-gray-200 shadow-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 rounded-t-md">
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bold" onClick={() => insertAtCursor(aboutRef.current, '**', '**', 'bold text')}><span style={{fontWeight:'bold'}}>B</span></button>
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Italic" onClick={() => insertAtCursor(aboutRef.current, '*', '*', 'italic text')}><span style={{fontStyle:'italic'}}>I</span></button>
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Inline Code" onClick={() => insertAtCursor(aboutRef.current, '`', '`', 'code')}><span style={{fontFamily:'monospace'}}>&lt;/&gt;</span></button>
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Code Block" onClick={() => insertAtCursor(aboutRef.current, '\n```\n', '\n```\n', 'code block', true)}><span style={{fontFamily:'monospace'}}>```</span></button>
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Quote" onClick={() => insertAtCursor(aboutRef.current, '', '', 'quote', false, '> ')}><span>"</span></button>
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 1" onClick={() => insertAtCursor(aboutRef.current, '', '', 'Heading 1', false, '# ')}><span>H1</span></button>
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 2" onClick={() => insertAtCursor(aboutRef.current, '', '', 'Heading 2', false, '## ')}><span>H2</span></button>
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 3" onClick={() => insertAtCursor(aboutRef.current, '', '', 'Heading 3', false, '### ')}><span>H3</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bold" onClick={() => insertAtCursor(aboutRef.current, '**', '**', 'bold text', false, '', setDescription)}><span style={{fontWeight:'bold'}}>B</span></button>
               <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bullet List" onClick={() => insertAtCursor(aboutRef.current, '', '', 'list item', false, '- ')}><span>&#8226;</span></button>
-              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Horizontal Rule" onClick={() => insertAtCursor(aboutRef.current, '\n---\n', '', '', true)}><span>&mdash;</span></button>
             </div>
             <textarea
               ref={aboutRef}
@@ -652,8 +772,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             <div className="text-xs text-gray-500 mb-1">Markdown Preview:</div>
             <ReactMarkdown
               className="prose max-w-none text-sm leading-5"
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeSanitize]}
+              remarkPlugins={[remarkGfm as any]}
+              rehypePlugins={[rehypeSanitize as any]}
             >
               {description || "Nothing to preview."}
             </ReactMarkdown>
@@ -715,16 +835,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             {/* Integrated Markdown Toolbar + Textarea */}
             <div className="rounded-md border border-gray-300 bg-white overflow-hidden">
               <div className="flex flex-nowrap gap-1 px-2 py-2 bg-white border-b border-gray-200 shadow-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 rounded-t-md">
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bold" onClick={() => insertAtCursor(whatsNewRef.current, '**', '**', 'bold text')}><span style={{fontWeight:'bold'}}>B</span></button>
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Italic" onClick={() => insertAtCursor(whatsNewRef.current, '*', '*', 'italic text')}><span style={{fontStyle:'italic'}}>I</span></button>
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Inline Code" onClick={() => insertAtCursor(whatsNewRef.current, '`', '`', 'code')}><span style={{fontFamily:'monospace'}}>&lt;/&gt;</span></button>
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Code Block" onClick={() => insertAtCursor(whatsNewRef.current, '\n```\n', '\n```\n', 'code block', true)}><span style={{fontFamily:'monospace'}}>```</span></button>
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Quote" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'quote', false, '> ')}><span>"</span></button>
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 1" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'Heading 1', false, '# ')}><span>H1</span></button>
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 2" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'Heading 2', false, '## ')}><span>H2</span></button>
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Heading 3" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'Heading 3', false, '### ')}><span>H3</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bold" onClick={() => insertAtCursor(whatsNewRef.current, '**', '**', 'bold text', false, '', setWhatsNew)}><span style={{fontWeight:'bold'}}>B</span></button>
                 <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bullet List" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'list item', false, '- ')}><span>&#8226;</span></button>
-                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Horizontal Rule" onClick={() => insertAtCursor(whatsNewRef.current, '\n---\n', '', '', true)}><span>&mdash;</span></button>
               </div>
               <textarea
                 ref={whatsNewRef}
@@ -745,8 +857,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
               <div className="text-xs text-gray-500 mb-1">Markdown Preview:</div>
               <ReactMarkdown
                 className="prose max-w-none text-sm leading-5"
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeSanitize]}
+                remarkPlugins={[remarkGfm as any]}
+                rehypePlugins={[rehypeSanitize as any]}
               >
                 {whatsNew || "Nothing to preview."}
               </ReactMarkdown>
@@ -770,7 +882,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
 
       {/* App Files */}
       <h3 className="text-[20px] font-semibold mt-6 mb-2">App File <span className="text-red-500">*</span></h3>
-        <FileDropzone label="App file only" onChange={(f) => simulateUpload(f, setAppFiles)} />
+        <FileDropzone label="App file only" onChange={handleAppFileChange} multiple={false} accept="*" disabled={appFiles.length > 0} />
         {renderUploadList(appFiles, setAppFiles)}
         {errors.appFiles && <div className="text-xs text-red-500">{errors.appFiles}</div>}
 
@@ -780,7 +892,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         <FileDropzone
           label="Card image only"
           accept="image/*"
-          onChange={(f) => simulateUpload(f, setCardImages)}
+          onChange={handleCardImageChange}
+          multiple={false}
+          disabled={cardImages.length > 0}
         />
         {renderUploadList(cardImages, setCardImages)}
         {errors.cardImages && <div className="text-xs text-red-500">{errors.cardImages}</div>}
@@ -790,7 +904,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         <FileDropzone
           label="Banner image only"
           accept="image/*"
-          onChange={(f) => simulateUpload(f, setBannerImages)}
+          onChange={handleBannerImageChange}
+          multiple={false}
+          disabled={bannerImages.length > 0}
         />
         {renderUploadList(bannerImages, setBannerImages)}
         {errors.bannerImages && <div className="text-xs text-red-500">{errors.bannerImages}</div>}
@@ -801,13 +917,76 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           label="Screenshot images"
           accept="image/*"
           multiple
-          onChange={(f) => simulateUpload(f, setScreenshots)}
+          onChange={files => {
+            setScreenshots(prev => {
+              const newFiles = Array.from(files);
+              // Only add up to 8 screenshots
+              if (prev.length + newFiles.length > MAX_SCREENSHOTS) {
+                return [...prev, ...newFiles.slice(0, MAX_SCREENSHOTS - prev.length)];
+              }
+              return [...prev, ...newFiles];
+            });
+          }}
+          disabled={screenshots.length >= MAX_SCREENSHOTS}
         />
-        {renderUploadList(screenshots, setScreenshots, true)}
+        {/* Only allow drag-and-drop reordering for new (File) screenshots */}
+        <DragDropContext onDragEnd={result => {
+          if (!result.destination) return;
+          setScreenshots(prev => {
+            const files = prev.filter(f => f instanceof File);
+            const others = prev.filter(f => !(f instanceof File));
+            if (files.length === 0) return prev;
+            const reordered = Array.from(files);
+            const [removed] = reordered.splice(result.source.index, 1);
+            if (result.destination) {
+              reordered.splice(result.destination.index, 0, removed);
+            }
+            return [...others, ...reordered];
+          });
+        }}>
+          <Droppable droppableId="screenshots-droppable">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {/* Show already-uploaded screenshots (not draggable) */}
+                {screenshots.filter(f => !(f instanceof File)).map((file, idx) => (
+                  <div key={file.url || file.name || idx} style={{ background: '#eee', margin: '8px 0', padding: 8, borderRadius: 4 }}>
+                    {file.name || file.url || 'File'} (uploaded)
+                  </div>
+                ))}
+                {/* Show new screenshots (draggable) */}
+                {screenshots.filter(f => f instanceof File).map((file, idx) => {
+                  const uniqueId = file.name || String(idx);
+                  return (
+                    <Draggable key={uniqueId} draggableId={uniqueId} index={idx}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          style={{
+                            ...provided.draggableProps.style,
+                            background: "#fff",
+                            margin: "8px 0",
+                            padding: 8,
+                            borderRadius: 4,
+                          }}
+                        >
+                          {file.name || 'File'}
+                        </div>
+                      )}
+                    </Draggable>
+                  );
+                })}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
         {errors.screenshots && <div className="text-xs text-red-500">{errors.screenshots}</div>}
 
       <div className="flex flex-col md:flex-row justify-center gap-4 pt-4">
         <Button
+          type="button"
           variant="purple"
           className="flex-1 basis-1/2 py-3 text-base font-semibold h-full justify-center"
           onClick={handleContinue}
@@ -816,6 +995,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           {saveLoading ? 'Submitting...' : 'Continue'}
         </Button>
         <Button
+          type="button"
           variant="outline"
           className="flex-1 basis-1/2 py-3 text-base font-semibold h-full justify-center"
           onClick={handleSave}
@@ -825,6 +1005,18 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         </Button>
       </div>
       {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}
+      {/* Debug Console */}
+      <div className="mt-8 p-4 bg-gray-100 border border-gray-300 rounded text-xs text-gray-800">
+        <div className="font-bold mb-2">Debug Console</div>
+        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(debugLog, null, 2)}</pre>
+      </div>
+      <div className="mt-8 p-4 bg-yellow-50 border border-yellow-400 rounded text-xs text-yellow-900">
+        <div className="font-bold mb-2">Auth/Session Debug</div>
+        <div><b>auth_session cookie:</b> <span style={{wordBreak:'break-all'}}>{sessionCookie || 'Not found'}</span></div>
+        <div><b>User Agent:</b> {userAgent}</div>
+        <div><b>Current User:</b> {appData && appData.user ? JSON.stringify(appData.user, null, 2) : 'Not available in this context'}</div>
+        <div><b>Current Time:</b> {new Date().toLocaleString()}</div>
+      </div>
     </div>
   );
 }

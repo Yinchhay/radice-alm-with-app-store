@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import AppBuilderClientWrapper from './_components/client-wrapper';
+import DashboardPageTitle from '@/components/DashboardPageTitle';
 
 export default function AppBuilderPage({ params }: { params: { project_id: string } }) {
   return (
@@ -15,7 +16,9 @@ export default function AppBuilderPage({ params }: { params: { project_id: strin
           Back to Projects
         </Link>
         
-        <h1 className="text-2xl pl-6 font-bold mt-4">App Builder</h1>
+        <div className="pl-6 mt-4">
+          <DashboardPageTitle title="App Builder" />
+        </div>
       </div>
       
       <AppBuilderClientWrapper projectId={params.project_id} />

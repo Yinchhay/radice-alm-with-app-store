@@ -19,6 +19,7 @@ export type FetchAppBuilderData = {
     bannerImage: string | null;
     featuredPriority: number | null;
     status: string;
+    screenshots?: string[]; // <-- Added this line
   };
   project: {
     id: number;
@@ -93,21 +94,9 @@ export async function fetchAppBuilderData(
         bannerImage: appData.data.app.bannerImage,
         featuredPriority: appData.data.app.featuredPriority,
         status: appData.data.app.status,
+        updateType: appData.data.app.updateType,
       } : undefined
     };
-
-    // Parse updateType and aboutDesc from content if present
-    if (combinedData.app && combinedData.app.content) {
-      try {
-        const parsed = JSON.parse(combinedData.app.content);
-        if (parsed && typeof parsed.updateType === 'string') {
-          combinedData.updateType = parsed.updateType;
-        }
-        if (parsed && typeof parsed.aboutDesc === 'string') {
-          combinedData.aboutDesc = parsed.aboutDesc;
-        }
-      } catch {}
-    }
 
     // If we have an app ID and it's not a new app and status is 'accepted', try to get the public details
     if (appData.data.appId && !appData.data.isNewApp && (appData.data.status === 'accepted')) {
@@ -151,19 +140,12 @@ export async function fetchAppBuilderData(
   }
 }
 
-export async function saveAppDraft({ appId, subtitle, aboutDesc, type, webUrl, updateType, existingContent }: { appId: number, subtitle: string, aboutDesc: string, type?: number, webUrl?: string, updateType: string, existingContent?: string }) {
+export async function saveAppDraft({ appId, subtitle, aboutDesc, type, webUrl, updateType }: { appId: number, subtitle: string, aboutDesc: string, type?: number, webUrl?: string, updateType: string }) {
   try {
     const sessionId = await getSessionCookie();
     if (!sessionId) {
       return { success: false, message: 'Unauthorized: No session' };
     }
-    // Merge updateType and aboutDesc into content JSON
-    let contentObj: any = {};
-    if (existingContent) {
-      try { contentObj = JSON.parse(existingContent) || {}; } catch {}
-    }
-    contentObj.updateType = updateType;
-    contentObj.aboutDesc = aboutDesc;
     const res = await fetch(`${await getBaseUrl()}/api/internal/app/${appId}/edit`, {
       method: 'PATCH',
       headers: {
@@ -175,7 +157,7 @@ export async function saveAppDraft({ appId, subtitle, aboutDesc, type, webUrl, u
         aboutDesc,
         type,
         webUrl,
-        content: JSON.stringify(contentObj),
+        updateType,
         status: 'draft',
       }),
       cache: 'no-cache',
