@@ -1,13 +1,12 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-// Configuration for file uploads
 const FILE_STORAGE_PATH = path.join(
     process.cwd(),
     process.env.FILE_STORAGE_PATH || "./public/uploads/apps",
 );
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB for images
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB for videos
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
 export const MAX_SCREENSHOTS = 8;
 
 const ALLOWED_IMAGE_TYPES = [
@@ -25,7 +24,6 @@ const ALLOWED_VIDEO_TYPES = [
     "video/quicktime",
 ];
 
-// Helper function to ensure upload directory exists
 export async function ensureUploadDir() {
     try {
         await fs.access(FILE_STORAGE_PATH);
@@ -34,7 +32,6 @@ export async function ensureUploadDir() {
     }
 }
 
-// Helper function to delete old file
 export async function deleteOldFile(filePath: string) {
     if (!filePath) return;
     try {
@@ -47,7 +44,6 @@ export async function deleteOldFile(filePath: string) {
     }
 }
 
-// Helper function to save uploaded file
 export async function saveUploadedFile(
     file: File,
     appId: number,
@@ -55,21 +51,17 @@ export async function saveUploadedFile(
 ): Promise<string> {
     await ensureUploadDir();
 
-    // Generate unique filename
     const fileExtension = path.extname(file.name);
     const timestamp = Date.now();
     const uniqueFilename = `app_${appId}_${fileType}_${timestamp}${fileExtension}`;
     const filePath = path.join(FILE_STORAGE_PATH, uniqueFilename);
 
-    // Convert file to buffer and save
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
 
-    // Return path for Next.js compatibility
     return `/uploads/apps/${uniqueFilename}`;
 }
 
-// Helper function to validate image files
 export function validateFile(file: File): { valid: boolean; error?: string } {
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
         return {
@@ -88,7 +80,6 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
     return { valid: true };
 }
 
-// Helper function to validate video files
 export function validateVideoFile(file: File): {
     valid: boolean;
     error?: string;
@@ -110,7 +101,6 @@ export function validateVideoFile(file: File): {
     return { valid: true };
 }
 
-// Helper function to get file info
 export function getFileInfo(file: File) {
     return {
         name: file.name,

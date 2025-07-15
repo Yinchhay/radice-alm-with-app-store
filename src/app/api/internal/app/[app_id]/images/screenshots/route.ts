@@ -245,7 +245,6 @@ export async function DELETE(request: NextRequest, { params }: Params) {
             );
         }
 
-        // Get screenshot info and verify it belongs to this app
         const { getAppScreenshotById, deleteAppScreenshotById } = await import(
             "@/repositories/app_screenshot"
         );
@@ -273,15 +272,12 @@ export async function DELETE(request: NextRequest, { params }: Params) {
             );
         }
 
-        // Delete the file if it exists
         if (screenshot.imageUrl) {
             await deleteOldFile(screenshot.imageUrl);
         }
 
-        // Delete from database
         await deleteAppScreenshotById(screenshotIdNumber);
 
-        // Reorder remaining screenshots
         await reorderScreenshots(appId);
 
         return buildSuccessResponse("Screenshot deleted successfully", {
@@ -301,7 +297,6 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     }
 }
 
-// Usage examples:
 // POST: Add new screenshots (append) - http://localhost:3000/api/internal/app/[app_id]/images/screenshots
 // PATCH: Reorder screenshots - http://localhost:3000/api/internal/app/[app_id]/images/screenshots
 // DELETE: Remove specific screenshot - http://localhost:3000/api/internal/app/[app_id]/images/screenshots?screenshot_id=123

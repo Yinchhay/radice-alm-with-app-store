@@ -88,7 +88,6 @@ export const createApp = async (app: typeof apps.$inferInsert) => {
     return await db.insert(apps).values(app);
 };
 
-// This function retrieves all apps associated with a specific project ID.
 export async function getAppsByProjectId(projectId: number) {
     return await db.query.apps.findMany({
         where: (app, { eq }) => eq(app.projectId, projectId),
@@ -420,7 +419,6 @@ export async function getAssociatedProjectsWithMembers(
             return [];
         }
 
-        // Transform the result to match the expected type
         const projectWithMembers: ProjectJoinMembersAndPartners = {
             id: result.project.id,
             name: result.project.name,
