@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 
-const FILE_STORAGE_PATH = process.env.FILE_STORAGE_PATH || "./src/file_storage";
+const FILE_STORAGE_PATH = process.env.FILE_STORAGE_PATH || "./public/uploads/apps";
 
 export async function GET(
     request: NextRequest,
