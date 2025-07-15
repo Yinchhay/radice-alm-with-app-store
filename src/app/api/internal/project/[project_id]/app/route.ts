@@ -27,7 +27,7 @@ export type FetchCreateApp = {
 const unsuccessMessage = "App operation failed";
 
 // Configuration for file storage (should match your PATCH endpoint)
-const FILE_STORAGE_PATH = path.join(process.cwd(), process.env.FILE_STORAGE_PATH || './public/uploads/apps');
+const FILE_STORAGE_PATH = path.join(process.cwd(), process.env.FILE_STORAGE_PATH || 'public/uploads/apps');
 
 // Helper function to copy an existing image file with new naming
 async function copyImageFile(originalPath: string, newAppId: number, imageType: 'card' | 'banner'): Promise<string | null> {
@@ -366,6 +366,11 @@ export async function POST(
             throw new Error("Failed to create version");
         }
 
+        // Fetch the full app object and its screenshots after creation
+        const newAppDetails = await getAppByIdForPublic(appId);
+        const newAppScreenshots = await getAppScreenshots(appId);
+        const newAppScreenshotUrls = newAppScreenshots.map(s => s.imageUrl).filter(Boolean);
+
         return buildSuccessResponse<FetchCreateApp>(
             acceptedApp
                 ? "Created new app from accepted version"
@@ -374,6 +379,10 @@ export async function POST(
                 appId,
                 isNewApp: true,
                 status: "draft",
+                app: {
+                    ...newAppDetails,
+                    screenshots: newAppScreenshotUrls,
+                },
             },
         );
     } catch (createError: any) {
