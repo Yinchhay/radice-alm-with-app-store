@@ -2,28 +2,31 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+        throw new Error("Missing Google OAuth credentials");
+    }
     const googleAuthUrl = new URL(
         "https://accounts.google.com/o/oauth2/v2/auth",
     );
-    
+
     googleAuthUrl.searchParams.append(
         "client_id",
         process.env.GOOGLE_CLIENT_ID!,
     );
-    
+
     googleAuthUrl.searchParams.append(
         "redirect_uri",
-        `${process.env.NEXTAUTH_URL}/api/auth/google/callback`,
+        `${process.env.APP_URL}/api/auth/google/callback`,
     );
-    
+
     googleAuthUrl.searchParams.append("response_type", "code");
     googleAuthUrl.searchParams.append("scope", "openid profile email");
     googleAuthUrl.searchParams.append("access_type", "offline");
-    
+
     const state = Math.random().toString(36).substring(2, 15);
     googleAuthUrl.searchParams.append("state", state);
-    
+
     googleAuthUrl.searchParams.append("prompt", "select_account");
-    
+
     return NextResponse.redirect(googleAuthUrl.toString());
 }
