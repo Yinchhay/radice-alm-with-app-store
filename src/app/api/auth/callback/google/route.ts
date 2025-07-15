@@ -131,3 +131,5 @@ export async function GET(request: NextRequest) {
         );
     }
 }
+
+// I hate you moneath, why did you delete this file

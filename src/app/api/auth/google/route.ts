@@ -27,3 +27,5 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(googleAuthUrl.toString());
 }
+
+// Bro just let me resolve conflicts, I don't want to write this file again
