@@ -26,21 +26,18 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Generate your custom tester token
         const customToken = generateTesterToken({
             id: tester.id,
             email: tester.email,
         });
 
-        // Create response and set your custom cookie
         const response = NextResponse.redirect(
             new URL("/testers/dashboard", request.url),
         );
 
-        // Set your custom tester-token cookie
         setTesterAuthCookie(response, customToken);
 
-        // Optional: Clear NextAuth cookies if you don't want them
+        // Clear NextAuth cookies
         response.cookies.delete("next-auth.session-token");
         response.cookies.delete("__Secure-next-auth.session-token");
         response.cookies.delete("next-auth.csrf-token");

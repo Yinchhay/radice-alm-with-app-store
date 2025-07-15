@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // Exchange code for access token
         const tokenResponse = await fetch(
             "https://oauth2.googleapis.com/token",
             {
@@ -65,7 +64,6 @@ export async function GET(request: NextRequest) {
             throw new Error("Failed to exchange code for token");
         }
 
-        // Get user info from Google
         const userResponse = await fetch(
             `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenData.access_token}`,
         );
@@ -76,7 +74,6 @@ export async function GET(request: NextRequest) {
             throw new Error("Failed to fetch user info");
         }
 
-        // Check if tester exists or create new one
         let tester = await getTesterByEmail(userData.email);
 
         if (!tester) {
@@ -97,13 +94,11 @@ export async function GET(request: NextRequest) {
             throw new Error("Failed to create or retrieve tester");
         }
 
-        // Generate your custom token
         const customToken = generateTesterToken({
             id: tester.id,
             email: tester.email,
         });
 
-        // Create response and set only your custom cookie
         const response = NextResponse.redirect(
             new URL("/testers/dashboard", request.url),
         );
@@ -118,5 +113,3 @@ export async function GET(request: NextRequest) {
         );
     }
 }
-
-// This file too
