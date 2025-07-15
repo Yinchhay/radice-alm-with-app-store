@@ -144,35 +144,37 @@ function AppPage({ params }: { params: { app_id: string } }) {
                             subtitle={app.subtitle}
                         />
                     </div>
-                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-4 min-h-[600px]">
-                        <div className="flex-1 lg:min-w-[260px] lg:max-w-sm flex flex-col justify-center h-full">
-                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2">
-                                {project?.name || "No Name"}
-                            </h1>
-                            <div className="text-sm text-gray-700 mb-2">
-                                {app.subtitle || "No subtitle"}
-                            </div>
-                            {project?.projectMembers && (
-                                <div className="mb-4 text-sm font-bold">
-                                    {project.projectMembers
-                                        .map(
-                                            (member) =>
-                                                `${member.user?.firstName} ${member.user?.lastName}`,
-                                        )
-                                        .join(", ")}
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                        <div className="lg:w-1/3 lg:min-w-[300px] lg:max-w-md">
+                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                                    {project?.name || "No Name"}
+                                </h1>
+                                <div className="text-base text-gray-600 mb-4 leading-relaxed">
+                                    {app.subtitle || "No subtitle"}
                                 </div>
-                            )}
-                            <AppActionButton
-                                onClick={() => {
-                                    if (action.url)
-                                        window.open(action.url, "_blank");
-                                }}
-                                disabled={action.disabled}
-                            >
-                                {action.label}
-                            </AppActionButton>
+                                {project?.projectMembers && (
+                                    <div className="mb-6">
+                                        <div className="text-sm font-bold">
+                                            {project.projectMembers
+                                                .map(
+                                                    (member) =>
+                                                        `${member.user?.firstName} ${member.user?.lastName}`,
+                                                )
+                                                .join(", ")}
+                                        </div>
+                                    </div>
+                                )}
+                                <AppActionButton
+                                    onClick={() => {
+                                        if (action.url)
+                                            window.open(action.url, "_blank");
+                                    }}
+                                    disabled={action.disabled}
+                                >
+                                    {action.label}
+                                </AppActionButton>
                         </div>
-                        <div className="flex-1 lg:min-w-[300px]">
+                        <div className="lg:w-2/3 lg:flex-1">
                             <AppScreenshotsCarousel
                                 screenshots={screenshots}
                                 appName={project?.name || "App"}

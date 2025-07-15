@@ -107,69 +107,73 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                             />
                         </div>
                     )}
-                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-4 min-h-[600px]">
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
                         {/* Left column */}
-                        <div className="flex-1 lg:min-w-[260px] lg:max-w-sm flex flex-col justify-center h-full">
-                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2">{appName}</h1>
-                            <div className="text-sm text-gray-700 mb-2">
-                                {appData?.subtitle || "No subtitle"}
-                            </div>
-                            {appData?.project?.projectMembers && (
-                                <div className="mb-4 text-sm font-bold">
-                                    {appData.project.projectMembers
-                                        .map(
-                                            (member: any) =>
-                                                `${member.user?.firstName} ${member.user?.lastName}`,
-                                        )
-                                        .join(", ")}
+                        <div className="lg:w-1/3 lg:min-w-[300px] lg:max-w-md">
+                            <div className="sticky top-6">
+                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{appName}</h1>
+                                <div className="text-base text-gray-600 mb-4 leading-relaxed">
+                                    {appData?.subtitle || "No subtitle"}
                                 </div>
-                            )}
-                            {appData && (
-                                <AppActionButton
-                                    onClick={() => {
-                                        const { appType, webUrl, appFile } =
-                                            appData;
-                                        let url = null;
-                                        if (
-                                            (appType?.name === "Web" ||
-                                                appType?.name === "Mobile") &&
-                                            (webUrl || appFile)
-                                        ) {
-                                            url = webUrl || appFile;
-                                        } else if (
-                                            appType?.name === "API" &&
-                                            appFile
-                                        ) {
-                                            url = appFile;
+                                {appData?.project?.projectMembers && (
+                                    <div className="mb-6">
+                                        <div className="text-sm font-bold">
+                                            {appData.project.projectMembers
+                                                .map(
+                                                    (member: any) =>
+                                                        `${member.user?.firstName} ${member.user?.lastName}`,
+                                                )
+                                                .join(", ")}
+                                        </div>
+                                    </div>
+                                )}
+                                {appData && (
+                                    <AppActionButton
+                                        onClick={() => {
+                                            const { appType, webUrl, appFile } =
+                                                appData;
+                                            let url = null;
+                                            if (
+                                                (appType?.name === "Web" ||
+                                                    appType?.name === "Mobile") &&
+                                                (webUrl || appFile)
+                                            ) {
+                                                url = webUrl || appFile;
+                                            } else if (
+                                                appType?.name === "API" &&
+                                                appFile
+                                            ) {
+                                                url = appFile;
+                                            }
+                                            if (url) window.open(url, "_blank");
+                                        }}
+                                        disabled={
+                                            !appData.webUrl && !appData.appFile
                                         }
-                                        if (url) window.open(url, "_blank");
-                                    }}
-                                    disabled={
-                                        !appData.webUrl && !appData.appFile
-                                    }
-                                >
-                                    {(() => {
-                                        const { appType, webUrl, appFile } =
-                                            appData;
-                                        if (
-                                            (appType?.name === "Web" ||
-                                                appType?.name === "Mobile") &&
-                                            (webUrl || appFile)
-                                        ) {
-                                            return "Start Testing";
-                                        } else if (
-                                            appType?.name === "API" &&
-                                            appFile
-                                        ) {
-                                            return "View Documentation";
-                                        }
-                                        return "Not Available";
-                                    })()}
-                                </AppActionButton>
-                            )}
+                                    >
+                                        {(() => {
+                                            const { appType, webUrl, appFile } =
+                                                appData;
+                                            if (
+                                                (appType?.name === "Web" ||
+                                                    appType?.name === "Mobile") &&
+                                                (webUrl || appFile)
+                                            ) {
+                                                return "Start Testing";
+                                            } else if (
+                                                appType?.name === "API" &&
+                                                appFile
+                                            ) {
+                                                return "View Documentation";
+                                            }
+                                            return "Not Available";
+                                        })()}
+                                    </AppActionButton>
+                                )}
+                            </div>
                         </div>
                         {/* Right column */}
-                        <div className="flex-1 lg:min-w-[300px]">
+                        <div className="lg:w-2/3 lg:flex-1">
                             <div className="mb-6 lg:mb-8 hidden sm:block">
                                 <button
                                     onClick={() => window.history.back()}
