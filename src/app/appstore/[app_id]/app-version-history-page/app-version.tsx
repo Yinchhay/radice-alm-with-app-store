@@ -310,7 +310,7 @@ function AppVersionHistory({ params }: { params: { app_id: string } }) {
                                 </div>
                                 {app?.project?.projectMembers && (
                                     <div className="mb-6">
-                                        <div className="text-sm text-gray-700">
+                                        <div className="text-sm font-bold">
                                             {app.project.projectMembers
                                                 .map(
                                                     (member: any) =>

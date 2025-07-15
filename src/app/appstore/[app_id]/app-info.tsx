@@ -154,7 +154,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 </div>
                                 {project?.projectMembers && (
                                     <div className="mb-6">
-                                        <div className="text-sm text-gray-700">
+                                        <div className="text-sm font-bold">
                                             {project.projectMembers
                                                 .map(
                                                     (member) =>

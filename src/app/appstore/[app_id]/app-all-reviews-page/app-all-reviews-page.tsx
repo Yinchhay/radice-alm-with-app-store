@@ -117,7 +117,7 @@ export default function AppAllReviewsPage({ params }: AppAllReviewsPageProps) {
                                 </div>
                                 {appData?.project?.projectMembers && (
                                     <div className="mb-6">
-                                        <div className="text-sm text-gray-700">
+                                        <div className="text-sm font-bold">
                                             {appData.project.projectMembers
                                                 .map(
                                                     (member: any) =>
