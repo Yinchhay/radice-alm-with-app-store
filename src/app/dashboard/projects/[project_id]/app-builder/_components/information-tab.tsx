@@ -1,12 +1,13 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAppBuilderData, FetchAppBuilderData, saveAppDraft } from '../fetch';
 import Button from '@/components/Button';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 
 
 function FileDropzone({
@@ -100,7 +101,128 @@ function insertAtCursor(
   if (setValue) setValue(newValue);
 }
 
+// Add this function to call the backend to reorder screenshots
+async function reorderScreenshotsOnServer(appId: number, newOrder: string[]) {
+  try {
+    const res = await fetch(`/api/internal/app/${appId}/images/screenshots`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reorder', order: newOrder }),
+      credentials: 'include',
+    });
+    return await res.json();
+  } catch (e) {
+    return { success: false, message: 'Failed to reorder screenshots' };
+  }
+}
+
+// Add a function to delete screenshots on the backend
+async function deleteScreenshotsOnServer(appId: number, urls: string[]) {
+  try {
+    const res = await fetch(`/api/internal/app/${appId}/images/screenshots`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls }),
+      credentials: 'include',
+    });
+    return await res.json();
+  } catch (e) {
+    return { success: false, message: 'Failed to delete screenshots' };
+  }
+}
+
+// Refactor uploadScreenshotsWithProgress to upload all files in parallel
+async function uploadScreenshotsWithProgress(files: File[], appId: number, updateProgress: (file: File, percent: number, done?: boolean, uploadedUrl?: string) => void) {
+  const uploadedUrls: { url: string }[] = [];
+  await Promise.all(files.map(file => new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('screenshots', file);
+    xhr.open('POST', `/api/internal/app/${appId}/images/screenshots`, true);
+    xhr.withCredentials = true;
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        updateProgress(file, percent);
+      }
+    };
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (data.success && data.newScreenshotPaths && data.newScreenshotPaths.length > 0) {
+            uploadedUrls.push({ url: data.newScreenshotPaths[0] });
+            updateProgress(file, 100, true, data.newScreenshotPaths[0]);
+          }
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      } else {
+        reject(xhr.statusText);
+      }
+    };
+    xhr.onerror = function () { reject(xhr.statusText); };
+    xhr.send(formData);
+  })));
+  return uploadedUrls;
+}
+
+// Helper to create a consistent screenshot object
+function makeScreenshotObj(fileOrUrl: any) {
+  if (fileOrUrl instanceof File) {
+    return { file: fileOrUrl, url: undefined, progress: 0, key: `${fileOrUrl.name}_${fileOrUrl.lastModified}_${crypto.randomUUID()}` };
+  } else if (typeof fileOrUrl === 'string') {
+    return { file: undefined, url: fileOrUrl, progress: 100, key: fileOrUrl };
+  } else if (fileOrUrl && fileOrUrl.key) {
+    return fileOrUrl;
+  } else if (fileOrUrl && fileOrUrl.url) {
+    // Use id+url if available, else just url
+    const key = fileOrUrl.id ? `${fileOrUrl.id}_${fileOrUrl.url}` : fileOrUrl.url;
+    return { ...fileOrUrl, progress: 100, key };
+  }
+  return fileOrUrl;
+}
+
+// Add this hook to disable page scroll while dragging
+function useDisableScrollOnDrag() {
+  useEffect(() => {
+    function handleDragStart() {
+      document.body.style.overflow = 'hidden';
+    }
+    function handleDragEnd() {
+      document.body.style.overflow = '';
+    }
+    window.addEventListener('dragstart', handleDragStart);
+    window.addEventListener('dragend', handleDragEnd);
+    window.addEventListener('drop', handleDragEnd);
+    return () => {
+      window.removeEventListener('dragstart', handleDragStart);
+      window.removeEventListener('dragend', handleDragEnd);
+      window.removeEventListener('drop', handleDragEnd);
+      document.body.style.overflow = '';
+    };
+  }, []);
+}
+
+// Utility to dedupe screenshots by key
+function dedupeByKey(arr: any[]) {
+  const seen = new Set();
+  const result = arr.filter(item => {
+    if (!item.key) return true;
+    if (seen.has(item.key)) {
+      console.log('Deduping screenshot with key:', item.key);
+      return false;
+    }
+    seen.add(item.key);
+    return true;
+  });
+  console.log('Screenshot keys after dedupe:', result.map(i => i.key));
+  return result;
+}
+
 export default function InformationTab({ projectId }: InformationTabProps) {
+  useDisableScrollOnDrag();
   const [loading, setLoading] = useState(true);
   const [appData, setAppData] = useState<FetchAppBuilderData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -120,17 +242,16 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [webUrlError, setWebUrlError] = useState('');
-  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   // Add state for update type and what's new
   const [updateType, setUpdateType] = useState<'major' | 'minor' | 'patch'>('major');
   const [whatsNew, setWhatsNew] = useState('');
   const [latestAcceptedVersion, setLatestAcceptedVersion] = useState<{major: number, minor: number, patch: number} | null>(null);
 
-  // Add debug state for UI console
-  const [debugLog, setDebugLog] = useState<any>({});
+  // Add state to track screenshots to delete
+  const [screenshotsToDelete, setScreenshotsToDelete] = useState<string[]>([]);
 
-  // Add at the top of the component
+  // Restore sessionCookie and userAgent state
   const [sessionCookie, setSessionCookie] = useState<string | null>(null);
   const [userAgent, setUserAgent] = useState<string | null>(null);
 
@@ -165,7 +286,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     if (!appType) newErrors.appType = 'Required';
     if (!description.trim()) newErrors.description = 'Required';
     if (!webUrl.trim()) newErrors.webUrl = 'Required';
-    if (appFiles.length === 0) newErrors.appFiles = 'Required';
     if (cardImages.length === 0) newErrors.cardImages = 'Required';
     if (bannerImages.length === 0) newErrors.bannerImages = 'Required';
     if (screenshots.length === 0) newErrors.screenshots = 'Required';
@@ -182,54 +302,88 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const handleAppFileChange = (files: FileList) => setAppFiles(Array.from(files));
   const handleCardImageChange = (files: FileList) => setCardImages(Array.from(files));
   const handleBannerImageChange = (files: FileList) => setBannerImages(Array.from(files));
-  const handleScreenshotsChange = (files: FileList) => setScreenshots(Array.from(files));
+  const handleScreenshotsChange = (files: FileList) => setScreenshots(prev => {
+    const newFiles = Array.from(files).map(makeScreenshotObj);
+    if (prev.length + newFiles.length > MAX_SCREENSHOTS) {
+      return [...prev, ...newFiles.slice(0, MAX_SCREENSHOTS - prev.length)];
+    }
+    return [...prev, ...newFiles];
+  });
 
-  // Fetch app data on component mount
+  // Replace the main data loading useEffect with a parallelized version
   useEffect(() => {
-    const loadAppData = async () => {
+    let isMounted = true;
+    async function loadAllData() {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
-        const response = await fetchAppBuilderData(projectId);
-        
-        if (response.success && response.data) {
-          setAppData(response.data);
-          setCurrentAppStatus(response.data.status);
-          
-          // Populate form fields with fetched data
-          if (response.data.app) {
-            setSubtitle(response.data.app.subtitle || '');
-            // Use aboutDesc from content field if available, otherwise fall back to app.aboutDesc
-            const aboutDesc = (response.data as any).aboutDesc || response.data.app.aboutDesc || '';
-            setDescription(aboutDesc);
-            setWebUrl(response.data.app.webUrl || '');
-            setPriorityTesting(response.data.app.featuredPriority === 1);
-            setAppType(response.data.app.type ? String(response.data.app.type) : '');
-            // If there are existing files, populate them as {url: ...}
-            if (response.data.app.appFile) {
-              setAppFiles([{ url: response.data.app.appFile }]);
-            }
-            if (response.data.app.cardImage) {
-              setCardImages([{ url: response.data.app.cardImage }]);
-            }
-            if (response.data.app.bannerImage) {
-              setBannerImages([{ url: response.data.app.bannerImage }]);
-            }
-            if (response.data.app.screenshots && Array.isArray(response.data.app.screenshots)) {
-              setScreenshots(response.data.app.screenshots.map((url: string) => ({ url })));
-            }
+        // Parallel fetches
+        const projectPromise = fetch(`/api/internal/project/${projectId}`, {
+          method: 'GET',
+          cache: 'no-cache',
+        }).then(r => r.json());
+        const appPromise = fetch(`/api/internal/project/${projectId}/app`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-cache',
+        }).then(r => r.json());
+        // Wait for both
+        const [projectData, appDataRaw] = await Promise.all([projectPromise, appPromise]);
+        if (!isMounted) return;
+        if (!projectData.success) throw new Error(projectData.message || 'Failed to load project');
+        if (!appDataRaw.success) throw new Error(appDataRaw.message || 'Failed to load app');
+        // Batch state updates
+        setAppData(appDataRaw.data);
+        setCurrentAppStatus(appDataRaw.data.status);
+        if (appDataRaw.data.app) {
+          setSubtitle(appDataRaw.data.app.subtitle || '');
+          setDescription(appDataRaw.data.app.aboutDesc || '');
+          setWebUrl(appDataRaw.data.app.webUrl || '');
+          setPriorityTesting(appDataRaw.data.app.featuredPriority === 1);
+          setAppType(appDataRaw.data.app.type ? String(appDataRaw.data.app.type) : '');
+          if (appDataRaw.data.app.appFile) setAppFiles([{ url: appDataRaw.data.app.appFile }]);
+          if (appDataRaw.data.app.cardImage) setCardImages([{ url: appDataRaw.data.app.cardImage }]);
+          if (appDataRaw.data.app.bannerImage) setBannerImages([{ url: appDataRaw.data.app.bannerImage }]);
+          // When loading screenshots from backend, use makeScreenshotObj
+          if (appDataRaw.data.app.screenshots && Array.isArray(appDataRaw.data.app.screenshots)) {
+            setScreenshots(
+              dedupeByKey(
+                appDataRaw.data.app.screenshots.map((s: any) =>
+                  typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
+                )
+              )
+            );
           }
-        } else {
-          setError(response.message || 'Failed to load app data');
         }
-      } catch (err) {
-        setError('An error occurred while loading app data');
-        console.error('Error loading app data:', err);
-      } finally {
+        setLoading(false);
+        // Fetch version in parallel (not blocking UI)
+        if (appDataRaw.data.appId) {
+          fetch(`http://localhost:3000/api/public/app/${appDataRaw.data.appId}/version`)
+            .then(r => r.json())
+            .then(data => {
+              if (!isMounted) return;
+              if (data.success && data.data && data.data.current && data.data.current.versionNumber && data.data.current.isCurrent === true) {
+                setLatestAcceptedVersion({
+                  major: data.data.current.majorVersion ?? 0,
+                  minor: data.data.current.minorVersion ?? 0,
+                  patch: data.data.current.patchVersion ?? 0,
+                });
+              } else {
+                setLatestAcceptedVersion(null);
+              }
+            })
+            .catch(() => setLatestAcceptedVersion(null));
+        }
+      } catch (err: any) {
+        if (!isMounted) return;
+        setError(err.message || 'An error occurred while loading data');
         setLoading(false);
       }
-    };
-
-    loadAppData();
+    }
+    loadAllData();
+    return () => { isMounted = false; };
   }, [projectId]);
 
   // Prefill updateType from appData.updateType
@@ -257,7 +411,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       try {
         const res = await fetch(`http://localhost:3000/api/public/app/${appData.appId}/version`);
         const data = await res.json();
-        console.log('Version API response:', data);
         // Only set latestAcceptedVersion if there's a current version with a finalized versionNumber
         // This means the version has been accepted and finalized
         if (data.success && data.data && data.data.current && 
@@ -274,7 +427,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           setLatestAcceptedVersion(null);
         }
       } catch (error) {
-        console.log('Error fetching version:', error);
         setLatestAcceptedVersion(null);
       }
     }
@@ -311,53 +463,125 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     });
   };
 
-  // Update renderUploadList to preview both File and {url: ...} objects
-  const renderUploadList = (uploads: any[], setter: Function, showHandle: boolean = false) => (
+  // Shared style for preview cards
+  const previewCardStyle = {
+    background: '#eee',
+    margin: '8px 0',
+    padding: 8,
+    borderRadius: 4,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  };
+  const previewImageStyle: React.CSSProperties = {
+    width: 48,
+    height: 48,
+    objectFit: 'cover',
+    borderRadius: 4,
+    background: '#fff',
+    border: '1px solid #ccc',
+  };
+
+  // Replace renderUploadList to use the shared style
+  const renderUploadList = useCallback((uploads: any[], setter: Function, showArrows: boolean = false) => (
     <div className="space-y-2">
       {uploads.map((file, idx) => {
         let previewUrl = '';
+        let filename = '';
         if (file instanceof File) {
           previewUrl = URL.createObjectURL(file);
+          filename = file.name;
         } else if (file.url) {
           previewUrl = file.url;
+          filename = file.url.split('/').pop() || file.url;
         }
-        const isImage = previewUrl && (previewUrl.endsWith('.png') || previewUrl.endsWith('.jpg') || previewUrl.endsWith('.jpeg') || previewUrl.endsWith('.gif'));
         return (
           <div
-            key={idx}
-            className="relative flex items-center gap-2 p-3 bg-gray-50 rounded overflow-hidden"
+            key={file.key || filename + idx}
+            style={previewCardStyle}
           >
-            {showHandle && <div className="text-gray-400 text-lg select-none">⋮⋮</div>}
-            <div className="flex-1 flex items-center gap-3">
-              {isImage && previewUrl && (
-                <img src={previewUrl} alt="preview" className="w-12 h-12 object-cover rounded" />
-              )}
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="truncate">{file.name || file.url || 'File'}</span>
-                  <span className="text-xs text-gray-500">
-                    {file.size ? file.size : ''} {file.progress !== undefined ? (file.progress < 100 ? `${file.progress}%` : 'Uploaded') : ''}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 h-1.5 rounded">
-                  <div
-                    className="h-1.5 bg-black rounded transition-all duration-200"
-                    style={{ width: `${file.progress !== undefined ? file.progress : 100}%` }}
-                  />
-                </div>
+            {/* Only show arrows for screenshots */}
+            {showArrows && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginRight: 8 }}>
+                <button
+                  type="button"
+                  aria-label="Move up"
+                  disabled={idx === 0}
+                  onClick={() => {
+                    if (idx === 0) return;
+                    setter((prev: any[]) => {
+                      const arr = [...prev];
+                      [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+                      // If all have .url, call reorder
+                      if (arr.every(f => f.url) && typeof reorderScreenshotsOnServer === 'function' && arr[0].appId) {
+                        reorderScreenshotsOnServer(arr[0].appId, arr.map(f => f.url));
+                      }
+                      return arr;
+                    });
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'not-allowed' : 'pointer', padding: 0 }}
+                >
+                  <IconChevronUp size={20} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Move down"
+                  disabled={idx === uploads.length - 1}
+                  onClick={() => {
+                    if (idx === uploads.length - 1) return;
+                    setter((prev: any[]) => {
+                      const arr = [...prev];
+                      [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+                      // If all have .url, call reorder
+                      if (arr.every(f => f.url) && typeof reorderScreenshotsOnServer === 'function' && arr[0].appId) {
+                        reorderScreenshotsOnServer(arr[0].appId, arr.map(f => f.url));
+                      }
+                      return arr;
+                    });
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: idx === uploads.length - 1 ? 'not-allowed' : 'pointer', padding: 0 }}
+                >
+                  <IconChevronDown size={20} />
+                </button>
               </div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+              {previewUrl && (
+                <img src={previewUrl} alt="preview" style={previewImageStyle} />
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <span>{filename}</span>
+                {file.size && (
+                  <div className="text-xs text-gray-500">{file.size}</div>
+                )}
+                {file.progress !== undefined && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                    <div className="bg-gray-200 h-1.5 rounded mt-1" style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        className="h-1.5 bg-black rounded transition-all duration-200"
+                        style={{ width: `${file.progress !== undefined ? file.progress : 100}%` }}
+                      />
+                    </div>
+                    <span style={{ minWidth: 36, textAlign: 'right', fontSize: 12, color: '#333' }}>
+                      {file.progress < 100 ? `${file.progress}%` : 'Uploaded'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                className="ml-2 text-gray-500 hover:text-red-500 text-sm"
+                onClick={e => {
+                  e.stopPropagation();
+                  setter((prev: any[]) => prev.filter((_: any, i: number) => i !== idx));
+                  if (file.url && typeof setScreenshotsToDelete === 'function') setScreenshotsToDelete((prev: any[]) => [...prev, file.url]);
+                }}
+              >✕</button>
             </div>
-            <button
-              className="text-gray-500 hover:text-red-500 text-sm ml-2"
-              onClick={() => setter((prev: any) => prev.filter((_: any, i: number) => i !== idx))}
-            >
-              ✕
-            </button>
           </div>
         );
       })}
     </div>
-  );
+  ), []);
 
   async function uploadFilesIfNeeded(files: any[], projectId: string) {
     // files: array of File or {url: string} objects
@@ -395,24 +619,37 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     setSaveMessage(null);
     try {
       // 1. Upload new screenshots if any
-      let screenshotUrls = screenshots;
-      if (screenshots.some(f => f instanceof File)) {
-        const formData = new FormData();
-        screenshots.filter(f => f instanceof File).forEach(file => formData.append('screenshots', file));
-        const res = await fetch(`/api/internal/app/${projectId}/images/screenshots`, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-        });
-        const data = await res.json();
-        if (data.success && data.newScreenshotPaths) {
-          // Combine already-uploaded and newly-uploaded URLs
-          screenshotUrls = [
-            ...screenshots.filter(f => !(f instanceof File)),
-            ...data.newScreenshotPaths.map((url: string) => ({ url })),
-          ];
-          setScreenshots(screenshotUrls); // update local state
+      // Robustly detect new files whether they are File or { file: File, ... }
+      let screenshotObjs = screenshots;
+      const isNewFile = (f: any) => f instanceof File || (f.file && f.file instanceof File);
+      if (screenshots.some(isNewFile)) {
+        const filesToUpload = screenshots
+          .filter(isNewFile)
+          .map(f => (f instanceof File ? f : f.file));
+        const others = screenshots.filter(f => !isNewFile(f));
+        const updateProgress = (
+          file: any,
+          percent: number,
+          done?: boolean,
+          uploadedUrl?: string
+        ) => {
+          setScreenshots((prev: any[]) => prev.map((f: any) => {
+            if ((f === file) || (f.file && f.file === file)) {
+              if (done && uploadedUrl) {
+                return { url: uploadedUrl };
+              }
+              return { ...f, progress: percent };
+            }
+            return f;
+          }));
+        };
+        let uploaded: any[] = [];
+        if (typeof appData.appId === 'number') {
+          uploaded = await uploadScreenshotsWithProgress(filesToUpload, appData.appId, updateProgress);
         }
+        // Use the result of the upload, not the old state!
+        screenshotObjs = [...others, ...uploaded.map(makeScreenshotObj)];
+        setScreenshots(dedupeByKey(screenshotObjs));
       }
 
       // 2. Upload other files if needed (appFiles, cardImages, bannerImages)
@@ -431,7 +668,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         cardImage: cardImageUrl,
         bannerImage: bannerImageUrl,
       };
-      setDebugLog((prev: any) => ({ ...prev, payload }));
       // If the current app is accepted, create a new draft app
       if (currentAppStatus === 'accepted') {
         const res = await fetch(`/api/internal/project/${projectId}/app`, {
@@ -455,7 +691,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             credentials: 'include',
           });
           const patchData = await patchRes.json();
-          setDebugLog((prev: any) => ({ ...prev, response: patchData }));
           if (patchData.success) {
             setSaveMessage('Saved as draft!');
             // Refetch app data to update UI to the new draft
@@ -463,6 +698,16 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             if (updated.success && updated.data) {
               setAppData(updated.data);
               setCurrentAppStatus(updated.data.status);
+              // Ensure screenshots state is updated with latest from backend
+              if (updated.data.app && Array.isArray(updated.data.app.screenshots)) {
+                setScreenshots(
+                  dedupeByKey(
+                    updated.data.app.screenshots.map((s: any) =>
+                      typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
+                    )
+                  )
+                );
+              }
             }
           } else {
             setSaveMessage(patchData.message || 'Failed to save.');
@@ -481,16 +726,38 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           credentials: 'include',
         });
         const data = await res.json();
-        setDebugLog((prev: any) => ({ ...prev, response: data }));
         if (data.success) {
           setSaveMessage('Saved as draft!');
+          // Refetch app data to update UI
+          const updated = await fetchAppBuilderData(projectId);
+          if (updated.success && updated.data) {
+            setAppData(updated.data);
+            setCurrentAppStatus(updated.data.status);
+            // Ensure screenshots state is updated with latest from backend
+            if (updated.data.app && Array.isArray(updated.data.app.screenshots)) {
+              setScreenshots(
+                dedupeByKey(
+                  updated.data.app.screenshots.map((s: any) =>
+                    typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
+                  )
+                )
+              );
+            }
+          }
         } else {
           setSaveMessage(data.message || 'Failed to save.');
         }
       }
+      // In handleSave, after uploading new screenshots and before finishing
+      if (appData?.appId) {
+        // Use the up-to-date screenshotObjs array, not the possibly stale screenshots state
+        const orderedUrls = screenshotObjs.filter(f => f.url).map(f => f.url);
+        if (orderedUrls.length > 0) {
+          await reorderScreenshotsOnServer(appData.appId, orderedUrls);
+        }
+      }
     } catch (err) {
       setSaveMessage('Failed to save.');
-      setDebugLog((prev: any) => ({ ...prev, error: String(err) }));
     } finally {
       setSaveLoading(false);
     }
@@ -501,26 +768,31 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     if (!validateFields()) return;
     setSaveLoading(true);
     setSaveMessage(null);
-    setDebugInfo(null);
     try {
       // 1. Upload new screenshots if any
       let screenshotUrls = screenshots;
       if (screenshots.some(f => f instanceof File)) {
-        const formData = new FormData();
-        screenshots.filter(f => f instanceof File).forEach(file => formData.append('screenshots', file));
-        const res = await fetch(`/api/internal/app/${projectId}/images/screenshots`, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-        });
-        const data = await res.json();
-        if (data.success && data.newScreenshotPaths) {
-          screenshotUrls = [
-            ...screenshots.filter(f => !(f instanceof File)),
-            ...data.newScreenshotPaths.map((url: string) => ({ url })),
-          ];
-          setScreenshots(screenshotUrls); // update local state
+        // Track progress for each file
+        const filesToUpload = screenshots.filter(f => f instanceof File);
+        const others = screenshots.filter(f => !(f instanceof File));
+        const updateProgress = (file: File, percent: number, done?: boolean, uploadedUrl?: string) => {
+          setScreenshots(prev => prev.map(f => {
+            if (f === file) {
+              if (done && uploadedUrl) {
+                return { url: uploadedUrl };
+              }
+              return { ...f, progress: percent };
+            }
+            return f;
+          }));
+        };
+        let uploaded2: any[] = [];
+        if (typeof appData.appId === 'number') {
+          uploaded2 = await uploadScreenshotsWithProgress(filesToUpload, appData.appId, updateProgress);
         }
+        // When setting screenshots after upload, use makeScreenshotObj for all uploaded
+        screenshotUrls = [...others, ...uploaded2.map(makeScreenshotObj)];
+        setScreenshots(dedupeByKey(screenshotUrls));
       }
 
       // 2. Upload other files if needed (appFiles, cardImages, bannerImages)
@@ -550,7 +822,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           credentials: 'include',
         });
         const data = await res.json();
-        setDebugInfo({ step: 'create-draft', data });
         if (data.success && data.data && data.data.appId) {
           // Now PATCH the new draft app with the form content and status 'pending'
           const patchRes = await fetch(`/api/internal/app/${data.data.appId}/edit`, {
@@ -572,7 +843,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             credentials: 'include',
           });
           const patchData = await patchRes.json();
-          setDebugInfo((prev: any) => ({ ...prev, step: 'patch-pending', patchData }));
           if (patchData.success) {
             // Call publish endpoint to increment version and save what's new
             await fetch(`/api/internal/app/${data.data.appId}/publish`, {
@@ -614,7 +884,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           credentials: 'include',
         });
         const data = await res.json();
-        setDebugInfo({ step: 'patch-pending', data });
         if (data.success) {
           // Only call publish endpoint if there is an accepted version
           if (latestAcceptedVersion) {
@@ -630,8 +899,14 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           setSaveMessage(data.message || 'Failed to submit.');
         }
       }
+      // In handleContinue, after uploading new screenshots and before finishing
+      if (appData?.appId) {
+        const orderedUrls = screenshots.filter(f => f.url).map(f => f.url);
+        if (orderedUrls.length > 0) {
+          await reorderScreenshotsOnServer(appData.appId, orderedUrls);
+        }
+      }
     } catch (err) {
-      setDebugInfo({ step: 'exception', error: String(err) });
       setSaveMessage('Failed to submit.');
     } finally {
       setSaveLoading(false);
@@ -669,15 +944,20 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     </div>
   );
 
+  // Add a simple loading skeleton
   if (loading) {
     return (
-      <div className="space-y-6">
-        {MainHeading}
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded mb-4"></div>
-        </div>
+      <div className="p-8 animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
+        <div className="h-6 bg-gray-200 rounded w-2/3 mb-2" />
+        <div className="h-6 bg-gray-200 rounded w-1/2 mb-2" />
+        <div className="h-6 bg-gray-200 rounded w-1/4 mb-2" />
+        <div className="h-48 bg-gray-200 rounded w-full mb-4" />
+        <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
+        <div className="h-6 bg-gray-200 rounded w-2/3 mb-2" />
+        <div className="h-6 bg-gray-200 rounded w-1/2 mb-2" />
+        <div className="h-6 bg-gray-200 rounded w-1/4 mb-2" />
+        <div className="h-48 bg-gray-200 rounded w-full mb-4" />
       </div>
     );
   }
@@ -881,10 +1161,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         {webUrlError && <div className="text-xs text-red-500 font-semibold">{webUrlError}</div>}
 
       {/* App Files */}
-      <h3 className="text-[20px] font-semibold mt-6 mb-2">App File <span className="text-red-500">*</span></h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">App File</h3>
         <FileDropzone label="App file only" onChange={handleAppFileChange} multiple={false} accept="*" disabled={appFiles.length > 0} />
         {renderUploadList(appFiles, setAppFiles)}
-        {errors.appFiles && <div className="text-xs text-red-500">{errors.appFiles}</div>}
 
       {/* Card Images */}
       <h3 className="text-[20px] font-semibold mt-6 mb-2">Image <span className="text-red-500">*</span></h3>
@@ -913,76 +1192,128 @@ export default function InformationTab({ projectId }: InformationTabProps) {
 
       {/* Screenshots */}
       <h3 className="text-[20px] font-semibold mt-6 mb-2">Screenshots (Max 8) <span className="text-red-500">*</span></h3>
+      <p className="text-sm font-medium">Screenshot <span className="text-red-500">*</span></p>
         <FileDropzone
           label="Screenshot images"
           accept="image/*"
           multiple
           onChange={files => {
             setScreenshots(prev => {
-              const newFiles = Array.from(files);
-              // Only add up to 8 screenshots
-              if (prev.length + newFiles.length > MAX_SCREENSHOTS) {
-                return [...prev, ...newFiles.slice(0, MAX_SCREENSHOTS - prev.length)];
+              const newFiles = Array.from(files).map(makeScreenshotObj);
+              let combined = [...prev, ...newFiles];
+              if (combined.length > MAX_SCREENSHOTS) {
+                combined = combined.slice(0, MAX_SCREENSHOTS);
               }
-              return [...prev, ...newFiles];
+              return dedupeByKey(combined);
             });
           }}
           disabled={screenshots.length >= MAX_SCREENSHOTS}
         />
-        {/* Only allow drag-and-drop reordering for new (File) screenshots */}
-        <DragDropContext onDragEnd={result => {
-          if (!result.destination) return;
-          setScreenshots(prev => {
-            const files = prev.filter(f => f instanceof File);
-            const others = prev.filter(f => !(f instanceof File));
-            if (files.length === 0) return prev;
-            const reordered = Array.from(files);
-            const [removed] = reordered.splice(result.source.index, 1);
-            if (result.destination) {
-              reordered.splice(result.destination.index, 0, removed);
-            }
-            return [...others, ...reordered];
-          });
-        }}>
-          <Droppable droppableId="screenshots-droppable">
-            {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
-                {/* Show already-uploaded screenshots (not draggable) */}
-                {screenshots.filter(f => !(f instanceof File)).map((file, idx) => (
-                  <div key={file.url || file.name || idx} style={{ background: '#eee', margin: '8px 0', padding: 8, borderRadius: 4 }}>
-                    {file.name || file.url || 'File'} (uploaded)
-                  </div>
-                ))}
-                {/* Show new screenshots (draggable) */}
-                {screenshots.filter(f => f instanceof File).map((file, idx) => {
-                  const uniqueId = file.name || String(idx);
-                  return (
-                    <Draggable key={uniqueId} draggableId={uniqueId} index={idx}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={{
-                            ...provided.draggableProps.style,
-                            background: "#fff",
-                            margin: "8px 0",
-                            padding: 8,
-                            borderRadius: 4,
-                          }}
-                        >
-                          {file.name || 'File'}
-                        </div>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
+<div style={{ minHeight: 60 * screenshots.length + 20 }}>
+  {screenshots.map((fileObj, idx) => {
+    const { file, url, progress = 0, key } = fileObj;
+    let previewUrl = '';
+    let filename = '';
+    let isUploaded = false;
+    if (file) {
+      previewUrl = URL.createObjectURL(file);
+      filename = file.name;
+    } else if (url) {
+      previewUrl = url;
+      filename = url.split('/').pop() || url;
+      isUploaded = true;
+    }
+    // Show 'Uploaded' only if url exists and progress === 100
+    const progressLabel = isUploaded && progress === 100 ? 'Uploaded' : `${progress}%`;
+    return (
+      <div
+        key={key}
+        style={{
+          background: '#eee',
+          margin: '8px 0',
+          padding: 8,
+          borderRadius: 4,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {/* Move arrows to the left */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginRight: 8 }}>
+          <button
+            type="button"
+            aria-label="Move up"
+            disabled={idx === 0}
+            onClick={() => {
+              if (idx === 0) return;
+              setScreenshots(prev => {
+                const arr = [...prev];
+                [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+                // If all have .url, call reorder
+                if (appData?.appId && arr.every(f => f.url)) {
+                  reorderScreenshotsOnServer(appData.appId, arr.map(f => f.url));
+                }
+                return arr;
+              });
+            }}
+            style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'not-allowed' : 'pointer', padding: 0 }}
+          >
+            <IconChevronUp size={20} />
+          </button>
+          <button
+            type="button"
+            aria-label="Move down"
+            disabled={idx === screenshots.length - 1}
+            onClick={() => {
+              if (idx === screenshots.length - 1) return;
+              setScreenshots(prev => {
+                const arr = [...prev];
+                [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+                // If all have .url, call reorder
+                if (appData?.appId && arr.every(f => f.url)) {
+                  reorderScreenshotsOnServer(appData.appId, arr.map(f => f.url));
+                }
+                return arr;
+              });
+            }}
+            style={{ background: 'none', border: 'none', cursor: idx === screenshots.length - 1 ? 'not-allowed' : 'pointer', padding: 0 }}
+          >
+            <IconChevronDown size={20} />
+          </button>
+        </div>
+        {/* Main content: image, filename, progress, delete */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+          {previewUrl && (
+            <img src={previewUrl} alt="preview" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4, background: '#fff', border: '1px solid #ccc' }} />
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            <span>{filename}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+              <div className="bg-gray-200 h-1.5 rounded mt-1" style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  className="h-1.5 bg-black rounded transition-all duration-200"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-        {errors.screenshots && <div className="text-xs text-red-500">{errors.screenshots}</div>}
+              <span style={{ minWidth: 36, textAlign: 'right', fontSize: 12, color: '#333' }}>
+                {progressLabel}
+              </span>
+            </div>
+          </div>
+          <button
+            className="ml-2 text-gray-500 hover:text-red-500 text-sm"
+            onClick={e => {
+              e.stopPropagation();
+              setScreenshots(prev => prev.filter((_, i) => i !== idx));
+              if (url) setScreenshotsToDelete(prev => [...prev, url]);
+            }}
+          >✕</button>
+        </div>
+      </div>
+    );
+  })}
+</div>
+{errors.screenshots && <div className="text-xs text-red-500">{errors.screenshots}</div>}
 
       <div className="flex flex-col md:flex-row justify-center gap-4 pt-4">
         <Button
@@ -1005,18 +1336,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         </Button>
       </div>
       {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}
-      {/* Debug Console */}
-      <div className="mt-8 p-4 bg-gray-100 border border-gray-300 rounded text-xs text-gray-800">
-        <div className="font-bold mb-2">Debug Console</div>
-        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(debugLog, null, 2)}</pre>
-      </div>
-      <div className="mt-8 p-4 bg-yellow-50 border border-yellow-400 rounded text-xs text-yellow-900">
-        <div className="font-bold mb-2">Auth/Session Debug</div>
-        <div><b>auth_session cookie:</b> <span style={{wordBreak:'break-all'}}>{sessionCookie || 'Not found'}</span></div>
-        <div><b>User Agent:</b> {userAgent}</div>
-        <div><b>Current User:</b> {appData && appData.user ? JSON.stringify(appData.user, null, 2) : 'Not available in this context'}</div>
-        <div><b>Current Time:</b> {new Date().toLocaleString()}</div>
-      </div>
     </div>
   );
 }

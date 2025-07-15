@@ -20,6 +20,7 @@ export type FetchAppBuilderData = {
     featuredPriority: number | null;
     status: string;
     screenshots?: string[]; // <-- Added this line
+    updateType?: string | null; // <-- Add this line
   };
   project: {
     id: number;
@@ -95,6 +96,7 @@ export async function fetchAppBuilderData(
         featuredPriority: appData.data.app.featuredPriority,
         status: appData.data.app.status,
         updateType: appData.data.app.updateType,
+        screenshots: appData.data.app.screenshots || [],
       } : undefined
     };
 
@@ -122,6 +124,7 @@ export async function fetchAppBuilderData(
             bannerImage: appDetails.data.app.bannerImage,
             featuredPriority: null, // We'll need to map this from priority if available
             status: appDetails.data.app.status || 'draft',
+            screenshots: appDetails.data.app.screenshots || [],
           };
         }
       } catch (error) {
