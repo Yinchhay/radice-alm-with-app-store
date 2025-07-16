@@ -51,7 +51,6 @@ export async function fetchAppInfoByAppId(appId: string) {
     ...appData,
     whatsNew: versionResult[0]?.content || null,
     versionNumber: versionResult[0]?.versionNumber || null,
-    updateType: versionResult[0]?.updateType || null,
     screenshots: screenshotsResult || [],
   };
 } 

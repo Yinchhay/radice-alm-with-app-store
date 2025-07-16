@@ -8,7 +8,7 @@ import rehypeSanitize from "rehype-sanitize";
 export default async function InformationView({ appId }: { appId: string }) {
   const data = await fetchAppInfoByAppId(appId);
   if (!data) return notFound();
-  const { app, project, appType, subtitle, aboutDesc, type, webUrl, featuredPriority, appFile, cardImage, bannerImage, screenshots, whatsNew, versionNumber, updateType } = data;
+  const { app, project, appType, subtitle, aboutDesc, type, webUrl, featuredPriority, appFile, cardImage, bannerImage, screenshots, whatsNew, versionNumber } = data;
 
   // Always show main heading and subheading
   const MainHeading = (
@@ -78,7 +78,7 @@ export default async function InformationView({ appId }: { appId: string }) {
             <label className="block text-sm font-medium">Update Type</label>
             <input
               type="text"
-              value={updateType || "-"}
+              value="-"
               readOnly
               className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
             />

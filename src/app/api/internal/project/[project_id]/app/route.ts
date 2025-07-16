@@ -22,6 +22,7 @@ export type FetchCreateApp = {
     appId: number;
     isNewApp: boolean;
     status: string;
+    app: any;
 };
 
 const unsuccessMessage = "App operation failed";
