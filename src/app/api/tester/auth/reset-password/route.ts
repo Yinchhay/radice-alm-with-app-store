@@ -5,7 +5,6 @@ import { db } from "@/drizzle/db";
 import { testers } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 
-// Optional: Define your payload type
 interface PasswordResetTokenPayload {
     id: string;
     email: string;
@@ -43,10 +42,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
         }
 
-        // Hash the new password
         const hashedPassword = await hash(newPassword, 10);
 
-        // Update password in DB
         await db.update(testers).set({ password: hashedPassword }).where(eq(testers.id, payload.id));
 
         return NextResponse.json({ success: true, message: "Password reset successfully" }, { status: 200 });

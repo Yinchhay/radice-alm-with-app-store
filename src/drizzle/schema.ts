@@ -37,6 +37,12 @@ export enum AppStatus {
     DENIED = "denied",
 }
 
+export enum AppUpdateType {
+    MAJOR = "major",
+    MINOR = "minor",
+    PATCH = "patch",
+}
+
 export enum VersionAction {
     CREATED = "created",
     UPDATED = "updated",
@@ -632,6 +638,7 @@ export const apps = mysqlTable("apps", {
     cardImage: varchar("card_image", { length: 500 }),
     bannerImage: varchar("banner_image", { length: 500 }),
     featuredPriority: boolean("featured_priority").default(false),
+    updateType: varchar("update_type", { length: 50 }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });

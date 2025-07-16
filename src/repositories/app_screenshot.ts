@@ -59,26 +59,6 @@ export async function getAppScreenshots(
 }
 
 /**
- * Get a specific screenshot by ID
- */
-export async function getScreenshotById(
-    screenshotId: number,
-): Promise<AppScreenshot | null> {
-    try {
-        const screenshot = await db
-            .select()
-            .from(appScreenshots)
-            .where(eq(appScreenshots.id, screenshotId))
-            .limit(1);
-
-        return (screenshot[0] as AppScreenshot) || null;
-    } catch (error: any) {
-        console.error("Error fetching screenshot by ID:", error);
-        return null;
-    }
-}
-
-/**
  * Delete all screenshots for a specific app
  */
 export async function deleteAppScreenshots(appId: number) {
@@ -97,102 +77,6 @@ export async function deleteAppScreenshots(appId: number) {
             success: false,
             error: error.message || "Failed to delete screenshots",
             deletedCount: 0,
-        };
-    }
-}
-
-/**
- * Delete a specific screenshot by ID
- */
-export async function deleteScreenshotById(screenshotId: number) {
-    try {
-        const result = await db
-            .delete(appScreenshots)
-            .where(eq(appScreenshots.id, screenshotId));
-
-        return {
-            success: true,
-            deletedCount: result.rowsAffected || 0,
-        };
-    } catch (error: any) {
-        console.error("Error deleting screenshot:", error);
-        return {
-            success: false,
-            error: error.message || "Failed to delete screenshot",
-            deletedCount: 0,
-        };
-    }
-}
-
-export async function replaceAppScreenshots(
-    appId: number,
-    newScreenshots: CreateAppScreenshot[],
-) {
-    try {
-        // Start a transaction to ensure atomicity
-        await db.transaction(async (tx) => {
-            // Delete existing screenshots
-            await tx
-                .delete(appScreenshots)
-                .where(eq(appScreenshots.appId, appId));
-
-            // Insert new screenshots if any
-            if (newScreenshots.length > 0) {
-                await tx.insert(appScreenshots).values(newScreenshots);
-            }
-        });
-
-        return {
-            success: true,
-            replacedCount: newScreenshots.length,
-        };
-    } catch (error: any) {
-        console.error("Error replacing app screenshots:", error);
-        return {
-            success: false,
-            error: error.message || "Failed to replace screenshots",
-            replacedCount: 0,
-        };
-    }
-}
-
-export async function getAppScreenshotCount(appId: number): Promise<number> {
-    try {
-        const result = await db
-            .select()
-            .from(appScreenshots)
-            .where(eq(appScreenshots.appId, appId));
-
-        return result.length;
-    } catch (error: any) {
-        console.error("Error getting screenshot count:", error);
-        return 0;
-    }
-}
-
-export async function updateScreenshotImageUrl(
-    screenshotId: number,
-    newImageUrl: string,
-) {
-    try {
-        const result = await db
-            .update(appScreenshots)
-            .set({
-                imageUrl: newImageUrl,
-                updatedAt: new Date(),
-            })
-            .where(eq(appScreenshots.id, screenshotId));
-
-        return {
-            success: true,
-            updated: (result.rowsAffected || 0) > 0,
-        };
-    } catch (error: any) {
-        console.error("Error updating screenshot image URL:", error);
-        return {
-            success: false,
-            error: error.message || "Failed to update screenshot image URL",
-            updated: false,
         };
     }
 }
@@ -255,19 +139,6 @@ export async function getAppScreenshotById(id: number) {
         return result[0] || null;
     } catch (error) {
         console.error("Error getting screenshot by ID:", error);
-        throw error;
-    }
-}
-
-// Bulk delete screenshots by IDs
-export async function deleteAppScreenshotsByIds(ids: number[]) {
-    try {
-        const result = await db
-            .delete(appScreenshots)
-            .where(inArray(appScreenshots.id, ids));
-        return result;
-    } catch (error) {
-        console.error("Error deleting screenshots by IDs:", error);
         throw error;
     }
 }

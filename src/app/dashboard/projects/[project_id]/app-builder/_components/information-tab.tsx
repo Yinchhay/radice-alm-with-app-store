@@ -1,18 +1,27 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAppBuilderData, FetchAppBuilderData, saveAppDraft } from '../fetch';
+import Button from '@/components/Button';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
+
 
 function FileDropzone({
   label,
   accept = '*',
   multiple = false,
   onChange,
+  disabled = false,
 }: {
   label: string;
   accept?: string;
   multiple?: boolean;
   onChange?: (files: FileList) => void;
+  disabled?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -56,7 +65,164 @@ interface InformationTabProps {
   projectId: string;
 }
 
+// Enhanced helper for inserting markdown at cursor or line start
+function insertAtCursor(
+  textarea: HTMLTextAreaElement | null,
+  before: string,
+  after: string = '',
+  placeholder: string = '',
+  block = false,
+  linePrefix = '',
+  setValue?: (val: string) => void
+) {
+  if (!textarea) return;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const value = textarea.value;
+  const selected = value.substring(start, end) || placeholder;
+  let newValue, cursorPos;
+  if (block) {
+    newValue = value.substring(0, start) + before + selected + after + value.substring(end);
+    cursorPos = start + before.length + selected.length + after.length;
+  } else if (linePrefix) {
+    const lines = value.substring(start, end).split('\n');
+    const modified = lines.map(line => linePrefix + (line || placeholder)).join('\n');
+    newValue = value.substring(0, start) + modified + value.substring(end);
+    cursorPos = start + linePrefix.length;
+  } else {
+    newValue = value.substring(0, start) + before + selected + after + value.substring(end);
+    cursorPos = start + before.length + selected.length + after.length;
+  }
+  textarea.value = newValue;
+  textarea.setSelectionRange(cursorPos, cursorPos);
+  textarea.focus();
+  const event = new Event('input', { bubbles: true });
+  textarea.dispatchEvent(event);
+  if (setValue) setValue(newValue);
+}
+
+// Add this function to call the backend to reorder screenshots
+async function reorderScreenshotsOnServer(appId: number, newOrder: string[]) {
+  try {
+    const res = await fetch(`/api/internal/app/${appId}/images/screenshots`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reorder', order: newOrder }),
+      credentials: 'include',
+    });
+    return await res.json();
+  } catch (e) {
+    return { success: false, message: 'Failed to reorder screenshots' };
+  }
+}
+
+// Add a function to delete screenshots on the backend
+async function deleteScreenshotsOnServer(appId: number, urls: string[]) {
+  try {
+    const res = await fetch(`/api/internal/app/${appId}/images/screenshots`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls }),
+      credentials: 'include',
+    });
+    return await res.json();
+  } catch (e) {
+    return { success: false, message: 'Failed to delete screenshots' };
+  }
+}
+
+// Refactor uploadScreenshotsWithProgress to upload all files in parallel
+async function uploadScreenshotsWithProgress(files: File[], appId: number, updateProgress: (file: File, percent: number, done?: boolean, uploadedUrl?: string) => void) {
+  const uploadedUrls: { url: string }[] = [];
+  await Promise.all(files.map(file => new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('screenshots', file);
+    xhr.open('POST', `/api/internal/app/${appId}/images/screenshots`, true);
+    xhr.withCredentials = true;
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        updateProgress(file, percent);
+      }
+    };
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (data.success && data.newScreenshotPaths && data.newScreenshotPaths.length > 0) {
+            uploadedUrls.push({ url: data.newScreenshotPaths[0] });
+            updateProgress(file, 100, true, data.newScreenshotPaths[0]);
+          }
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      } else {
+        reject(xhr.statusText);
+      }
+    };
+    xhr.onerror = function () { reject(xhr.statusText); };
+    xhr.send(formData);
+  })));
+  return uploadedUrls;
+}
+
+// Helper to create a consistent screenshot object
+function makeScreenshotObj(fileOrUrl: any) {
+  if (fileOrUrl instanceof File) {
+    return { file: fileOrUrl, url: undefined, progress: 0, key: `${fileOrUrl.name}_${fileOrUrl.lastModified}_${crypto.randomUUID()}` };
+  } else if (typeof fileOrUrl === 'string') {
+    return { file: undefined, url: fileOrUrl, progress: 100, key: fileOrUrl };
+  } else if (fileOrUrl && fileOrUrl.key) {
+    return fileOrUrl;
+  } else if (fileOrUrl && fileOrUrl.url) {
+    // Use id+url if available, else just url
+    const key = fileOrUrl.id ? `${fileOrUrl.id}_${fileOrUrl.url}` : fileOrUrl.url;
+    return { ...fileOrUrl, progress: 100, key };
+  }
+  return fileOrUrl;
+}
+
+// Add this hook to disable page scroll while dragging
+function useDisableScrollOnDrag() {
+  useEffect(() => {
+    function handleDragStart() {
+      document.body.style.overflow = 'hidden';
+    }
+    function handleDragEnd() {
+      document.body.style.overflow = '';
+    }
+    window.addEventListener('dragstart', handleDragStart);
+    window.addEventListener('dragend', handleDragEnd);
+    window.addEventListener('drop', handleDragEnd);
+    return () => {
+      window.removeEventListener('dragstart', handleDragStart);
+      window.removeEventListener('dragend', handleDragEnd);
+      window.removeEventListener('drop', handleDragEnd);
+      document.body.style.overflow = '';
+    };
+  }, []);
+}
+
+// Utility to dedupe screenshots by key
+function dedupeByKey(arr: any[]) {
+  const seen = new Set();
+  const result = arr.filter(item => {
+    if (!item.key) return true;
+    if (seen.has(item.key)) {
+      console.log('Deduping screenshot with key:', item.key);
+      return false;
+    }
+    seen.add(item.key);
+    return true;
+  });
+  console.log('Screenshot keys after dedupe:', result.map(i => i.key));
+  return result;
+}
+
 export default function InformationTab({ projectId }: InformationTabProps) {
+  useDisableScrollOnDrag();
   const [loading, setLoading] = useState(true);
   const [appData, setAppData] = useState<FetchAppBuilderData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,12 +242,27 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [webUrlError, setWebUrlError] = useState('');
-  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   // Add state for update type and what's new
   const [updateType, setUpdateType] = useState<'major' | 'minor' | 'patch'>('major');
   const [whatsNew, setWhatsNew] = useState('');
   const [latestAcceptedVersion, setLatestAcceptedVersion] = useState<{major: number, minor: number, patch: number} | null>(null);
+
+  // Add state to track screenshots to delete
+  const [screenshotsToDelete, setScreenshotsToDelete] = useState<string[]>([]);
+
+  // Restore sessionCookie and userAgent state
+  const [sessionCookie, setSessionCookie] = useState<string | null>(null);
+  const [userAgent, setUserAgent] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';').map(c => c.trim());
+      const authSession = cookies.find(c => c.startsWith('auth_session='));
+      setSessionCookie(authSession || null);
+      setUserAgent(window.navigator.userAgent);
+    }
+  }, []);
 
   // Static app type options
   const appTypeOptions = [
@@ -97,72 +278,125 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     return 'URL must start with http:// or https://';
   };
 
-  // Fetch app data on component mount
+  const [errors, setErrors] = useState<any>({});
+
+  const validateFields = () => {
+    const newErrors: any = {};
+    if (!subtitle.trim()) newErrors.subtitle = 'Required';
+    if (!appType) newErrors.appType = 'Required';
+    if (!description.trim()) newErrors.description = 'Required';
+    if (!webUrl.trim()) newErrors.webUrl = 'Required';
+    if (cardImages.length === 0) newErrors.cardImages = 'Required';
+    if (bannerImages.length === 0) newErrors.bannerImages = 'Required';
+    if (screenshots.length === 0) newErrors.screenshots = 'Required';
+    if (latestAcceptedVersion && !whatsNew.trim()) newErrors.whatsNew = 'Required';
+    if (latestAcceptedVersion && !updateType) newErrors.updateType = 'Required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const aboutRef = useRef<HTMLTextAreaElement>(null);
+  const whatsNewRef = useRef<HTMLTextAreaElement>(null);
+
+  // Update file state handlers to store actual File objects
+  const handleAppFileChange = (files: FileList) => setAppFiles(Array.from(files));
+  const handleCardImageChange = (files: FileList) => setCardImages(Array.from(files));
+  const handleBannerImageChange = (files: FileList) => setBannerImages(Array.from(files));
+  const handleScreenshotsChange = (files: FileList) => setScreenshots(prev => {
+    const newFiles = Array.from(files).map(makeScreenshotObj);
+    if (prev.length + newFiles.length > MAX_SCREENSHOTS) {
+      return [...prev, ...newFiles.slice(0, MAX_SCREENSHOTS - prev.length)];
+    }
+    return [...prev, ...newFiles];
+  });
+
+  // Replace the main data loading useEffect with a parallelized version
   useEffect(() => {
-    const loadAppData = async () => {
+    let isMounted = true;
+    async function loadAllData() {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
-        const response = await fetchAppBuilderData(projectId);
-        
-        if (response.success && response.data) {
-          setAppData(response.data);
-          setCurrentAppStatus(response.data.status);
-          
-          // Populate form fields with fetched data
-          if (response.data.app) {
-            setSubtitle(response.data.app.subtitle || '');
-            // Use aboutDesc from content field if available, otherwise fall back to app.aboutDesc
-            const aboutDesc = (response.data as any).aboutDesc || response.data.app.aboutDesc || '';
-            setDescription(aboutDesc);
-            setWebUrl(response.data.app.webUrl || '');
-            setPriorityTesting(response.data.app.featuredPriority === 1);
-            setAppType(response.data.app.type ? String(response.data.app.type) : '');
-            
-            // If there are existing files, populate them
-            if (response.data.app.appFile) {
-              setAppFiles([{
-                name: 'Existing App File',
-                size: 'Uploaded',
-                progress: 100,
-                url: response.data.app.appFile
-              }]);
-            }
-            
-            if (response.data.app.cardImage) {
-              setCardImages([{
-                name: 'Existing Card Image',
-                size: 'Uploaded',
-                progress: 100,
-                url: response.data.app.cardImage
-              }]);
-            }
-            
-            if (response.data.app.bannerImage) {
-              setBannerImages([{
-                name: 'Existing Banner Image',
-                size: 'Uploaded',
-                progress: 100,
-                url: response.data.app.bannerImage
-              }]);
-            }
+        // Parallel fetches
+        const projectPromise = fetch(`/api/internal/project/${projectId}`, {
+          method: 'GET',
+          cache: 'no-cache',
+        }).then(r => r.json());
+        const appPromise = fetch(`/api/internal/project/${projectId}/app`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-cache',
+        }).then(r => r.json());
+        // Wait for both
+        const [projectData, appDataRaw] = await Promise.all([projectPromise, appPromise]);
+        if (!isMounted) return;
+        if (!projectData.success) throw new Error(projectData.message || 'Failed to load project');
+        if (!appDataRaw.success) throw new Error(appDataRaw.message || 'Failed to load app');
+        // Batch state updates
+        setAppData(appDataRaw.data);
+        setCurrentAppStatus(appDataRaw.data.status);
+        if (appDataRaw.data.app) {
+          setSubtitle(appDataRaw.data.app.subtitle || '');
+          setDescription(appDataRaw.data.app.aboutDesc || '');
+          setWebUrl(appDataRaw.data.app.webUrl || '');
+          setPriorityTesting(appDataRaw.data.app.featuredPriority === 1);
+          setAppType(appDataRaw.data.app.type ? String(appDataRaw.data.app.type) : '');
+          if (appDataRaw.data.app.appFile) setAppFiles([{ url: appDataRaw.data.app.appFile }]);
+          if (appDataRaw.data.app.cardImage) setCardImages([{ url: appDataRaw.data.app.cardImage }]);
+          if (appDataRaw.data.app.bannerImage) setBannerImages([{ url: appDataRaw.data.app.bannerImage }]);
+          // When loading screenshots from backend, use makeScreenshotObj
+          if (appDataRaw.data.app.screenshots && Array.isArray(appDataRaw.data.app.screenshots)) {
+            setScreenshots(
+              dedupeByKey(
+                appDataRaw.data.app.screenshots.map((s: any) =>
+                  typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
+                )
+              )
+            );
           }
-        } else {
-          setError(response.message || 'Failed to load app data');
         }
-      } catch (err) {
-        setError('An error occurred while loading app data');
-        console.error('Error loading app data:', err);
-      } finally {
+        setLoading(false);
+        // Fetch version in parallel (not blocking UI)
+        if (appDataRaw.data.appId) {
+          fetch(`http://localhost:3000/api/public/app/${appDataRaw.data.appId}/version`)
+            .then(r => r.json())
+            .then(data => {
+              if (!isMounted) return;
+              if (data.success && data.data && data.data.current && data.data.current.versionNumber && data.data.current.isCurrent === true) {
+                setLatestAcceptedVersion({
+                  major: data.data.current.majorVersion ?? 0,
+                  minor: data.data.current.minorVersion ?? 0,
+                  patch: data.data.current.patchVersion ?? 0,
+                });
+              } else {
+                setLatestAcceptedVersion(null);
+              }
+            })
+            .catch(() => setLatestAcceptedVersion(null));
+        }
+      } catch (err: any) {
+        if (!isMounted) return;
+        setError(err.message || 'An error occurred while loading data');
         setLoading(false);
       }
-    };
-
-    loadAppData();
+    }
+    loadAllData();
+    return () => { isMounted = false; };
   }, [projectId]);
 
+  // Prefill updateType from appData.updateType
   useEffect(() => {
-    if (appData && (appData as any).updateType) {
-      setUpdateType((appData as any).updateType as 'major' | 'minor' | 'patch');
+    if (appData && appData.app && typeof appData.app.updateType === 'string') {
+      setUpdateType(appData.app.updateType as 'major' | 'minor' | 'patch');
+    }
+  }, [appData]);
+
+  // Prefill what's new from appData.aboutDesc
+  useEffect(() => {
+    if (appData && appData.app && typeof appData.app.aboutDesc === 'string') {
+      setWhatsNew(appData.app.aboutDesc);
     }
   }, [appData]);
 
@@ -177,7 +411,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       try {
         const res = await fetch(`http://localhost:3000/api/public/app/${appData.appId}/version`);
         const data = await res.json();
-        console.log('Version API response:', data);
         // Only set latestAcceptedVersion if there's a current version with a finalized versionNumber
         // This means the version has been accepted and finalized
         if (data.success && data.data && data.data.current && 
@@ -194,7 +427,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           setLatestAcceptedVersion(null);
         }
       } catch (error) {
-        console.log('Error fetching version:', error);
         setLatestAcceptedVersion(null);
       }
     }
@@ -231,74 +463,232 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     });
   };
 
-  const renderUploadList = (uploads: any[], setter: Function, showHandle: boolean = false) => (
+  // Shared style for preview cards
+  const previewCardStyle = {
+    background: '#eee',
+    margin: '8px 0',
+    padding: 8,
+    borderRadius: 4,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  };
+  const previewImageStyle: React.CSSProperties = {
+    width: 48,
+    height: 48,
+    objectFit: 'cover',
+    borderRadius: 4,
+    background: '#fff',
+    border: '1px solid #ccc',
+  };
+
+  // Replace renderUploadList to use the shared style
+  const renderUploadList = useCallback((uploads: any[], setter: Function, showArrows: boolean = false) => (
     <div className="space-y-2">
-      {uploads.map((file, idx) => (
-        <div
-          key={idx}
-          className="relative flex items-center gap-2 p-3 bg-gray-50 rounded overflow-hidden"
-        >
-          {showHandle && <div className="text-gray-400 text-lg select-none">⋮⋮</div>}
-          <div className="flex-1">
-            <div className="flex justify-between text-sm mb-1">
-              <span className="truncate">{file.name}</span>
-              <span className="text-xs text-gray-500">
-                {file.size} • {file.progress < 100 ? `${file.progress}%` : 'Uploaded'}
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 h-1.5 rounded">
-              <div
-                className="h-1.5 bg-black rounded transition-all duration-200"
-                style={{ width: `${file.progress}%` }}
-              />
+      {uploads.map((file, idx) => {
+        let previewUrl = '';
+        let filename = '';
+        if (file instanceof File) {
+          previewUrl = URL.createObjectURL(file);
+          filename = file.name;
+        } else if (file.url) {
+          previewUrl = file.url;
+          filename = file.url.split('/').pop() || file.url;
+        }
+        return (
+          <div
+            key={file.key || filename + idx}
+            style={previewCardStyle}
+          >
+            {/* Only show arrows for screenshots */}
+            {showArrows && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginRight: 8 }}>
+                <button
+                  type="button"
+                  aria-label="Move up"
+                  disabled={idx === 0}
+                  onClick={() => {
+                    if (idx === 0) return;
+                    setter((prev: any[]) => {
+                      const arr = [...prev];
+                      [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+                      // If all have .url, call reorder
+                      if (arr.every(f => f.url) && typeof reorderScreenshotsOnServer === 'function' && arr[0].appId) {
+                        reorderScreenshotsOnServer(arr[0].appId, arr.map(f => f.url));
+                      }
+                      return arr;
+                    });
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'not-allowed' : 'pointer', padding: 0 }}
+                >
+                  <IconChevronUp size={20} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Move down"
+                  disabled={idx === uploads.length - 1}
+                  onClick={() => {
+                    if (idx === uploads.length - 1) return;
+                    setter((prev: any[]) => {
+                      const arr = [...prev];
+                      [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+                      // If all have .url, call reorder
+                      if (arr.every(f => f.url) && typeof reorderScreenshotsOnServer === 'function' && arr[0].appId) {
+                        reorderScreenshotsOnServer(arr[0].appId, arr.map(f => f.url));
+                      }
+                      return arr;
+                    });
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: idx === uploads.length - 1 ? 'not-allowed' : 'pointer', padding: 0 }}
+                >
+                  <IconChevronDown size={20} />
+                </button>
+              </div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+              {previewUrl && (
+                <img src={previewUrl} alt="preview" style={previewImageStyle} />
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <span>{filename}</span>
+                {file.size && (
+                  <div className="text-xs text-gray-500">{file.size}</div>
+                )}
+                {file.progress !== undefined && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                    <div className="bg-gray-200 h-1.5 rounded mt-1" style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        className="h-1.5 bg-black rounded transition-all duration-200"
+                        style={{ width: `${file.progress !== undefined ? file.progress : 100}%` }}
+                      />
+                    </div>
+                    <span style={{ minWidth: 36, textAlign: 'right', fontSize: 12, color: '#333' }}>
+                      {file.progress < 100 ? `${file.progress}%` : 'Uploaded'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                className="ml-2 text-gray-500 hover:text-red-500 text-sm"
+                onClick={e => {
+                  e.stopPropagation();
+                  setter((prev: any[]) => prev.filter((_: any, i: number) => i !== idx));
+                  if (file.url && typeof setScreenshotsToDelete === 'function') setScreenshotsToDelete((prev: any[]) => [...prev, file.url]);
+                }}
+              >✕</button>
             </div>
           </div>
-          <button
-            className="text-gray-500 hover:text-red-500 text-sm ml-2"
-            onClick={() => setter((prev: any) => prev.filter((_: any, i: number) => i !== idx))}
-          >
-            ✕
-          </button>
-        </div>
-      ))}
+        );
+      })}
     </div>
-  );
+  ), []);
+
+  async function uploadFilesIfNeeded(files: any[], projectId: string) {
+    // files: array of File or {url: string} objects
+    // returns: array of URLs (string)
+    const uploadable = files.filter(f => f instanceof File);
+    const existing = files.filter(f => !(f instanceof File) && f.url);
+    let uploadedUrls: string[] = [];
+    if (uploadable.length > 0) {
+      const formData = new FormData();
+      formData.append('projectId', projectId);
+      uploadable.forEach(file => formData.append('files', file));
+      const res = await fetch('/api/internal/file/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success && data.paths) {
+        uploadedUrls = data.paths.map((p: string) => '/uploads/' + p);
+      } else {
+        throw new Error(data.message || 'File upload failed');
+      }
+    }
+    // Return all URLs (existing + uploaded)
+    return [
+      ...existing.map(f => f.url),
+      ...uploadedUrls,
+    ];
+  }
 
   const handleSave = async () => {
     if (!appData) return;
+    if (!validateFields()) return;
     setSaveLoading(true);
     setSaveMessage(null);
     try {
+      // 1. Upload new screenshots if any
+      // Robustly detect new files whether they are File or { file: File, ... }
+      let screenshotObjs = screenshots;
+      const isNewFile = (f: any) => f instanceof File || (f.file && f.file instanceof File);
+      if (screenshots.some(isNewFile)) {
+        const filesToUpload = screenshots
+          .filter(isNewFile)
+          .map(f => (f instanceof File ? f : f.file));
+        const others = screenshots.filter(f => !isNewFile(f));
+        const updateProgress = (
+          file: any,
+          percent: number,
+          done?: boolean,
+          uploadedUrl?: string
+        ) => {
+          setScreenshots((prev: any[]) => prev.map((f: any) => {
+            if ((f === file) || (f.file && f.file === file)) {
+              if (done && uploadedUrl) {
+                return { url: uploadedUrl };
+              }
+              return { ...f, progress: percent };
+            }
+            return f;
+          }));
+        };
+        let uploaded: any[] = [];
+        if (typeof appData.appId === 'number') {
+          uploaded = await uploadScreenshotsWithProgress(filesToUpload, appData.appId, updateProgress);
+        }
+        // Use the result of the upload, not the old state!
+        screenshotObjs = [...others, ...uploaded.map(makeScreenshotObj)];
+        setScreenshots(dedupeByKey(screenshotObjs));
+      }
+
+      // 2. Upload other files if needed (appFiles, cardImages, bannerImages)
+      const [appFileUrl] = await uploadFilesIfNeeded(appFiles, projectId);
+      const [cardImageUrl] = await uploadFilesIfNeeded(cardImages, projectId);
+      const [bannerImageUrl] = await uploadFilesIfNeeded(bannerImages, projectId);
+
+      // 3. Save the draft, using the URLs
+      const payload = {
+        subtitle,
+        aboutDesc: description,
+        type: appType !== '' ? Number(appType) : undefined,
+        webUrl,
+        status: 'draft',
+        appFile: appFileUrl,
+        cardImage: cardImageUrl,
+        bannerImage: bannerImageUrl,
+      };
       // If the current app is accepted, create a new draft app
       if (currentAppStatus === 'accepted') {
-        // Call the internal project app POST endpoint to create a new draft
-        const sessionId = await (await import('../fetch')).getSessionCookie();
-        const baseUrl = await (await import('../fetch')).getBaseUrl();
-        const res = await fetch(`${baseUrl}/api/internal/project/${projectId}/app`, {
+        const res = await fetch(`/api/internal/project/${projectId}/app`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${sessionId}`,
           },
           cache: 'no-cache',
+          credentials: 'include',
         });
         const data = await res.json();
         if (data.success && data.data && data.data.appId) {
           // Now PATCH the new draft app with the form content
-          const patchRes = await fetch(`${baseUrl}/api/internal/app/${data.data.appId}/edit`, {
+          const patchRes = await fetch(`/api/internal/app/${data.data.appId}/edit`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${sessionId}`,
             },
-            body: JSON.stringify({
-              subtitle,
-              aboutDesc: description,
-              type: appType !== '' ? Number(appType) : null,
-              webUrl, // always send as string
-              status: 'draft',
-            }),
+            body: JSON.stringify(payload),
             cache: 'no-cache',
+            credentials: 'include',
           });
           const patchData = await patchRes.json();
           if (patchData.success) {
@@ -308,6 +698,16 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             if (updated.success && updated.data) {
               setAppData(updated.data);
               setCurrentAppStatus(updated.data.status);
+              // Ensure screenshots state is updated with latest from backend
+              if (updated.data.app && Array.isArray(updated.data.app.screenshots)) {
+                setScreenshots(
+                  dedupeByKey(
+                    updated.data.app.screenshots.map((s: any) =>
+                      typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
+                    )
+                  )
+                );
+              }
             }
           } else {
             setSaveMessage(patchData.message || 'Failed to save.');
@@ -316,19 +716,44 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           setSaveMessage(data.message || 'Failed to create draft.');
         }
       } else {
-        const data = await saveAppDraft({
-          appId: appData.appId!,
-          subtitle,
-          aboutDesc: description,
-          type: appType !== '' ? Number(appType) : null,
-          webUrl, // always send as string
-          updateType,
-          existingContent: appData.app?.content || '',
+        const res = await fetch(`/api/internal/app/${appData.appId}/edit`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          cache: 'no-cache',
+          credentials: 'include',
         });
+        const data = await res.json();
         if (data.success) {
           setSaveMessage('Saved as draft!');
+          // Refetch app data to update UI
+          const updated = await fetchAppBuilderData(projectId);
+          if (updated.success && updated.data) {
+            setAppData(updated.data);
+            setCurrentAppStatus(updated.data.status);
+            // Ensure screenshots state is updated with latest from backend
+            if (updated.data.app && Array.isArray(updated.data.app.screenshots)) {
+              setScreenshots(
+                dedupeByKey(
+                  updated.data.app.screenshots.map((s: any) =>
+                    typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
+                  )
+                )
+              );
+            }
+          }
         } else {
           setSaveMessage(data.message || 'Failed to save.');
+        }
+      }
+      // In handleSave, after uploading new screenshots and before finishing
+      if (appData?.appId) {
+        // Use the up-to-date screenshotObjs array, not the possibly stale screenshots state
+        const orderedUrls = screenshotObjs.filter(f => f.url).map(f => f.url);
+        if (orderedUrls.length > 0) {
+          await reorderScreenshotsOnServer(appData.appId, orderedUrls);
         }
       }
     } catch (err) {
@@ -340,20 +765,52 @@ export default function InformationTab({ projectId }: InformationTabProps) {
 
   const handleContinue = async () => {
     if (!appData) return;
+    if (!validateFields()) return;
     setSaveLoading(true);
     setSaveMessage(null);
-    setDebugInfo(null);
     try {
-      // Save updateType in draft before publishing
+      // 1. Upload new screenshots if any
+      let screenshotUrls = screenshots;
+      if (screenshots.some(f => f instanceof File)) {
+        // Track progress for each file
+        const filesToUpload = screenshots.filter(f => f instanceof File);
+        const others = screenshots.filter(f => !(f instanceof File));
+        const updateProgress = (file: File, percent: number, done?: boolean, uploadedUrl?: string) => {
+          setScreenshots(prev => prev.map(f => {
+            if (f === file) {
+              if (done && uploadedUrl) {
+                return { url: uploadedUrl };
+              }
+              return { ...f, progress: percent };
+            }
+            return f;
+          }));
+        };
+        let uploaded2: any[] = [];
+        if (typeof appData.appId === 'number') {
+          uploaded2 = await uploadScreenshotsWithProgress(filesToUpload, appData.appId, updateProgress);
+        }
+        // When setting screenshots after upload, use makeScreenshotObj for all uploaded
+        screenshotUrls = [...others, ...uploaded2.map(makeScreenshotObj)];
+        setScreenshots(dedupeByKey(screenshotUrls));
+      }
+
+      // 2. Upload other files if needed (appFiles, cardImages, bannerImages)
+      const [appFileUrl] = await uploadFilesIfNeeded(appFiles, projectId);
+      const [cardImageUrl] = await uploadFilesIfNeeded(cardImages, projectId);
+      const [bannerImageUrl] = await uploadFilesIfNeeded(bannerImages, projectId);
+      const screenshotUrlList = screenshotUrls.map((f: any) => f.url || f.name);
+
+      // 3. Save updateType in draft before publishing
       await saveAppDraft({
         appId: appData.appId!,
         subtitle,
         aboutDesc: description,
-        type: appType !== '' ? Number(appType) : null,
+        type: appType !== '' ? Number(appType) : undefined,
         webUrl,
         updateType,
-        existingContent: appData.app?.content || '',
       });
+
       // If the current app is accepted, create a new draft app (then set to pending)
       if (currentAppStatus === 'accepted') {
         const res = await fetch(`/api/internal/project/${projectId}/app`, {
@@ -365,7 +822,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           credentials: 'include',
         });
         const data = await res.json();
-        setDebugInfo({ step: 'create-draft', data });
         if (data.success && data.data && data.data.appId) {
           // Now PATCH the new draft app with the form content and status 'pending'
           const patchRes = await fetch(`/api/internal/app/${data.data.appId}/edit`, {
@@ -376,15 +832,17 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             body: JSON.stringify({
               subtitle,
               aboutDesc: description,
-              type: appType !== '' ? Number(appType) : null,
+              type: appType !== '' ? Number(appType) : undefined,
               webUrl,
               status: 'pending',
+              appFile: appFileUrl,
+              cardImage: cardImageUrl,
+              bannerImage: bannerImageUrl,
             }),
             cache: 'no-cache',
             credentials: 'include',
           });
           const patchData = await patchRes.json();
-          setDebugInfo((prev: any) => ({ ...prev, step: 'patch-pending', patchData }));
           if (patchData.success) {
             // Call publish endpoint to increment version and save what's new
             await fetch(`/api/internal/app/${data.data.appId}/publish`, {
@@ -415,15 +873,17 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           body: JSON.stringify({
             subtitle,
             aboutDesc: description,
-            type: appType !== '' ? Number(appType) : null,
+            type: appType !== '' ? Number(appType) : undefined,
             webUrl,
             status: 'pending',
+            appFile: appFileUrl,
+            cardImage: cardImageUrl,
+            bannerImage: bannerImageUrl,
           }),
           cache: 'no-cache',
           credentials: 'include',
         });
         const data = await res.json();
-        setDebugInfo({ step: 'patch-pending', data });
         if (data.success) {
           // Only call publish endpoint if there is an accepted version
           if (latestAcceptedVersion) {
@@ -439,8 +899,14 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           setSaveMessage(data.message || 'Failed to submit.');
         }
       }
+      // In handleContinue, after uploading new screenshots and before finishing
+      if (appData?.appId) {
+        const orderedUrls = screenshots.filter(f => f.url).map(f => f.url);
+        if (orderedUrls.length > 0) {
+          await reorderScreenshotsOnServer(appData.appId, orderedUrls);
+        }
+      }
     } catch (err) {
-      setDebugInfo({ step: 'exception', error: String(err) });
       setSaveMessage('Failed to submit.');
     } finally {
       setSaveLoading(false);
@@ -471,20 +937,27 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     return `${major}.${minor}.${patch}`;
   }
 
+  const MainHeading = (
+    <div className="space-y-1 mb-6">
+      <h1 className="text-[24px] font-semibold">Information</h1>
+      <p className="text-gray-500 text-sm">Fill in your app information and prepare it for listing on our store.</p>
+    </div>
+  );
+
+  // Add a simple loading skeleton
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Information</h1>
-          <p className="text-gray-500 text-sm">
-            Loading app information...
-          </p>
-        </div>
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded mb-4"></div>
-        </div>
+      <div className="p-8 animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
+        <div className="h-6 bg-gray-200 rounded w-2/3 mb-2" />
+        <div className="h-6 bg-gray-200 rounded w-1/2 mb-2" />
+        <div className="h-6 bg-gray-200 rounded w-1/4 mb-2" />
+        <div className="h-48 bg-gray-200 rounded w-full mb-4" />
+        <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
+        <div className="h-6 bg-gray-200 rounded w-2/3 mb-2" />
+        <div className="h-6 bg-gray-200 rounded w-1/2 mb-2" />
+        <div className="h-6 bg-gray-200 rounded w-1/4 mb-2" />
+        <div className="h-48 bg-gray-200 rounded w-full mb-4" />
       </div>
     );
   }
@@ -492,6 +965,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   if (error) {
     return (
       <div className="space-y-6">
+        {MainHeading}
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Information</h1>
           <p className="text-red-500 text-sm">
@@ -502,20 +976,14 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     );
   }
 
+  // Limit for screenshots
+  const MAX_SCREENSHOTS = 8;
+
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Information</h1>
-        <p className="text-gray-500 text-sm">
-          Fill in your app information and prepare it for listing on our store.
-          {appData?.isNewApp && (
-            <span className="text-blue-600 font-medium"> Creating new app...</span>
-          )}
-        </p>
-      </div>
+      {MainHeading}
 
-      <div className="space-y-4 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Basic Information</h3>
+      <h3 className="text-[20px] font-semibold mb-2">Basic Information</h3>
 
         <div className="space-y-1">
           <label className="block text-sm font-medium">App Name</label>
@@ -525,25 +993,28 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             readOnly
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
           />
-          <div className="text-xs text-gray-500">Project name (read-only)</div>
+          <div className="text-xs text-gray-500">Project name</div>
         </div>
 
         <div className="space-y-1 mt-3">
-          <label className="block text-sm font-medium">Sub Title</label>
+          <label className="block text-sm font-medium">Sub Title <span className="text-red-500">*</span></label>
           <input
             type="text"
             value={subtitle}
             onChange={e => setSubtitle(e.target.value)}
-            className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
+            required
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-white text-sm"
           />
+          {errors.subtitle && <div className="text-xs text-red-500">{errors.subtitle}</div>}
           <div className="text-xs text-gray-500">1/30 words</div>
         </div>
 
         <div className="space-y-1 mt-3">
-          <label className="block text-sm font-medium">Type</label>
+          <label className="block text-sm font-medium">Type <span className="text-red-500">*</span></label>
           <select 
             value={appType}
             onChange={(e) => setAppType(e.target.value)}
+            required
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
           >
             <option value="">Select Type</option>
@@ -551,19 +1022,42 @@ export default function InformationTab({ projectId }: InformationTabProps) {
               <option key={option.id} value={option.id}>{option.name}</option>
             ))}
           </select>
+          {errors.appType && <div className="text-xs text-red-500">{errors.appType}</div>}
         </div>
 
         <div className="space-y-1 mt-3">
-          <label className="block text-sm font-medium">About</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-            rows={5}
-            maxLength={300}
-            placeholder="Describe your app..."
-          />
+          <label className="block text-sm font-medium">About <span className="text-red-500">*</span></label>
+          {/* Integrated Markdown Toolbar + Textarea */}
+          <div className="rounded-md border border-gray-300 bg-white overflow-hidden">
+            <div className="flex flex-nowrap gap-1 px-2 py-2 bg-white border-b border-gray-200 shadow-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 rounded-t-md">
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bold" onClick={() => insertAtCursor(aboutRef.current, '**', '**', 'bold text', false, '', setDescription)}><span style={{fontWeight:'bold'}}>B</span></button>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bullet List" onClick={() => insertAtCursor(aboutRef.current, '', '', 'list item', false, '- ')}><span>&#8226;</span></button>
+            </div>
+            <textarea
+              ref={aboutRef}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+              className="w-full px-3 py-1.5 text-sm bg-white border-0 focus:ring-0 focus:outline-none resize-none min-h-[100px]"
+              rows={5}
+              maxLength={300}
+              placeholder="Describe your app..."
+              style={{borderRadius: 0}}
+            />
+          </div>
+          {errors.description && <div className="text-xs text-red-500">{errors.description}</div>}
           <div className="text-xs text-gray-500">{description.length}/300 words</div>
+          {/* Markdown Preview for About */}
+          <div className="mt-2 p-2 border border-dashed border-gray-300 rounded bg-gray-50">
+            <div className="text-xs text-gray-500 mb-1">Markdown Preview:</div>
+            <ReactMarkdown
+              className="prose max-w-none text-sm leading-5"
+              remarkPlugins={[remarkGfm as any]}
+              rehypePlugins={[rehypeSanitize as any]}
+            >
+              {description || "Nothing to preview."}
+            </ReactMarkdown>
+          </div>
         </div>
 
         <div className="space-y-1 mt-4">
@@ -596,121 +1090,252 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             </button>
           </div>
         </div>
-      </div>
 
       {/* Update Information Section */}
       {latestAcceptedVersion && (
-        <div className="space-y-4 bg-white rounded-lg shadow-sm p-4">
-          <h3 className="text-lg font-semibold">Update Information</h3>
+        <>
+          <h3 className="text-[20px] font-semibold mb-2">Update Information</h3>
           <div className="space-y-1">
-            <label className="block text-sm font-medium">Update Type</label>
+            <label className="block text-sm font-medium">Update Type <span className="text-red-500">*</span></label>
             <select
               value={updateType}
               onChange={e => setUpdateType(e.target.value as 'major' | 'minor' | 'patch')}
+              required
               className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
             >
               <option value="major">Major</option>
               <option value="minor">Minor</option>
               <option value="patch">Patch</option>
             </select>
+            {errors.updateType && <div className="text-xs text-red-500">{errors.updateType}</div>}
             <div className="text-xs text-gray-600 mt-1">Next version: <span className="font-mono">{getNextVersion()}</span></div>
           </div>
           <div className="space-y-1 mt-3">
-            <label className="block text-sm font-medium">What's New</label>
-            <textarea
-              value={whatsNew}
-              onChange={e => setWhatsNew(e.target.value)}
-              className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-              rows={5}
-              maxLength={300}
-              placeholder="Describe what's new in this update..."
-            />
+            <label className="block text-sm font-medium">What's New <span className="text-red-500">*</span></label>
+            {/* Integrated Markdown Toolbar + Textarea */}
+            <div className="rounded-md border border-gray-300 bg-white overflow-hidden">
+              <div className="flex flex-nowrap gap-1 px-2 py-2 bg-white border-b border-gray-200 shadow-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 rounded-t-md">
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bold" onClick={() => insertAtCursor(whatsNewRef.current, '**', '**', 'bold text', false, '', setWhatsNew)}><span style={{fontWeight:'bold'}}>B</span></button>
+                <button type="button" className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm" title="Bullet List" onClick={() => insertAtCursor(whatsNewRef.current, '', '', 'list item', false, '- ')}><span>&#8226;</span></button>
+              </div>
+              <textarea
+                ref={whatsNewRef}
+                value={whatsNew}
+                onChange={e => setWhatsNew(e.target.value)}
+                required
+                className="w-full px-3 py-1.5 text-sm bg-white border-0 focus:ring-0 focus:outline-none resize-none min-h-[100px]"
+                rows={5}
+                maxLength={300}
+                placeholder="Describe what's new in this update..."
+                style={{borderRadius: 0}}
+              />
+            </div>
+            {errors.whatsNew && <div className="text-xs text-red-500">{errors.whatsNew}</div>}
             <div className="text-xs text-gray-500">{whatsNew.length}/300 words</div>
+            {/* Markdown Preview for What's New */}
+            <div className="mt-2 p-2 border border-dashed border-gray-300 rounded bg-gray-50">
+              <div className="text-xs text-gray-500 mb-1">Markdown Preview:</div>
+              <ReactMarkdown
+                className="prose max-w-none text-sm leading-5"
+                remarkPlugins={[remarkGfm as any]}
+                rehypePlugins={[rehypeSanitize as any]}
+              >
+                {whatsNew || "Nothing to preview."}
+              </ReactMarkdown>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Web URL</h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Web URL <span className="text-red-500">*</span></h3>
         <input
           type="text"
           value={webUrl}
           onChange={e => setWebUrl(e.target.value)}
+          required
           className={`w-full px-3 py-1.5 border ${webUrlError ? 'border-red-500' : 'border-gray-300'} rounded-md text-sm`}
           placeholder="https://yourapp.com"
         />
+        {errors.webUrl && <div className="text-xs text-red-500">{errors.webUrl}</div>}
         <div className="text-xs text-gray-500">Enter the full URL, including http:// or https://</div>
         {webUrlError && <div className="text-xs text-red-500 font-semibold">{webUrlError}</div>}
-      </div>
 
       {/* App Files */}
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">App File</h3>
-        <FileDropzone label="App file only" onChange={(f) => simulateUpload(f, setAppFiles)} />
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">App File</h3>
+        <FileDropzone label="App file only" onChange={handleAppFileChange} multiple={false} accept="*" disabled={appFiles.length > 0} />
         {renderUploadList(appFiles, setAppFiles)}
-      </div>
 
       {/* Card Images */}
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Image</h3>
-        <p className="text-sm font-medium">Card</p>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Image <span className="text-red-500">*</span></h3>
+      <p className="text-sm font-medium">Card <span className="text-red-500">*</span></p>
         <FileDropzone
           label="Card image only"
           accept="image/*"
-          onChange={(f) => simulateUpload(f, setCardImages)}
+          onChange={handleCardImageChange}
+          multiple={false}
+          disabled={cardImages.length > 0}
         />
         {renderUploadList(cardImages, setCardImages)}
-      </div>
+        {errors.cardImages && <div className="text-xs text-red-500">{errors.cardImages}</div>}
 
       {/* Banner Images */}
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Banner</h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Banner <span className="text-red-500">*</span></h3>
         <FileDropzone
           label="Banner image only"
           accept="image/*"
-          onChange={(f) => simulateUpload(f, setBannerImages)}
+          onChange={handleBannerImageChange}
+          multiple={false}
+          disabled={bannerImages.length > 0}
         />
         {renderUploadList(bannerImages, setBannerImages)}
-      </div>
+        {errors.bannerImages && <div className="text-xs text-red-500">{errors.bannerImages}</div>}
 
       {/* Screenshots */}
-      <div className="space-y-2 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold">Screenshots (Max 8)</h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Screenshots (Max 8) <span className="text-red-500">*</span></h3>
+      <p className="text-sm font-medium">Screenshot <span className="text-red-500">*</span></p>
         <FileDropzone
           label="Screenshot images"
           accept="image/*"
           multiple
-          onChange={(f) => simulateUpload(f, setScreenshots)}
+          onChange={files => {
+            setScreenshots(prev => {
+              const newFiles = Array.from(files).map(makeScreenshotObj);
+              let combined = [...prev, ...newFiles];
+              if (combined.length > MAX_SCREENSHOTS) {
+                combined = combined.slice(0, MAX_SCREENSHOTS);
+              }
+              return dedupeByKey(combined);
+            });
+          }}
+          disabled={screenshots.length >= MAX_SCREENSHOTS}
         />
-        {renderUploadList(screenshots, setScreenshots, true)}
+<div style={{ minHeight: 60 * screenshots.length + 20 }}>
+  {screenshots.map((fileObj, idx) => {
+    const { file, url, progress = 0, key } = fileObj;
+    let previewUrl = '';
+    let filename = '';
+    let isUploaded = false;
+    if (file) {
+      previewUrl = URL.createObjectURL(file);
+      filename = file.name;
+    } else if (url) {
+      previewUrl = url;
+      filename = url.split('/').pop() || url;
+      isUploaded = true;
+    }
+    // Show 'Uploaded' only if url exists and progress === 100
+    const progressLabel = isUploaded && progress === 100 ? 'Uploaded' : `${progress}%`;
+    return (
+      <div
+        key={key}
+        style={{
+          background: '#eee',
+          margin: '8px 0',
+          padding: 8,
+          borderRadius: 4,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {/* Move arrows to the left */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginRight: 8 }}>
+          <button
+            type="button"
+            aria-label="Move up"
+            disabled={idx === 0}
+            onClick={() => {
+              if (idx === 0) return;
+              setScreenshots(prev => {
+                const arr = [...prev];
+                [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+                // If all have .url, call reorder
+                if (appData?.appId && arr.every(f => f.url)) {
+                  reorderScreenshotsOnServer(appData.appId, arr.map(f => f.url));
+                }
+                return arr;
+              });
+            }}
+            style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'not-allowed' : 'pointer', padding: 0 }}
+          >
+            <IconChevronUp size={20} />
+          </button>
+          <button
+            type="button"
+            aria-label="Move down"
+            disabled={idx === screenshots.length - 1}
+            onClick={() => {
+              if (idx === screenshots.length - 1) return;
+              setScreenshots(prev => {
+                const arr = [...prev];
+                [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+                // If all have .url, call reorder
+                if (appData?.appId && arr.every(f => f.url)) {
+                  reorderScreenshotsOnServer(appData.appId, arr.map(f => f.url));
+                }
+                return arr;
+              });
+            }}
+            style={{ background: 'none', border: 'none', cursor: idx === screenshots.length - 1 ? 'not-allowed' : 'pointer', padding: 0 }}
+          >
+            <IconChevronDown size={20} />
+          </button>
+        </div>
+        {/* Main content: image, filename, progress, delete */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+          {previewUrl && (
+            <img src={previewUrl} alt="preview" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4, background: '#fff', border: '1px solid #ccc' }} />
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            <span>{filename}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+              <div className="bg-gray-200 h-1.5 rounded mt-1" style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  className="h-1.5 bg-black rounded transition-all duration-200"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span style={{ minWidth: 36, textAlign: 'right', fontSize: 12, color: '#333' }}>
+                {progressLabel}
+              </span>
+            </div>
+          </div>
+          <button
+            className="ml-2 text-gray-500 hover:text-red-500 text-sm"
+            onClick={e => {
+              e.stopPropagation();
+              setScreenshots(prev => prev.filter((_, i) => i !== idx));
+              if (url) setScreenshotsToDelete(prev => [...prev, url]);
+            }}
+          >✕</button>
+        </div>
       </div>
+    );
+  })}
+</div>
+{errors.screenshots && <div className="text-xs text-red-500">{errors.screenshots}</div>}
 
-      <div className="flex justify-center pt-4">
-        <button
-          className="w-64 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-900"
+      <div className="flex flex-col md:flex-row justify-center gap-4 pt-4">
+        <Button
+          type="button"
+          variant="purple"
+          className="flex-1 basis-1/2 py-3 text-base font-semibold h-full justify-center"
           onClick={handleContinue}
           disabled={saveLoading || !!webUrlError}
         >
           {saveLoading ? 'Submitting...' : 'Continue'}
-        </button>
-      </div>
-
-      <div className="pt-4">
-        <button
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1 basis-1/2 py-3 text-base font-semibold h-full justify-center"
           onClick={handleSave}
           disabled={saveLoading || !!webUrlError}
-          className={`w-full py-3 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 ${saveLoading || webUrlError ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {saveLoading ? 'Saving...' : 'Save as Draft'}
-        </button>
-        {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}
+        </Button>
       </div>
-      {debugInfo && (
-        <div className="bg-yellow-50 border border-yellow-300 rounded p-3 text-xs text-yellow-900 overflow-x-auto">
-          <strong>Debug Info:</strong>
-          <pre className="whitespace-pre-wrap break-all">{JSON.stringify(debugInfo, null, 2)}</pre>
-        </div>
-      )}
+      {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}
     </div>
   );
 }

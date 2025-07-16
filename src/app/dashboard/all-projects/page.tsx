@@ -10,6 +10,7 @@ import { fetchAssociatedProjects } from "../projects/fetch";
 import { FetchProjectsForManageAllProjectsData } from "@/app/api/internal/project/route";
 import ToggleProjectPublic from "./toggle_project_public";
 import ToggleAppPublic from "./toggle_app_public";
+import ToggleAppPriority from "./toggle_app_priority";
 import NoProject from "./no_project";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
@@ -128,16 +129,15 @@ function Project({
                     <p className="text-black/64 text-sm leading-5 line-clamp-3 overflow-hidden">{project.description}</p>
                 </div>
 
-                {/* Toggles - Positioned like the buttons were */}
+                {/* Toggles - Stack vertically */}
                 <div className="flex flex-col justify-between items-end h-full py-2 gap-2">
-                    {/* Public Toggle */}
-                    <div className="flex items-center gap-2">
+                    {/* Project Public Toggle */}
+                    <div className="flex items-center gap-2 w-full justify-end">
                         <span className="text-xs text-gray-500">Project</span>
                         <ToggleProjectPublic project={project} />
                     </div>
-
-                    {/* App Toggle or App Builder Button */}
-                    <div className="flex items-center gap-2">
+                    {/* App Toggle */}
+                    <div className="flex items-center gap-2 w-full justify-end">
                         {hasAcceptedApp ? (
                             <>
                                 <span className="text-xs text-gray-500">App</span>
@@ -151,6 +151,13 @@ function Project({
                             </div>
                         )}
                     </div>
+                    {/* App Priority Toggle */}
+                    {hasAcceptedApp && (
+                        <div className="flex items-center gap-2 w-full justify-end">
+                            <span className="text-xs text-gray-500">Priority</span>
+                            <ToggleAppPriority project={project} />
+                        </div>
+                    )}
                 </div>
             </div>
         </Card>

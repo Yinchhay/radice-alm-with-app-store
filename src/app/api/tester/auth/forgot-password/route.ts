@@ -3,10 +3,6 @@ import jwt from "jsonwebtoken";
 import { getTesterByEmail } from "@/repositories/tester";
 import { sendPasswordResetEmail } from "@/lib/email";
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
 export interface PasswordResetTokenPayload {
     id: string;
     email: string;
@@ -14,10 +10,6 @@ export interface PasswordResetTokenPayload {
     iat?: number;
     exp?: number;
 }
-
-// ============================================================================
-// API ROUTE HANDLER
-// ============================================================================
 
 export async function POST(request: NextRequest) {
     try {
@@ -31,7 +23,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Check if email format is valid
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return NextResponse.json(
@@ -41,12 +32,9 @@ export async function POST(request: NextRequest) {
         }
 
         try {
-            // Check if tester exists
             const tester = await getTesterByEmail(email);
             
             if (!tester) {
-                // For security, we don't reveal whether the email exists or not
-                // Always return success to prevent email enumeration
                 return NextResponse.json(
                     { 
                         success: true, 
@@ -56,7 +44,6 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            // Generate password reset token (expires in 1 hour)
             const resetToken = jwt.sign(
                 { 
                     id: tester.id, 
@@ -67,10 +54,8 @@ export async function POST(request: NextRequest) {
                 { expiresIn: "1h" }
             );
 
-            // Create reset URL
             const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/testers/reset-password?token=${resetToken}`;
 
-            // Send password reset email
             await sendPasswordResetEmail(tester.email, resetUrl, `${tester.firstName} ${tester.lastName}`);
 
             return NextResponse.json(
@@ -85,7 +70,6 @@ export async function POST(request: NextRequest) {
         } catch (error) {
             console.error("Database error during password reset:", error);
             
-            // Still return success to prevent information leakage
             return NextResponse.json(
                 { 
                     success: true, 

@@ -72,4 +72,6 @@ export const editAppFormSchema = z.object({
             invalid_type_error: "Featured priority must be a number",
         })
         .optional(),
+    
+    updateType: z.enum(["major", "minor", "patch"]).optional(),
 });

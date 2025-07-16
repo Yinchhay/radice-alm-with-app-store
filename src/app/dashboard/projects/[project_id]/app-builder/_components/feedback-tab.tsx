@@ -23,9 +23,9 @@ interface FeedbackTabProps {
 
 function StarRating({ count }: { count: number }) {
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-0.5 mb-2">
       {Array.from({ length: count }).map((_, idx) => (
-        <Star key={idx} size={16} fill="gold" stroke="gold" />
+        <Star key={idx} size={14} fill="#FFD600" stroke="#FFD600" />
       ))}
     </div>
   );
@@ -106,47 +106,120 @@ export default function FeedbackTab({ projectId }: FeedbackTabProps) {
     }
   }, [projectId]);
 
+  // Standard heading for all states
+  const MainHeading = (
+    <div className="space-y-1 mb-6">
+      <h1 className="text-[24px] font-semibold">Feedback</h1>
+      <p className="text-gray-500 text-sm">This is where you can view feedback submitted by your users for all apps in this project</p>
+    </div>
+  );
+
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold">Feedback</h2>
-        <p className="text-sm text-gray-500">
-          This is where you can view feedbacks submitted by your user for all apps in this project
-        </p>
-      </div>
+      {MainHeading}
       {loading ? (
         <div>Loading feedback...</div>
       ) : error ? (
         <div className="text-red-500">{error}</div>
       ) : feedbackList.length === 0 ? (
-        <div className="text-gray-500">No feedback available for this project.</div>
-      ) : (
-        feedbackList
-          .slice() // copy to avoid mutating state
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .map((feedback) => (
-            <div
-              key={feedback.id}
-              className="bg-white border border-gray-200 rounded-md p-4 space-y-2"
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <svg
+              className="mx-auto h-12 w-12"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-300" />
-                  <div className="text-sm font-medium">
-                    {feedback.tester && feedback.tester.firstName
-                      ? `${feedback.tester.firstName} ${feedback.tester.lastName ?? ''}`.trim()
-                      : feedback.testerId || 'User'}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No feedback yet
+          </h3>
+          <p className="text-gray-500">
+            Feedback from your users will appear here when they submit them.
+          </p>
+        </div>
+      ) : (
+        <div className="border border-[#E6E8EC] rounded-lg bg-white">
+          {feedbackList
+            .slice() // copy to avoid mutating state
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .map((feedback, idx, arr) => (
+              <div
+                key={feedback.id}
+                className={`${idx !== arr.length - 1 ? 'border-b border-[#E6E8EC]' : ''}`}
+                style={{ display: 'flex', flexDirection: 'column', padding: '16px', alignSelf: 'stretch', gap: 0 }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+                  {/* Top row: avatar, name, and time */}
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
+                      {/* Avatar */}
+                      <div className="w-8 h-8 rounded-full bg-[#B1B5C3] flex items-center justify-center font-bold" style={{ color: 'var(--OnBackground, #000)', fontFamily: 'Inter', fontSize: '14px', fontStyle: 'normal', fontWeight: 400, lineHeight: '20px' }}>
+                        {feedback.tester && feedback.tester.firstName
+                          ? feedback.tester.firstName.charAt(0).toLowerCase()
+                          : <span className="text-gray-200">●</span>}
+                      </div>
+                      <div className="font-normal text-[#23272E]" style={{ fontSize: '14px' }}>
+                        {feedback.tester && feedback.tester.firstName
+                          ? `${feedback.tester.firstName.toLowerCase()} ${feedback.tester.lastName ? feedback.tester.lastName.toLowerCase() : ''}`.trim()
+                          : feedback.testerId || 'User'}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        color: 'var(--OnBackground32, rgba(0, 0, 0, 0.32))',
+                        fontFamily: 'Inter',
+                        fontSize: '12px',
+                        fontStyle: 'normal',
+                        fontWeight: 400,
+                        lineHeight: 'normal',
+                        marginLeft: '12px',
+                      }}
+                    >
+                      {format(new Date(feedback.createdAt), 'dd MMM yyyy, h:mma').toUpperCase()}
+                    </div>
                   </div>
-                </div>
-                <div className="text-xs text-gray-500">
-                  {format(new Date(feedback.createdAt), 'dd MMM yyyy, h:mma')}
+                  {/* Stars */}
+                  <StarRating count={Number(feedback.starRating)} />
+                  {/* Title */}
+                  <div
+                    className="mb-1"
+                    style={{
+                      color: 'var(--OnBackground, #000)',
+                      fontFamily: 'Inter',
+                      fontSize: '20px',
+                      fontStyle: 'normal',
+                      fontWeight: 600,
+                      lineHeight: '20px',
+                    }}
+                  >
+                    {feedback.title}
+                  </div>
+                  {/* Body */}
+                  <p
+                    style={{
+                      color: 'var(--OnBackground64, rgba(0, 0, 0, 0.64))',
+                      fontFamily: 'Inter',
+                      fontSize: '14px',
+                      fontStyle: 'normal',
+                      fontWeight: 400,
+                      lineHeight: '20px',
+                      marginTop: 0,
+                    }}
+                  >
+                    {feedback.review}
+                  </p>
                 </div>
               </div>
-              <StarRating count={Number(feedback.starRating)} />
-              <div className="font-medium">{feedback.title}</div>
-              <p className="text-sm text-gray-600">{feedback.review}</p>
-            </div>
-          ))
+            ))}
+        </div>
       )}
     </div>
   );

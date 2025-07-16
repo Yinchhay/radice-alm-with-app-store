@@ -37,7 +37,6 @@ export const POST = requireTesterAuth(
                 );
             }
 
-            // Fetch tester record with password hash
             const [dbTester] = await db
                 .select()
                 .from(testers)

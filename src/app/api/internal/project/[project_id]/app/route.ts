@@ -16,6 +16,7 @@ import { HttpStatusCode } from "@/types/http";
 import { promises as fs } from 'fs';
 import path from 'path';
 import { NextRequest } from "next/server";
+import { getAppScreenshots } from "@/repositories/app_screenshot";
 
 export type FetchCreateApp = {
     appId: number;
@@ -26,7 +27,7 @@ export type FetchCreateApp = {
 const unsuccessMessage = "App operation failed";
 
 // Configuration for file storage (should match your PATCH endpoint)
-const FILE_STORAGE_PATH = path.join(process.cwd(), process.env.FILE_STORAGE_PATH || './public/uploads/apps');
+const FILE_STORAGE_PATH = path.join(process.cwd(), process.env.FILE_STORAGE_PATH || 'public/uploads/apps');
 
 // Helper function to copy an existing image file with new naming
 async function copyImageFile(originalPath: string, newAppId: number, imageType: 'card' | 'banner'): Promise<string | null> {
@@ -147,12 +148,47 @@ export async function POST(
 
         const existingApps = await getAppsByProjectId(projectId);
 
+        // Check if there's already a pending app
+        const pendingApp = existingApps.find(
+            (app) => app.status === "pending"
+        );
+        if (pendingApp) {
+            // Fetch screenshots for the pending app
+            const screenshots = await getAppScreenshots(pendingApp.id);
+            const screenshotUrls = screenshots.map(s => s.imageUrl).filter(Boolean);
+            return buildSuccessResponse(
+                "Found pending app (cannot create or save another)",
+                {
+                    appId: pendingApp.id,
+                    isNewApp: false,
+                    status: pendingApp.status ?? "unknown",
+                    app: {
+                        id: pendingApp.id,
+                        subtitle: pendingApp.subtitle,
+                        type: pendingApp.type,
+                        aboutDesc: pendingApp.aboutDesc,
+                        content: pendingApp.content,
+                        webUrl: pendingApp.webUrl,
+                        appFile: pendingApp.appFile,
+                        cardImage: pendingApp.cardImage,
+                        bannerImage: pendingApp.bannerImage,
+                        featuredPriority: pendingApp.featuredPriority,
+                        status: pendingApp.status,
+                        screenshots: screenshotUrls,
+                    },
+                },
+            );
+        }
+
         // Check if there's already a draft or rejected app
         const nonAcceptedApp = existingApps.find(
             (app) => app.status === "draft" || app.status === "rejected" || app.status === "pending",
         );
 
         if (nonAcceptedApp) {
+            // Fetch screenshots for the app
+            const screenshots = await getAppScreenshots(nonAcceptedApp.id);
+            const screenshotUrls = screenshots.map(s => s.imageUrl).filter(Boolean);
             return buildSuccessResponse(
                 "Found existing app in progress",
                 {
@@ -171,6 +207,7 @@ export async function POST(
                         bannerImage: nonAcceptedApp.bannerImage,
                         featuredPriority: nonAcceptedApp.featuredPriority,
                         status: nonAcceptedApp.status,
+                        screenshots: screenshotUrls,
                     },
                 },
             );
@@ -327,6 +364,11 @@ export async function POST(
             throw new Error("Failed to create version");
         }
 
+        // Fetch the full app object and its screenshots after creation
+        const newAppDetails = await getAppByIdForPublic(appId);
+        const newAppScreenshots = await getAppScreenshots(appId);
+        const newAppScreenshotUrls = newAppScreenshots.map(s => s.imageUrl).filter(Boolean);
+
         return buildSuccessResponse<FetchCreateApp>(
             acceptedApp
                 ? "Created new app from accepted version"
@@ -335,6 +377,10 @@ export async function POST(
                 appId,
                 isNewApp: true,
                 status: "draft",
+                app: {
+                    ...newAppDetails,
+                    screenshots: newAppScreenshotUrls,
+                },
             },
         );
     } catch (createError: any) {

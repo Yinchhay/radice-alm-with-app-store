@@ -8,28 +8,14 @@ import {
 } from "@/lib/response";
 import { HttpStatusCode } from "@/types/http";
 import { NextRequest } from "next/server";
-import {
-    validateAppPermissions,
-    deleteExistingScreenshots,
-    processScreenshots,
-    insertScreenshots,
-    reorderScreenshots,
-} from "@/repositories/app/screenshots";
-import {
-    deleteOldFile,
-    saveUploadedFile,
-    validateFile,
-    MAX_SCREENSHOTS,
-} from "@/repositories/app/images";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
+import { getAppScreenshots } from "@/repositories/app_screenshot";
 
 const unsuccessMessage = "Failed to retrieve app screenshots";
 
-// GET: Get all screenshots
 export async function GET(request: NextRequest, { params }: Params) {
     try {
 
-        // Validate app ID
         const appId = Number(params.app_id);
 
         if (isNaN(appId) || appId <= 0) {
@@ -40,10 +26,6 @@ export async function GET(request: NextRequest, { params }: Params) {
             );
         }
 
-        // Get screenshots
-        const { getAppScreenshots } = await import(
-            "@/repositories/app_screenshot"
-        );
         const screenshots = await getAppScreenshots(appId);
 
         return buildSuccessResponse("Screenshots retrieved successfully", {

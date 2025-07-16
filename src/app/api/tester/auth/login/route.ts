@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
                 phoneNumber: tester.phoneNumber,
                 profileUrl: tester.profileUrl,
                 description: tester.description,
-                token: token,
             }
         });
         

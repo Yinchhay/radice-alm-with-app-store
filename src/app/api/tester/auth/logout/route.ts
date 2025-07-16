@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// Optional: Support GET method for logout links
 export async function GET(request: NextRequest) {
     return POST(request);
 }

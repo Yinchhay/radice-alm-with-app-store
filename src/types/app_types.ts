@@ -26,6 +26,7 @@ export interface App {
     apiDocUrl?: string;
     category?: Category;
     projectCategories?: ProjectCategory;
+    updateType?: string;
 }
 
 export interface ProjectCategory {

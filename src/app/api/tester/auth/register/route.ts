@@ -8,10 +8,8 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
-        // ✅ Validate input
         const validatedData = testerRegistrationSchema.parse(body);
 
-        // ✅ Check if tester already exists
         const existingTester = await testerExistsByEmail(validatedData.email);
         if (existingTester) {
             return NextResponse.json(
@@ -20,16 +18,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ✅ Create tester
         await createTester({
             firstName: validatedData.firstName,
             lastName: validatedData.lastName,
             email: validatedData.email,
-            password: validatedData.password, // hashed inside repository
+            password: validatedData.password,
             phoneNumber: validatedData.phoneNumber || null,
         });
 
-        // ✅ Retrieve newly created tester
         const tester = await getTesterByEmail(validatedData.email);
         if (!tester) {
             return NextResponse.json(
@@ -38,10 +34,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ✅ Generate JWT token
         const token = generateTesterToken({ id: tester.id, email: tester.email });
 
-        // ✅ Create response and set cookie (optional)
         const response = NextResponse.json({
             message: "Tester account created and logged in successfully",
             tester: {
@@ -51,12 +45,11 @@ export async function POST(request: NextRequest) {
                 email: tester.email,
                 phoneNumber: tester.phoneNumber,
                 profileUrl: tester.profileUrl,
-                description: tester.description,
-                token: token, // <-- include if frontend reads it directly
+                description: tester.description
             },
         });
 
-        setTesterAuthCookie(response, token); // <-- optional if you want to store JWT in cookies
+        setTesterAuthCookie(response, token);
         return response;
 
     } catch (error) {

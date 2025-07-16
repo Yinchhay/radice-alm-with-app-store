@@ -4,6 +4,7 @@ import AppActionButton from "./app-action-button";
 import { IconStar, IconStarFilled } from "@tabler/icons-react";
 import { useTesterAuth } from "@/app/contexts/TesterAuthContext";
 import Popup from "@/components/Popup";
+import { format } from 'date-fns';
 
 export type Feedback = {
     id: number;
@@ -58,7 +59,16 @@ export default function AppReviews({
             const response = await fetch(`/api/public/app/${appId}/feedback`);
             if (!response.ok) throw new Error(`Failed to fetch reviews`);
             const data = await response.json();
-            setReviews(data.data.feedbacks || []);
+            const fetchedReviews = data.data.feedbacks || [];
+            
+            // Sort reviews in descending order (newest first)
+            const sortedReviews = fetchedReviews.slice().sort((a: Feedback, b: Feedback) => {
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                return dateB - dateA; // Newest first (descending order)
+            });
+            
+            setReviews(sortedReviews);
             setAverageRating(data.data.averageRating || 0);
         } catch (error) {
             console.error(error);
@@ -68,7 +78,13 @@ export default function AppReviews({
 
     useEffect(() => {
         if (propReviews) {
-            setReviews(propReviews);
+            // Sort propReviews in descending order (newest first)
+            const sortedPropReviews = propReviews.slice().sort((a: Feedback, b: Feedback) => {
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                return dateB - dateA; // Newest first (descending order)
+            });
+            setReviews(sortedPropReviews);
             return;
         }
         fetchReviews();
@@ -213,21 +229,29 @@ export default function AppReviews({
                                     key={review.id}
                                     className={`mb-6${idx < Math.min(arr.length, maxReviews) - 1 ? " border-b border-gray-100 pb-3" : ""}`}
                                 >
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg font-bold text-gray-500">
-                                            {getInitials(
-                                                review.tester?.firstName,
-                                                review.tester?.lastName,
-                                            ) || "A"}
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg font-bold text-gray-500">
+                                                {getInitials(
+                                                    review.tester?.firstName,
+                                                    review.tester?.lastName,
+                                                ) || "A"}
+                                            </div>
+                                            <div className="font-semibold">
+                                                {review.tester
+                                                    ? `${review.tester.firstName} ${review.tester.lastName}`
+                                                    : "Anonymous"}
+                                            </div>
                                         </div>
-                                        <div className="font-semibold">
-                                            {review.tester
-                                                ? `${review.tester.firstName} ${review.tester.lastName}`
-                                                : "Anonymous"}
+                                        <div className="text-xs text-gray-500">
+                                            {format(new Date(review.createdAt), 'dd MMM yyyy, h:mma')}
                                         </div>
                                     </div>
                                     <div className="flex items-center mb-3 pointer-events-none">
                                         {renderStars(review.starRating)}
+                                    </div>
+                                    <div className="font-medium text-gray-900 mb-1">
+                                        {review.title}
                                     </div>
                                     <div className="text-gray-700 text-sm mb-2">
                                         {review.review}

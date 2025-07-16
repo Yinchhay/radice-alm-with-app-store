@@ -2,12 +2,23 @@
 import InputField from "@/components/InputField";
 import Button from "@/components/Button";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { IconBrandGoogle } from "@tabler/icons-react";
 
 export default function TesterLoginForm() {
-    const [result, setResult] = useState<{ success: boolean; errors?: string[] }>();
+    const [result, setResult] = useState<{
+        success: boolean;
+        errors?: string[];
+    }>();
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+
+    const handleGoogleLogin = () => {
+        setIsLoading(true);
+        // Redirect to your custom Google OAuth endpoint
+        window.location.href = "/api/auth/google";
+    };
 
     const handleSubmit = async (formData: FormData) => {
         setIsLoading(true);
@@ -15,7 +26,10 @@ export default function TesterLoginForm() {
             const email = formData.get("email") as string;
             const password = formData.get("password") as string;
             if (!email || !password) {
-                setResult({ success: false, errors: ["Please fill in all fields"] });
+                setResult({
+                    success: false,
+                    errors: ["Please fill in all fields"],
+                });
                 setIsLoading(false);
                 return;
             }
@@ -30,10 +44,16 @@ export default function TesterLoginForm() {
                 setResult({ success: true });
                 router.push("/tester-dashboard");
             } else {
-                setResult({ success: false, errors: [data.error || "Invalid credentials"] });
+                setResult({
+                    success: false,
+                    errors: [data.error || "Invalid credentials"],
+                });
             }
         } catch (error) {
-            setResult({ success: false, errors: ["An error occurred. Please try again."] });
+            setResult({
+                success: false,
+                errors: ["An error occurred. Please try again."],
+            });
         } finally {
             setIsLoading(false);
         }
@@ -42,7 +62,12 @@ export default function TesterLoginForm() {
     return (
         <form className="w-full flex flex-col gap-6" action={handleSubmit}>
             <div className="flex flex-col gap-1">
-                <label htmlFor="email" className="text-base text-black font-medium">Email</label>
+                <label
+                    htmlFor="email"
+                    className="text-base text-black font-medium"
+                >
+                    Email
+                </label>
                 <InputField
                     name="email"
                     id="email"
@@ -53,7 +78,12 @@ export default function TesterLoginForm() {
                 />
             </div>
             <div className="flex flex-col gap-1">
-                <label htmlFor="password" className="text-base text-black font-medium">Password</label>
+                <label
+                    htmlFor="password"
+                    className="text-base text-black font-medium"
+                >
+                    Password
+                </label>
                 <InputField
                     type="password"
                     name="password"
@@ -65,7 +95,9 @@ export default function TesterLoginForm() {
             </div>
             {result?.errors && (
                 <div className="text-red-600 text-sm text-center">
-                    {result.errors.map((err, i) => <div key={i}>{err}</div>)}
+                    {result.errors.map((err, i) => (
+                        <div key={i}>{err}</div>
+                    ))}
                 </div>
             )}
             <button
@@ -82,17 +114,32 @@ export default function TesterLoginForm() {
                 <span className="text-gray-400 text-base">or</span>
                 <div className="flex-1 h-px bg-gray-200" />
             </div>
-            {/* GitHub Button */}
-            <a
-                href="/api/tester-oauth/github/login"
-                className="w-full h-12 border border-gray-400 rounded-lg flex items-center justify-center gap-2 text-base font-normal bg-white hover:bg-gray-50 transition-all"
-                style={{ boxShadow: "none" }}
-            >
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.37 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.419-1.305.763-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.125-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.236 1.911 1.236 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.824 1.102.824 2.222v3.293c0 .319.192.694.801.576C20.565 21.8 24 17.302 24 12c0-6.627-5.373-12-12-12z" />
-                </svg>
-                Log In with GitHub
-            </a>
+            <div className="flex flex-col gap-3 mt-6 w-full">
+                {/* Google Button */}
+                <a
+                    href="/api/auth/google"
+                    className="w-full h-12 border border-gray-400 rounded-lg flex items-center justify-center gap-2 text-base font-normal bg-white hover:bg-gray-50 transition-all"
+                    style={{ boxShadow: "none" }}
+                >
+                    <img src="https://img.icons8.com/color/48/google-logo.png" alt="google-logo" width="24" height="24" />
+                    Log In with Google
+                </a>
+                {/* GitHub Button */}
+                <a
+                    href="/api/tester-oauth/github/login"
+                    className="w-full h-12 border border-gray-400 rounded-lg flex items-center justify-center gap-2 text-base font-normal bg-white hover:bg-gray-50 transition-all"
+                    style={{ boxShadow: "none" }}
+                >
+                    <svg
+                        className="w-6 h-6"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <path d="M12 0C5.37 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.419-1.305.763-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.125-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.236 1.911 1.236 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.824 1.102.824 2.222v3.293c0 .319.192.694.801.576C20.565 21.8 24 17.302 24 12c0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    Log In with GitHub
+                </a>
+            </div>
         </form>
     );
-} 
+}
