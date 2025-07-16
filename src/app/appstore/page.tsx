@@ -1,7 +1,8 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import AppStorePage from "./appstore";
 import { Metadata } from "next";
+import { Suspense } from "react";
+import AppStorePage from "./AppStoreClient";
 
 export const metadata: Metadata = {
     title: "Appstore - Radice",
@@ -12,7 +13,9 @@ export default function JoinUsPage() {
     return (
         <div>
             <Navbar />
-            <AppStorePage />
+            <Suspense fallback={<div className="text-center py-10">Loading Appstore…</div>}>
+                <AppStorePage />
+            </Suspense>
             <Footer />
         </div>
     );

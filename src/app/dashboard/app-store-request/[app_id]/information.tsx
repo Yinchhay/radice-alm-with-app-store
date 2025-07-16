@@ -74,7 +74,16 @@ export default async function InformationView({ appId }: { appId: string }) {
       {versionNumber && (
         <>
           <h3 className="text-xl font-bold mb-2">Update Information</h3>
-          {/* Removed Update Type field because updateType is not defined */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium">Update Type</label>
+            <input
+              type="text"
+              value="-"
+              readOnly
+              className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
+            />
+            <div className="text-xs text-gray-600 mt-1">Version: <span className="font-mono">{versionNumber}</span></div>
+          </div>
           <div className="space-y-1 mt-3">
             <label className="block text-sm font-medium">What's New</label>
             <div className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm bg-gray-50 min-h-[120px]">

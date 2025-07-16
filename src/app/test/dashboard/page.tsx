@@ -27,17 +27,14 @@ export default async function Page() {
     );
 }
 
-interface ActionResult {
-    error: string;
-}
+// Remove ActionResult interface as it's not needed
 
-async function logout(): Promise<ActionResult> {
+async function logout(): Promise<void> {
     "use server";
     const { user, session } = await validateRequest();
     if (!session) {
-        return {
-            error: "Unauthorized",
-        };
+        redirect("/test/login");
+        return;
     }
 
     await lucia.invalidateSession(session.id);
@@ -48,5 +45,5 @@ async function logout(): Promise<ActionResult> {
         sessionCookie.value,
         sessionCookie.attributes,
     );
-    return redirect("/test/login");
+    redirect("/test/login");
 }
