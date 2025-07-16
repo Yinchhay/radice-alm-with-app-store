@@ -302,9 +302,7 @@ export async function POST(
             }
         }
 
-        // For new apps (not cloning), versionNumber should be null until approved
-        // For cloned apps, we can set the versionNumber since we're basing it on an accepted version
-        const versionNumber = acceptedApp ? `${major}.${minor}.${patch}` : null;
+        const versionNumber = acceptedApp ? `${major}.${minor}.${patch}` : "1.0.0";
 
         const versionContent = acceptedApp
             ? "- Draft created by cloning accepted app"
