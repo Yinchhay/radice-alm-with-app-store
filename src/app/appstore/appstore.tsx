@@ -46,10 +46,9 @@ export default function AppStorePage() {
                             projectCategories: item.projectCategories,
                         }))
                         .sort((a: App, b: App) => {
-                            // Treat NULL/undefined as 0, only truthy is featured
                             const aPriority = a.featuredPriority ? 1 : 0;
                             const bPriority = b.featuredPriority ? 1 : 0;
-                            return bPriority - aPriority; // Featured (1) first, then Live (0/NULL)
+                            return bPriority - aPriority; 
                         });
                     setApps(sortedApps);
                 } else {
