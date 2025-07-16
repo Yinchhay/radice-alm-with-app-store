@@ -8,7 +8,7 @@ import rehypeSanitize from "rehype-sanitize";
 export default async function InformationView({ appId }: { appId: string }) {
   const data = await fetchAppInfoByAppId(appId);
   if (!data) return notFound();
-  const { app, project, appType, subtitle, aboutDesc, type, webUrl, featuredPriority, appFile, cardImage, bannerImage, screenshots, whatsNew, versionNumber, updateType } = data;
+  const { app, project, appType, subtitle, aboutDesc, type, webUrl, featuredPriority, appFile, cardImage, bannerImage, screenshots, whatsNew, versionNumber, latestVersionNumber } = data;
 
   // Always show main heading and subheading
   const MainHeading = (
@@ -55,8 +55,8 @@ export default async function InformationView({ appId }: { appId: string }) {
           <div className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm bg-gray-50 min-h-[120px]">
             <ReactMarkdown
               className="prose max-w-none text-sm leading-5"
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeSanitize]}
+              remarkPlugins={[remarkGfm as any]}
+              rehypePlugins={[rehypeSanitize as any]}
             >
               {aboutDesc || "No description available."}
             </ReactMarkdown>
@@ -76,21 +76,17 @@ export default async function InformationView({ appId }: { appId: string }) {
           <h3 className="text-xl font-bold mb-2">Update Information</h3>
           <div className="space-y-1">
             <label className="block text-sm font-medium">Update Type</label>
-            <input
-              type="text"
-              value={updateType || "-"}
-              readOnly
-              className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
-            />
-            <div className="text-xs text-gray-600 mt-1">Version: <span className="font-mono">{versionNumber}</span></div>
+            {latestVersionNumber && (
+              <div className="text-xs text-black mt-1">- Latest Version: <span className="font-mono">{latestVersionNumber}</span></div>
+            )}
           </div>
           <div className="space-y-1 mt-3">
             <label className="block text-sm font-medium">What's New</label>
             <div className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm bg-gray-50 min-h-[120px]">
               <ReactMarkdown
                 className="prose max-w-none text-sm leading-5"
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeSanitize]}
+                remarkPlugins={[remarkGfm as any]}
+                rehypePlugins={[rehypeSanitize as any]}
               >
                 {whatsNew || "No changelog available."}
               </ReactMarkdown>
@@ -130,7 +126,7 @@ export default async function InformationView({ appId }: { appId: string }) {
         {screenshots && screenshots.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {screenshots.map((s, i) => (
-              <img key={i} src={s.imageUrl} alt={`Screenshot ${i + 1}`} className="rounded-md max-h-32" />
+              <img key={i} src={s.imageUrl || ''} alt={`Screenshot ${i + 1}`} className="rounded-md max-h-32" />
             ))}
           </div>
         ) : (

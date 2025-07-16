@@ -1,5 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 import { getBaseUrl } from "@/lib/server_utils";
 import { notFound } from "next/navigation";
 import AppActionButton from "../_components/app-action-button";
@@ -142,40 +145,10 @@ function VersionCard({
 
             <div className="text-sm text-gray-700 leading-relaxed">
                 {version.content ? (
-                    <div className="space-y-2 max-w-none overflow-wrap-anywhere">
-                        {version.content.split("\n").map((line, index) => (
-                            <p
-                                key={index}
-                                className={
-                                    line.trim() === ""
-                                        ? "h-2"
-                                        : "break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal"
-                                }
-                                style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
-                            >
-                                {line.startsWith("- ") ? (
-                                    <span className="flex items-start gap-2">
-                                        <span className="text-gray-400 mt-1 flex-shrink-0">
-                                            •
-                                        </span>
-                                        <span className="break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>
-                                            {line.substring(2)}
-                                        </span>
-                                    </span>
-                                ) : line.startsWith("* ") ? (
-                                    <span className="flex items-start gap-2">
-                                        <span className="text-gray-400 mt-1 flex-shrink-0">
-                                            •
-                                        </span>
-                                        <span className="break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>
-                                            {line.substring(2)}
-                                        </span>
-                                    </span>
-                                ) : (
-                                    line || <br />
-                                )}
-                            </p>
-                        ))}
+                    <div className="prose max-w-none overflow-wrap-anywhere">
+                        <ReactMarkdown remarkPlugins={[remarkGfm as any]} rehypePlugins={[rehypeSanitize as any]}>
+                            {version.content}
+                        </ReactMarkdown>
                     </div>
                 ) : (
                     <p className="text-gray-500 italic">

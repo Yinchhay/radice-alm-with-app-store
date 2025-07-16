@@ -268,7 +268,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const appTypeOptions = [
     { id: 1, name: 'Web' },
     { id: 2, name: 'Mobile' },
-    { id: 3, name: 'Desktop' },
+    { id: 3, name: 'API' },
   ];
 
   // Simple URL validation: must start with http:// or https:// or be empty

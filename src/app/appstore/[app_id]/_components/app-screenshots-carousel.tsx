@@ -160,7 +160,7 @@ export default function AppScreenshotsCarousel({
                         </div>
                     </div>
                     {screenshots.length > 1 && (
-                        <div className="flex gap-2 overflow-x-auto pb-2">
+                        <div className="flex gap-4 mt-4 overflow-x-auto pb-2">
                             {screenshots.map((screenshot, index) => (
                                 <button
                                     key={screenshot.id}

@@ -23,7 +23,6 @@ export async function fetchAppInfoByAppId(appId: string) {
       appFile: apps.appFile,
       cardImage: apps.cardImage,
       bannerImage: apps.bannerImage,
-      // screenshots: fetch separately below
     })
     .from(apps)
     .leftJoin(projects, eq(apps.projectId, projects.id))
@@ -33,7 +32,7 @@ export async function fetchAppInfoByAppId(appId: string) {
   const appData = result[0] || null;
   if (!appData) return null;
 
-  // Fetch the latest version for this app
+
   const versionResult = await db
     .select()
     .from(versions)
@@ -41,7 +40,18 @@ export async function fetchAppInfoByAppId(appId: string) {
     .orderBy(desc(versions.createdAt))
     .limit(1);
 
-  // Fetch screenshots for this app
+  let latestVersionNumber = null;
+  if (appData?.app?.projectId) {
+    const latestVersion = await db
+      .select()
+      .from(versions)
+      .where(eq(versions.projectId, appData.app.projectId))
+      .orderBy(desc(versions.createdAt))
+      .limit(1);
+    latestVersionNumber = latestVersion[0]?.versionNumber || null;
+  }
+
+
   const screenshotsResult = await db
     .select()
     .from(appScreenshots)
@@ -51,7 +61,7 @@ export async function fetchAppInfoByAppId(appId: string) {
     ...appData,
     whatsNew: versionResult[0]?.content || null,
     versionNumber: versionResult[0]?.versionNumber || null,
-    updateType: versionResult[0]?.updateType || null,
     screenshots: screenshotsResult || [],
+    latestVersionNumber,
   };
 } 
