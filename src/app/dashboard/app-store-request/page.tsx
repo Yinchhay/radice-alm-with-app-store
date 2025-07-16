@@ -5,28 +5,15 @@ import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import { Suspense } from "react";
 import Link from "next/link";
 
-export default async function AppStoreRequestPage({ searchParams }: { searchParams?: { page?: string } }) {
-  const page = Number(searchParams?.page) || 1;
+export default async function AppStoreRequestPage() {
+  const page = 1;
   const { data: pendingApps, totalRows } = await fetchPendingApps(page, ROWS_PER_PAGE);
   const maxPage = getPaginationMaxPage(totalRows, ROWS_PER_PAGE);
 
   return (
     <div className="w-full max-w-[1000px] mx-auto">
       <DashboardPageTitle title="App Store Requests" />
-      <div className="mt-4">
-        <div className="mb-6">
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 6.5 6.5a7.5 7.5 0 0 0 10.6 10.6Z"/></svg>
-            </span>
-            <input
-              type="text"
-              placeholder="Search request"
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/10 text-base bg-gray-50"
-              disabled
-            />
-          </div>
-        </div>
+      <div className="mt-10">
         {pendingApps.length === 0 ? (
           <div className="text-gray-500 text-center py-12">No pending app store requests.</div>
         ) : (
@@ -39,9 +26,6 @@ export default async function AppStoreRequestPage({ searchParams }: { searchPara
                 <div className="mb-1">
                   <span className="font-semibold">Type:</span> {item.appType?.name || "-"}
                 </div>
-                {/* <div className="mb-1">
-                  <span className="font-semibold">Update Type:</span> {item.app.updateType || "-"}
-                </div> */}
                 <div>
                   <span className="font-semibold">Status:</span> {item.app.status ? item.app.status.charAt(0).toUpperCase() + item.app.status.slice(1) : "-"}
                 </div>
