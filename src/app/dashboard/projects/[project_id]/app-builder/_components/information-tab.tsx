@@ -255,6 +255,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const [sessionCookie, setSessionCookie] = useState<string | null>(null);
   const [userAgent, setUserAgent] = useState<string | null>(null);
 
+  const [project, setProject] = useState<any>(null);
+
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const cookies = document.cookie.split(';').map(c => c.trim());
@@ -317,50 +319,63 @@ export default function InformationTab({ projectId }: InformationTabProps) {
       setLoading(true);
       setError(null);
       try {
-        // Parallel fetches
-        const projectPromise = fetch(`/api/internal/project/${projectId}`, {
+        // Fetch project data
+        const projectRes = await fetch(`/api/internal/project/${projectId}`, {
           method: 'GET',
           cache: 'no-cache',
-        }).then(r => r.json());
-        const appPromise = fetch(`/api/internal/project/${projectId}/app`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-cache',
-        }).then(r => r.json());
-        // Wait for both
-        const [projectData, appDataRaw] = await Promise.all([projectPromise, appPromise]);
+        });
+        const projectData = await projectRes.json();
         if (!isMounted) return;
         if (!projectData.success) throw new Error(projectData.message || 'Failed to load project');
-        if (!appDataRaw.success) throw new Error(appDataRaw.message || 'Failed to load app');
-        // Batch state updates
-        setAppData(appDataRaw.data);
-        setCurrentAppStatus(appDataRaw.data.status);
-        if (appDataRaw.data.app) {
-          setSubtitle(appDataRaw.data.app.subtitle || '');
-          setDescription(appDataRaw.data.app.aboutDesc || '');
-          setWebUrl(appDataRaw.data.app.webUrl || '');
-          setPriorityTesting(appDataRaw.data.app.featuredPriority === 1);
-          setAppType(appDataRaw.data.app.type ? String(appDataRaw.data.app.type) : '');
-          if (appDataRaw.data.app.appFile) setAppFiles([{ url: appDataRaw.data.app.appFile }]);
-          if (appDataRaw.data.app.cardImage) setCardImages([{ url: appDataRaw.data.app.cardImage }]);
-          if (appDataRaw.data.app.bannerImage) setBannerImages([{ url: appDataRaw.data.app.bannerImage }]);
-          // When loading screenshots from backend, use makeScreenshotObj
-          if (appDataRaw.data.app.screenshots && Array.isArray(appDataRaw.data.app.screenshots)) {
-            setScreenshots(
-              dedupeByKey(
-                appDataRaw.data.app.screenshots.map((s: any) =>
-                  typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
-                )
-              )
-            );
+        setProject(projectData.data.project);
+        // Try to get the draft app
+        let draftApp;
+        let appData;
+        const appRes = await fetch(`/api/internal/project/${projectId}/app`, {
+          method: 'GET',
+          cache: 'no-cache',
+        });
+        appData = await appRes.json();
+        if (appData.success && appData.data && appData.data.app && appData.data.status === 'draft') {
+          draftApp = appData.data.app;
+        } else {
+          // If not found, create a new draft
+          const appPostRes = await fetch(`/api/internal/project/${projectId}/app`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            cache: 'no-cache',
+          });
+          const appPostData = await appPostRes.json();
+          if (appPostData.success && appPostData.data && appPostData.data.app && appPostData.data.status === 'draft') {
+            draftApp = appPostData.data.app;
+          } else {
+            throw new Error('No draft app found or could not create one.');
           }
         }
+        // Prefill form fields from the draft app
+        setAppData({ appId: draftApp.id, status: draftApp.status, app: draftApp });
+        setCurrentAppStatus(draftApp.status);
+        setSubtitle(draftApp.subtitle || '');
+        setDescription(draftApp.aboutDesc || '');
+        setWebUrl(draftApp.webUrl || '');
+        setPriorityTesting(draftApp.featuredPriority === 1);
+        setAppType(draftApp.type ? String(draftApp.type) : '');
+        if (draftApp.appFile) setAppFiles([{ url: draftApp.appFile }]);
+        if (draftApp.cardImage) setCardImages([{ url: draftApp.cardImage }]);
+        if (draftApp.bannerImage) setBannerImages([{ url: draftApp.bannerImage }]);
+        if (draftApp.screenshots && Array.isArray(draftApp.screenshots)) {
+          setScreenshots(
+            dedupeByKey(
+              draftApp.screenshots.map((s: any) =>
+                typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
+              )
+            )
+          );
+        }
         setLoading(false);
-        // Fetch version in parallel (not blocking UI)
-        if (appDataRaw.data.appId) {
-          fetch(`http://localhost:3000/api/public/app/${appDataRaw.data.appId}/version`)
+        // Fetch version info in parallel
+        if (draftApp.id) {
+          fetch(`http://localhost:3000/api/public/app/${draftApp.id}/version`)
             .then(r => r.json())
             .then(data => {
               if (!isMounted) return;
@@ -668,86 +683,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         cardImage: cardImageUrl,
         bannerImage: bannerImageUrl,
       };
-      // If the current app is accepted, create a new draft app
-      if (currentAppStatus === 'accepted') {
-        const res = await fetch(`/api/internal/project/${projectId}/app`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-cache',
-          credentials: 'include',
-        });
-        const data = await res.json();
-        if (data.success && data.data && data.data.appId) {
-          // Now PATCH the new draft app with the form content
-          const patchRes = await fetch(`/api/internal/app/${data.data.appId}/edit`, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-            cache: 'no-cache',
-            credentials: 'include',
-          });
-          const patchData = await patchRes.json();
-          if (patchData.success) {
-            setSaveMessage('Saved as draft!');
-            // Refetch app data to update UI to the new draft
-            const updated = await fetchAppBuilderData(projectId);
-            if (updated.success && updated.data) {
-              setAppData(updated.data);
-              setCurrentAppStatus(updated.data.status);
-              // Ensure screenshots state is updated with latest from backend
-              if (updated.data.app && Array.isArray(updated.data.app.screenshots)) {
-                setScreenshots(
-                  dedupeByKey(
-                    updated.data.app.screenshots.map((s: any) =>
-                      typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
-                    )
-                  )
-                );
-              }
-            }
-          } else {
-            setSaveMessage(patchData.message || 'Failed to save.');
-          }
-        } else {
-          setSaveMessage(data.message || 'Failed to create draft.');
-        }
-      } else {
-        const res = await fetch(`/api/internal/app/${appData.appId}/edit`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-          cache: 'no-cache',
-          credentials: 'include',
-        });
-        const data = await res.json();
-        if (data.success) {
-          setSaveMessage('Saved as draft!');
-          // Refetch app data to update UI
-          const updated = await fetchAppBuilderData(projectId);
-          if (updated.success && updated.data) {
-            setAppData(updated.data);
-            setCurrentAppStatus(updated.data.status);
-            // Ensure screenshots state is updated with latest from backend
-            if (updated.data.app && Array.isArray(updated.data.app.screenshots)) {
-              setScreenshots(
-                dedupeByKey(
-                  updated.data.app.screenshots.map((s: any) =>
-                    typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
-                  )
-                )
-              );
-            }
-          }
-        } else {
-          setSaveMessage(data.message || 'Failed to save.');
-        }
-      }
       // In handleSave, after uploading new screenshots and before finishing
       if (appData?.appId) {
         // Use the up-to-date screenshotObjs array, not the possibly stale screenshots state
@@ -769,15 +704,19 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     setSaveLoading(true);
     setSaveMessage(null);
     try {
-      // 1. Upload new screenshots if any
-      let screenshotUrls = screenshots;
-      if (screenshots.some(f => f instanceof File)) {
-        // Track progress for each file
-        const filesToUpload = screenshots.filter(f => f instanceof File);
-        const others = screenshots.filter(f => !(f instanceof File));
-        const updateProgress = (file: File, percent: number, done?: boolean, uploadedUrl?: string) => {
-          setScreenshots(prev => prev.map(f => {
-            if (f === file) {
+      // Upload files if needed (appFiles, cardImages, bannerImages, screenshots)
+      const [appFileUrl] = await uploadFilesIfNeeded(appFiles, projectId);
+      const [cardImageUrl] = await uploadFilesIfNeeded(cardImages, projectId);
+      const [bannerImageUrl] = await uploadFilesIfNeeded(bannerImages, projectId);
+      // Upload screenshots if needed
+      let screenshotObjs = screenshots;
+      const isNewFile = (f: any) => f instanceof File || (f.file && f.file instanceof File);
+      if (screenshots.some(isNewFile)) {
+        const filesToUpload = screenshots.filter(isNewFile).map(f => (f instanceof File ? f : f.file));
+        const others = screenshots.filter(f => !isNewFile(f));
+        const updateProgress = (file: any, percent: number, done?: boolean, uploadedUrl?: string) => {
+          setScreenshots((prev: any[]) => prev.map((f: any) => {
+            if ((f === file) || (f.file && f.file === file)) {
               if (done && uploadedUrl) {
                 return { url: uploadedUrl };
               }
@@ -786,122 +725,61 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             return f;
           }));
         };
-        let uploaded2: any[] = [];
+        let uploaded: any[] = [];
         if (typeof appData.appId === 'number') {
-          uploaded2 = await uploadScreenshotsWithProgress(filesToUpload, appData.appId, updateProgress);
+          uploaded = await uploadScreenshotsWithProgress(filesToUpload, appData.appId, updateProgress);
         }
-        // When setting screenshots after upload, use makeScreenshotObj for all uploaded
-        screenshotUrls = [...others, ...uploaded2.map(makeScreenshotObj)];
-        setScreenshots(dedupeByKey(screenshotUrls));
+        screenshotObjs = [...others, ...uploaded.map(makeScreenshotObj)];
+        setScreenshots(dedupeByKey(screenshotObjs));
       }
-
-      // 2. Upload other files if needed (appFiles, cardImages, bannerImages)
-      const [appFileUrl] = await uploadFilesIfNeeded(appFiles, projectId);
-      const [cardImageUrl] = await uploadFilesIfNeeded(cardImages, projectId);
-      const [bannerImageUrl] = await uploadFilesIfNeeded(bannerImages, projectId);
-      const screenshotUrlList = screenshotUrls.map((f: any) => f.url || f.name);
-
-      // 3. Save updateType in draft before publishing
-      await saveAppDraft({
-        appId: appData.appId!,
+      // Prepare payload for edit and publish
+      const payload = {
         subtitle,
         aboutDesc: description,
         type: appType !== '' ? Number(appType) : undefined,
         webUrl,
+        appFile: appFileUrl,
+        cardImage: cardImageUrl,
+        bannerImage: bannerImageUrl,
         updateType,
+        whatsNew,
+        status: 'pending',
+      };
+      // First PATCH to update the draft app
+      const editRes = await fetch(`/api/internal/app/${appData.appId}/edit`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
       });
-
-      // If the current app is accepted, create a new draft app (then set to pending)
-      if (currentAppStatus === 'accepted') {
-        const res = await fetch(`/api/internal/project/${projectId}/app`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-cache',
-          credentials: 'include',
-        });
-        const data = await res.json();
-        if (data.success && data.data && data.data.appId) {
-          // Now PATCH the new draft app with the form content and status 'pending'
-          const patchRes = await fetch(`/api/internal/app/${data.data.appId}/edit`, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              subtitle,
-              aboutDesc: description,
-              type: appType !== '' ? Number(appType) : undefined,
-              webUrl,
-              status: 'pending',
-              appFile: appFileUrl,
-              cardImage: cardImageUrl,
-              bannerImage: bannerImageUrl,
-            }),
-            cache: 'no-cache',
-            credentials: 'include',
-          });
-          const patchData = await patchRes.json();
-          if (patchData.success) {
-            // Call publish endpoint to increment version and save what's new
-            await fetch(`/api/internal/app/${data.data.appId}/publish`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ updateType, whatsNew }),
-              credentials: 'include',
-            });
-            setSaveMessage('Submitted for review!');
-            const updated = await fetchAppBuilderData(projectId);
-            if (updated.success && updated.data) {
-              setAppData(updated.data);
-              setCurrentAppStatus(updated.data.status);
-            }
-          } else {
-            setSaveMessage(patchData.message || 'Failed to submit.');
-          }
-        } else {
-          setSaveMessage(data.message || 'Failed to create draft.');
+      const editData = await editRes.json();
+      if (!editData.success) {
+        setSaveMessage(editData.message || 'Failed to update draft.');
+        setSaveLoading(false);
+        return;
+      }
+      // Then PATCH to publish the draft app
+      const publishRes = await fetch(`/api/internal/app/${appData.appId}/publish`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updateType, whatsNew }),
+        credentials: 'include',
+      });
+      const publishData = await publishRes.json();
+      if (publishData.success) {
+        setSaveMessage('Submitted for review!');
+        // Optionally refetch app data to update UI
+        const updated = await fetchAppBuilderData(projectId);
+        if (updated.success && updated.data) {
+          setAppData(updated.data);
+          setCurrentAppStatus(updated.data.status);
         }
       } else {
-        // Save as pending
-        const res = await fetch(`/api/internal/app/${appData.appId}/edit`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            subtitle,
-            aboutDesc: description,
-            type: appType !== '' ? Number(appType) : undefined,
-            webUrl,
-            status: 'pending',
-            appFile: appFileUrl,
-            cardImage: cardImageUrl,
-            bannerImage: bannerImageUrl,
-          }),
-          cache: 'no-cache',
-          credentials: 'include',
-        });
-        const data = await res.json();
-        if (data.success) {
-          // Only call publish endpoint if there is an accepted version
-          if (latestAcceptedVersion) {
-            await fetch(`/api/internal/app/${appData.appId}/publish`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ updateType, whatsNew }),
-              credentials: 'include',
-            });
-          }
-          setSaveMessage('Submitted for review!');
-        } else {
-          setSaveMessage(data.message || 'Failed to submit.');
-        }
+        setSaveMessage(publishData.message || 'Failed to submit.');
       }
-      // In handleContinue, after uploading new screenshots and before finishing
+      // Reorder screenshots if needed
       if (appData?.appId) {
-        const orderedUrls = screenshots.filter(f => f.url).map(f => f.url);
+        const orderedUrls = screenshotObjs.filter(f => f.url).map(f => f.url);
         if (orderedUrls.length > 0) {
           await reorderScreenshotsOnServer(appData.appId, orderedUrls);
         }
@@ -989,7 +867,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           <label className="block text-sm font-medium">App Name</label>
           <input
             type="text"
-            value={appData?.project?.name || 'Loading...'}
+            value={project?.name || 'Loading...'}
             readOnly
             className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
           />
