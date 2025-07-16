@@ -6,12 +6,18 @@ import { buildNoBearerTokenErrorResponse } from "./lib/response";
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
+    const publicRoutes = [
+        "/tester-login",
+        "/tester-registration",
+        "/api/auth",
+    ];
+    if (publicRoutes.some((route) => pathname.startsWith(route))) {
+        return NextResponse.next();
+    }
+
     if (process.env.NODE_ENV !== "development") {
         // experiment route will be disabled in production
-        const prodRestrictedRoutes = [
-            "/test",
-            "/animations",
-        ];
+        const prodRestrictedRoutes = ["/test", "/animations"];
         if (
             prodRestrictedRoutes.some((restrictedRoute) =>
                 pathname.startsWith(restrictedRoute),
