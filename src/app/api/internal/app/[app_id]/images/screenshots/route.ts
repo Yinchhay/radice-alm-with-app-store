@@ -304,65 +304,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 // PATCH: Reorder screenshots - http://localhost:3000/api/internal/app/[app_id]/images/screenshots
 // DELETE: Remove specific screenshot - http://localhost:3000/api/internal/app/[app_id]/images/screenshots?screenshot_id=123
 
-export async function POST_REORDER(request: NextRequest, { params }: Params) {
-    // Check for Bearer Token and Permissions
-    const requiredPermission = new Set([]);
-    const { errorNoBearerToken, errorNoPermission, user } =
-        await checkBearerAndPermission(request, requiredPermission);
-    if (errorNoBearerToken) {
-        return buildNoBearerTokenErrorResponse();
-    }
-    if (errorNoPermission) {
-        return buildNoPermissionErrorResponse();
-    }
-    const appId = Number(params.app_id);
-    if (isNaN(appId) || appId <= 0) {
-        return buildErrorResponse(
-            unsuccessMessage,
-            generateAndFormatZodError("app_id", "Invalid app ID"),
-            HttpStatusCode.BAD_REQUEST_400,
-        );
-    }
-    // Validate permissions
-    try {
-        await validateAppPermissions(appId, user.id, user.type);
-    } catch (error: any) {
-        return buildErrorResponse(
-            unsuccessMessage,
-            generateAndFormatZodError("permission", error.message),
-            HttpStatusCode.UNAUTHORIZED_401,
-        );
-    }
-    // Parse new order from body
-    const body = await request.json();
-    const newOrder: string[] = body.order;
-    if (!Array.isArray(newOrder) || newOrder.length === 0) {
-        return buildErrorResponse(
-            unsuccessMessage,
-            generateAndFormatZodError("order", "Invalid order array"),
-            HttpStatusCode.BAD_REQUEST_400,
-        );
-    }
-    // Get all screenshots for this app
-    const { getAppScreenshots, updateMultipleScreenshotSortOrders } = await import("@/repositories/app_screenshot");
-    const screenshots = await getAppScreenshots(appId);
-    // Map new order to screenshot IDs
-    const updates: { id: number, sortOrder: number }[] = [];
-    for (let i = 0; i < newOrder.length; i++) {
-        const url = newOrder[i];
-        const screenshot = screenshots.find(s => s.imageUrl === url);
-        if (screenshot) {
-            updates.push({ id: screenshot.id, sortOrder: i + 1 });
-        }
-    }
-    if (updates.length > 0) {
-        await updateMultipleScreenshotSortOrders(updates);
-    }
-    return buildSuccessResponse("Screenshots reordered successfully", { updated: updates.length });
-}
-
 export async function PATCH(request: NextRequest, { params }: Params) {
-    // Parse action from body
     const body = await request.json();
     if (body.action === 'reorder') {
         // Add logging for debugging
