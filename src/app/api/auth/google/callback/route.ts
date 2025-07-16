@@ -43,8 +43,9 @@ export async function GET(request: NextRequest) {
             new URL("/testers/login?error=no_code", request.url),
         );
     }
-
+    
     try {
+        const redirectUri = new URL("/api/auth/google/callback", process.env.APP_URL).toString();
         const tokenResponse = await fetch(
             "https://oauth2.googleapis.com/token",
             {
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
                     client_secret: process.env.GOOGLE_CLIENT_SECRET!,
                     code,
                     grant_type: "authorization_code",
-                    redirect_uri: `${process.env.APP_URL}/api/auth/google/callback`,
+                    redirect_uri: redirectUri,
                 }),
             },
         );
