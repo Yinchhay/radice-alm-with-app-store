@@ -44,7 +44,7 @@ export function DeleteCategoryOverlay({
             <Button
                 data-test={`deleteCategory-${category.name}`}
                 onClick={() => setShowOverlay(true)}
-                className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white"
+                variant="danger"
             >
                 Delete
             </Button>
