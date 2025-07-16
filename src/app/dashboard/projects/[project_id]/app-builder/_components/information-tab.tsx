@@ -682,6 +682,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         appFile: appFileUrl,
         cardImage: cardImageUrl,
         bannerImage: bannerImageUrl,
+        featuredPriority: priorityTesting ? 1 : 0,
       };
       // In handleSave, after uploading new screenshots and before finishing
       if (appData?.appId) {
@@ -744,6 +745,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         updateType,
         whatsNew,
         status: 'pending',
+        featuredPriority: priorityTesting ? 1 : 0,
       };
       // First PATCH to update the draft app
       const editRes = await fetch(`/api/internal/app/${appData.appId}/edit`, {
