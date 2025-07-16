@@ -265,7 +265,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                             <div className="flex items-center gap-2">
                                                 <img
                                                     src={
-                                                        appType?.name === "Web"
+                                                        appType?.name === "Web" || appType?.name === "API"
                                                             ? "/ui/tick.mark.svg"
                                                             : "/ui/x_mark.svg"
                                                     }
@@ -279,8 +279,7 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                             <div className="flex items-center gap-2">
                                                 <img
                                                     src={
-                                                        appType?.name ===
-                                                        "Mobile"
+                                                        appType?.name === "Mobile" || appType?.name === "API"
                                                             ? "/ui/tick.mark.svg"
                                                             : "/ui/x_mark.svg"
                                                     }
@@ -289,16 +288,6 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                                 />
                                                 <span className="text-sm">
                                                     Andriod
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <img
-                                                    src={"/ui/x_mark.svg"}
-                                                    alt="iOS"
-                                                    className="w-6 h-6"
-                                                />
-                                                <span className="text-sm">
-                                                    iOS
                                                 </span>
                                             </div>
                                         </div>
