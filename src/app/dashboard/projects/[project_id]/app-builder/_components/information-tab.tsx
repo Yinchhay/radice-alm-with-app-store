@@ -353,7 +353,13 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           }
         }
         // Prefill form fields from the draft app
-        setAppData({ appId: draftApp.id, status: draftApp.status, app: draftApp });
+        setAppData({
+          appId: draftApp.id,
+          status: draftApp.status,
+          app: draftApp,
+          isNewApp: false,
+          project: projectData.data.project,
+        });
         setCurrentAppStatus(draftApp.status);
         setSubtitle(draftApp.subtitle || '');
         setDescription(draftApp.aboutDesc || '');
