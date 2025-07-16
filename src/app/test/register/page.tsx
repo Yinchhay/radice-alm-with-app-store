@@ -31,11 +31,7 @@ export default async function Page() {
     );
 }
 
-interface ActionResult {
-    error: string;
-}
-
-async function signup(formData: FormData): Promise<ActionResult> {
+async function signup(formData: FormData): Promise<void> {
     "use server";
 
     try {
@@ -51,16 +47,14 @@ async function signup(formData: FormData): Promise<ActionResult> {
             password.length < 6 ||
             password.length > 255
         ) {
-            return {
-                error: "Invalid password",
-            };
+            // You can set a cookie or redirect to an error page here
+            // For example, redirect to the same page with a query param
+            return redirect("/test/register?error=Invalid%20password");
         }
 
         // const userExists = await getUserByEmail(email);
         // if (userExists) {
-        //     return {
-        //         error: "Email already exists",
-        //     };
+        //     return redirect("/test/register?error=Email%20already%20exists");
         // }
 
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
@@ -76,9 +70,7 @@ async function signup(formData: FormData): Promise<ActionResult> {
         });
 
         if (!createdUser) {
-            return {
-                error: "Failed to create user",
-            };
+            return redirect("/test/register?error=Failed%20to%20create%20user");
         }
 
         // remove session and set session if being used by internal user (admin)
@@ -93,9 +85,6 @@ async function signup(formData: FormData): Promise<ActionResult> {
         return redirect("/");
     } catch (error: any) {
         localDebug(error.message, "signUpAction");
-
-        return {
-            error: "Unknown error",
-        };
+        return redirect("/test/register?error=Unknown%20error");
     }
 }

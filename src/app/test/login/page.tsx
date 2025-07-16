@@ -22,11 +22,7 @@ export default async function Page() {
     );
 }
 
-interface ActionResult {
-    error: string;
-}
-
-async function login(formData: FormData): Promise<ActionResult> {
+async function login(formData: FormData): Promise<void> {
     "use server";
     const email = formData.get("email") as string;
     
@@ -36,23 +32,20 @@ async function login(formData: FormData): Promise<ActionResult> {
         password.length < 6 ||
         password.length > 255
     ) {
-        return {
-            error: "Invalid password",
-        };
+        // You can handle error display here, e.g., by redirecting to an error page or using a state
+        return;
     }
 
     const userExists = await getUserByEmail(email);
     if (!userExists) {
-        return {
-            error: "Incorrect username or password",
-        };
+        // Handle error (e.g., redirect or set error state)
+        return;
     }
 
     const validPassword = await bcrypt.compare(password, userExists.password);
     if (!validPassword) {
-        return {
-            error: "Incorrect username or password",
-        };
+        // Handle error (e.g., redirect or set error state)
+        return;
     }
 
     const session = await lucia.createSession(userExists.id, {});
@@ -66,5 +59,5 @@ async function login(formData: FormData): Promise<ActionResult> {
     // invalidate permission cache
     await revalidateTags<GetUserRolesAndRolePermissions_C_Tag>(`getUserRolesAndRolePermissions_C:${userExists.id}`);
 
-    return redirect("/test/dashboard");
+    redirect("/test/dashboard");
 }

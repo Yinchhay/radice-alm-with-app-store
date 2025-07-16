@@ -84,7 +84,15 @@ function Project({
   user: User
   project: SuccessResponse<FetchAssociatedProjectsData>["data"]["projects"][number]
 }) {
-  const { canEdit, projectRole } = checkProjectRole(user.id, project, user.type)
+  const { canEdit, projectRole } = checkProjectRole(
+    user.id,
+    {
+      ...project,
+      projectMembers: project.projectMembers ?? [],
+      projectPartners: project.projectPartners ?? [],
+    },
+    user.type
+  )
   const canViewSettings = projectRole === ProjectRole.OWNER || projectRole === ProjectRole.SUPER_ADMIN
 
   return (

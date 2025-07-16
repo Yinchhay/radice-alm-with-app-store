@@ -1,6 +1,7 @@
 import { db } from "@/drizzle/db";
 import { appScreenshots } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import { MySqlRawQueryResult } from "drizzle-orm/mysql2";
 
 export interface AppScreenshot {
     id: number;
@@ -69,7 +70,7 @@ export async function deleteAppScreenshots(appId: number) {
 
         return {
             success: true,
-            deletedCount: result.rowsAffected || 0,
+            deletedCount: (result as any).affectedRows || 0,
         };
     } catch (error: any) {
         console.error("Error deleting app screenshots:", error);
