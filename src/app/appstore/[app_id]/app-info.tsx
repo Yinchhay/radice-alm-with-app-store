@@ -1,5 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 import { getBaseUrl } from "@/lib/server_utils";
 import { notFound } from "next/navigation";
 import AppBanner from "./_components/app-banner";
@@ -183,9 +186,11 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                 <h2 className="text-xl mb-4 font-semibold">
                                     About
                                 </h2>
-                                <p className="text-sm leading-5 break-words whitespace-pre-wrap max-w-none overflow-wrap-anywhere word-break-break-all sm:word-break-normal" style={{ color: "rgba(0,0,0,0.64)", overflowWrap: "anywhere", wordBreak: "break-word" }}>
-                                    {app.aboutDesc || "No description available."}
-                                </p>
+                                <div className="prose max-w-none text-sm leading-5" style={{ color: "rgba(0,0,0,0.64)" }}>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm as any]} rehypePlugins={[rehypeSanitize as any]}>
+                                        {app.aboutDesc || "No description available."}
+                                    </ReactMarkdown>
+                                </div>
                             </div>
                             <div className="mb-10">
                                 <div className="flex items-center justify-between mb-4">
@@ -200,30 +205,10 @@ function AppPage({ params }: { params: { app_id: string } }) {
                                         Version History
                                     </a>
                                 </div>
-                                <div className="text-sm leading-5" style={{ color: "rgba(0,0,0,0.64)" }}>
-                                    {currentVersion?.content ? (
-                                        <div className="space-y-2 max-w-none overflow-wrap-anywhere">
-                                            {currentVersion.content.split('\n').map((line: string, index: number) => (
-                                                <p key={index} className={line.trim() === '' ? 'h-2' : 'break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal'} style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>
-                                                    {line.startsWith('- ') ? (
-                                                        <span className="flex items-start gap-2">
-                                                            <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
-                                                            <span className="break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>{line.substring(2)}</span>
-                                                        </span>
-                                                    ) : line.startsWith('* ') ? (
-                                                        <span className="flex items-start gap-2">
-                                                            <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
-                                                            <span className="break-words whitespace-pre-wrap word-break-break-all sm:word-break-normal" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>{line.substring(2)}</span>
-                                                        </span>
-                                                    ) : (
-                                                        line || <br />
-                                                    )}
-                                                </p>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        "No update information available."
-                                    )}
+                                <div className="prose max-w-none text-sm leading-5" style={{ color: "rgba(0,0,0,0.64)" }}>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm as any]} rehypePlugins={[rehypeSanitize as any]}>
+                                        {currentVersion?.content || "No update information available."}
+                                    </ReactMarkdown>
                                 </div>
                             </div>
                             <div className="mb-10">
