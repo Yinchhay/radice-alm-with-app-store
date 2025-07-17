@@ -1,7 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-const FILE_STORAGE_PATH = path.join(process.cwd(), process.env.FILE_STORAGE_PATH || "public/uploads/apps");
+const FILE_STORAGE_PATH = path.join(process.cwd(), process.env.FILE_STORAGE_PATH || "public/uploads");
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
 export const MAX_SCREENSHOTS = 8;
