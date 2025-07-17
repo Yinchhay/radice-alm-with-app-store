@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeSanitize from 'rehype-sanitize';
 
 interface VersionLog {
   id: string;
@@ -88,7 +91,14 @@ export default function VersionLogsTab({ appId }: VersionLogsTabProps) {
               <span className="text-sm text-gray-500">{log.timeAgo}</span>
             </div>
             {/* Summary */}
-            <p className="text-gray-700 text-sm mb-3">{log.summary}</p>
+            <div className="prose max-w-none text-gray-700 text-sm mb-3">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm as any]}
+                rehypePlugins={[rehypeSanitize as any]}
+              >
+                {log.summary}
+              </ReactMarkdown>
+            </div>
             {/* Bullet list */}
                 {log.changes && log.changes.length > 0 && (
             <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
