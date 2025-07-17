@@ -710,7 +710,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         appFile: appFileUrl,
         cardImage: cardImageUrl,
         bannerImage: bannerImageUrl,
-        featuredPriority: priorityTesting ? 1 : 0,
+        featuredPriority: !!priorityTesting,
       };
       if (appData?.appId) {
         const orderedUrls = screenshotObjs.filter(f => f.url).map(f => f.url);
@@ -771,7 +771,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         updateType,
         whatsNew,
         status: 'pending',
-        featuredPriority: priorityTesting ? 1 : 0,
+        featuredPriority: !!priorityTesting,
       };
       // First PATCH to update the draft app
       const editRes = await fetch(`/api/internal/app/${appData.appId}/edit`, {
