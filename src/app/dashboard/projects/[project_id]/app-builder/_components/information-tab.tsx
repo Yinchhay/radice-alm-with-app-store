@@ -307,7 +307,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     if (!subtitle.trim()) newErrors.subtitle = 'Required';
     if (!appType) newErrors.appType = 'Required';
     if (!description.trim()) newErrors.description = 'Required';
-    if (!webUrl.trim()) newErrors.webUrl = 'Required';
     if (cardImages.length === 0) newErrors.cardImages = 'Required';
     if (bannerImages.length === 0) newErrors.bannerImages = 'Required';
     if (screenshots.length === 0) newErrors.screenshots = 'Required';
@@ -1054,12 +1053,11 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         </>
       )}
 
-      <h3 className="text-[20px] font-semibold mt-6 mb-2">Web URL <span className="text-red-500">*</span></h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Web URL</h3>
         <input
           type="text"
           value={webUrl}
           onChange={e => setWebUrl(e.target.value)}
-          required
           className={`w-full px-3 py-1.5 border ${webUrlError ? 'border-red-500' : 'border-gray-300'} rounded-md text-sm`}
           placeholder="https://yourapp.com"
         />
