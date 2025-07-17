@@ -170,7 +170,7 @@ CREATE TABLE `apps` (
   KEY `apps_type_app_types_id_fk` (`type`),
   CONSTRAINT `apps_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `apps_type_app_types_id_fk` FOREIGN KEY (`type`) REFERENCES `app_types` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -179,23 +179,6 @@ CREATE TABLE `apps` (
 
 LOCK TABLES `apps` WRITE;
 /*!40000 ALTER TABLE `apps` DISABLE KEYS */;
-INSERT INTO `apps` VALUES
-(36,4,NULL,NULL,NULL,NULL,NULL,NULL,'draft',NULL,NULL,0,NULL,'2025-07-12 08:46:21','2025-07-14 08:09:39'),
-(41,21,'sadasdasd',3,'sdfdadfasfasfasd','{\"updateType\":\"minor\",\"aboutDesc\":\"sdfdadfasfasfasd\"}',NULL,NULL,'accepted',NULL,NULL,0,NULL,'2025-07-12 09:21:27','2025-07-14 17:11:26'),
-(42,19,NULL,1,NULL,'{\"updateType\":\"major\",\"aboutDesc\":\"\"}',NULL,NULL,'accepted',NULL,NULL,0,NULL,'2025-07-14 14:15:13','2025-07-14 16:58:11'),
-(43,13,NULL,NULL,NULL,NULL,NULL,NULL,'draft',NULL,NULL,0,NULL,'2025-07-14 14:52:44','2025-07-14 14:52:44'),
-(46,12,NULL,NULL,NULL,NULL,NULL,NULL,'draft',NULL,NULL,0,NULL,'2025-07-14 14:53:29','2025-07-14 14:53:29'),
-(47,11,NULL,NULL,NULL,NULL,NULL,NULL,'draft',NULL,NULL,0,NULL,'2025-07-14 14:55:24','2025-07-14 14:55:24'),
-(48,10,NULL,NULL,NULL,NULL,NULL,NULL,'draft',NULL,NULL,0,NULL,'2025-07-14 14:57:06','2025-07-14 14:57:06'),
-(49,8,NULL,NULL,NULL,NULL,NULL,NULL,'draft',NULL,NULL,0,NULL,'2025-07-14 14:57:16','2025-07-14 14:57:16'),
-(53,20,'Hello',1,'abouttt','{\"updateType\":\"major\",\"aboutDesc\":\"abouttt\"}',NULL,NULL,'accepted',NULL,NULL,0,NULL,'2025-07-14 15:29:49','2025-07-14 15:44:50'),
-(58,18,'sub title 7.0.0',1,'about 7.0.0','{\"updateType\":\"major\",\"aboutDesc\":\"about 7.0.0\"}',NULL,NULL,'accepted',NULL,NULL,1,NULL,'2025-07-14 15:57:28','2025-07-14 16:56:09'),
-(59,20,'2.4',1,'abouttt','{\"updateType\":\"major\",\"aboutDesc\":\"abouttt\"}',NULL,NULL,'rejected',NULL,NULL,0,NULL,'2025-07-14 16:00:29','2025-07-14 16:55:58'),
-(60,18,'sub title 7.0.0',1,'about 7.0.0','{\"updateType\":\"major\",\"aboutDesc\":\"about 7.0.0\"}','https://youtube.com','/uploads/apps/app-release_1752568082692.apk','draft','/uploads/apps/Commits over time_1752521436705.png','/uploads/apps/Commits over time_1752521437810.png',1,NULL,'2025-07-14 17:02:55','2025-07-15 09:00:58'),
-(61,19,NULL,1,NULL,'{\"updateType\":\"major\",\"aboutDesc\":\"\"}',NULL,NULL,'draft',NULL,NULL,0,NULL,'2025-07-14 17:03:08','2025-07-14 17:03:08'),
-(62,21,'sadasdasd',3,'sdfdadfasfasfasd','{\"updateType\":\"minor\",\"aboutDesc\":\"sdfdadfasfasfasd\"}',NULL,NULL,'draft',NULL,NULL,0,NULL,'2025-07-14 17:12:36','2025-07-14 17:12:36'),
-(63,1,'scholarize subtitle',1,'scholarize about','{\"updateType\":\"major\",\"aboutDesc\":\"scholarize about\"}','https://www.youtube.com','/uploads/apps/Commits over time_1752520487013.png','draft','/uploads/apps/Commits over time_1752520487145.png','/uploads/apps/Commits over time_1752520487276.png',0,NULL,'2025-07-14 19:09:51','2025-07-14 19:14:48');
-
 /*!40000 ALTER TABLE `apps` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -224,7 +207,7 @@ CREATE TABLE `bug_reports` (
   CONSTRAINT `bug_reports_app_id_apps_id_fk` FOREIGN KEY (`app_id`) REFERENCES `apps` (`id`) ON DELETE SET NULL,
   CONSTRAINT `bug_reports_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `bug_reports_tester_id_testers_id_fk` FOREIGN KEY (`tester_id`) REFERENCES `testers` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -324,7 +307,7 @@ CREATE TABLE `feedbacks` (
   CONSTRAINT `feedbacks_app_id_apps_id_fk` FOREIGN KEY (`app_id`) REFERENCES `apps` (`id`) ON DELETE SET NULL,
   CONSTRAINT `feedbacks_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `feedbacks_tester_id_testers_id_fk` FOREIGN KEY (`tester_id`) REFERENCES `testers` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -333,7 +316,6 @@ CREATE TABLE `feedbacks` (
 
 LOCK TABLES `feedbacks` WRITE;
 /*!40000 ALTER TABLE `feedbacks` DISABLE KEYS */;
-INSERT INTO `feedbacks` VALUES (17,'f55e0919-5ef7-11f0-952a-daec5656b813',NULL,4,'sadsa','asdasd','4','2025-07-12 08:14:55','2025-07-12 08:14:55'),(18,'2371040d-5efd-11f0-952a-daec5656b813',NULL,18,'1234','1234','5','2025-07-12 08:49:55','2025-07-12 08:49:55'),(19,'f55e0919-5ef7-11f0-952a-daec5656b813',NULL,18,'asdasd','sadasd','4','2025-07-12 09:36:17','2025-07-12 09:36:17'),(20,'f55e0919-5ef7-11f0-952a-daec5656b813',NULL,18,'asdda','sadas','4','2025-07-14 16:37:17','2025-07-14 16:37:17');
 /*!40000 ALTER TABLE `feedbacks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -801,7 +783,7 @@ CREATE TABLE `versions` (
   KEY `versions_project_id_projects_id_fk` (`project_id`),
   CONSTRAINT `versions_app_id_apps_id_fk` FOREIGN KEY (`app_id`) REFERENCES `apps` (`id`) ON DELETE SET NULL,
   CONSTRAINT `versions_project_id_projects_id_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
