@@ -117,23 +117,46 @@ async function reorderScreenshotsOnServer(appId: number, newOrder: string[]) {
 }
 
 // Add a function to delete screenshots on the backend
-async function deleteScreenshotsOnServer(appId: number, urls: string[]) {
+async function deleteScreenshotOnServer(appId: number, screenshotId: number) {
   try {
-    const res = await fetch(`/api/internal/app/${appId}/images/screenshots`, {
+    const res = await fetch(`/api/internal/app/${appId}/images/screenshots?screenshot_id=${screenshotId}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ urls }),
       credentials: 'include',
     });
     return await res.json();
   } catch (e) {
-    return { success: false, message: 'Failed to delete screenshots' };
+    return { success: false, message: 'Failed to delete screenshot' };
   }
 }
 
-// Refactor uploadScreenshotsWithProgress to upload all files in parallel
+async function fetchScreenshotIds(appId: number, urls: string[]): Promise<{url: string, id: number}[]> {
+  try {
+    const res = await fetch(`/api/internal/app/${appId}/images/screenshots`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (data.success && data.screenshots) {
+      const urlToId = new Map();
+      data.screenshots.forEach((s: any) => {
+        if (s.imageUrl) {
+          urlToId.set(s.imageUrl, s.id);
+        }
+      });
+      return urls.map(url => ({
+        url,
+        id: urlToId.get(url)
+      })).filter((item: {url: string, id: number}) => item.id);
+    }
+    return [];
+  } catch (e) {
+    console.error('Failed to fetch screenshot IDs:', e);
+    return [];
+  }
+}
+
 async function uploadScreenshotsWithProgress(files: File[], appId: number, updateProgress: (file: File, percent: number, done?: boolean, uploadedUrl?: string) => void) {
-  const uploadedUrls: { url: string }[] = [];
+  const uploadedUrls: string[] = [];
   await Promise.all(files.map(file => new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
@@ -151,7 +174,7 @@ async function uploadScreenshotsWithProgress(files: File[], appId: number, updat
         try {
           const data = JSON.parse(xhr.responseText);
           if (data.success && data.newScreenshotPaths && data.newScreenshotPaths.length > 0) {
-            uploadedUrls.push({ url: data.newScreenshotPaths[0] });
+            uploadedUrls.push(data.newScreenshotPaths[0]);
             updateProgress(file, 100, true, data.newScreenshotPaths[0]);
           }
           resolve();
@@ -165,10 +188,15 @@ async function uploadScreenshotsWithProgress(files: File[], appId: number, updat
     xhr.onerror = function () { reject(xhr.statusText); };
     xhr.send(formData);
   })));
-  return uploadedUrls;
+  
+  if (uploadedUrls.length > 0) {
+    const screenshotData = await fetchScreenshotIds(appId, uploadedUrls);
+    return screenshotData.map(item => ({ url: item.url, id: item.id }));
+  }
+  
+  return [];
 }
 
-// Helper to create a consistent screenshot object
 function makeScreenshotObj(fileOrUrl: any) {
   if (fileOrUrl instanceof File) {
     return { file: fileOrUrl, url: undefined, progress: 0, key: `${fileOrUrl.name}_${fileOrUrl.lastModified}_${crypto.randomUUID()}` };
@@ -177,14 +205,12 @@ function makeScreenshotObj(fileOrUrl: any) {
   } else if (fileOrUrl && fileOrUrl.key) {
     return fileOrUrl;
   } else if (fileOrUrl && fileOrUrl.url) {
-    // Use id+url if available, else just url
     const key = fileOrUrl.id ? `${fileOrUrl.id}_${fileOrUrl.url}` : fileOrUrl.url;
     return { ...fileOrUrl, progress: 100, key };
   }
   return fileOrUrl;
 }
 
-// Add this hook to disable page scroll while dragging
 function useDisableScrollOnDrag() {
   useEffect(() => {
     function handleDragStart() {
@@ -205,7 +231,6 @@ function useDisableScrollOnDrag() {
   }, []);
 }
 
-// Utility to dedupe screenshots by key
 function dedupeByKey(arr: any[]) {
   const seen = new Set();
   const result = arr.filter(item => {
@@ -243,15 +268,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [webUrlError, setWebUrlError] = useState('');
 
-  // Add state for update type and what's new
   const [updateType, setUpdateType] = useState<'major' | 'minor' | 'patch'>('major');
   const [whatsNew, setWhatsNew] = useState('');
   const [latestAcceptedVersion, setLatestAcceptedVersion] = useState<{major: number, minor: number, patch: number} | null>(null);
 
-  // Add state to track screenshots to delete
   const [screenshotsToDelete, setScreenshotsToDelete] = useState<string[]>([]);
 
-  // Restore sessionCookie and userAgent state
   const [sessionCookie, setSessionCookie] = useState<string | null>(null);
   const [userAgent, setUserAgent] = useState<string | null>(null);
 
@@ -266,14 +288,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     }
   }, []);
 
-  // Static app type options
   const appTypeOptions = [
     { id: 1, name: 'Web' },
     { id: 2, name: 'Mobile' },
     { id: 3, name: 'API' },
   ];
 
-  // Simple URL validation: must start with http:// or https:// or be empty
   const validateWebUrl = (url: string) => {
     if (!url) return '';
     if (/^https?:\/\//.test(url)) return '';
@@ -287,7 +307,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     if (!subtitle.trim()) newErrors.subtitle = 'Required';
     if (!appType) newErrors.appType = 'Required';
     if (!description.trim()) newErrors.description = 'Required';
-    if (!webUrl.trim()) newErrors.webUrl = 'Required';
     if (cardImages.length === 0) newErrors.cardImages = 'Required';
     if (bannerImages.length === 0) newErrors.bannerImages = 'Required';
     if (screenshots.length === 0) newErrors.screenshots = 'Required';
@@ -300,7 +319,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   const aboutRef = useRef<HTMLTextAreaElement>(null);
   const whatsNewRef = useRef<HTMLTextAreaElement>(null);
 
-  // Update file state handlers to store actual File objects
   const handleAppFileChange = (files: FileList) => setAppFiles(Array.from(files));
   const handleCardImageChange = (files: FileList) => setCardImages(Array.from(files));
   const handleBannerImageChange = (files: FileList) => setBannerImages(Array.from(files));
@@ -312,14 +330,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     return [...prev, ...newFiles];
   });
 
-  // Replace the main data loading useEffect with a parallelized version
   useEffect(() => {
     let isMounted = true;
     async function loadAllData() {
       setLoading(true);
       setError(null);
       try {
-        // Fetch project data
         const projectRes = await fetch(`/api/internal/project/${projectId}`, {
           method: 'GET',
           cache: 'no-cache',
@@ -328,7 +344,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         if (!isMounted) return;
         if (!projectData.success) throw new Error(projectData.message || 'Failed to load project');
         setProject(projectData.data.project);
-        // Try to get the draft app
         let draftApp;
         let appData;
         const appRes = await fetch(`/api/internal/project/${projectId}/app`, {
@@ -336,7 +351,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           cache: 'no-cache',
         });
         appData = await appRes.json();
-        if (appData.success && appData.data && appData.data.app && appData.data.status === 'draft') {
+        if (
+          appData.success &&
+          appData.data &&
+          appData.data.app &&
+          (appData.data.status === 'draft' || appData.data.status === 'rejected')
+        ) {
           draftApp = appData.data.app;
         } else {
           // If not found, create a new draft
@@ -346,10 +366,12 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             cache: 'no-cache',
           });
           const appPostData = await appPostRes.json();
-          if (appPostData.success && appPostData.data && appPostData.data.app && appPostData.data.status === 'draft') {
+          if (appPostData.success && appPostData.data && appPostData.data.app && (appPostData.data.status === 'draft' || appPostData.data.status === 'rejected')) {
             draftApp = appPostData.data.app;
           } else {
-            throw new Error('No draft app found or could not create one.');
+            setError('No draft app found or could not create one.');
+            setLoading(false);
+            return;
           }
         }
         // Prefill form fields from the draft app
@@ -372,14 +394,29 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         if (draftApp.screenshots && Array.isArray(draftApp.screenshots)) {
           setScreenshots(
             dedupeByKey(
-              draftApp.screenshots.map((s: any) =>
-                typeof s === 'object' && s !== null && 'key' in s ? s : makeScreenshotObj(typeof s === 'string' ? s : '')
-              )
+              draftApp.screenshots.map((s: any) => {
+                if (typeof s === 'object' && s !== null && s.id && s.imageUrl) {
+                  return { id: s.id, url: s.imageUrl, key: `${s.id}_${s.imageUrl}` };
+                }
+                if (typeof s === 'string') {
+                  return makeScreenshotObj(s);
+                }
+                if (s && s.key) {
+                  return s;
+                }
+                return makeScreenshotObj(s);
+              })
             )
           );
+          
+          setTimeout(() => {
+            setScreenshots(prev => prev.map(s => ({
+              ...s,
+              progress: s.url ? 100 : s.progress
+            })));
+          }, 500);
         }
         setLoading(false);
-        // Fetch version info in parallel
         if (draftApp.id) {
           fetch(`http://localhost:3000/api/public/app/${draftApp.id}/version`)
             .then(r => r.json())
@@ -407,14 +444,13 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     return () => { isMounted = false; };
   }, [projectId]);
 
-  // Prefill updateType from appData.updateType
+
   useEffect(() => {
     if (appData && appData.app && typeof appData.app.updateType === 'string') {
       setUpdateType(appData.app.updateType as 'major' | 'minor' | 'patch');
     }
   }, [appData]);
 
-  // Prefill what's new from appData.aboutDesc
   useEffect(() => {
     if (appData && appData.app && typeof appData.app.aboutDesc === 'string') {
       setWhatsNew(appData.app.aboutDesc);
@@ -425,15 +461,13 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     setWebUrlError(validateWebUrl(webUrl));
   }, [webUrl]);
 
-  // Fetch latest accepted version on mount or when appData changes
+
   useEffect(() => {
     async function fetchLatestAcceptedVersion() {
       if (!appData?.appId) return;
       try {
         const res = await fetch(`http://localhost:3000/api/public/app/${appData.appId}/version`);
         const data = await res.json();
-        // Only set latestAcceptedVersion if there's a current version with a finalized versionNumber
-        // This means the version has been accepted and finalized
         if (data.success && data.data && data.data.current && 
             data.data.current.versionNumber && 
             data.data.current.versionNumber !== null && 
@@ -484,7 +518,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     });
   };
 
-  // Shared style for preview cards
   const previewCardStyle = {
     background: '#eee',
     margin: '8px 0',
@@ -503,7 +536,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     border: '1px solid #ccc',
   };
 
-  // Replace renderUploadList to use the shared style
   const renderUploadList = useCallback((uploads: any[], setter: Function, showArrows: boolean = false) => (
     <div className="space-y-2">
       {uploads.map((file, idx) => {
@@ -521,7 +553,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             key={file.key || filename + idx}
             style={previewCardStyle}
           >
-            {/* Only show arrows for screenshots */}
             {showArrows && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginRight: 8 }}>
                 <button
@@ -553,7 +584,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                     setter((prev: any[]) => {
                       const arr = [...prev];
                       [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
-                      // If all have .url, call reorder
                       if (arr.every(f => f.url) && typeof reorderScreenshotsOnServer === 'function' && arr[0].appId) {
                         reorderScreenshotsOnServer(arr[0].appId, arr.map(f => f.url));
                       }
@@ -605,8 +635,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
   ), []);
 
   async function uploadFilesIfNeeded(files: any[], projectId: string) {
-    // files: array of File or {url: string} objects
-    // returns: array of URLs (string)
     const uploadable = files.filter(f => f instanceof File);
     const existing = files.filter(f => !(f instanceof File) && f.url);
     let uploadedUrls: string[] = [];
@@ -626,7 +654,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         throw new Error(data.message || 'File upload failed');
       }
     }
-    // Return all URLs (existing + uploaded)
     return [
       ...existing.map(f => f.url),
       ...uploadedUrls,
@@ -639,8 +666,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     setSaveLoading(true);
     setSaveMessage(null);
     try {
-      // 1. Upload new screenshots if any
-      // Robustly detect new files whether they are File or { file: File, ... }
       let screenshotObjs = screenshots;
       const isNewFile = (f: any) => f instanceof File || (f.file && f.file instanceof File);
       if (screenshots.some(isNewFile)) {
@@ -668,17 +693,14 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         if (typeof appData.appId === 'number') {
           uploaded = await uploadScreenshotsWithProgress(filesToUpload, appData.appId, updateProgress);
         }
-        // Use the result of the upload, not the old state!
+
         screenshotObjs = [...others, ...uploaded.map(makeScreenshotObj)];
         setScreenshots(dedupeByKey(screenshotObjs));
       }
 
-      // 2. Upload other files if needed (appFiles, cardImages, bannerImages)
       const [appFileUrl] = await uploadFilesIfNeeded(appFiles, projectId);
       const [cardImageUrl] = await uploadFilesIfNeeded(cardImages, projectId);
       const [bannerImageUrl] = await uploadFilesIfNeeded(bannerImages, projectId);
-
-      // 3. Save the draft, using the URLs
       const payload = {
         subtitle,
         aboutDesc: description,
@@ -690,9 +712,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         bannerImage: bannerImageUrl,
         featuredPriority: priorityTesting ? 1 : 0,
       };
-      // In handleSave, after uploading new screenshots and before finishing
       if (appData?.appId) {
-        // Use the up-to-date screenshotObjs array, not the possibly stale screenshots state
         const orderedUrls = screenshotObjs.filter(f => f.url).map(f => f.url);
         if (orderedUrls.length > 0) {
           await reorderScreenshotsOnServer(appData.appId, orderedUrls);
@@ -848,15 +868,15 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     );
   }
 
-  if (error) {
+  if (error && currentAppStatus !== 'rejected') {
     return (
-      <div className="space-y-6">
-        {MainHeading}
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Information</h1>
-          <p className="text-red-500 text-sm">
-            Error: {error}
-          </p>
+      <div className="flex flex-col items-center justify-center min-h-[40vh]">
+        <div className="bg-white shadow-lg rounded-xl p-8 flex flex-col items-center border border-gray-200 max-w-md w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-yellow-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+          </svg>
+          <h2 className="text-xl font-bold mb-2 text-gray-800">App Under Review</h2>
+          <p className="text-gray-600 text-center mb-2">This app is under review. You cannot submit or edit information at this time.</p>
         </div>
       </div>
     );
@@ -1033,12 +1053,11 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         </>
       )}
 
-      <h3 className="text-[20px] font-semibold mt-6 mb-2">Web URL <span className="text-red-500">*</span></h3>
+      <h3 className="text-[20px] font-semibold mt-6 mb-2">Web URL</h3>
         <input
           type="text"
           value={webUrl}
           onChange={e => setWebUrl(e.target.value)}
-          required
           className={`w-full px-3 py-1.5 border ${webUrlError ? 'border-red-500' : 'border-gray-300'} rounded-md text-sm`}
           placeholder="https://yourapp.com"
         />
@@ -1188,10 +1207,26 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           </div>
           <button
             className="ml-2 text-gray-500 hover:text-red-500 text-sm"
-            onClick={e => {
+            onClick={async e => {
               e.stopPropagation();
-              setScreenshots(prev => prev.filter((_, i) => i !== idx));
-              if (url) setScreenshotsToDelete(prev => [...prev, url]);
+              console.log('Delete clicked:', fileObj, appData?.appId);
+
+              if (fileObj.file && !fileObj.url && !fileObj.id) {
+                console.log('Removing unuploaded file from local state');
+                setScreenshots(prev => prev.filter((_, i) => i !== idx));
+                return;
+              }
+              if (fileObj.id && appData?.appId) {
+                const result = await deleteScreenshotOnServer(appData.appId, fileObj.id);
+                if (result.success) {
+                  setScreenshots(prev => prev.filter((_, i) => i !== idx));
+                } else {
+                  console.error('Failed to delete screenshot:', result.message);
+                }
+              } else {
+                console.warn('Missing id or appId for delete:', fileObj, appData?.appId);
+                setScreenshots(prev => prev.filter((_, i) => i !== idx));
+              }
             }}
           >✕</button>
         </div>
@@ -1210,15 +1245,6 @@ export default function InformationTab({ projectId }: InformationTabProps) {
           disabled={saveLoading || !!webUrlError}
         >
           {saveLoading ? 'Submitting...' : 'Continue'}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="flex-1 basis-1/2 py-3 text-base font-semibold h-full justify-center"
-          onClick={handleSave}
-          disabled={saveLoading || !!webUrlError}
-        >
-          {saveLoading ? 'Saving...' : 'Save as Draft'}
         </Button>
       </div>
       {saveMessage && <span className="ml-4 text-sm text-green-600">{saveMessage}</span>}

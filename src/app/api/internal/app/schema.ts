@@ -67,11 +67,7 @@ export const editAppFormSchema = z.object({
     
     bannerImage: optionalString(500),
     
-    featuredPriority: z
-        .number({
-            invalid_type_error: "Featured priority must be a number",
-        })
-        .optional(),
+    featuredPriority: z.boolean().optional(),
     
     updateType: z.enum(["major", "minor", "patch"]).optional(),
 });

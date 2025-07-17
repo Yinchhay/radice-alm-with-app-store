@@ -10,32 +10,33 @@ const typeColors: Record<number, { name: string; color: string }> = {
 
 export function AppCard({app, clickable = true} : { app: App; clickable?: boolean}){
     const CardContent = () => (
-        <div className="bg-transparent overflow-hidden flex flex-col p-4 w-full">
-            <div className="w-full aspect-[16/9] mb-4">
+        <div className="w-full rounded-xl overflow-hidden bg-white border flex flex-col">
+            <div className="w-full aspect-[16/9] relative">
                 {app.cardImage ? (
                     <Image
                         src={app.cardImage.startsWith("/") ? app.cardImage : `/placeholders/placeholder.png`}
                         alt={app.project?.name || "App"}
-                        className="w-full h-full object-cover rounded-lg"
-                        width={400}
-                        height={225}
-                        style={{objectFit: 'cover', borderRadius: '0.5rem'}}
+                        className="w-full h-full object-cover"
+                        fill
+                        style={{objectFit: 'cover'}}
                         onError={(e) => {
                             e.currentTarget.src = "/placeholders/placeholder.png";
                         }}
                         priority={false}
                     />
                 ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                         <span className="text-gray-400">No Image</span>
                     </div>
                 )}
             </div>
-            <div className="flex flex-col">
-                <div className="font-bold text-sm mb-1" style={{color: "#7F56D9"}}>{app.category?.name|| "Unknown"}</div>
-                <div className="font-bold text-lg mb-1">{app.project?.name || "Untitled"}</div>
-                <div className="text-sm text-gray-600 mb-2">{app.subtitle}</div>
-                <div className="flex items-center justify-between">
+            <div className="flex flex-col justify-between p-4 flex-1">
+                <div>
+                    <div className="font-bold text-sm mb-1" style={{color: "#7F56D9"}}>{app.category?.name|| "Unknown"}</div>
+                    <div className="font-bold text-lg mb-1 line-clamp-1">{app.project?.name || "Untitled"}</div>
+                    <div className="text-sm text-gray-600 mb-2 line-clamp-2">{app.subtitle}</div>
+                </div>
+                <div className="flex items-center justify-between mt-2">
                     <span
                         className={`text-xs px-2 py-1 rounded-full text-white`}
                         style={{ 

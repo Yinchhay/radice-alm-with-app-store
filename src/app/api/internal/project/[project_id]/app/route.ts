@@ -156,7 +156,7 @@ export async function POST(
         if (pendingApp) {
             // Fetch screenshots for the pending app
             const screenshots = await getAppScreenshots(pendingApp.id);
-            const screenshotUrls = screenshots.map(s => s.imageUrl).filter(Boolean);
+            const screenshotObjs = screenshots.filter(s => s.imageUrl).map(s => ({ id: s.id, imageUrl: s.imageUrl }));
             return buildSuccessResponse(
                 "Found pending app (cannot create or save another)",
                 {
@@ -175,7 +175,7 @@ export async function POST(
                         bannerImage: pendingApp.bannerImage,
                         featuredPriority: pendingApp.featuredPriority,
                         status: pendingApp.status,
-                        screenshots: screenshotUrls,
+                        screenshots: screenshotObjs,
                     },
                 },
             );
@@ -189,7 +189,7 @@ export async function POST(
         if (nonAcceptedApp) {
             // Fetch screenshots for the app
             const screenshots = await getAppScreenshots(nonAcceptedApp.id);
-            const screenshotUrls = screenshots.map(s => s.imageUrl).filter(Boolean);
+            const screenshotObjs = screenshots.filter(s => s.imageUrl).map(s => ({ id: s.id, imageUrl: s.imageUrl }));
             return buildSuccessResponse(
                 "Found existing app in progress",
                 {
@@ -208,7 +208,7 @@ export async function POST(
                         bannerImage: nonAcceptedApp.bannerImage,
                         featuredPriority: nonAcceptedApp.featuredPriority,
                         status: nonAcceptedApp.status,
-                        screenshots: screenshotUrls,
+                        screenshots: screenshotObjs,
                     },
                 },
             );
@@ -368,7 +368,7 @@ export async function POST(
         // Fetch the full app object and its screenshots after creation
         const newAppDetails = await getAppByIdForPublic(appId);
         const newAppScreenshots = await getAppScreenshots(appId);
-        const newAppScreenshotUrls = newAppScreenshots.map(s => s.imageUrl).filter(Boolean);
+        const newAppScreenshotObjs = newAppScreenshots.filter(s => s.imageUrl).map(s => ({ id: s.id, imageUrl: s.imageUrl }));
 
         return buildSuccessResponse<FetchCreateApp>(
             acceptedApp
@@ -380,7 +380,7 @@ export async function POST(
                 status: "draft",
                 app: {
                     ...newAppDetails,
-                    screenshots: newAppScreenshotUrls,
+                    screenshots: newAppScreenshotObjs,
                 },
             },
         );
