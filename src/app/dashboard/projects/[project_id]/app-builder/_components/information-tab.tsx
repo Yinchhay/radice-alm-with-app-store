@@ -211,7 +211,7 @@ function getScreenshotBaseName(url: string) {
     return url.replace(/^\/uploads\/apps\//, "").replace(/\.[^.]+$/, "");
 }
 
-// Update uploadScreenshotsWithProgress to store only the base name
+// Update uploadScreenshotsWithProgress to upload all screenshots in a single POST
 async function uploadScreenshotsWithProgress(
     files: File[],
     appId: number,
@@ -222,68 +222,71 @@ async function uploadScreenshotsWithProgress(
         uploadedUrl?: string,
     ) => void,
 ) {
-    const uploadedUrls: string[] = [];
-    await Promise.all(
-        files.map(
-            (file) =>
-                new Promise<void>((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    const formData = new FormData();
-                    formData.append("screenshots", file);
-                    xhr.open(
-                        "POST",
-                        `${API_BASE_URL}/api/internal/app/${appId}/images/screenshots`,
-                        true,
-                    );
-                    xhr.withCredentials = true;
-                    xhr.upload.onprogress = (event) => {
-                        if (event.lengthComputable) {
-                            const percent = Math.round(
-                                (event.loaded / event.total) * 100,
+    if (files.length === 0) return [];
+    const formData = new FormData();
+    files.forEach((file) => {
+        formData.append("screenshots", file);
+    });
+    // Use XMLHttpRequest for progress
+    return new Promise<any[]>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(
+            "POST",
+            `${API_BASE_URL}/api/internal/app/${appId}/images/screenshots`,
+            true,
+        );
+        xhr.withCredentials = true;
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                // Update progress for all files
+                files.forEach((file) => updateProgress(file, percent));
+            }
+        };
+        xhr.onload = async function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    if (
+                        data.success &&
+                        data.newScreenshotPaths &&
+                        data.newScreenshotPaths.length > 0
+                    ) {
+                        // Fetch screenshot IDs for all uploaded paths
+                        const screenshotData = await fetchScreenshotIds(
+                            appId,
+                            data.newScreenshotPaths,
+                        );
+                        // Mark all files as done
+                        files.forEach((file, idx) => {
+                            updateProgress(
+                                file,
+                                100,
+                                true,
+                                data.newScreenshotPaths[idx],
                             );
-                            updateProgress(file, percent);
-                        }
-                    };
-                    xhr.onload = function () {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            try {
-                                const data = JSON.parse(xhr.responseText);
-                                if (
-                                    data.success &&
-                                    data.newScreenshotPaths &&
-                                    data.newScreenshotPaths.length > 0
-                                ) {
-                                    const baseName = getScreenshotBaseName(data.newScreenshotPaths[0]);
-                                    uploadedUrls.push(baseName);
-                                    updateProgress(
-                                        file,
-                                        100,
-                                        true,
-                                        baseName,
-                                    );
-                                }
-                                resolve();
-                            } catch (e) {
-                                reject(e);
-                            }
-                        } else {
-                            reject(xhr.statusText);
-                        }
-                    };
-                    xhr.onerror = function () {
-                        reject(xhr.statusText);
-                    };
-                    xhr.send(formData);
-                }),
-        ),
-    );
-
-    if (uploadedUrls.length > 0) {
-        const screenshotData = await fetchScreenshotIds(appId, uploadedUrls.map(name => `/uploads/apps/${name}`));
-        return screenshotData.map((item) => ({ url: getScreenshotBaseName(item.url), id: item.id }));
-    }
-
-    return [];
+                        });
+                        resolve(
+                            screenshotData.map((item) => ({
+                                url: item.url,
+                                id: item.id,
+                            })),
+                        );
+                        return;
+                    }
+                    resolve([]);
+                } catch (e) {
+                    reject(e);
+                }
+            } else {
+                reject(xhr.statusText);
+            }
+        };
+        xhr.onerror = function () {
+            reject(xhr.statusText);
+        };
+        xhr.send(formData);
+    });
 }
 
 // Update makeScreenshotObj to handle base names
@@ -526,48 +529,30 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                     );
                 setProject(projectData.data.project);
                 let draftApp;
-                let appData;
-                const appRes = await fetch(
+                // --- ALWAYS CREATE NEW DRAFT ---
+                const appPostRes = await fetch(
                     `${API_BASE_URL}/api/internal/project/${projectId}/app`,
                     {
-                        method: "GET",
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
                         cache: "no-cache",
                     },
                 );
-                appData = await appRes.json();
+                const appPostData = await appPostRes.json();
                 if (
-                    appData.success &&
-                    appData.data &&
-                    appData.data.app &&
-                    (appData.data.status === "draft" ||
-                        appData.data.status === "rejected")
+                    appPostData.success &&
+                    appPostData.data &&
+                    appPostData.data.app &&
+                    (appPostData.data.status === "draft" ||
+                        appPostData.data.status === "rejected")
                 ) {
-                    draftApp = appData.data.app;
+                    draftApp = appPostData.data.app;
                 } else {
-                    // If not found, create a new draft
-                    const appPostRes = await fetch(
-                        `${API_BASE_URL}/api/internal/project/${projectId}/app`,
-                        {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            cache: "no-cache",
-                        },
-                    );
-                    const appPostData = await appPostRes.json();
-                    if (
-                        appPostData.success &&
-                        appPostData.data &&
-                        appPostData.data.app &&
-                        (appPostData.data.status === "draft" ||
-                            appPostData.data.status === "rejected")
-                    ) {
-                        draftApp = appPostData.data.app;
-                    } else {
-                        setError("No draft app found or could not create one.");
-                        setLoading(false);
-                        return;
-                    }
+                    setError("No draft app found or could not create one.");
+                    setLoading(false);
+                    return;
                 }
+                // --- END ALWAYS CREATE NEW DRAFT ---
                 // Prefill form fields from the draft app
                 setAppData({
                     appId: draftApp.id,
