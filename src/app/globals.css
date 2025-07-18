@@ -37,3 +37,14 @@
 .markdown-preview li {
   margin-bottom: 0.25em;
 }
+
+.prose ul,
+.prose ol {
+  list-style: disc;
+  margin-left: 1.5em;
+  padding-left: 0.5em;
+  margin-top: 0.5em;
+}
+.prose li {
+  margin-bottom: 0.25em;
+}
