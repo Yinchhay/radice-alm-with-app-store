@@ -1246,7 +1246,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ whatsNew }),
+                    body: JSON.stringify({ updateType, whatsNew }),
                     credentials: "include",
                 },
             );
