@@ -1,6 +1,7 @@
 import type { App } from "@/types/app_types";
 import Link from "next/link";
 import Image from "next/image";
+import React, { useState } from "react";
 
 const typeColors: Record<number, { name: string; color: string }> = {
     1: { name: "Web", color: "#4285F4" },
@@ -8,20 +9,20 @@ const typeColors: Record<number, { name: string; color: string }> = {
     3: { name: "API", color: "#34A853" }
 }
 
-export function AppCard({app, clickable = true} : { app: App; clickable?: boolean}){
+export function AppCard({ app, clickable = true }: { app: App; clickable?: boolean }) {
+    const [imageError, setImageError] = useState(false);
+
     const CardContent = () => (
         <div className="w-full overflow-hidden bg-white flex flex-col">
             <div className="w-full aspect-[16/9] border-2 border-gray-100 overflow-hidden rounded-lg relative">
-                {app.cardImage ? (
+                {!imageError && app.cardImage ? (
                     <Image
                         src={app.cardImage.startsWith("/") ? app.cardImage : `/placeholders/placeholder.png`}
                         alt={app.project?.name || "App"}
                         className="w-full h-full object-cover"
                         fill
-                        style={{objectFit: 'cover'}}
-                        onError={(e) => {
-                            e.currentTarget.src = "/placeholders/placeholder.png";
-                        }}
+                        style={{ objectFit: 'cover' }}
+                        onError={() => setImageError(true)}
                         priority={false}
                     />
                 ) : (
