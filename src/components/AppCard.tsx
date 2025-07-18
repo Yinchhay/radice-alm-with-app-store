@@ -10,8 +10,8 @@ const typeColors: Record<number, { name: string; color: string }> = {
 
 export function AppCard({app, clickable = true} : { app: App; clickable?: boolean}){
     const CardContent = () => (
-        <div className="w-full rounded-xl overflow-hidden bg-white border flex flex-col">
-            <div className="w-full aspect-[16/9] relative">
+        <div className="w-full overflow-hidden bg-white flex flex-col">
+            <div className="w-full aspect-[16/9] border-2 border-gray-100 overflow-hidden rounded-lg relative">
                 {app.cardImage ? (
                     <Image
                         src={app.cardImage.startsWith("/") ? app.cardImage : `/placeholders/placeholder.png`}
