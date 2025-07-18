@@ -115,14 +115,14 @@ export async function fetchAppBuilderData(
           combinedData.app = {
             id: appDetails.data.app.id,
             subtitle: appDetails.data.app.subtitle,
-            type: null, // We'll need to map this from appType if available
+            type: null,
             aboutDesc: appDetails.data.app.aboutDesc,
             content: appDetails.data.app.content,
             webUrl: appDetails.data.app.webUrl,
             appFile: appDetails.data.app.appFile,
             cardImage: appDetails.data.app.cardImage,
             bannerImage: appDetails.data.app.bannerImage,
-            featuredPriority: null, // We'll need to map this from priority if available
+            featuredPriority: null,
             status: appDetails.data.app.status || 'draft',
             screenshots: appDetails.data.app.screenshots || [],
           };
