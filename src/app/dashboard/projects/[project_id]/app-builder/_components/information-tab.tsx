@@ -363,7 +363,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     const [cardImages, setCardImages] = useState<any[]>([]);
     const [bannerImages, setBannerImages] = useState<any[]>([]);
     const [cardImagesToDelete, setCardImagesToDelete] = useState<string[]>([]);
-    const [bannerImagesToDelete, setBannerImagesToDelete] = useState<string[]>([]);
+    const [bannerImagesToDelete, setBannerImagesToDelete] = useState<string[]>(
+        [],
+    );
     const [screenshots, setScreenshots] = useState<any[]>([]);
 
     const [saveLoading, setSaveLoading] = useState(false);
@@ -429,11 +431,24 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             webUrl !== initialDataRef.current.webUrl ||
             updateType !== initialDataRef.current.updateType ||
             whatsNew !== initialDataRef.current.whatsNew ||
-            JSON.stringify(cardImages) !== JSON.stringify(initialDataRef.current.cardImages) ||
-            JSON.stringify(bannerImages) !== JSON.stringify(initialDataRef.current.bannerImages) ||
-            JSON.stringify(screenshots) !== JSON.stringify(initialDataRef.current.screenshots);
+            JSON.stringify(cardImages) !==
+                JSON.stringify(initialDataRef.current.cardImages) ||
+            JSON.stringify(bannerImages) !==
+                JSON.stringify(initialDataRef.current.bannerImages) ||
+            JSON.stringify(screenshots) !==
+                JSON.stringify(initialDataRef.current.screenshots);
         setHasUnsavedChanges(changed);
-    }, [subtitle, description, appType, webUrl, cardImages, bannerImages, screenshots, updateType, whatsNew]);
+    }, [
+        subtitle,
+        description,
+        appType,
+        webUrl,
+        cardImages,
+        bannerImages,
+        screenshots,
+        updateType,
+        whatsNew,
+    ]);
 
     // Warn on browser navigation (refresh, close, back)
     useEffect(() => {
@@ -483,9 +498,21 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     const handleAppFileChange = (files: FileList) =>
         setAppFiles(Array.from(files));
     const handleCardImageChange = (files: FileList) =>
-        setCardImages(Array.from(files).map(file => ({ file, progress: 0, key: `${file.name}_${file.lastModified}_${crypto.randomUUID()}` })));
+        setCardImages(
+            Array.from(files).map((file) => ({
+                file,
+                progress: 0,
+                key: `${file.name}_${file.lastModified}_${crypto.randomUUID()}`,
+            })),
+        );
     const handleBannerImageChange = (files: FileList) =>
-        setBannerImages(Array.from(files).map(file => ({ file, progress: 0, key: `${file.name}_${file.lastModified}_${crypto.randomUUID()}` })));
+        setBannerImages(
+            Array.from(files).map((file) => ({
+                file,
+                progress: 0,
+                key: `${file.name}_${file.lastModified}_${crypto.randomUUID()}`,
+            })),
+        );
     const handleScreenshotsChange = (files: FileList) =>
         setScreenshots((prev) => {
             const newFiles = Array.from(files).map(makeScreenshotObj);
@@ -967,55 +994,88 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         [],
     );
 
-    async function uploadFilesIfNeeded(files: any[], projectId: string, setProgress?: (idx: number, percent: number) => void, setImageState?: (updater: (prev: any[]) => any[]) => void) {
-        const uploadable = files.filter((f) => f instanceof File || (f.file && f.file instanceof File));
-        const existing = files.filter((f) => !(f instanceof File) && !f.file && f.url);
+    async function uploadFilesIfNeeded(
+        files: any[],
+        projectId: string,
+        setProgress?: (idx: number, percent: number) => void,
+        setImageState?: (updater: (prev: any[]) => any[]) => void,
+    ): Promise<string[]> {
+        const uploadable = files.filter(
+            (f) => f instanceof File || (f.file && f.file instanceof File),
+        );
+        const existing = files.filter(
+            (f) => !(f instanceof File) && !f.file && f.url,
+        );
+
         let uploadedUrls: string[] = [];
+
         if (uploadable.length > 0) {
             const formData = new FormData();
             formData.append("projectId", projectId);
-            uploadable.forEach((file, idx) => formData.append("files", file.file || file));
+            uploadable.forEach((file) => {
+                formData.append("files", file.file || file);
+            });
+
             const xhr = new XMLHttpRequest();
             xhr.open("POST", `${API_BASE_URL}/api/internal/file/upload`, true);
             xhr.withCredentials = true;
+
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable && setProgress) {
-                    const percent = Math.round((event.loaded / event.total) * 100);
+                    const percent = Math.round(
+                        (event.loaded / event.total) * 100,
+                    );
                     setProgress(0, percent);
                 }
             };
+
             const promise = new Promise<void>((resolve, reject) => {
                 xhr.onload = function () {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         try {
                             const data = JSON.parse(xhr.responseText);
-            if (data.success && data.paths) {
-                uploadedUrls = data.paths.map((p: string) => "/uploads/" + p);
-                                // Update state with new URLs and progress
+                            if (data.success && data.paths) {
+                                uploadedUrls = data.paths.map(
+                                    (p: string) => "/" + p,
+                                );
                                 if (setImageState) {
-                                    setImageState((prev) => prev.map((img, i) => {
-                                        if (i < uploadedUrls.length) {
-                                            return { ...img, url: uploadedUrls[i], file: undefined, progress: 100 };
-                                        }
-                                        return img;
-                                    }));
+                                    setImageState((prev) =>
+                                        prev.map((img, i) => {
+                                            if (i < uploadedUrls.length) {
+                                                return {
+                                                    ...img,
+                                                    url: uploadedUrls[i],
+                                                    file: undefined,
+                                                    progress: 100,
+                                                };
+                                            }
+                                            return img;
+                                        }),
+                                    );
                                 }
+                                resolve();
+                            } else {
+                                reject(
+                                    "Upload failed: no success or paths in response.",
+                                );
                             }
-                            resolve();
                         } catch (e) {
                             reject(e);
                         }
-            } else {
-                        reject(xhr.statusText);
+                    } else {
+                        reject(`Upload failed with status ${xhr.status}`);
                     }
                 };
+
                 xhr.onerror = function () {
                     reject(xhr.statusText);
                 };
             });
+
             xhr.send(formData);
             await promise;
         }
+
         return [...existing.map((f) => f.url), ...uploadedUrls];
     }
 
@@ -1025,23 +1085,28 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         setSaveLoading(true);
         setSaveMessage(null);
         try {
-            // Delete card images marked for deletion
             if (appData?.appId && cardImagesToDelete.length > 0) {
                 for (const url of cardImagesToDelete) {
-                    await fetch(`${API_BASE_URL}/api/internal/app/${appData.appId}/images/card`, {
-                        method: 'DELETE',
-                        credentials: 'include',
-                    });
+                    await fetch(
+                        `${API_BASE_URL}/api/internal/app/${appData.appId}/images/card`,
+                        {
+                            method: "DELETE",
+                            credentials: "include",
+                        },
+                    );
                 }
                 setCardImagesToDelete([]);
             }
             // Delete banner images marked for deletion
             if (appData?.appId && bannerImagesToDelete.length > 0) {
                 for (const url of bannerImagesToDelete) {
-                    await fetch(`${API_BASE_URL}/api/internal/app/${appData.appId}/images/banner`, {
-                        method: 'DELETE',
-                        credentials: 'include',
-                    });
+                    await fetch(
+                        `${API_BASE_URL}/api/internal/app/${appData.appId}/images/banner`,
+                        {
+                            method: "DELETE",
+                            credentials: "include",
+                        },
+                    );
                 }
                 setBannerImagesToDelete([]);
             }
@@ -1091,13 +1156,23 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             const [cardImageUrl] = await uploadFilesIfNeeded(
                 cardImages,
                 projectId,
-                (idx, percent) => setCardImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
+                (idx, percent) =>
+                    setCardImages((prev) =>
+                        prev.map((img, i) =>
+                            i === idx ? { ...img, progress: percent } : img,
+                        ),
+                    ),
                 (updater) => setCardImages(updater),
             );
             const [bannerImageUrl] = await uploadFilesIfNeeded(
                 bannerImages,
                 projectId,
-                (idx, percent) => setBannerImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
+                (idx, percent) =>
+                    setBannerImages((prev) =>
+                        prev.map((img, i) =>
+                            i === idx ? { ...img, progress: percent } : img,
+                        ),
+                    ),
                 (updater) => setBannerImages(updater),
             );
             const payload = {
@@ -1138,20 +1213,26 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             // Delete card images marked for deletion
             if (appData?.appId && cardImagesToDelete.length > 0) {
                 for (const url of cardImagesToDelete) {
-                    await fetch(`${API_BASE_URL}/api/internal/app/${appData.appId}/images/card`, {
-                        method: 'DELETE',
-                        credentials: 'include',
-                    });
+                    await fetch(
+                        `${API_BASE_URL}/api/internal/app/${appData.appId}/images/card`,
+                        {
+                            method: "DELETE",
+                            credentials: "include",
+                        },
+                    );
                 }
                 setCardImagesToDelete([]);
             }
             // Delete banner images marked for deletion
             if (appData?.appId && bannerImagesToDelete.length > 0) {
                 for (const url of bannerImagesToDelete) {
-                    await fetch(`${API_BASE_URL}/api/internal/app/${appData.appId}/images/banner`, {
-                        method: 'DELETE',
-                        credentials: 'include',
-                    });
+                    await fetch(
+                        `${API_BASE_URL}/api/internal/app/${appData.appId}/images/banner`,
+                        {
+                            method: "DELETE",
+                            credentials: "include",
+                        },
+                    );
                 }
                 setBannerImagesToDelete([]);
             }
@@ -1160,13 +1241,23 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             const [cardImageUrl] = await uploadFilesIfNeeded(
                 cardImages,
                 projectId,
-                (idx, percent) => setCardImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
+                (idx, percent) =>
+                    setCardImages((prev) =>
+                        prev.map((img, i) =>
+                            i === idx ? { ...img, progress: percent } : img,
+                        ),
+                    ),
                 (updater) => setCardImages(updater),
             );
             const [bannerImageUrl] = await uploadFilesIfNeeded(
                 bannerImages,
                 projectId,
-                (idx, percent) => setBannerImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
+                (idx, percent) =>
+                    setBannerImages((prev) =>
+                        prev.map((img, i) =>
+                            i === idx ? { ...img, progress: percent } : img,
+                        ),
+                    ),
                 (updater) => setBannerImages(updater),
             );
             // Upload screenshots if needed
@@ -1419,11 +1510,21 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 cardImages={cardImages}
                 setCardImages={(updater: any) => {
                     setCardImages((prev: any[]) => {
-                        const next = typeof updater === 'function' ? updater(prev) : updater;
+                        const next =
+                            typeof updater === "function"
+                                ? updater(prev)
+                                : updater;
                         // Find removed card images (with .url)
-                        const removed = prev.filter(img => img.url && !next.some((n: any) => n.url === img.url));
+                        const removed = prev.filter(
+                            (img) =>
+                                img.url &&
+                                !next.some((n: any) => n.url === img.url),
+                        );
                         if (removed.length > 0) {
-                            setCardImagesToDelete((old) => [...old, ...removed.map(r => r.url)]);
+                            setCardImagesToDelete((old) => [
+                                ...old,
+                                ...removed.map((r) => r.url),
+                            ]);
                         }
                         return next;
                     });
@@ -1431,20 +1532,42 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 bannerImages={bannerImages}
                 setBannerImages={(updater: any) => {
                     setBannerImages((prev: any[]) => {
-                        const next = typeof updater === 'function' ? updater(prev) : updater;
+                        const next =
+                            typeof updater === "function"
+                                ? updater(prev)
+                                : updater;
                         // Find removed banner images (with .url)
-                        const removed = prev.filter(img => img.url && !next.some((n: any) => n.url === img.url));
+                        const removed = prev.filter(
+                            (img) =>
+                                img.url &&
+                                !next.some((n: any) => n.url === img.url),
+                        );
                         if (removed.length > 0) {
-                            setBannerImagesToDelete((old) => [...old, ...removed.map(r => r.url)]);
+                            setBannerImagesToDelete((old) => [
+                                ...old,
+                                ...removed.map((r) => r.url),
+                            ]);
                         }
                         return next;
-                                        });
-                                    }}
+                    });
+                }}
                 errors={errors}
                 renderUploadList={renderUploadList}
                 FileDropzone={FileDropzone}
-                setCardImageProgress={(idx: number, percent: number) => setCardImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img))}
-                setBannerImageProgress={(idx: number, percent: number) => setBannerImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img))}
+                setCardImageProgress={(idx: number, percent: number) =>
+                    setCardImages((prev) =>
+                        prev.map((img, i) =>
+                            i === idx ? { ...img, progress: percent } : img,
+                        ),
+                    )
+                }
+                setBannerImageProgress={(idx: number, percent: number) =>
+                    setBannerImages((prev) =>
+                        prev.map((img, i) =>
+                            i === idx ? { ...img, progress: percent } : img,
+                        ),
+                    )
+                }
                 appId={appData?.appId}
             />
 
