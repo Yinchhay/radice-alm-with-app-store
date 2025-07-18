@@ -104,83 +104,24 @@ export default function CategorySection({
                                                         (project, i) => {
                                                             return (
                                                                 <button
-                                                                    onClick={() =>
-                                                                        setSelectedProject(
-                                                                            i,
-                                                                        )
-                                                                    }
-                                                                    className={[
-                                                                        "transition-all relative group cursor-pointer p-2",
-                                                                    ].join(" ")}
+                                                                    onClick={() => setSelectedProject(i)}
+                                                                    className="transition-all group cursor-pointer p-2 relative"
                                                                     key={`${category.name}-${project.name}-${project.id}`}
                                                                 >
-                                                                    <ImageWithFallback
-                                                                        src={
-                                                                            `/api/file?filename=${project.logoUrl}` ||
-                                                                            "/placeholders/placeholder.png"
-                                                                        }
-                                                                        width={
-                                                                            80
-                                                                        }
-                                                                        height={
-                                                                            80
-                                                                        }
-                                                                        className={[
-                                                                            "aspect-square object-cover duration-200 border border-gray-200 bg-white w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20",
-                                                                            selectedProject ==
-                                                                            i
-                                                                                ? "scale-[90%]"
-                                                                                : "group-hover:scale-[90%]",
-                                                                        ].join(
-                                                                            " ",
-                                                                        )}
-                                                                        alt=""
-                                                                    />{" "}
-                                                                    <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-                                                                        <div
-                                                                            className={[
-                                                                                "duration-150 group-active:duration-75 border-t border-l border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
-                                                                                selectedProject !=
-                                                                                i
-                                                                                    ? "top-[-0.3rem] left-[-0.3rem] sm:top-[-0.35rem] sm:left-[-0.35rem] lg:top-[-0.4rem] lg:left-[-0.4rem] opacity-0"
-                                                                                    : "top-[-0.1rem] left-[-0.1rem] sm:top-[-0.125rem] sm:left-[-0.125rem] lg:top-[-0.15rem] lg:left-[-0.15rem]",
-                                                                            ].join(
-                                                                                " ",
-                                                                            )}
-                                                                        ></div>
-                                                                        <div
-                                                                            className={[
-                                                                                "duration-150 group-active:duration-75 border-b border-l border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
-                                                                                selectedProject !=
-                                                                                i
-                                                                                    ? "bottom-[-0.3rem] left-[-0.3rem] sm:bottom-[-0.35rem] sm:left-[-0.35rem] lg:bottom-[-0.4rem] lg:left-[-0.4rem] opacity-0"
-                                                                                    : "bottom-[-0.1rem] left-[-0.1rem] sm:bottom-[-0.125rem] sm:left-[-0.125rem] lg:bottom-[-0.15rem] lg:left-[-0.15rem]",
-                                                                            ].join(
-                                                                                " ",
-                                                                            )}
-                                                                        ></div>
-                                                                        <div
-                                                                            className={[
-                                                                                "duration-150 group-active:duration-75 border-t border-r border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
-                                                                                selectedProject !=
-                                                                                i
-                                                                                    ? "top-[-0.3rem] right-[-0.3rem] sm:top-[-0.35rem] sm:right-[-0.35rem] lg:top-[-0.4rem] lg:right-[-0.4rem] opacity-0"
-                                                                                    : "top-[-0.1rem] right-[-0.1rem] sm:top-[-0.125rem] sm:right-[-0.125rem] lg:top-[-0.15rem] lg:right-[-0.15rem]",
-                                                                            ].join(
-                                                                                " ",
-                                                                            )}
-                                                                        ></div>
-                                                                        <div
-                                                                            className={[
-                                                                                "duration-150 group-active:duration-75 border-b border-r border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
-                                                                                selectedProject !=
-                                                                                i
-                                                                                    ? "bottom-[-0.3rem] right-[-0.3rem] sm:bottom-[-0.35rem] sm:right-[-0.35rem] lg:bottom-[-0.4rem] lg:right-[-0.4rem] opacity-0"
-                                                                                    : "bottom-[-0.1rem] right-[-0.1rem] sm:bottom-[-0.125rem] sm:right-[-0.125rem] lg:bottom-[-0.15rem] lg:right-[-0.15rem]",
-                                                                            ].join(
-                                                                                " ",
-                                                                            )}
-                                                                        ></div>
+                                                                    <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20">
+                                                                        <ImageWithFallback
+                                                                            src={`/api/file?filename=${project.logoUrl}` || "/placeholders/placeholder.png"}
+                                                                            width={80}
+                                                                            height={80}
+                                                                            className={["aspect-square object-cover duration-200 border border-gray-200 bg-white w-full h-full", selectedProject == i ? "scale-[90%]" : "group-hover:scale-[90%]"].join(" ")}
+                                                                            alt=""
+                                                                        />
+                                                                        <div className="absolute inset-0 pointer-events-none">
+                                                                            <div className={["duration-150 group-active:duration-75 border-t border-l border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute", selectedProject != i ? "top-0 left-0 opacity-0" : "top-0 left-0"].join(" ")}></div>
+                                                                            <div className={["duration-150 group-active:duration-75 border-b border-l border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute", selectedProject != i ? "bottom-0 left-0 opacity-0" : "bottom-0 left-0"].join(" ")}></div>
+                                                                            <div className={["duration-150 group-active:duration-75 border-t border-r border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute", selectedProject != i ? "top-0 right-0 opacity-0" : "top-0 right-0"].join(" ")}></div>
+                                                                            <div className={["duration-150 group-active:duration-75 border-b border-r border-black w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute", selectedProject != i ? "bottom-0 right-0 opacity-0" : "bottom-0 right-0"].join(" ")}></div>
+                                                                        </div>
                                                                     </div>
                                                                 </button>
                                                             );
@@ -227,83 +168,24 @@ export default function CategorySection({
                                                         (project, i) => {
                                                             return (
                                                                 <button
-                                                                    onClick={() =>
-                                                                        setSelectedProject(
-                                                                            i,
-                                                                        )
-                                                                    }
-                                                                    className={[
-                                                                        "transition-all relative group cursor-pointer p-2",
-                                                                    ].join(" ")}
+                                                                    onClick={() => setSelectedProject(i)}
+                                                                    className="transition-all group cursor-pointer p-2 relative"
                                                                     key={`${category.name}-${project.name}-${project.id}`}
                                                                 >
-                                                                    <ImageWithFallback
-                                                                        src={
-                                                                            `/api/file?filename=${project.logoUrl}` ||
-                                                                            "/placeholders/placeholder.png"
-                                                                        }
-                                                                        width={
-                                                                            80
-                                                                        }
-                                                                        height={
-                                                                            80
-                                                                        }
-                                                                        className={[
-                                                                            "aspect-square object-cover duration-200 border border-gray-100/25 bg-white w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20",
-                                                                            selectedProject ==
-                                                                            i
-                                                                                ? "scale-[90%]"
-                                                                                : "group-hover:scale-[90%]",
-                                                                        ].join(
-                                                                            " ",
-                                                                        )}
-                                                                        alt=""
-                                                                    />{" "}
-                                                                    <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-                                                                        <div
-                                                                            className={[
-                                                                                "duration-150 group-active:duration-75 border-t border-l border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
-                                                                                selectedProject !=
-                                                                                i
-                                                                                    ? "top-[-0.3rem] left-[-0.3rem] sm:top-[-0.35rem] sm:left-[-0.35rem] lg:top-[-0.4rem] lg:left-[-0.4rem] opacity-0"
-                                                                                    : "top-[-0.1rem] left-[-0.1rem] sm:top-[-0.125rem] sm:left-[-0.125rem] lg:top-[-0.15rem] lg:left-[-0.15rem]",
-                                                                            ].join(
-                                                                                " ",
-                                                                            )}
-                                                                        ></div>
-                                                                        <div
-                                                                            className={[
-                                                                                "duration-150 group-active:duration-75 border-b border-l border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
-                                                                                selectedProject !=
-                                                                                i
-                                                                                    ? "bottom-[-0.3rem] left-[-0.3rem] sm:bottom-[-0.35rem] sm:left-[-0.35rem] lg:bottom-[-0.4rem] lg:left-[-0.4rem] opacity-0"
-                                                                                    : "bottom-[-0.1rem] left-[-0.1rem] sm:bottom-[-0.125rem] sm:left-[-0.125rem] lg:bottom-[-0.15rem] lg:left-[-0.15rem]",
-                                                                            ].join(
-                                                                                " ",
-                                                                            )}
-                                                                        ></div>
-                                                                        <div
-                                                                            className={[
-                                                                                "duration-150 group-active:duration-75 border-t border-r border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
-                                                                                selectedProject !=
-                                                                                i
-                                                                                    ? "top-[-0.3rem] right-[-0.3rem] sm:top-[-0.35rem] sm:right-[-0.35rem] lg:top-[-0.4rem] lg:right-[-0.4rem] opacity-0"
-                                                                                    : "top-[-0.1rem] right-[-0.1rem] sm:top-[-0.125rem] sm:right-[-0.125rem] lg:top-[-0.15rem] lg:right-[-0.15rem]",
-                                                                            ].join(
-                                                                                " ",
-                                                                            )}
-                                                                        ></div>
-                                                                        <div
-                                                                            className={[
-                                                                                "duration-150 group-active:duration-75 border-b border-r border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute",
-                                                                                selectedProject !=
-                                                                                i
-                                                                                    ? "bottom-[-0.3rem] right-[-0.3rem] sm:bottom-[-0.35rem] sm:right-[-0.35rem] lg:bottom-[-0.4rem] lg:right-[-0.4rem] opacity-0"
-                                                                                    : "bottom-[-0.1rem] right-[-0.1rem] sm:bottom-[-0.125rem] sm:right-[-0.125rem] lg:bottom-[-0.15rem] lg:right-[-0.15rem]",
-                                                                            ].join(
-                                                                                " ",
-                                                                            )}
-                                                                        ></div>
+                                                                    <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20">
+                                                                        <ImageWithFallback
+                                                                            src={`/api/file?filename=${project.logoUrl}` || "/placeholders/placeholder.png"}
+                                                                            width={80}
+                                                                            height={80}
+                                                                            className={["aspect-square object-cover duration-200 border border-gray-100/25 bg-white w-full h-full", selectedProject == i ? "scale-[90%]" : "group-hover:scale-[90%]"].join(" ")}
+                                                                            alt=""
+                                                                        />
+                                                                        <div className="absolute inset-0 pointer-events-none">
+                                                                            <div className={["duration-150 group-active:duration-75 border-t border-l border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute", selectedProject != i ? "top-0 left-0 opacity-0" : "top-0 left-0"].join(" ")}></div>
+                                                                            <div className={["duration-150 group-active:duration-75 border-b border-l border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute", selectedProject != i ? "bottom-0 left-0 opacity-0" : "bottom-0 left-0"].join(" ")}></div>
+                                                                            <div className={["duration-150 group-active:duration-75 border-t border-r border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute", selectedProject != i ? "top-0 right-0 opacity-0" : "top-0 right-0"].join(" ")}></div>
+                                                                            <div className={["duration-150 group-active:duration-75 border-b border-r border-white w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-transparent absolute", selectedProject != i ? "bottom-0 right-0 opacity-0" : "bottom-0 right-0"].join(" ")}></div>
+                                                                        </div>
                                                                     </div>
                                                                 </button>
                                                             );
