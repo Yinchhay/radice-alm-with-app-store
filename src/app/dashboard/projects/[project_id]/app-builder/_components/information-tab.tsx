@@ -206,6 +206,12 @@ async function fetchScreenshotIds(
     }
 }
 
+// Helper to get screenshot base name from URL
+function getScreenshotBaseName(url: string) {
+    return url.replace(/^\/uploads\/apps\//, "").replace(/\.[^.]+$/, "");
+}
+
+// Update uploadScreenshotsWithProgress to store only the base name
 async function uploadScreenshotsWithProgress(
     files: File[],
     appId: number,
@@ -247,14 +253,13 @@ async function uploadScreenshotsWithProgress(
                                     data.newScreenshotPaths &&
                                     data.newScreenshotPaths.length > 0
                                 ) {
-                                    uploadedUrls.push(
-                                        data.newScreenshotPaths[0],
-                                    );
+                                    const baseName = getScreenshotBaseName(data.newScreenshotPaths[0]);
+                                    uploadedUrls.push(baseName);
                                     updateProgress(
                                         file,
                                         100,
                                         true,
-                                        data.newScreenshotPaths[0],
+                                        baseName,
                                     );
                                 }
                                 resolve();
@@ -274,13 +279,14 @@ async function uploadScreenshotsWithProgress(
     );
 
     if (uploadedUrls.length > 0) {
-        const screenshotData = await fetchScreenshotIds(appId, uploadedUrls);
-        return screenshotData.map((item) => ({ url: item.url, id: item.id }));
+        const screenshotData = await fetchScreenshotIds(appId, uploadedUrls.map(name => `/uploads/apps/${name}`));
+        return screenshotData.map((item) => ({ url: getScreenshotBaseName(item.url), id: item.id }));
     }
 
     return [];
 }
 
+// Update makeScreenshotObj to handle base names
 function makeScreenshotObj(fileOrUrl: any) {
     if (fileOrUrl instanceof File) {
         return {
@@ -292,17 +298,18 @@ function makeScreenshotObj(fileOrUrl: any) {
     } else if (typeof fileOrUrl === "string") {
         return {
             file: undefined,
-            url: fileOrUrl,
+            url: getScreenshotBaseName(fileOrUrl),
             progress: 100,
-            key: fileOrUrl,
+            key: getScreenshotBaseName(fileOrUrl),
         };
     } else if (fileOrUrl && fileOrUrl.key) {
         return fileOrUrl;
     } else if (fileOrUrl && fileOrUrl.url) {
+        const baseName = getScreenshotBaseName(fileOrUrl.url);
         const key = fileOrUrl.id
-            ? `${fileOrUrl.id}_${fileOrUrl.url}`
-            : fileOrUrl.url;
-        return { ...fileOrUrl, progress: 100, key };
+            ? `${fileOrUrl.id}_${baseName}`
+            : baseName;
+        return { ...fileOrUrl, url: baseName, progress: 100, key };
     }
     return fileOrUrl;
 }
@@ -595,8 +602,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                                 ) {
                                     return {
                                         id: s.id,
-                                        url: s.imageUrl,
-                                        key: `${s.id}_${s.imageUrl}`,
+                                        url: getScreenshotBaseName(s.imageUrl),
+                                        key: `${s.id}_${getScreenshotBaseName(s.imageUrl)}`,
                                     };
                                 }
                                 if (typeof s === "string") {
@@ -774,7 +781,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                         filename = file.file.name;
                     } else if (file.url) {
                         previewUrl = file.url;
-                        filename = file.url.split("/").pop() || file.url;
+                        filename = getScreenshotBaseName(file.url);
                     }
                     return (
                         <div
@@ -967,61 +974,96 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         [],
     );
 
-    async function uploadFilesIfNeeded(files: any[], projectId: string, setProgress?: (idx: number, percent: number) => void, setImageState?: (updater: (prev: any[]) => any[]) => void) {
-        const uploadable = files.filter((f) => f instanceof File || (f.file && f.file instanceof File));
-        const existing = files.filter((f) => !(f instanceof File) && !f.file && f.url);
-        let uploadedUrls: string[] = [];
-        if (uploadable.length > 0) {
-            const formData = new FormData();
-            formData.append("projectId", projectId);
-            uploadable.forEach((file, idx) => formData.append("files", file.file || file));
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", `${API_BASE_URL}/api/internal/file/upload`, true);
-            xhr.withCredentials = true;
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable && setProgress) {
-                    const percent = Math.round((event.loaded / event.total) * 100);
-                    setProgress(0, percent);
-                }
-            };
-            const promise = new Promise<void>((resolve, reject) => {
-                xhr.onload = function () {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            const data = JSON.parse(xhr.responseText);
-            if (data.success && data.paths) {
-                uploadedUrls = data.paths.map((p: string) => "/uploads/" + p);
-                                // Update state with new URLs and progress
-                                if (setImageState) {
-                                    setImageState((prev) => prev.map((img, i) => {
-                                        if (i < uploadedUrls.length) {
-                                            return { ...img, url: uploadedUrls[i], file: undefined, progress: 100 };
-                                        }
-                                        return img;
-                                    }));
-                                }
-                            }
-                            resolve();
-                        } catch (e) {
-                            reject(e);
-                        }
-            } else {
-                        reject(xhr.statusText);
+    // Refactored uploadFilesIfNeeded to use backend endpoints for card/banner images
+    async function uploadFilesIfNeeded(files: any[], projectId: string, setProgress?: (idx: number, percent: number) => void, setImageState?: (updater: (prev: any[]) => any[]) => void, appId?: number, imageType?: 'card' | 'banner') {
+        // For app files, use the old logic
+        if (!imageType) {
+            const uploadable = files.filter((f) => f instanceof File || (f.file && f.file instanceof File));
+            const existing = files.filter((f) => !(f instanceof File) && !f.file && f.url);
+            let uploadedUrls: string[] = [];
+            if (uploadable.length > 0) {
+                const formData = new FormData();
+                formData.append("projectId", projectId);
+                uploadable.forEach((file, idx) => formData.append("files", file.file || file));
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", `${API_BASE_URL}/api/internal/file/upload`, true);
+                xhr.withCredentials = true;
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable && setProgress) {
+                        const percent = Math.round((event.loaded / event.total) * 100);
+                        setProgress(0, percent);
                     }
                 };
-                xhr.onerror = function () {
-                    reject(xhr.statusText);
-                };
-            });
-            xhr.send(formData);
-            await promise;
+                const promise = new Promise<void>((resolve, reject) => {
+                    xhr.onload = function () {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.success && data.paths) {
+                                    uploadedUrls = data.paths.map((p: string) => "/uploads/" + p);
+                                    if (setImageState) {
+                                        setImageState((prev) => prev.map((img, i) => {
+                                            if (i < uploadedUrls.length) {
+                                                return { ...img, url: uploadedUrls[i], file: undefined, progress: 100 };
+                                            }
+                                            return img;
+                                        }));
+                                    }
+                                }
+                                resolve();
+                            } catch (e) {
+                                reject(e);
+                            }
+                        } else {
+                            reject(xhr.statusText);
+                        }
+                    };
+                    xhr.onerror = function () {
+                        reject(xhr.statusText);
+                    };
+                });
+                xhr.send(formData);
+                await promise;
+            }
+            return [...existing.map((f) => f.url), ...uploadedUrls];
         }
-        return [...existing.map((f) => f.url), ...uploadedUrls];
+        // For card/banner images, use the backend endpoints
+        const uploadable = files.filter((f) => f instanceof File || (f.file && f.file instanceof File));
+        const existing = files.filter((f) => !(f instanceof File) && !f.file && f.url);
+        let uploadedUrl: string | undefined;
+        if (uploadable.length > 0 && appId && imageType) {
+            const file = uploadable[0].file || uploadable[0];
+            const formData = new FormData();
+            formData.append("image", file);
+            const res = await fetch(`${API_BASE_URL}/api/internal/app/${appId}/images/${imageType}`, {
+                method: "POST",
+                credentials: "include",
+                body: formData,
+            });
+            const data = await res.json();
+            if (data.success && data.imagePath) {
+                uploadedUrl = data.imagePath;
+                if (setImageState) {
+                    setImageState((prev) => prev.map((img, i) => {
+                        if (i === 0) {
+                            return { ...img, url: uploadedUrl, file: undefined, progress: 100 };
+                        }
+                        return img;
+                    }));
+                }
+            }
+        }
+        return [...existing.map((f) => f.url), ...(uploadedUrl ? [uploadedUrl] : [])];
     }
 
     const handleSave = async () => {
         if (!appData) return;
         if (!validateFields()) return;
+        if (typeof appData.appId !== "number" || isNaN(appData.appId) || appData.appId <= 0) {
+            setSaveMessage("Error: App ID is missing or invalid. Please reload the page or try again later.");
+            setSaveLoading(false);
+            return;
+        }
         setSaveLoading(true);
         setSaveMessage(null);
         try {
@@ -1093,12 +1135,16 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 projectId,
                 (idx, percent) => setCardImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
                 (updater) => setCardImages(updater),
+                appData?.appId,
+                "card"
             );
             const [bannerImageUrl] = await uploadFilesIfNeeded(
                 bannerImages,
                 projectId,
                 (idx, percent) => setBannerImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
                 (updater) => setBannerImages(updater),
+                appData?.appId,
+                "banner"
             );
             const payload = {
                 subtitle,
@@ -1132,6 +1178,11 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     const handleContinue = async () => {
         if (!appData) return;
         if (!validateFields()) return;
+        if (typeof appData.appId !== "number" || isNaN(appData.appId) || appData.appId <= 0) {
+            setSaveMessage("Error: App ID is missing or invalid. Please reload the page or try again later.");
+            setSaveLoading(false);
+            return;
+        }
         setSaveLoading(true);
         setSaveMessage(null);
         try {
@@ -1162,12 +1213,16 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 projectId,
                 (idx, percent) => setCardImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
                 (updater) => setCardImages(updater),
+                appData?.appId,
+                "card"
             );
             const [bannerImageUrl] = await uploadFilesIfNeeded(
                 bannerImages,
                 projectId,
                 (idx, percent) => setBannerImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
                 (updater) => setBannerImages(updater),
+                appData?.appId,
+                "banner"
             );
             // Upload screenshots if needed
             let screenshotObjs = screenshots;
