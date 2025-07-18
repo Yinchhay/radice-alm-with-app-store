@@ -111,7 +111,7 @@ export default function AppStorePage() {
     );
 
     const PriorityOrder = [
-        { key: "featured", label: "Our Best Apps" },
+        { key: "featured", label: "Open for Testing" },
         { key: "live", label: "Live" }
     ];
 
