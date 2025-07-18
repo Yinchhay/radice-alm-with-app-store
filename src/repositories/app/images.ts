@@ -31,8 +31,11 @@ export async function ensureUploadDir() {
 
 export async function deleteOldFile(filePath: string) {
     if (!filePath) return;
+    
     try {
-        const fullPath = path.join(FILE_STORAGE_PATH, path.basename(filePath));
+        const relativePath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+        const fullPath = path.join(process.cwd(), 'public', relativePath);
+        
         await fs.access(fullPath);
         await fs.unlink(fullPath);
         console.log(`Deleted old file: ${fullPath}`);
@@ -47,15 +50,22 @@ export async function saveUploadedFile(
     fileType: string,
 ): Promise<string> {
     await ensureUploadDir();
-
+    
+    const appsDir = path.join(FILE_STORAGE_PATH, "apps");
+    try {
+        await fs.access(appsDir);
+    } catch {
+        await fs.mkdir(appsDir, { recursive: true });
+    }
+    
     const fileExtension = path.extname(file.name);
     const timestamp = Date.now();
     const uniqueFilename = `app_${appId}_${fileType}_${timestamp}${fileExtension}`;
-    const filePath = path.join(FILE_STORAGE_PATH, uniqueFilename);
-
+    const filePath = path.join(appsDir, uniqueFilename);
+    
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
-
+    
     return `/uploads/apps/${uniqueFilename}`;
 }
 
