@@ -28,7 +28,7 @@ export default function JoinUsForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex w-[600px] p-[40px] flex-col items-center gap-[40px] mx-auto">
+    <div className="w-full max-w-lg px-4 sm:px-8 py-8 flex flex-col items-center gap-8 mx-auto">
       {success ? (
         <div className="text-center">
           <h1 className="text-5xl font-bold">Thank you for Applying to Radice</h1>
@@ -50,7 +50,7 @@ export default function JoinUsForm() {
             }}
             className="flex flex-col gap-6 w-full"
           >
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="firstName" className="block mb-2 text-sm font-medium">First Name</label>
                 <input
