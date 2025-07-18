@@ -30,14 +30,12 @@ export default function SideNav({
     }, [theme]);
 
     return (
-        <aside
+        <div
             className={[
                 "bg-white",
                 "transition-all",
                 showSideNav ? "block" : "hidden",
-                "fixed",
-                "w-[300px]",
-                "h-[917px]",
+                // REMOVED: 'fixed', 'w-[300px]', 'h-[917px]'
                 "p-[32px_24px]",
                 "flex",
                 "flex-col",
@@ -113,6 +111,6 @@ export default function SideNav({
                     <Logout />
                 </div>
             </div>
-        </aside>
+        </div>
     );
 }
