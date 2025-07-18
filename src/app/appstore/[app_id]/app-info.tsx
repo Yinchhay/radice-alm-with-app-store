@@ -120,9 +120,9 @@ function AppPage({ params }: { params: { app_id: string } }) {
                 label: "Start Testing",
                 disabled: false,
             };
-        } else if (appType?.name === "API" && appFile) {
+        } else if (appType?.name === "API" && webUrl) {
             return {
-                url: appFile,
+                url: webUrl,
                 label: "View Documentation",
                 disabled: false,
             };
