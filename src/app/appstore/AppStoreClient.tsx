@@ -111,7 +111,7 @@ export default function AppStorePage() {
     );
 
     const PriorityOrder = [
-        { key: "featured", label: "Our Best Apps" },
+        { key: "featured", label: "Open for Testing" },
         { key: "live", label: "Live" }
     ];
 
@@ -232,7 +232,7 @@ export default function AppStorePage() {
                                         </h2>
                                         <span className="w-2 h-2 bg-green-500 rounded-full" />
                                     </div>
-                                    <div className="grid gap-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                                         {paginatedApps.length > 0 ? (
                                             paginatedApps.map((app: App) => (
                                                 <AppCard

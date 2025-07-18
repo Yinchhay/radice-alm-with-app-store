@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function AppVersionHistoryPage({ params }: { params: { app_id: string } }) {
     return (
         <div>
-            <Navbar />
+            <Navbar variant="tester"/>
             <AppVersionHistory params={params} />
             <Footer />
         </div>

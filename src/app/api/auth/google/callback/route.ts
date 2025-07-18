@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
     
     try {
         const redirectUri = new URL("/api/auth/google/callback", process.env.APP_URL).toString();
+        
         const tokenResponse = await fetch(
             "https://oauth2.googleapis.com/token",
             {
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
                 firstName: userData.given_name || "",
                 lastName: userData.family_name || "",
                 profileUrl: userData.picture || null,
-                password: "",
+                password: "", // You might want to handle this differently for OAuth users
                 phoneNumber: null,
                 description: null,
             };
@@ -105,7 +106,7 @@ export async function GET(request: NextRequest) {
         });
 
         const response = NextResponse.redirect(
-            new URL("/testers/dashboard", request.url),
+            new URL("/appstore", process.env.APP_URL),
         );
 
         setTesterAuthCookie(response, customToken);
@@ -114,7 +115,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error("Google OAuth callback error:", error);
         return NextResponse.redirect(
-            new URL("/testers/login?error=callback_error", request.url),
+            new URL("/testers/login?error=callback_error", process.env.APP_URL),
         );
     }
 }

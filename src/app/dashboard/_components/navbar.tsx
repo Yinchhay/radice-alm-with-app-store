@@ -88,8 +88,27 @@ export default function Navbar({ user, userWithRoles }: NavbarProps) {
                     }}>
                         {roleName}
                     </span>
-                    {/* Empty profile picture (gray circle) */}
-                    <div style={{ width: 31, flexShrink: 0, alignSelf: "stretch", aspectRatio: "1/1", borderRadius: "50%", background: "#ddd" }} />
+                    {user.profileUrl ? (
+                        <img
+                            src={fileToUrl(user.profileUrl)}
+                            alt="Profile"
+                            style={{
+                                width: 31,
+                                height: 31,
+                                borderRadius: "50%",
+                                objectFit: "cover",
+                                background: "#ddd",
+                                display: "block"
+                            }}
+                        />
+                    ) : (
+                        <div style={{
+                            width: 31,
+                            height: 31,
+                            borderRadius: "50%",
+                            background: "#ddd"
+                        }} />
+                    )}
                 </div>
             </div>
         </nav>

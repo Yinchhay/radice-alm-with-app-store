@@ -20,6 +20,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { NextRequest } from "next/server";
 import { getAppScreenshots } from "@/repositories/app_screenshot";
+import { copyImageFile, copyScreenshots } from "@/repositories/app/images";
 
 export type FetchCreateApp = {
     appId: number;
@@ -36,113 +37,14 @@ const FILE_STORAGE_PATH = path.join(
     process.env.FILE_STORAGE_PATH || "public/uploads/apps",
 );
 
-// Helper function to copy an existing image file with new naming
-async function copyImageFile(
-    originalPath: string,
-    newAppId: number,
-    imageType: "card" | "banner",
-): Promise<string | null> {
-    if (!originalPath) return null;
-
-    try {
-        // Extract the original filename from the path
-        const originalFilename = path.basename(originalPath);
-        const fileExtension = path.extname(originalFilename);
-        const timestamp = Date.now();
-
-        // Generate new filename for the new app
-        const newFilename = `app_${newAppId}_${imageType}_image_${timestamp}${fileExtension}`;
-
-        // Construct full paths
-        const originalFullPath = path.join(FILE_STORAGE_PATH, originalFilename);
-        const newFullPath = path.join(FILE_STORAGE_PATH, newFilename);
-
-        // Check if original file exists
-        await fs.access(originalFullPath);
-
-        // Copy the file
-        await fs.copyFile(originalFullPath, newFullPath);
-
-        // Return the new path (relative to public directory)
-        return `/uploads/apps/${newFilename}`;
-    } catch (error) {
-        console.warn(`Failed to copy ${imageType} image:`, error);
-        return null;
-    }
-}
-
-// Helper function to copy screenshots
-async function copyScreenshots(
-    originalAppId: number,
-    newAppId: number,
-): Promise<void> {
-    try {
-        const { getAppScreenshots, insertAppScreenshots } = await import(
-            "@/repositories/app_screenshot"
-        );
-
-        // Get screenshots from the original app
-        const originalScreenshots = await getAppScreenshots(originalAppId);
-
-        if (!originalScreenshots || originalScreenshots.length === 0) {
-            return;
-        }
-
-        const newScreenshots = [];
-
-        for (let i = 0; i < originalScreenshots.length; i++) {
-            const originalScreenshot = originalScreenshots[i];
-
-            if (!originalScreenshot.imageUrl) continue;
-
-            try {
-                const originalFilename = path.basename(
-                    originalScreenshot.imageUrl,
-                );
-                const fileExtension = path.extname(originalFilename);
-                const timestamp = Date.now();
-
-                // Generate new filename for the new app
-                const newFilename = `app_${newAppId}_${i}_${timestamp}${fileExtension}`;
-
-                // Construct full paths
-                const originalFullPath = path.join(
-                    FILE_STORAGE_PATH,
-                    originalFilename,
-                );
-                const newFullPath = path.join(FILE_STORAGE_PATH, newFilename);
-
-                // Check if original file exists and copy it
-                await fs.access(originalFullPath);
-                await fs.copyFile(originalFullPath, newFullPath);
-
-                // Add to new screenshots array
-                newScreenshots.push({
-                    appId: newAppId,
-                    imageUrl: `/uploads/apps/${newFilename}`,
-                    sortOrder: originalScreenshot.sortOrder || i + 1,
-                });
-            } catch (error) {
-                console.warn(`Failed to copy screenshot ${i}:`, error);
-                // Continue with other screenshots even if one fails
-            }
-        }
-
-        // Insert new screenshots if any were successfully copied
-        if (newScreenshots.length > 0) {
-            await insertAppScreenshots(newScreenshots);
-        }
-    } catch (error) {
-        console.error("Failed to copy screenshots:", error);
-        // Don't throw error, just log it since screenshots are not critical
-    }
-}
-
 export async function POST(
     request: Request,
     { params }: { params: { project_id: string } },
 ) {
     try {
+        // to handle race conditions, we wait
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         const requiredPermission = new Set([]);
         const { errorNoBearerToken, errorNoPermission } =
             await checkBearerAndPermission(request, requiredPermission);
