@@ -34,7 +34,7 @@ const unsuccessMessage = "App operation failed";
 // Configuration for file storage (should match your PATCH endpoint)
 const FILE_STORAGE_PATH = path.join(
     process.cwd(),
-    process.env.FILE_STORAGE_PATH || "public/uploads/apps",
+    process.env.FILE_STORAGE_PATH || "/mnt/RadiceStorageFolder",
 );
 
 export async function POST(
