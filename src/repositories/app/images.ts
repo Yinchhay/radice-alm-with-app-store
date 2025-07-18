@@ -50,22 +50,20 @@ export async function saveUploadedFile(
     fileType: string,
 ): Promise<string> {
     await ensureUploadDir();
-    
-    const appsDir = path.join(FILE_STORAGE_PATH, "apps");
+    // Store directly in FILE_STORAGE_PATH (uploads/apps), not in uploads/apps/apps
+    // const appsDir = path.join(FILE_STORAGE_PATH, "apps");
+    const appsDir = FILE_STORAGE_PATH;
     try {
         await fs.access(appsDir);
     } catch {
         await fs.mkdir(appsDir, { recursive: true });
     }
-    
     const fileExtension = path.extname(file.name);
     const timestamp = Date.now();
     const uniqueFilename = `app_${appId}_${fileType}_${timestamp}${fileExtension}`;
     const filePath = path.join(appsDir, uniqueFilename);
-    
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
-    
     return `/uploads/apps/${uniqueFilename}`;
 }
 

@@ -23,6 +23,12 @@ import {
     DropResult,
 } from "@hello-pangea/dnd";
 import { IconChevronUp, IconChevronDown } from "@tabler/icons-react";
+import InformationSection from "./appbuilder-modules/InformationSection";
+import BannerAndCardSection from "./appbuilder-modules/BannerAndCardSection";
+import UpdateInformationSection from "./appbuilder-modules/UpdateInformationSection";
+import ScreenshotsSection from "./appbuilder-modules/ScreenshotsSection";
+import { useRouter } from "next/navigation";
+import AppUploadSection from "./appbuilder-modules/AppUploadSection";
 
 function FileDropzone({
     label,
@@ -338,6 +344,7 @@ function dedupeByKey(arr: any[]) {
 
 export default function InformationTab({ projectId }: InformationTabProps) {
     useDisableScrollOnDrag();
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [appData, setAppData] = useState<FetchAppBuilderData | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -352,6 +359,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     const [appFiles, setAppFiles] = useState<any[]>([]);
     const [cardImages, setCardImages] = useState<any[]>([]);
     const [bannerImages, setBannerImages] = useState<any[]>([]);
+    const [cardImagesToDelete, setCardImagesToDelete] = useState<string[]>([]);
+    const [bannerImagesToDelete, setBannerImagesToDelete] = useState<string[]>([]);
     const [screenshots, setScreenshots] = useState<any[]>([]);
 
     const [saveLoading, setSaveLoading] = useState(false);
@@ -376,6 +385,8 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     const [userAgent, setUserAgent] = useState<string | null>(null);
 
     const [project, setProject] = useState<any>(null);
+    const initialDataRef = useRef<any>(null);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     useEffect(() => {
         if (typeof document !== "undefined") {
@@ -387,6 +398,51 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             setUserAgent(window.navigator.userAgent);
         }
     }, []);
+
+    // After loading data from backend, store it for comparison
+    useEffect(() => {
+        if (appData) {
+            initialDataRef.current = {
+                subtitle,
+                description,
+                appType,
+                webUrl,
+                cardImages,
+                bannerImages,
+                screenshots,
+                updateType,
+                whatsNew,
+            };
+        }
+    }, [appData]);
+
+    // Detect changes
+    useEffect(() => {
+        if (!initialDataRef.current) return;
+        const changed =
+            subtitle !== initialDataRef.current.subtitle ||
+            description !== initialDataRef.current.description ||
+            appType !== initialDataRef.current.appType ||
+            webUrl !== initialDataRef.current.webUrl ||
+            updateType !== initialDataRef.current.updateType ||
+            whatsNew !== initialDataRef.current.whatsNew ||
+            JSON.stringify(cardImages) !== JSON.stringify(initialDataRef.current.cardImages) ||
+            JSON.stringify(bannerImages) !== JSON.stringify(initialDataRef.current.bannerImages) ||
+            JSON.stringify(screenshots) !== JSON.stringify(initialDataRef.current.screenshots);
+        setHasUnsavedChanges(changed);
+    }, [subtitle, description, appType, webUrl, cardImages, bannerImages, screenshots, updateType, whatsNew]);
+
+    // Warn on browser navigation (refresh, close, back)
+    useEffect(() => {
+        const handler = (e: BeforeUnloadEvent) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        };
+        window.addEventListener("beforeunload", handler);
+        return () => window.removeEventListener("beforeunload", handler);
+    }, [hasUnsavedChanges]);
 
     const appTypeOptions = [
         { id: 1, name: "Web" },
@@ -424,9 +480,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
     const handleAppFileChange = (files: FileList) =>
         setAppFiles(Array.from(files));
     const handleCardImageChange = (files: FileList) =>
-        setCardImages(Array.from(files));
+        setCardImages(Array.from(files).map(file => ({ file, progress: 0, key: `${file.name}_${file.lastModified}_${crypto.randomUUID()}` })));
     const handleBannerImageChange = (files: FileList) =>
-        setBannerImages(Array.from(files));
+        setBannerImages(Array.from(files).map(file => ({ file, progress: 0, key: `${file.name}_${file.lastModified}_${crypto.randomUUID()}` })));
     const handleScreenshotsChange = (files: FileList) =>
         setScreenshots((prev) => {
             const newFiles = Array.from(files).map(makeScreenshotObj);
@@ -710,9 +766,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 {uploads.map((file, idx) => {
                     let previewUrl = "";
                     let filename = "";
-                    if (file instanceof File) {
-                        previewUrl = URL.createObjectURL(file);
-                        filename = file.name;
+                    if (file.file instanceof File) {
+                        previewUrl = URL.createObjectURL(file.file);
+                        filename = file.file.name;
                     } else if (file.url) {
                         previewUrl = file.url;
                         filename = file.url.split("/").pop() || file.url;
@@ -908,25 +964,54 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         [],
     );
 
-    async function uploadFilesIfNeeded(files: any[], projectId: string) {
-        const uploadable = files.filter((f) => f instanceof File);
-        const existing = files.filter((f) => !(f instanceof File) && f.url);
+    async function uploadFilesIfNeeded(files: any[], projectId: string, setProgress?: (idx: number, percent: number) => void, setImageState?: (updater: (prev: any[]) => any[]) => void) {
+        const uploadable = files.filter((f) => f instanceof File || (f.file && f.file instanceof File));
+        const existing = files.filter((f) => !(f instanceof File) && !f.file && f.url);
         let uploadedUrls: string[] = [];
         if (uploadable.length > 0) {
             const formData = new FormData();
             formData.append("projectId", projectId);
-            uploadable.forEach((file) => formData.append("files", file));
-            const res = await fetch("/api/internal/file/upload", {
-                method: "POST",
-                body: formData,
-                credentials: "include",
-            });
-            const data = await res.json();
+            uploadable.forEach((file, idx) => formData.append("files", file.file || file));
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/internal/file/upload", true);
+            xhr.withCredentials = true;
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable && setProgress) {
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    setProgress(0, percent);
+                }
+            };
+            const promise = new Promise<void>((resolve, reject) => {
+                xhr.onload = function () {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
             if (data.success && data.paths) {
                 uploadedUrls = data.paths.map((p: string) => "/uploads/" + p);
+                                // Update state with new URLs and progress
+                                if (setImageState) {
+                                    setImageState((prev) => prev.map((img, i) => {
+                                        if (i < uploadedUrls.length) {
+                                            return { ...img, url: uploadedUrls[i], file: undefined, progress: 100 };
+                                        }
+                                        return img;
+                                    }));
+                                }
+                            }
+                            resolve();
+                        } catch (e) {
+                            reject(e);
+                        }
             } else {
-                throw new Error(data.message || "File upload failed");
-            }
+                        reject(xhr.statusText);
+                    }
+                };
+                xhr.onerror = function () {
+                    reject(xhr.statusText);
+                };
+            });
+            xhr.send(formData);
+            await promise;
         }
         return [...existing.map((f) => f.url), ...uploadedUrls];
     }
@@ -937,6 +1022,26 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         setSaveLoading(true);
         setSaveMessage(null);
         try {
+            // Delete card images marked for deletion
+            if (appData?.appId && cardImagesToDelete.length > 0) {
+                for (const url of cardImagesToDelete) {
+                    await fetch(`/api/internal/app/${appData.appId}/images/card`, {
+                        method: 'DELETE',
+                        credentials: 'include',
+                    });
+                }
+                setCardImagesToDelete([]);
+            }
+            // Delete banner images marked for deletion
+            if (appData?.appId && bannerImagesToDelete.length > 0) {
+                for (const url of bannerImagesToDelete) {
+                    await fetch(`/api/internal/app/${appData.appId}/images/banner`, {
+                        method: 'DELETE',
+                        credentials: 'include',
+                    });
+                }
+                setBannerImagesToDelete([]);
+            }
             let screenshotObjs = screenshots;
             const isNewFile = (f: any) =>
                 f instanceof File || (f.file && f.file instanceof File);
@@ -983,10 +1088,14 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             const [cardImageUrl] = await uploadFilesIfNeeded(
                 cardImages,
                 projectId,
+                (idx, percent) => setCardImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
+                (updater) => setCardImages(updater),
             );
             const [bannerImageUrl] = await uploadFilesIfNeeded(
                 bannerImages,
                 projectId,
+                (idx, percent) => setBannerImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
+                (updater) => setBannerImages(updater),
             );
             const payload = {
                 subtitle,
@@ -1023,15 +1132,39 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         setSaveLoading(true);
         setSaveMessage(null);
         try {
+            // Delete card images marked for deletion
+            if (appData?.appId && cardImagesToDelete.length > 0) {
+                for (const url of cardImagesToDelete) {
+                    await fetch(`/api/internal/app/${appData.appId}/images/card`, {
+                        method: 'DELETE',
+                        credentials: 'include',
+                    });
+                }
+                setCardImagesToDelete([]);
+            }
+            // Delete banner images marked for deletion
+            if (appData?.appId && bannerImagesToDelete.length > 0) {
+                for (const url of bannerImagesToDelete) {
+                    await fetch(`/api/internal/app/${appData.appId}/images/banner`, {
+                        method: 'DELETE',
+                        credentials: 'include',
+                    });
+                }
+                setBannerImagesToDelete([]);
+            }
             // Upload files if needed (appFiles, cardImages, bannerImages, screenshots)
             const [appFileUrl] = await uploadFilesIfNeeded(appFiles, projectId);
             const [cardImageUrl] = await uploadFilesIfNeeded(
                 cardImages,
                 projectId,
+                (idx, percent) => setCardImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
+                (updater) => setCardImages(updater),
             );
             const [bannerImageUrl] = await uploadFilesIfNeeded(
                 bannerImages,
                 projectId,
+                (idx, percent) => setBannerImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img)),
+                (updater) => setBannerImages(updater),
             );
             // Upload screenshots if needed
             let screenshotObjs = screenshots;
@@ -1123,6 +1256,9 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                     setAppData(updated.data);
                     setCurrentAppStatus(updated.data.status);
                 }
+                // Redirect to projects page
+                router.push("/dashboard/projects");
+                return;
             } else {
                 setSaveMessage(publishData.message || "Failed to submit.");
             }
@@ -1234,633 +1370,84 @@ export default function InformationTab({ projectId }: InformationTabProps) {
         <div className="space-y-6">
             {MainHeading}
 
-            <h3 className="text-[20px] font-semibold mb-2">
-                Basic Information
-            </h3>
+            <InformationSection
+                projectName={project?.name || "Loading..."}
+                subtitle={subtitle}
+                setSubtitle={setSubtitle}
+                appType={appType}
+                setAppType={setAppType}
+                appTypeOptions={appTypeOptions}
+                description={description}
+                setDescription={setDescription}
+                aboutRef={aboutRef}
+                errors={errors}
+                priorityTesting={priorityTesting}
+                setPriorityTesting={setPriorityTesting}
+                insertAtCursor={insertAtCursor}
+                webUrl={webUrl}
+                setWebUrl={setWebUrl}
+                webUrlError={webUrlError}
+            />
 
-            <div className="space-y-1">
-                <label className="block text-sm font-medium">App Name</label>
-                <input
-                    type="text"
-                    value={project?.name || "Loading..."}
-                    readOnly
-                    className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
-                />
-                <div className="text-xs text-gray-500">Project name</div>
-            </div>
-
-            <div className="space-y-1 mt-3">
-                <label className="block text-sm font-medium">
-                    Sub Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                    type="text"
-                    value={subtitle}
-                    onChange={(e) => setSubtitle(e.target.value)}
-                    required
-                    className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-white text-sm"
-                />
-                {errors.subtitle && (
-                    <div className="text-xs text-red-500">
-                        {errors.subtitle}
-                    </div>
-                )}
-                <div className="text-xs text-gray-500">1/30 words</div>
-            </div>
-
-            <div className="space-y-1 mt-3">
-                <label className="block text-sm font-medium">
-                    Type <span className="text-red-500">*</span>
-                </label>
-                <select
-                    value={appType}
-                    onChange={(e) => setAppType(e.target.value)}
-                    required
-                    className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-                >
-                    <option value="">Select Type</option>
-                    {appTypeOptions.map((option) => (
-                        <option key={option.id} value={option.id}>
-                            {option.name}
-                        </option>
-                    ))}
-                </select>
-                {errors.appType && (
-                    <div className="text-xs text-red-500">{errors.appType}</div>
-                )}
-            </div>
-
-            <div className="space-y-1 mt-3">
-                <label className="block text-sm font-medium">
-                    About <span className="text-red-500">*</span>
-                </label>
-                {/* Integrated Markdown Toolbar + Textarea */}
-                <div className="rounded-md border border-gray-300 bg-white overflow-hidden">
-                    <div className="flex flex-nowrap gap-1 px-2 py-2 bg-white border-b border-gray-200 shadow-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 rounded-t-md">
-                        <button
-                            type="button"
-                            className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm"
-                            title="Bold"
-                            onClick={() =>
-                                insertAtCursor(
-                                    aboutRef.current,
-                                    "**",
-                                    "**",
-                                    "bold text",
-                                    false,
-                                    "",
-                                    setDescription,
-                                )
-                            }
-                        >
-                            <span style={{ fontWeight: "bold" }}>B</span>
-                        </button>
-                        <button
-                            type="button"
-                            className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm"
-                            title="Bullet List"
-                            onClick={() =>
-                                insertAtCursor(
-                                    aboutRef.current,
-                                    "",
-                                    "",
-                                    "list item",
-                                    false,
-                                    "- ",
-                                )
-                            }
-                        >
-                            <span>&#8226;</span>
-                        </button>
-                    </div>
-                    <textarea
-                        ref={aboutRef}
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                        className="w-full px-3 py-1.5 text-sm bg-white border-0 focus:ring-0 focus:outline-none resize-none min-h-[100px]"
-                        rows={5}
-                        maxLength={300}
-                        placeholder="Describe your app..."
-                        style={{ borderRadius: 0 }}
-                    />
-                </div>
-                {errors.description && (
-                    <div className="text-xs text-red-500">
-                        {errors.description}
-                    </div>
-                )}
-                <div className="text-xs text-gray-500">
-                    {description.length}/300 words
-                </div>
-                {/* Markdown Preview for About */}
-                <div className="mt-2 p-2 border border-dashed border-gray-300 rounded bg-gray-50">
-                    <div className="text-xs text-gray-500 mb-1">
-                        Markdown Preview:
-                    </div>
-                    <ReactMarkdown
-                        className="prose max-w-none text-sm leading-5"
-                        remarkPlugins={[remarkGfm as any]}
-                        rehypePlugins={[rehypeSanitize as any]}
-                    >
-                        {description || "Nothing to preview."}
-                    </ReactMarkdown>
-                </div>
-            </div>
-
-            <div className="space-y-1 mt-4">
-                <label className="block text-sm font-medium">
-                    Request Testing Priority
-                </label>
-                <p className="text-xs text-gray-500">
-                    Use this if your project is highly experimental or urgently
-                    requires QA.
-                </p>
-
-                {/* Bordered Toggle */}
-                <div className="mt-2 p-1 border border-gray-300 rounded-md inline-flex bg-white gap-1">
-                    <button
-                        onClick={() => setPriorityTesting(true)}
-                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                            priorityTesting
-                                ? "bg-purple-600 text-white shadow-sm"
-                                : "text-gray-700 hover:bg-gray-100"
-                        }`}
-                    >
-                        Yes
-                    </button>
-                    <button
-                        onClick={() => setPriorityTesting(false)}
-                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                            !priorityTesting
-                                ? "bg-purple-600 text-white shadow-sm"
-                                : "text-gray-700 hover:bg-gray-100"
-                        }`}
-                    >
-                        No
-                    </button>
-                </div>
-            </div>
-
-            {/* Update Information Section */}
             {latestAcceptedVersion && (
-                <>
-                    <h3 className="text-[20px] font-semibold mb-2">
-                        Update Information
-                    </h3>
-                    <div className="space-y-1">
-                        <label className="block text-sm font-medium">
-                            Update Type <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            value={updateType}
-                            onChange={(e) =>
-                                setUpdateType(
-                                    e.target.value as
-                                        | "major"
-                                        | "minor"
-                                        | "patch",
-                                )
-                            }
-                            required
-                            className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-                        >
-                            <option value="major">Major</option>
-                            <option value="minor">Minor</option>
-                            <option value="patch">Patch</option>
-                        </select>
-                        {errors.updateType && (
-                            <div className="text-xs text-red-500">
-                                {errors.updateType}
-                            </div>
-                        )}
-                        <div className="text-xs text-gray-600 mt-1">
-                            Next version:{" "}
-                            <span className="font-mono">
-                                {getNextVersion()}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="space-y-1 mt-3">
-                        <label className="block text-sm font-medium">
-                            What's New <span className="text-red-500">*</span>
-                        </label>
-                        {/* Integrated Markdown Toolbar + Textarea */}
-                        <div className="rounded-md border border-gray-300 bg-white overflow-hidden">
-                            <div className="flex flex-nowrap gap-1 px-2 py-2 bg-white border-b border-gray-200 shadow-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 rounded-t-md">
-                                <button
-                                    type="button"
-                                    className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm"
-                                    title="Bold"
-                                    onClick={() =>
-                                        insertAtCursor(
-                                            whatsNewRef.current,
-                                            "**",
-                                            "**",
-                                            "bold text",
-                                            false,
-                                            "",
-                                            setWhatsNew,
-                                        )
-                                    }
-                                >
-                                    <span style={{ fontWeight: "bold" }}>
-                                        B
-                                    </span>
-                                </button>
-                                <button
-                                    type="button"
-                                    className="w-9 h-9 flex items-center justify-center rounded border border-gray-200 bg-white text-sm hover:bg-gray-100 active:bg-gray-200 transition shadow-sm"
-                                    title="Bullet List"
-                                    onClick={() =>
-                                        insertAtCursor(
-                                            whatsNewRef.current,
-                                            "",
-                                            "",
-                                            "list item",
-                                            false,
-                                            "- ",
-                                        )
-                                    }
-                                >
-                                    <span>&#8226;</span>
-                                </button>
-                            </div>
-                            <textarea
-                                ref={whatsNewRef}
-                                value={whatsNew}
-                                onChange={(e) => setWhatsNew(e.target.value)}
-                                required
-                                className="w-full px-3 py-1.5 text-sm bg-white border-0 focus:ring-0 focus:outline-none resize-none min-h-[100px]"
-                                rows={5}
-                                maxLength={300}
-                                placeholder="Describe what's new in this update..."
-                                style={{ borderRadius: 0 }}
-                            />
-                        </div>
-                        {errors.whatsNew && (
-                            <div className="text-xs text-red-500">
-                                {errors.whatsNew}
-                            </div>
-                        )}
-                        <div className="text-xs text-gray-500">
-                            {whatsNew.length}/300 words
-                        </div>
-                        {/* Markdown Preview for What's New */}
-                        <div className="mt-2 p-2 border border-dashed border-gray-300 rounded bg-gray-50">
-                            <div className="text-xs text-gray-500 mb-1">
-                                Markdown Preview:
-                            </div>
-                            <ReactMarkdown
-                                className="prose max-w-none text-sm leading-5"
-                                remarkPlugins={[remarkGfm as any]}
-                                rehypePlugins={[rehypeSanitize as any]}
-                            >
-                                {whatsNew || "Nothing to preview."}
-                            </ReactMarkdown>
-                        </div>
-                    </div>
-                </>
+                <UpdateInformationSection
+                    updateType={updateType}
+                    setUpdateType={setUpdateType}
+                    whatsNew={whatsNew}
+                    setWhatsNew={setWhatsNew}
+                    errors={errors}
+                    latestAcceptedVersion={latestAcceptedVersion}
+                    getNextVersion={getNextVersion}
+                    whatsNewRef={whatsNewRef}
+                    insertAtCursor={insertAtCursor}
+                />
             )}
 
-            <h3 className="text-[20px] font-semibold mt-6 mb-2">Web URL</h3>
-            <input
-                type="text"
-                value={webUrl}
-                onChange={(e) => setWebUrl(e.target.value)}
-                className={`w-full px-3 py-1.5 border ${webUrlError ? "border-red-500" : "border-gray-300"} rounded-md text-sm`}
-                placeholder="https://yourapp.com"
-            />
-            {errors.webUrl && (
-                <div className="text-xs text-red-500">{errors.webUrl}</div>
-            )}
-            <div className="text-xs text-gray-500">
-                Enter the full URL, including http:// or https://
-            </div>
-            {webUrlError && (
-                <div className="text-xs text-red-500 font-semibold">
-                    {webUrlError}
-                </div>
-            )}
-
-            {/* App Files */}
-            <h3 className="text-[20px] font-semibold mt-6 mb-2">App File</h3>
-            <FileDropzone
-                label="App file only"
-                onChange={handleAppFileChange}
-                multiple={false}
-                accept="*"
-                disabled={appFiles.length > 0}
-            />
-            {renderUploadList(appFiles, setAppFiles)}
-
-            {/* Card Images */}
-            <h3 className="text-[20px] font-semibold mt-6 mb-2">
-                Image <span className="text-red-500">*</span>
-            </h3>
-            <p className="text-sm font-medium">
-                Card <span className="text-red-500">*</span>
-            </p>
-            <FileDropzone
-                label="Card image only"
-                accept="image/*"
-                onChange={handleCardImageChange}
-                multiple={false}
-                disabled={cardImages.length > 0}
-            />
-            {renderUploadList(cardImages, setCardImages)}
-            {errors.cardImages && (
-                <div className="text-xs text-red-500">{errors.cardImages}</div>
-            )}
-
-            {/* Banner Images */}
-            <h3 className="text-[20px] font-semibold mt-6 mb-2">
-                Banner <span className="text-red-500">*</span>
-            </h3>
-            <FileDropzone
-                label="Banner image only"
-                accept="image/*"
-                onChange={handleBannerImageChange}
-                multiple={false}
-                disabled={bannerImages.length > 0}
-            />
-            {renderUploadList(bannerImages, setBannerImages)}
-            {errors.bannerImages && (
-                <div className="text-xs text-red-500">
-                    {errors.bannerImages}
-                </div>
-            )}
-
-            {/* Screenshots */}
-            <h3 className="text-[20px] font-semibold mt-6 mb-2">
-                Screenshots (Max 8) <span className="text-red-500">*</span>
-            </h3>
-            <p className="text-sm font-medium">
-                Screenshot <span className="text-red-500">*</span>
-            </p>
-            <FileDropzone
-                label="Screenshot images"
-                accept="image/*"
-                multiple
-                onChange={(files) => {
-                    setScreenshots((prev) => {
-                        const newFiles =
-                            Array.from(files).map(makeScreenshotObj);
-                        let combined = [...prev, ...newFiles];
-                        if (combined.length > MAX_SCREENSHOTS) {
-                            combined = combined.slice(0, MAX_SCREENSHOTS);
+            <BannerAndCardSection
+                cardImages={cardImages}
+                setCardImages={(updater: any) => {
+                    setCardImages((prev: any[]) => {
+                        const next = typeof updater === 'function' ? updater(prev) : updater;
+                        // Find removed card images (with .url)
+                        const removed = prev.filter(img => img.url && !next.some(n => n.url === img.url));
+                        if (removed.length > 0) {
+                            setCardImagesToDelete((old) => [...old, ...removed.map(r => r.url)]);
                         }
-                        return dedupeByKey(combined);
+                        return next;
                     });
                 }}
-                disabled={screenshots.length >= MAX_SCREENSHOTS}
+                bannerImages={bannerImages}
+                setBannerImages={(updater: any) => {
+                    setBannerImages((prev: any[]) => {
+                        const next = typeof updater === 'function' ? updater(prev) : updater;
+                        // Find removed banner images (with .url)
+                        const removed = prev.filter(img => img.url && !next.some(n => n.url === img.url));
+                        if (removed.length > 0) {
+                            setBannerImagesToDelete((old) => [...old, ...removed.map(r => r.url)]);
+                        }
+                        return next;
+                                        });
+                                    }}
+                errors={errors}
+                renderUploadList={renderUploadList}
+                FileDropzone={FileDropzone}
+                setCardImageProgress={(idx: number, percent: number) => setCardImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img))}
+                setBannerImageProgress={(idx: number, percent: number) => setBannerImages((prev) => prev.map((img, i) => i === idx ? { ...img, progress: percent } : img))}
+                appId={appData?.appId}
             />
-            <div style={{ minHeight: 60 * screenshots.length + 20 }}>
-                {screenshots.map((fileObj, idx) => {
-                    const { file, url, progress = 0, key } = fileObj;
-                    let previewUrl = "";
-                    let filename = "";
-                    let isUploaded = false;
-                    if (file) {
-                        previewUrl = URL.createObjectURL(file);
-                        filename = file.name;
-                    } else if (url) {
-                        previewUrl = url;
-                        filename = url.split("/").pop() || url;
-                        isUploaded = true;
-                    }
-                    // Show 'Uploaded' only if url exists and progress === 100
-                    const progressLabel =
-                        isUploaded && progress === 100
-                            ? "Uploaded"
-                            : `${progress}%`;
-                    return (
-                        <div
-                            key={key}
-                            style={{
-                                background: "#eee",
-                                margin: "8px 0",
-                                padding: 8,
-                                borderRadius: 4,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            {/* Move arrows to the left */}
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 4,
-                                    marginRight: 8,
-                                }}
-                            >
-                                <button
-                                    type="button"
-                                    aria-label="Move up"
-                                    disabled={idx === 0}
-                                    onClick={() => {
-                                        if (idx === 0) return;
-                                        setScreenshots((prev) => {
-                                            const arr = [...prev];
-                                            [arr[idx - 1], arr[idx]] = [
-                                                arr[idx],
-                                                arr[idx - 1],
-                                            ];
-                                            // If all have .url, call reorder
-                                            if (
-                                                appData?.appId &&
-                                                arr.every((f) => f.url)
-                                            ) {
-                                                reorderScreenshotsOnServer(
-                                                    appData.appId,
-                                                    arr.map((f) => f.url),
-                                                );
-                                            }
-                                            return arr;
-                                        });
-                                    }}
-                                    style={{
-                                        background: "none",
-                                        border: "none",
-                                        cursor:
-                                            idx === 0
-                                                ? "not-allowed"
-                                                : "pointer",
-                                        padding: 0,
-                                    }}
-                                >
-                                    <IconChevronUp size={20} />
-                                </button>
-                                <button
-                                    type="button"
-                                    aria-label="Move down"
-                                    disabled={idx === screenshots.length - 1}
-                                    onClick={() => {
-                                        if (idx === screenshots.length - 1)
-                                            return;
-                                        setScreenshots((prev) => {
-                                            const arr = [...prev];
-                                            [arr[idx], arr[idx + 1]] = [
-                                                arr[idx + 1],
-                                                arr[idx],
-                                            ];
-                                            // If all have .url, call reorder
-                                            if (
-                                                appData?.appId &&
-                                                arr.every((f) => f.url)
-                                            ) {
-                                                reorderScreenshotsOnServer(
-                                                    appData.appId,
-                                                    arr.map((f) => f.url),
-                                                );
-                                            }
-                                            return arr;
-                                        });
-                                    }}
-                                    style={{
-                                        background: "none",
-                                        border: "none",
-                                        cursor:
-                                            idx === screenshots.length - 1
-                                                ? "not-allowed"
-                                                : "pointer",
-                                        padding: 0,
-                                    }}
-                                >
-                                    <IconChevronDown size={20} />
-                                </button>
-                            </div>
-                            {/* Main content: image, filename, progress, delete */}
-                            <div
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 8,
-                                    flex: 1,
-                                }}
-                            >
-                                {previewUrl && (
-                                    <img
-                                        src={previewUrl}
-                                        alt="preview"
-                                        style={{
-                                            width: 48,
-                                            height: 48,
-                                            objectFit: "cover",
-                                            borderRadius: 4,
-                                            background: "#fff",
-                                            border: "1px solid #ccc",
-                                        }}
-                                    />
-                                )}
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        flex: 1,
-                                    }}
-                                >
-                                    <span>{filename}</span>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: 8,
-                                            width: "100%",
-                                        }}
-                                    >
-                                        <div
-                                            className="bg-gray-200 h-1.5 rounded mt-1"
-                                            style={{ flex: 1, minWidth: 0 }}
-                                        >
-                                            <div
-                                                className="h-1.5 bg-black rounded transition-all duration-200"
-                                                style={{
-                                                    width: `${progress}%`,
-                                                }}
-                                            />
-                                        </div>
-                                        <span
-                                            style={{
-                                                minWidth: 36,
-                                                textAlign: "right",
-                                                fontSize: 12,
-                                                color: "#333",
-                                            }}
-                                        >
-                                            {progressLabel}
-                                        </span>
-                                    </div>
-                                </div>
-                                <button
-                                    className="ml-2 text-gray-500 hover:text-red-500 text-sm"
-                                    onClick={async (e) => {
-                                        e.stopPropagation();
-                                        console.log(
-                                            "Delete clicked:",
-                                            fileObj,
-                                            appData?.appId,
-                                        );
 
-                                        if (
-                                            fileObj.file &&
-                                            !fileObj.url &&
-                                            !fileObj.id
-                                        ) {
-                                            console.log(
-                                                "Removing unuploaded file from local state",
-                                            );
-                                            setScreenshots((prev) =>
-                                                prev.filter(
-                                                    (_, i) => i !== idx,
-                                                ),
-                                            );
-                                            return;
-                                        }
-                                        if (fileObj.id && appData?.appId) {
-                                            const result =
-                                                await deleteScreenshotOnServer(
-                                                    appData.appId,
-                                                    fileObj.id,
-                                                );
-                                            if (result.success) {
-                                                setScreenshots((prev) =>
-                                                    prev.filter(
-                                                        (_, i) => i !== idx,
-                                                    ),
-                                                );
-                                            } else {
-                                                console.error(
-                                                    "Failed to delete screenshot:",
-                                                    result.message,
-                                                );
-                                            }
-                                        } else {
-                                            console.warn(
-                                                "Missing id or appId for delete:",
-                                                fileObj,
-                                                appData?.appId,
-                                            );
-                                            setScreenshots((prev) =>
-                                                prev.filter(
-                                                    (_, i) => i !== idx,
-                                                ),
-                                            );
-                                        }
-                                    }}
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-            {errors.screenshots && (
-                <div className="text-xs text-red-500">{errors.screenshots}</div>
-            )}
+            <ScreenshotsSection
+                screenshots={screenshots}
+                setScreenshots={setScreenshots}
+                MAX_SCREENSHOTS={MAX_SCREENSHOTS}
+                makeScreenshotObj={makeScreenshotObj}
+                dedupeByKey={dedupeByKey}
+                renderUploadList={renderUploadList}
+                FileDropzone={FileDropzone}
+                errors={errors}
+                appData={appData}
+                deleteScreenshotOnServer={deleteScreenshotOnServer}
+            />
 
             <div className="flex flex-col md:flex-row justify-center gap-4 pt-4">
                 <Button

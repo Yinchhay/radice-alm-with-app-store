@@ -78,7 +78,7 @@ export default async function InformationView({ appId }: { appId: string }) {
             <label className="block text-sm font-medium">Update Type</label>
             <input
               type="text"
-              value="-"
+              value={data.updateType ? data.updateType.charAt(0).toUpperCase() + data.updateType.slice(1) : "-"}
               readOnly
               className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
             />
@@ -98,19 +98,25 @@ export default async function InformationView({ appId }: { appId: string }) {
           </div>
         </>
       )}
-      <h3 className="text-xl font-bold mt-6 mb-2">Web URL</h3>
-        <input
-          type="text"
-          value={webUrl || "-"}
-          readOnly
-          className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm bg-gray-50"
-        />
-      <h3 className="text-xl font-bold mt-6 mb-2">App File</h3>
-        {appFile ? (
+      {/* Web URL section: only show if webUrl is present */}
+      {webUrl && (
+        <>
+          <h3 className="text-xl font-bold mt-6 mb-2">Web URL</h3>
+          <input
+            type="text"
+            value={webUrl}
+            readOnly
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm bg-gray-50"
+          />
+        </>
+      )}
+      {/* App File section: only show if appFile is present */}
+      {appFile && (
+        <>
+          <h3 className="text-xl font-bold mt-6 mb-2">App File</h3>
           <a href={appFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Download App File</a>
-        ) : (
-          <div className="text-gray-400">No app file uploaded.</div>
-        )}
+        </>
+      )}
       <h3 className="text-xl font-bold mt-6 mb-2">Image</h3>
       <div className="mb-2">
         <span className="text-sm font-medium">Card</span>

@@ -34,7 +34,19 @@ export async function fetchAppInfoByAppId(appId: string) {
 
 
   const versionResult = await db
-    .select()
+    .select({
+      id: versions.id,
+      appId: versions.appId,
+      projectId: versions.projectId,
+      versionNumber: versions.versionNumber,
+      majorVersion: versions.majorVersion,
+      minorVersion: versions.minorVersion,
+      patchVersion: versions.patchVersion,
+      isCurrent: versions.isCurrent,
+      content: versions.content,
+      createdAt: versions.createdAt,
+      updatedAt: versions.updatedAt,
+    })
     .from(versions)
     .where(eq(versions.appId, Number(appId)))
     .orderBy(desc(versions.createdAt))
@@ -61,6 +73,7 @@ export async function fetchAppInfoByAppId(appId: string) {
     ...appData,
     whatsNew: versionResult[0]?.content || null,
     versionNumber: versionResult[0]?.versionNumber || null,
+    updateType: appData.app?.updateType || null,
     screenshots: screenshotsResult || [],
     latestVersionNumber,
   };
