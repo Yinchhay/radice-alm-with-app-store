@@ -333,16 +333,25 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
                 <div className="md:w-[200px] flex justify-end">{rightSide}</div>
             </div>
             <button
-                className="md:hidden ml-auto"
+                className={`md:hidden ml-auto relative w-10 h-10 flex items-center justify-center focus:outline-none group ${mobileMenuOpen ? 'open' : ''}`}
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-                <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
-                    <path
-                        stroke="#000"
-                        strokeWidth="2"
-                        d="M4 6h16M4 12h16M4 18h16"
-                    />
-                </svg>
+                <span className="sr-only">{mobileMenuOpen ? 'Close menu' : 'Open menu'}</span>
+                <span
+                    className={`block absolute h-0.5 w-7 bg-black rounded transition-all duration-300 ease-in-out ${mobileMenuOpen ? 'rotate-45 top-5' : 'top-3'}`}
+                    style={{ left: '0.375rem' }}
+                ></span>
+                <span
+                    className={`block absolute h-0.5 w-7 bg-black rounded transition-all duration-300 ease-in-out ${mobileMenuOpen ? 'opacity-0 left-4' : 'top-5'}`}
+                    style={{ left: '0.375rem' }}
+                ></span>
+                <span
+                    className={`block absolute h-0.5 w-7 bg-black rounded transition-all duration-300 ease-in-out ${mobileMenuOpen ? '-rotate-45 top-5' : 'top-7'}`}
+                    style={{ left: '0.375rem' }}
+                ></span>
             </button>
             {mobileMenuOpen && (
                 <div
