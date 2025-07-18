@@ -42,7 +42,7 @@ export default function TesterLoginForm() {
             const data = await response.json();
             if (response.ok) {
                 setResult({ success: true });
-                router.push("/tester-dashboard");
+                router.push("/appstore");
             } else {
                 setResult({
                     success: false,

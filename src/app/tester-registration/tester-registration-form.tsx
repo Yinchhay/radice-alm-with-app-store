@@ -6,20 +6,26 @@ import { useRouter } from "next/navigation";
 
 // Enhanced friendlyError with HTML formatting
 const friendlyError = (msg: string) => {
-  if (msg.includes("lowercase letter, an uppercase letter, and a number")) {
-    return ` <span>Password must include at least:</span><br />
-      <span class='ml-2'>• One lowercase letter</span><br />
-      <span class='ml-2'>• One uppercase letter</span><br />
-      <span class='ml-2'>• One number</span>`;
-  }
   if (msg.includes("at least 8 characters")) {
-    return "Your password must be at least <b>8 characters</b> long.";
+    return <>Your password must be at least <b>8 characters</b> long.</>;
+  }
+  if (msg.includes("Password must contain at least one lowercase letter, one uppercase letter, and one number")) {
+    return (
+      <div className="text-left max-w-md mx-auto mb-2">
+        <div className="font-semibold mb-1">Password requirements</div>
+        <ul className="list-disc ml-6 text-sm">
+          <li>One lowercase letter</li>
+          <li>One uppercase letter</li>
+          <li>One number</li>
+        </ul>
+      </div>
+    );
   }
   if (msg.includes("already exists")) {
-    return "An account with this email already exists. <a href='/tester-login' class='underline'>Log in?</a>";
+    return <>An account with this email already exists. <a href='/tester-login' className='underline'>Log in?</a></>;
   }
-  // Add more mappings as needed
-  return msg;
+  // For any other error, show nothing
+  return null;
 };
 
 export default function TesterRegistrationForm() {
@@ -140,32 +146,27 @@ export default function TesterRegistrationForm() {
                 />
             </div>
             {result?.errors && (
-                <div className="text-red-600 text-sm text-center">
-                    {result.errors.flatMap((err: any, i: number) => {
-                        if (typeof err === 'string') {
-                            return (
-                                <div key={i} className="flex items-start gap-2 justify-center mb-1">
-                                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" /></svg>
-                                    <span dangerouslySetInnerHTML={{ __html: friendlyError(err) }} />
-                                </div>
-                            );
-                        } else if (Array.isArray(err)) {
-                            // If err is an array, flatten and extract messages
-                            return err.map((e: any, j: number) => (
-                                <div key={i + '-' + j} className="flex items-start gap-2 justify-center mb-1">
-                                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" /></svg>
-                                    <span dangerouslySetInnerHTML={{ __html: friendlyError(e.message || '') }} />
-                                </div>
-                            ));
-                        } else if (err && typeof err === 'object' && err.message) {
-                            return (
-                                <div key={i} className="flex items-start gap-2 justify-center mb-1">
-                                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" /></svg>
-                                    <span dangerouslySetInnerHTML={{ __html: friendlyError(err.message) }} />
-                                </div>
-                            );
+                <div className="text-red-600 text-sm text-left w-full">
+                    {result.errors.map((err: any, i: number) => {
+                        let msg = '';
+                        if (typeof err === 'object') {
+                            if (err.message) {
+                                msg = err.message;
+                            } else if (Array.isArray(err.errors) && err.errors[0]?.message) {
+                                msg = err.errors[0].message;
+                            } else {
+                                msg = JSON.stringify(err);
+                            }
+                        } else {
+                            msg = String(err);
                         }
-                        return null;
+                        const rendered = friendlyError(msg);
+                        if (!rendered) return null;
+                        return (
+                            <div key={i} className="flex items-start gap-2 mb-1">
+                                <span>{rendered}</span>
+                            </div>
+                        );
                     })}
                 </div>
             )}
