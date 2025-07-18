@@ -50,7 +50,7 @@ export default async function Home() {
     //console.log(categoriesAndProjects);
     return (
         <div>
-            <Navbar />
+            <Navbar variant="default" />
             <div className="relative">
                 <Image
                     alt="Radice"

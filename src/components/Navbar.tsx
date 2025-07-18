@@ -26,7 +26,8 @@ export type NavbarVariant =
     | "justLogo"
     | "loggedIn"
     | "dashboard"
-    | "tester";
+    | "tester"
+    | "appstore";
 
 interface NavbarProps {
     variant?: NavbarVariant;
@@ -35,7 +36,6 @@ interface NavbarProps {
 export default function Navbar({ variant = "default" }: NavbarProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { tester, isAuthenticated, logout, isLoading } = useTesterAuth();
-    // Logo element
     const logo = (
         <Link
             href="/"
@@ -102,9 +102,9 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             <Link href="/media" style={navLinkStyle}>
                 Media
             </Link>
-            <Link href="/dashboard" style={navLinkStyle}>
+            {/* <Link href="/dashboard" style={navLinkStyle}>
                 Developer
-            </Link>
+            </Link> */}
             <div
                 style={{
                     position: "relative",
@@ -647,66 +647,135 @@ export default function Navbar({ variant = "default" }: NavbarProps) {
             </nav>
         );
     }
-    // Default
-    return (
-        <nav className="flex w-full max-w-[1440px] px-4 sm:px-10 py-4 justify-between items-center mx-auto">
-            {logo}
-            <div className="hidden md:flex flex-1 justify-center">
-                {navLinks}
-            </div>
-            <div className="hidden md:flex">
-                {rightSide}
-            </div>
-            <button
-                className="md:hidden ml-auto"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-                <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
-                    <path
-                        stroke="#000"
-                        strokeWidth="2"
-                        d="M4 6h16M4 12h16M4 18h16"
-                    />
-                </svg>
-            </button>
-            {mobileMenuOpen && (
-                <div
-                    className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center md:hidden"
-                    onClick={() => setMobileMenuOpen(false)}
+    if (variant === "appstore") {
+        return (
+            <nav className="relative flex w-full max-w-[1440px] px-4 sm:px-10 py-4 items-center mx-auto">
+                {/* Left: Logo, fixed width */}
+                <div style={{ width: 200, minWidth: 120 }} className="flex items-center justify-start">
+                    {logo}
+                </div>
+                {/* Center: navLinks, always centered absolutely */}
+                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden md:flex flex-1 justify-center">
+                    {navLinks}
+                </div>
+                {/* Right: Auth buttons, right aligned */}
+                <div className="hidden md:flex items-center justify-end ml-auto">
+                    {authButtons}
+                </div>
+                <button
+                    className="md:hidden ml-auto"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+                        <path
+                            stroke="#000"
+                            strokeWidth="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                        />
+                    </svg>
+                </button>
+                {mobileMenuOpen && (
                     <div
-                        className="bg-white w-full mx-8 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
-                        onClick={(e) => e.stopPropagation()}
+                        className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center md:hidden"
+                        onClick={() => setMobileMenuOpen(false)}
                     >
-                        <button
-                            className="self-end mb-2"
-                            onClick={() => setMobileMenuOpen(false)}
+                        <div
+                            className="bg-white w-full mx-8 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            <svg
-                                width="28"
-                                height="28"
-                                fill="none"
-                                viewBox="0 0 24 24"
+                            <button
+                                className="self-end mb-2"
+                                onClick={() => setMobileMenuOpen(false)}
                             >
-                                <path
-                                    stroke="#000"
-                                    strokeWidth="2"
-                                    d="M6 6l12 12M6 18L18 6"
-                                />
-                            </svg>
-                        </button>
-                        <div className="flex flex-col items-center space-y-4 w-full">
-                            {navLinksMobile}
-                            {isAuthenticated ? (
-                                <div className="flex flex-col items-center space-y-3 w-full">
-                                    {profileMenuMobile}
-                                    {signOutMobile}
-                                </div>
-                            ) : authButtonsMobile}
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke="#000"
+                                        strokeWidth="2"
+                                        d="M6 6l12 12M6 18L18 6"
+                                    />
+                                </svg>
+                            </button>
+                            <div className="flex flex-col items-center space-y-4 w-full">
+                                {navLinksMobile}
+                                {authButtonsMobile}
+                            </div>
                         </div>
                     </div>
+                )}
+            </nav>
+        );
+    }
+    // Default
+    if (variant === "default") {
+        return (
+            <nav className="relative flex w-full max-w-[1440px] px-4 sm:px-10 py-4 items-center mx-auto">
+                {/* Left: Logo, fixed width */}
+                <div style={{ width: 200, minWidth: 120 }} className="flex items-center justify-start">
+                    {logo}
                 </div>
-            )}
-        </nav>
-    );
+                {/* Center: navLinks, always centered absolutely */}
+                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden md:flex flex-1 justify-center">
+                    {navLinks}
+                </div>
+                {/* Right: Developer link, right aligned */}
+                <div className="hidden md:flex items-center justify-end ml-auto">
+                    <Link href="/dashboard" style={navLinkStyle}>
+                        Developer
+                    </Link>
+                </div>
+                <button
+                    className="md:hidden ml-auto"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+                        <path
+                            stroke="#000"
+                            strokeWidth="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                        />
+                    </svg>
+                </button>
+                {mobileMenuOpen && (
+                    <div
+                        className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center md:hidden"
+                        onClick={() => setMobileMenuOpen(false)}
+                    >
+                        <div
+                            className="bg-white w-full mx-8 rounded-lg p-6 flex flex-col items-center justify-center max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                className="self-end mb-2"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke="#000"
+                                        strokeWidth="2"
+                                        d="M6 6l12 12M6 18L18 6"
+                                    />
+                                </svg>
+                            </button>
+                            <div className="flex flex-col items-center space-y-4 w-full">
+                                {navLinksMobile}
+                                <Link href="/dashboard" className="text-base w-full text-center">
+                                    Developer
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </nav>
+        );
+    }
 }
