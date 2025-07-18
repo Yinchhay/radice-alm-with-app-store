@@ -249,7 +249,7 @@ export async function POST(
             }
         }
 
-        let major = 1,
+        let major = 0,
             minor = 0,
             patch = 0;
 
@@ -259,7 +259,7 @@ export async function POST(
             );
 
             if (latestAcceptedVersion) {
-                major = latestAcceptedVersion.majorVersion ?? 1;
+                major = latestAcceptedVersion.majorVersion ?? 0;
                 minor = latestAcceptedVersion.minorVersion ?? 0;
                 patch = latestAcceptedVersion.patchVersion ?? 0;
             }
@@ -267,7 +267,7 @@ export async function POST(
 
         const versionNumber = acceptedApp
             ? `${major}.${minor}.${patch}`
-            : "1.0.0";
+            : "0.0.0";
 
         const versionContent = acceptedApp
             ? "- Draft created by cloning accepted app"
