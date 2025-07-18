@@ -85,10 +85,12 @@ export default function AppScreenshotsCarousel({
         return () => clearTimeout(timeout);
     }, [currentImage]);
 
+    const PLACEHOLDER = "/placeholders/placeholder.png";
     if (!screenshots || screenshots.length === 0) {
         return (
             <div className="mb-8">
                 <div className="bg-gray-100 w-full h-64 rounded-lg flex items-center justify-center text-gray-500">
+                    <img src={PLACEHOLDER} alt="No screenshots available" className="w-32 h-32 object-contain opacity-60" />
                     No screenshots available
                 </div>
             </div>
@@ -118,10 +120,10 @@ export default function AppScreenshotsCarousel({
     return (
         <>
             <div className="mb-8" ref={carouselRef} tabIndex={0} aria-label="App screenshots carousel">
-                <div className="relative mb-4">
-                    <div className="aspect-[16/9] bg-gray-100 rounded-lg overflow-hidden transition-all duration-300">
+                <div className="mb-4">
+                    <div className="relative aspect-[16/9] bg-gray-100 rounded-lg overflow-hidden transition-all duration-300 flex items-center justify-center">
                         <ImageWithFallback
-                            src={screenshots[currentImage]?.imageUrl || "/placeholders/placeholder.png"}
+                            src={screenshots[currentImage]?.imageUrl || PLACEHOLDER}
                             alt={`${appName} screenshot ${currentImage + 1}`}
                             width="0"
                             height="0"
@@ -173,7 +175,7 @@ export default function AppScreenshotsCarousel({
                                     }`}
                                 >
                                     <ImageWithFallback
-                                        src={screenshot.imageUrl}
+                                        src={screenshot.imageUrl || PLACEHOLDER}
                                         alt={`${appName} screenshot ${index + 1}`}
                                         width="0"
                                         height="0"
@@ -200,7 +202,7 @@ export default function AppScreenshotsCarousel({
                                 </button>
                                 <div className="relative flex items-center justify-center">
                                     <img
-                                        src={screenshots[currentImage]?.imageUrl}
+                                        src={screenshots[currentImage]?.imageUrl || PLACEHOLDER}
                                         alt={`${appName} screenshot ${currentImage + 1}`}
                                         className="max-w-full max-h-[80vh] object-contain transition-transform duration-300"
                                         tabIndex={0}
@@ -209,6 +211,7 @@ export default function AppScreenshotsCarousel({
                                             if (e.key === "ArrowLeft") prevImage();
                                             if (e.key === "ArrowRight") nextImage();
                                         }}
+                                        onError={e => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER; }}
                                     />
                                     {screenshots.length > 1 && (
                                         <>
