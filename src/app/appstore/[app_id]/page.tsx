@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function AppInfoPage({ params }: { params: { app_id: string } }) {
     return (
         <div>
-            <Navbar />
+            <Navbar variant="tester" />
             <AppPage params={params} />
             <Footer />
         </div>
