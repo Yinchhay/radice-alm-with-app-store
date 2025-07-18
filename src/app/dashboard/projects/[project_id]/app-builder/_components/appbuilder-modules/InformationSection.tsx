@@ -121,11 +121,12 @@ export default function InformationSection({
                         <div className="rounded-md border border-dashed border-gray-300 bg-gray-50 p-2 h-full flex-1 min-h-0">
                             <div className="text-xs text-gray-500 mb-1">Markdown Preview:</div>
                             <ReactMarkdown
-                                children={description}
                                 remarkPlugins={[remarkGfm]}
                                 rehypePlugins={[rehypeSanitize]}
                                 className="markdown-preview"
-                            />
+                            >
+                                {description}
+                            </ReactMarkdown>
                         </div>
                     </div>
                 </div>

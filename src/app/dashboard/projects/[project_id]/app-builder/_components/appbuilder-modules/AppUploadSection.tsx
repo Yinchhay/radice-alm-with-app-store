@@ -56,7 +56,7 @@ const AppUploadSection: React.FC<AppUploadSectionProps> = ({
                             </div>
                             <button
                                 className="ml-2 text-gray-500 hover:text-red-500 text-sm"
-                                onClick={() => setAppFiles((prev: any[]) => prev.filter((_, i: number) => i !== idx))}
+                                onClick={() => setAppFiles(appFiles.filter((_, i: number) => i !== idx))}
                             >
                                 ✕
                             </button>

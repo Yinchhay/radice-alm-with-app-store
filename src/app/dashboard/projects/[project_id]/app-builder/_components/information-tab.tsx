@@ -30,6 +30,9 @@ import ScreenshotsSection from "./appbuilder-modules/ScreenshotsSection";
 import { useRouter } from "next/navigation";
 import AppUploadSection from "./appbuilder-modules/AppUploadSection";
 
+// Use env for API base URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
 function FileDropzone({
     label,
     accept = "*",
@@ -139,7 +142,7 @@ function insertAtCursor(
 async function reorderScreenshotsOnServer(appId: number, newOrder: string[]) {
     try {
         const res = await fetch(
-            `/api/internal/app/${appId}/images/screenshots`,
+            `${API_BASE_URL}/api/internal/app/${appId}/images/screenshots`,
             {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -157,7 +160,7 @@ async function reorderScreenshotsOnServer(appId: number, newOrder: string[]) {
 async function deleteScreenshotOnServer(appId: number, screenshotId: number) {
     try {
         const res = await fetch(
-            `/api/internal/app/${appId}/images/screenshots?screenshot_id=${screenshotId}`,
+            `${API_BASE_URL}/api/internal/app/${appId}/images/screenshots?screenshot_id=${screenshotId}`,
             {
                 method: "DELETE",
                 credentials: "include",
@@ -175,7 +178,7 @@ async function fetchScreenshotIds(
 ): Promise<{ url: string; id: number }[]> {
     try {
         const res = await fetch(
-            `/api/internal/app/${appId}/images/screenshots`,
+            `${API_BASE_URL}/api/internal/app/${appId}/images/screenshots`,
             {
                 method: "GET",
                 credentials: "include",
@@ -223,7 +226,7 @@ async function uploadScreenshotsWithProgress(
                     formData.append("screenshots", file);
                     xhr.open(
                         "POST",
-                        `/api/internal/app/${appId}/images/screenshots`,
+                        `${API_BASE_URL}/api/internal/app/${appId}/images/screenshots`,
                         true,
                     );
                     xhr.withCredentials = true;
@@ -502,7 +505,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             setError(null);
             try {
                 const projectRes = await fetch(
-                    `/api/internal/project/${projectId}`,
+                    `${API_BASE_URL}/api/internal/project/${projectId}`,
                     {
                         method: "GET",
                         cache: "no-cache",
@@ -518,7 +521,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 let draftApp;
                 let appData;
                 const appRes = await fetch(
-                    `/api/internal/project/${projectId}/app`,
+                    `${API_BASE_URL}/api/internal/project/${projectId}/app`,
                     {
                         method: "GET",
                         cache: "no-cache",
@@ -536,7 +539,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 } else {
                     // If not found, create a new draft
                     const appPostRes = await fetch(
-                        `/api/internal/project/${projectId}/app`,
+                        `${API_BASE_URL}/api/internal/project/${projectId}/app`,
                         {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -619,7 +622,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 setLoading(false);
                 if (draftApp.id) {
                     fetch(
-                        `http://localhost:3000/api/public/app/${draftApp.id}/version`,
+                        `${API_BASE_URL}/api/public/app/${draftApp.id}/version`,
                     )
                         .then((r) => r.json())
                         .then((data) => {
@@ -685,7 +688,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             if (!appData?.appId) return;
             try {
                 const res = await fetch(
-                    `http://localhost:3000/api/public/app/${appData.appId}/version`,
+                    `${API_BASE_URL}/api/public/app/${appData.appId}/version`,
                 );
                 const data = await res.json();
                 if (
@@ -973,7 +976,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             formData.append("projectId", projectId);
             uploadable.forEach((file, idx) => formData.append("files", file.file || file));
             const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/api/internal/file/upload", true);
+            xhr.open("POST", `${API_BASE_URL}/api/internal/file/upload`, true);
             xhr.withCredentials = true;
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable && setProgress) {
@@ -1025,7 +1028,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             // Delete card images marked for deletion
             if (appData?.appId && cardImagesToDelete.length > 0) {
                 for (const url of cardImagesToDelete) {
-                    await fetch(`/api/internal/app/${appData.appId}/images/card`, {
+                    await fetch(`${API_BASE_URL}/api/internal/app/${appData.appId}/images/card`, {
                         method: 'DELETE',
                         credentials: 'include',
                     });
@@ -1035,7 +1038,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             // Delete banner images marked for deletion
             if (appData?.appId && bannerImagesToDelete.length > 0) {
                 for (const url of bannerImagesToDelete) {
-                    await fetch(`/api/internal/app/${appData.appId}/images/banner`, {
+                    await fetch(`${API_BASE_URL}/api/internal/app/${appData.appId}/images/banner`, {
                         method: 'DELETE',
                         credentials: 'include',
                     });
@@ -1135,7 +1138,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             // Delete card images marked for deletion
             if (appData?.appId && cardImagesToDelete.length > 0) {
                 for (const url of cardImagesToDelete) {
-                    await fetch(`/api/internal/app/${appData.appId}/images/card`, {
+                    await fetch(`${API_BASE_URL}/api/internal/app/${appData.appId}/images/card`, {
                         method: 'DELETE',
                         credentials: 'include',
                     });
@@ -1145,7 +1148,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             // Delete banner images marked for deletion
             if (appData?.appId && bannerImagesToDelete.length > 0) {
                 for (const url of bannerImagesToDelete) {
-                    await fetch(`/api/internal/app/${appData.appId}/images/banner`, {
+                    await fetch(`${API_BASE_URL}/api/internal/app/${appData.appId}/images/banner`, {
                         method: 'DELETE',
                         credentials: 'include',
                     });
@@ -1223,7 +1226,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             };
             // First PATCH to update the draft app
             const editRes = await fetch(
-                `/api/internal/app/${appData.appId}/edit`,
+                `${API_BASE_URL}/api/internal/app/${appData.appId}/edit`,
                 {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
@@ -1239,7 +1242,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
             }
             // Then PATCH to publish the draft app
             const publishRes = await fetch(
-                `/api/internal/app/${appData.appId}/publish`,
+                `${API_BASE_URL}/api/internal/app/${appData.appId}/publish`,
                 {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
@@ -1389,6 +1392,15 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                 webUrlError={webUrlError}
             />
 
+            {/* Always show AppUploadSection regardless of type */}
+            <AppUploadSection
+                appFiles={appFiles}
+                setAppFiles={setAppFiles}
+                renderUploadList={renderUploadList}
+                FileDropzone={FileDropzone}
+                errors={errors}
+            />
+
             {latestAcceptedVersion && (
                 <UpdateInformationSection
                     updateType={updateType}
@@ -1409,7 +1421,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                     setCardImages((prev: any[]) => {
                         const next = typeof updater === 'function' ? updater(prev) : updater;
                         // Find removed card images (with .url)
-                        const removed = prev.filter(img => img.url && !next.some(n => n.url === img.url));
+                        const removed = prev.filter(img => img.url && !next.some((n: any) => n.url === img.url));
                         if (removed.length > 0) {
                             setCardImagesToDelete((old) => [...old, ...removed.map(r => r.url)]);
                         }
@@ -1421,7 +1433,7 @@ export default function InformationTab({ projectId }: InformationTabProps) {
                     setBannerImages((prev: any[]) => {
                         const next = typeof updater === 'function' ? updater(prev) : updater;
                         // Find removed banner images (with .url)
-                        const removed = prev.filter(img => img.url && !next.some(n => n.url === img.url));
+                        const removed = prev.filter(img => img.url && !next.some((n: any) => n.url === img.url));
                         if (removed.length > 0) {
                             setBannerImagesToDelete((old) => [...old, ...removed.map(r => r.url)]);
                         }
