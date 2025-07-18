@@ -47,7 +47,7 @@ export default function LoginForm() {
     }
 
     return (
-        <div className="flex w-[600px] p-[40px] flex-col items-center gap-[40px]">
+        <div className="w-full max-w-lg px-4 sm:px-8 py-8 flex flex-col items-center gap-8 mx-auto">
             <h1 className="text-5xl font-bold text-center">Radice Developer</h1>
             <form className="flex flex-col gap-6 w-full" onSubmit={handleSubmit}>
                 <div>
