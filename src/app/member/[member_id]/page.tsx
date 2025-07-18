@@ -111,9 +111,9 @@ export default async function MemberPublicProfilePage({
         <div>
             <Navbar />
             {member && (
-                <div className="container min-h-[70vh] mx-auto py-8 grid grid-cols-2 gap-8">
-                    <div className="flex flex-col gap-2">
-                        <div className="w-[175px] h-[225px] relative">
+                <div className="container min-h-[70vh] mx-auto py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="flex flex-col gap-2 items-center md:items-start mb-8 md:mb-0">
+                        <div className="w-[180px] h-[220px] md:w-[175px] md:h-[225px] relative">
                             <GridRevealImage
                                 variant="light"
                                 canReveal
@@ -128,21 +128,21 @@ export default async function MemberPublicProfilePage({
                                 alt=""
                             />
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold">
+                        <div className="text-center md:text-left">
+                            <h1 className="text-lg md:text-xl font-bold">
                                 {member.firstName + " " + member.lastName}
                             </h1>
-                            <h2 className="">{member.email}</h2>
+                            <h2 className="text-sm md:text-base">{member.email}</h2>
                         </div>
                         {member.skillSet && (
                             <SkillSetChips skillSets={member.skillSet} />
                         )}
-                        {member.description && <p>{member.description}</p>}
+                        {member.description && <p className="text-sm md:text-base text-gray-700">{member.description}</p>}
                         {member.hasLinkedGithub &&
                             fetchGithub &&
                             fetchGithub.html_url && (
                                 <>
-                                    <div className="flex">
+                                    <div className="flex justify-center md:justify-start">
                                         <Link
                                             href={fetchGithub.html_url}
                                             className="text-white rounded-full flex items-end justify-center bg-white"
@@ -160,24 +160,25 @@ export default async function MemberPublicProfilePage({
                             )}
                     </div>
                     <div>
-                        <h2 className="font-bold mb-2 text-lg">
+                        <h2 className="font-bold mb-2 text-lg md:text-xl">
                             Researches/Projects:
                         </h2>
                         {projects.length <= 0 && (
-                            <p>No researches or projects yet</p>
+                            <p className="text-sm md:text-base">No researches or projects yet</p>
                         )}
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-4 w-full">
                             {projects.map((project, i) => {
                                 return (
                                     <Card
                                         square
                                         key={`researches-${project.id}`}
+                                        className="w-full"
                                     >
                                         <Link
                                             href={`/project/${project.id}`}
-                                            className="flex"
+                                            className="flex flex-col sm:flex-row items-center sm:items-start w-full"
                                         >
-                                            <div className="w-[80px] h-[80px] relative shrink-0 border border-gray-200">
+                                            <div className="w-[64px] h-[64px] md:w-[80px] md:h-[80px] relative shrink-0 border border-gray-200 mx-auto sm:mx-0">
                                                 <Image
                                                     src={
                                                         `/api/file?filename=${project.logoUrl}` ||
@@ -188,12 +189,12 @@ export default async function MemberPublicProfilePage({
                                                     alt=""
                                                 />
                                             </div>
-                                            <div className="px-4">
-                                                <h1 className="text-xl font-bold">
+                                            <div className="px-0 sm:px-4 mt-2 sm:mt-0 text-center sm:text-left w-full">
+                                                <h1 className="text-base md:text-xl font-bold">
                                                     {project.name}
                                                 </h1>
-                                                <p>{project.description}</p>
-                                                <ChipsHolder className="mt-2">
+                                                <p className="text-xs md:text-base">{project.description}</p>
+                                                <ChipsHolder className="mt-2 flex flex-wrap justify-center sm:justify-start">
                                                     {project.projectCategories.map(
                                                         (categoryJoin) => (
                                                             <Chip
