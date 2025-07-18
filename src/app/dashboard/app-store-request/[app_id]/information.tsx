@@ -82,7 +82,6 @@ export default async function InformationView({ appId }: { appId: string }) {
               readOnly
               className="w-full px-3 py-1.5 border border-gray-300 rounded-md bg-gray-50 text-sm"
             />
-            <div className="text-xs text-gray-600 mt-1">Version: <span className="font-mono">{versionNumber}</span></div>
           </div>
           <div className="space-y-1 mt-3">
             <label className="block text-sm font-medium">What's New</label>
@@ -117,16 +116,15 @@ export default async function InformationView({ appId }: { appId: string }) {
           <a href={appFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Download App File</a>
         </>
       )}
-      <h3 className="text-xl font-bold mt-6 mb-2">Image</h3>
+      <h3 className="text-xl font-bold mt-6 mb-2">Card Image</h3>
       <div className="mb-2">
-        <span className="text-sm font-medium">Card</span>
           {cardImage ? (
             <img src={cardImage} alt="Card" className="mt-2 rounded-md max-h-32" />
           ) : (
             <div className="text-gray-400">No card image uploaded.</div>
           )}
         </div>
-      <h3 className="text-xl font-bold mt-6 mb-2">Banner</h3>
+      <h3 className="text-xl font-bold mt-6 mb-2">Banner Image</h3>
         {bannerImage ? (
           <img src={bannerImage} alt="Banner" className="mt-2 rounded-md max-h-32" />
         ) : (
