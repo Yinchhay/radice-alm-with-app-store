@@ -50,8 +50,6 @@ export async function saveUploadedFile(
     fileType: string,
 ): Promise<string> {
     await ensureUploadDir();
-    // Store directly in FILE_STORAGE_PATH (uploads/apps), not in uploads/apps/apps
-    // const appsDir = path.join(FILE_STORAGE_PATH, "apps");
     const appsDir = FILE_STORAGE_PATH;
     try {
         await fs.access(appsDir);
@@ -64,7 +62,7 @@ export async function saveUploadedFile(
     const filePath = path.join(appsDir, uniqueFilename);
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
-    return `/uploads/apps/${uniqueFilename}`;
+    return `/mnt/RadiceStorageFolder/${uniqueFilename}`;
 }
 
 export function validateFile(file: File): { valid: boolean; error?: string } {
@@ -136,7 +134,7 @@ export async function copyImageFile(
 
         await fs.copyFile(originalFullPath, newFullPath);
 
-        return `/uploads/apps/${newFilename}`;
+        return `/mnt/RadiceStorageFolder/${newFilename}`;
     } catch (error) {
         console.warn(`Failed to copy ${imageType} image:`, error);
         return null;
@@ -185,7 +183,7 @@ export async function copyScreenshots(
 
                 newScreenshots.push({
                     appId: newAppId,
-                    imageUrl: `/uploads/apps/${newFilename}`,
+                    imageUrl: `/mnt/RadiceStorageFolder/${newFilename}`,
                     sortOrder: originalScreenshot.sortOrder || i + 1,
                 });
             } catch (error) {
