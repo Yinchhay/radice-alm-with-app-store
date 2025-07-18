@@ -50,22 +50,20 @@ export async function saveUploadedFile(
     fileType: string,
 ): Promise<string> {
     await ensureUploadDir();
-    
-    const appsDir = path.join(FILE_STORAGE_PATH, "apps");
+    // Store directly in FILE_STORAGE_PATH (uploads/apps), not in uploads/apps/apps
+    // const appsDir = path.join(FILE_STORAGE_PATH, "apps");
+    const appsDir = FILE_STORAGE_PATH;
     try {
         await fs.access(appsDir);
     } catch {
         await fs.mkdir(appsDir, { recursive: true });
     }
-    
     const fileExtension = path.extname(file.name);
     const timestamp = Date.now();
     const uniqueFilename = `app_${appId}_${fileType}_${timestamp}${fileExtension}`;
     const filePath = path.join(appsDir, uniqueFilename);
-    
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
-    
     return `/uploads/apps/${uniqueFilename}`;
 }
 
@@ -115,4 +113,90 @@ export function getFileInfo(file: File) {
         type: file.type,
         lastModified: file.lastModified,
     };
+}
+
+export async function copyImageFile(
+    originalPath: string,
+    newAppId: number,
+    imageType: "card" | "banner",
+): Promise<string | null> {
+    if (!originalPath) return null;
+
+    try {
+        const originalFilename = path.basename(originalPath);
+        const fileExtension = path.extname(originalFilename);
+        const timestamp = Date.now();
+
+        const newFilename = `app_${newAppId}_${imageType}_image_${timestamp}${fileExtension}`;
+
+        const originalFullPath = path.join(FILE_STORAGE_PATH, originalFilename);
+        const newFullPath = path.join(FILE_STORAGE_PATH, newFilename);
+
+        await fs.access(originalFullPath);
+
+        await fs.copyFile(originalFullPath, newFullPath);
+
+        return `/uploads/apps/${newFilename}`;
+    } catch (error) {
+        console.warn(`Failed to copy ${imageType} image:`, error);
+        return null;
+    }
+}
+
+export async function copyScreenshots(
+    originalAppId: number,
+    newAppId: number,
+): Promise<void> {
+    try {
+        const { getAppScreenshots, insertAppScreenshots } = await import(
+            "@/repositories/app_screenshot"
+        );
+
+        const originalScreenshots = await getAppScreenshots(originalAppId);
+
+        if (!originalScreenshots || originalScreenshots.length === 0) {
+            return;
+        }
+
+        const newScreenshots = [];
+
+        for (let i = 0; i < originalScreenshots.length; i++) {
+            const originalScreenshot = originalScreenshots[i];
+
+            if (!originalScreenshot.imageUrl) continue;
+
+            try {
+                const originalFilename = path.basename(
+                    originalScreenshot.imageUrl,
+                );
+                const fileExtension = path.extname(originalFilename);
+                const timestamp = Date.now();
+
+                const newFilename = `app_${newAppId}_${i}_${timestamp}${fileExtension}`;
+
+                const originalFullPath = path.join(
+                    FILE_STORAGE_PATH,
+                    originalFilename,
+                );
+                const newFullPath = path.join(FILE_STORAGE_PATH, newFilename);
+
+                await fs.access(originalFullPath);
+                await fs.copyFile(originalFullPath, newFullPath);
+
+                newScreenshots.push({
+                    appId: newAppId,
+                    imageUrl: `/uploads/apps/${newFilename}`,
+                    sortOrder: originalScreenshot.sortOrder || i + 1,
+                });
+            } catch (error) {
+                console.warn(`Failed to copy screenshot ${i}:`, error);
+            }
+        }
+
+        if (newScreenshots.length > 0) {
+            await insertAppScreenshots(newScreenshots);
+        }
+    } catch (error) {
+        console.error("Failed to copy screenshots:", error);
+    }
 }

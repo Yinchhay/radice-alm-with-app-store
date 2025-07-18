@@ -22,3 +22,18 @@
         background: white;
     }
 }
+
+.markdown-preview {
+  font-size: 14px;
+}
+
+.markdown-preview ul,
+.markdown-preview ol {
+  list-style: disc;
+  margin-left: 0.5em;
+  padding-left: 0.5em;
+  margin-top: 0.5em;
+}
+.markdown-preview li {
+  margin-bottom: 0.25em;
+}

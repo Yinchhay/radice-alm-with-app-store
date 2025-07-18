@@ -28,11 +28,9 @@ type Params = { params: { app_id: string } };
 
 // POST: Append new screenshots (without replacing existing ones)
 export async function POST(request: NextRequest, { params }: Params) {
-    // Debug: log headers and cookies
     console.log('---UPLOAD DEBUG---');
     console.log('Headers:', Object.fromEntries(request.headers.entries()));
     try {
-        // Log cookies (NextRequest cookies API)
         if (request.cookies) {
             console.log('Cookies:', request.cookies.getAll());
         } else {
@@ -41,7 +39,6 @@ export async function POST(request: NextRequest, { params }: Params) {
     } catch (e) {
         console.log('Error reading cookies:', e);
     }
-    // Check for Bearer Token and Permissions
     const requiredPermission = new Set([]);
     const { errorNoBearerToken, errorNoPermission, user } =
         await checkBearerAndPermission(request, requiredPermission);

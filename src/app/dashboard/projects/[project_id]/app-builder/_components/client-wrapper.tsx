@@ -1,15 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import InformationTab from './information-tab';
-import FeedbackTab from './feedback-tab';
-import BugReportsTab from './bugreport-tab';
-import VersionLogsTab from './versionlog-tab';
-import { fetchAppBuilderData } from '../fetch';
+import { useEffect, useState, useRef } from "react";
+import InformationTab from "./information-tab";
+import FeedbackTab from "./feedback-tab";
+import BugReportsTab from "./bugreport-tab";
+import VersionLogsTab from "./versionlog-tab";
+import { fetchAppBuilderData } from "../fetch";
+
 
 interface AppBuilderClientWrapperProps {
   projectId: string;
 }
+
+// Global cache to prevent duplicate requests across component remounts
+const initializationCache = new Map<string, Promise<any>>();
 
 export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientWrapperProps) {
   const [activeTab, setActiveTab] = useState('information');
@@ -18,11 +22,35 @@ export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientW
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const cacheKey = `app-builder-${projectId}`;
+    
     const loadAppId = async () => {
+      // Check if we already have a pending request for this project
+      if (initializationCache.has(cacheKey)) {
+        try {
+          const cachedResponse = await initializationCache.get(cacheKey);
+          if (cachedResponse.success && cachedResponse.data && cachedResponse.data.appId) {
+            setAppId(cachedResponse.data.appId);
+          } else {
+            setError(cachedResponse.message || 'Failed to load appId');
+          }
+        } catch (err) {
+          setError('Failed to load appId');
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+
       setLoading(true);
       setError(null);
+      
+      // Create and cache the promise
+      const requestPromise = fetchAppBuilderData(projectId);
+      initializationCache.set(cacheKey, requestPromise);
+      
       try {
-        const response = await fetchAppBuilderData(projectId);
+        const response = await requestPromise;
         if (response.success && response.data && response.data.appId) {
           setAppId(response.data.appId);
         } else {
@@ -30,10 +58,13 @@ export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientW
         }
       } catch (err) {
         setError('Failed to load appId');
+        // Remove from cache on error so it can be retried
+        initializationCache.delete(cacheKey);
       } finally {
         setLoading(false);
       }
     };
+
     loadAppId();
   }, [projectId]);
 
@@ -62,6 +93,7 @@ export default function AppBuilderClientWrapper({ projectId }: AppBuilderClientW
           </button>
         ))}
       </div>
+
       {/* Tab Content */}
       <div className="py-4">
         {activeTab === 'information' && <InformationTab projectId={projectId} />}

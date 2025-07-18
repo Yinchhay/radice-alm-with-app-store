@@ -13,7 +13,6 @@ import { eq, desc } from "drizzle-orm";
 import { HttpStatusCode } from "@/types/http";
 import { z } from "zod";
 
-// Response type (if you want to return any extra data later)
 export type UpdateVersionContentResponse = Record<string, never>;
 
 type Params = { params: { app_id: string } };

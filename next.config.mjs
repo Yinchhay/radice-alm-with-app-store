@@ -26,3 +26,14 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
+// export default {
+//     reactStrictMode: false,
+//     swcMinify: false,
+//     eslint: {
+//       ignoreDuringBuilds: true,
+//     },
+//     typescript: {
+//       ignoreBuildErrors: true,
+//     },
+//   };
