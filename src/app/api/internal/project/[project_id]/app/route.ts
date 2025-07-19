@@ -32,9 +32,9 @@ export type FetchCreateApp = {
 const unsuccessMessage = "App operation failed";
 
 // Configuration for file storage (should match your PATCH endpoint)
-const FILE_STORAGE_PATH = path.join(
+const IMAGE_STORAGE_PATH = path.join(
     process.cwd(),
-    process.env.FILE_STORAGE_PATH || "/mnt/RadiceStorageFolder",
+    process.env.IMAGE_STORAGE_PATH || "/",
 );
 
 export async function POST(

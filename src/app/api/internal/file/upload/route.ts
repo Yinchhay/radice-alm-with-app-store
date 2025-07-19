@@ -10,7 +10,7 @@ import { UserType } from "@/types/user";
 
 const UPLOAD_DIR = path.join(
     process.cwd(),
-    process.env.FILE_STORAGE_PATH || "/mnt/RadiceStorageFolder",
+    process.env.IMAGE_STORAGE_PATH || "/public/uploads",
 );
 
 export async function POST(req: NextRequest) {
