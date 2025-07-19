@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
         const timestamp = Date.now();
         const safeName = `${baseName}_${timestamp}${ext}`;
         const filePath = path.join(UPLOAD_DIR, safeName);
-        const fileId = `apps/${safeName}`;
+        const fileId = `uploads/${safeName}`;
 
         // Write file to disk
         const arrayBuffer = await file.arrayBuffer();
