@@ -8,26 +8,14 @@ import ImageWithFallback from "@/components/ImageWithFallback";
 import { fileToUrl } from "@/lib/file";
 
 function getImageUrl(imagePath: string | null | undefined): string {
-    console.log('getImageUrl input:', imagePath);
-    
-    if (!imagePath) {
-        return "/placeholders/placeholder.png";
+    if (!imagePath) return "/placeholders/placeholder.png";
+    if (imagePath.startsWith("http")) return imagePath;
+    if (imagePath.startsWith("/api/")) return imagePath;
+    if (imagePath.startsWith("/uploads/")) {
+        return `/api/file?filename=${encodeURIComponent(imagePath.replace('/uploads/', ''))}`;
     }
-
-    if (imagePath.startsWith('http')) {
-        return imagePath;
-    }
-    
-    if (imagePath.startsWith('/uploads/')) {
-        const filename = imagePath.replace('/uploads/', '');
-        const result = `/api/file?filename=${filename}`;
-        console.log('getImageUrl uploads result:', result);
-        return result;
-    }
-    
-    const result = `/api/file?filename=${imagePath}`;
-    console.log('getImageUrl filename result:', result);
-    return result;
+    // If it's just a filename
+    return `/api/file?filename=${encodeURIComponent(imagePath)}`;
 }
 
 
