@@ -5,8 +5,8 @@ import { getPaginationMaxPage, ROWS_PER_PAGE } from "@/lib/pagination";
 import { Suspense } from "react";
 import Link from "next/link";
 
-export default async function AppStoreRequestPage() {
-  const page = 1;
+export default async function AppStoreRequestPage({ searchParams }: { searchParams?: { page?: string } }) {
+  const page = Number(searchParams?.page) || 1;
   const { data: pendingApps, totalRows } = await fetchPendingApps(page, ROWS_PER_PAGE);
   const maxPage = getPaginationMaxPage(totalRows, ROWS_PER_PAGE);
 
