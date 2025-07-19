@@ -1,8 +1,8 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-const FILE_STORAGE_PATH = path.join(process.cwd(), process.env.FILE_STORAGE_PATH || "/mnt/RadiceStorageFolder");
-const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+const IMAGE_STORAGE_PATH = path.join(process.cwd(), "public", "uploads");
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15Mb
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
 export const MAX_SCREENSHOTS = 8;
 
@@ -23,19 +23,19 @@ const ALLOWED_VIDEO_TYPES = [
 
 export async function ensureUploadDir() {
     try {
-        await fs.access(FILE_STORAGE_PATH);
+        await fs.access(IMAGE_STORAGE_PATH);
     } catch {
-        await fs.mkdir(FILE_STORAGE_PATH, { recursive: true });
+        await fs.mkdir(IMAGE_STORAGE_PATH, { recursive: true });
     }
 }
 
 export async function deleteOldFile(filePath: string) {
     if (!filePath) return;
-    
+
     try {
-        const relativePath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
-        const fullPath = path.join(process.cwd(), 'public', relativePath);
-        
+        const filename = path.basename(filePath);
+        const fullPath = path.join(IMAGE_STORAGE_PATH, filename);
+
         await fs.access(fullPath);
         await fs.unlink(fullPath);
         console.log(`Deleted old file: ${fullPath}`);
@@ -50,19 +50,16 @@ export async function saveUploadedFile(
     fileType: string,
 ): Promise<string> {
     await ensureUploadDir();
-    const appsDir = FILE_STORAGE_PATH;
-    try {
-        await fs.access(appsDir);
-    } catch {
-        await fs.mkdir(appsDir, { recursive: true });
-    }
+
     const fileExtension = path.extname(file.name);
     const timestamp = Date.now();
     const uniqueFilename = `app_${appId}_${fileType}_${timestamp}${fileExtension}`;
-    const filePath = path.join(appsDir, uniqueFilename);
+    const filePath = path.join(IMAGE_STORAGE_PATH, uniqueFilename);
+
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
-    return `/mnt/RadiceStorageFolder/${uniqueFilename}`;
+
+    return `/uploads/${uniqueFilename}`;
 }
 
 export function validateFile(file: File): { valid: boolean; error?: string } {
@@ -126,15 +123,13 @@ export async function copyImageFile(
         const timestamp = Date.now();
 
         const newFilename = `app_${newAppId}_${imageType}_image_${timestamp}${fileExtension}`;
-
-        const originalFullPath = path.join(FILE_STORAGE_PATH, originalFilename);
-        const newFullPath = path.join(FILE_STORAGE_PATH, newFilename);
+        const originalFullPath = path.join(IMAGE_STORAGE_PATH, originalFilename);
+        const newFullPath = path.join(IMAGE_STORAGE_PATH, newFilename);
 
         await fs.access(originalFullPath);
-
         await fs.copyFile(originalFullPath, newFullPath);
 
-        return `/mnt/RadiceStorageFolder/${newFilename}`;
+        return `/uploads/${newFilename}`;
     } catch (error) {
         console.warn(`Failed to copy ${imageType} image:`, error);
         return null;
@@ -171,19 +166,18 @@ export async function copyScreenshots(
                 const timestamp = Date.now();
 
                 const newFilename = `app_${newAppId}_${i}_${timestamp}${fileExtension}`;
-
                 const originalFullPath = path.join(
-                    FILE_STORAGE_PATH,
+                    IMAGE_STORAGE_PATH,
                     originalFilename,
                 );
-                const newFullPath = path.join(FILE_STORAGE_PATH, newFilename);
+                const newFullPath = path.join(IMAGE_STORAGE_PATH, newFilename);
 
                 await fs.access(originalFullPath);
                 await fs.copyFile(originalFullPath, newFullPath);
 
                 newScreenshots.push({
                     appId: newAppId,
-                    imageUrl: `/mnt/RadiceStorageFolder/${newFilename}`,
+                    imageUrl: `/uploads/${newFilename}`,
                     sortOrder: originalScreenshot.sortOrder || i + 1,
                 });
             } catch (error) {
