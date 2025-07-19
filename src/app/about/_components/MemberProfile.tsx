@@ -101,8 +101,8 @@ export default function MemberProfile({
                         {useTitle
                             ? customTitle.length > 0
                                 ? customTitle
-                                : member.title
-                            : member.email}
+                                : member.title || ""
+                            : member.email || ""}
                     </h2>
                     <p className="text-sm text-center">{member.description}</p>
                 </div>
@@ -154,8 +154,8 @@ export default function MemberProfile({
                         {useTitle
                             ? customTitle.length > 0
                                 ? customTitle
-                                : member.title
-                            : member.email}
+                                : member.title || ""
+                            : member.email || ""}
                     </h2>
                     <p className="text-sm text-center text-gray-200">
                         {member.description}

@@ -4,6 +4,32 @@ import ApproveRejectButtons from "./ApproveRejectButtons";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
+import ImageWithFallback from "@/components/ImageWithFallback";
+import { fileToUrl } from "@/lib/file";
+
+function getImageUrl(imagePath: string | null | undefined): string {
+    console.log('getImageUrl input:', imagePath);
+    
+    if (!imagePath) {
+        return "/placeholders/placeholder.png";
+    }
+
+    if (imagePath.startsWith('http')) {
+        return imagePath;
+    }
+    
+    if (imagePath.startsWith('/uploads/')) {
+        const filename = imagePath.replace('/uploads/', '');
+        const result = `/api/file?filename=${filename}`;
+        console.log('getImageUrl uploads result:', result);
+        return result;
+    }
+    
+    const result = `/api/file?filename=${imagePath}`;
+    console.log('getImageUrl filename result:', result);
+    return result;
+}
+
 
 export default async function InformationView({ appId }: { appId: string }) {
   const data = await fetchAppInfoByAppId(appId);
@@ -119,14 +145,27 @@ export default async function InformationView({ appId }: { appId: string }) {
       <h3 className="text-xl font-bold mt-6 mb-2">Card Image</h3>
       <div className="mb-2">
           {cardImage ? (
-            <img src={cardImage} alt="Card" className="mt-2 rounded-md max-h-32" />
+            <ImageWithFallback
+              src={getImageUrl(cardImage)}
+              alt="Card"
+              className="mt-2 rounded-md max-h-32 object-contain"
+              width={128}
+              height={128}
+            />
           ) : (
             <div className="text-gray-400">No card image uploaded.</div>
           )}
         </div>
       <h3 className="text-xl font-bold mt-6 mb-2">Banner Image</h3>
-        {bannerImage ? (
-          <img src={bannerImage} alt="Banner" className="mt-2 rounded-md max-h-32" />
+          {bannerImage ? (
+          <ImageWithFallback
+            src={getImageUrl(bannerImage)}
+            alt="Banner"
+            className="mt-2 rounded-md max-h-32 object-contain"
+            width={128}
+            height={128}
+          />
+
         ) : (
           <div className="text-gray-400">No banner image uploaded.</div>
         )}
@@ -134,7 +173,14 @@ export default async function InformationView({ appId }: { appId: string }) {
         {screenshots && screenshots.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {screenshots.map((s, i) => (
-              <img key={i} src={s.imageUrl || ''} alt={`Screenshot ${i + 1}`} className="rounded-md max-h-32" />
+              <ImageWithFallback
+                key={i}
+                src={getImageUrl(s.imageUrl)}
+                alt={`Screenshot ${i + 1}`}
+                className="rounded-md max-h-32 object-contain"
+                width={128}
+                height={128}
+              />
             ))}
           </div>
         ) : (

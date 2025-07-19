@@ -1,5 +1,15 @@
 import React from "react";
 
+function getImageUrl(path: string | null | undefined): string {
+    if (!path) return "";
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('/api/')) return path;
+    if (path.startsWith('/uploads/')) {
+        return `/api/file?filename=${encodeURIComponent(path.replace('/uploads/', ''))}`;
+    }
+    return `/api/file?filename=${encodeURIComponent(path)}`;
+}
+
 export default function BannerAndCardSection({
     cardImages,
     setCardImages,
@@ -40,7 +50,7 @@ export default function BannerAndCardSection({
                     previewUrl = URL.createObjectURL(img.file);
                     filename = img.file.name;
                 } else if (img.url) {
-                    previewUrl = img.url;
+                    previewUrl = getImageUrl(img.url);
                     filename = img.url.split("/").pop() || img.url;
                 }
                 return (
@@ -90,7 +100,7 @@ export default function BannerAndCardSection({
                     previewUrl = URL.createObjectURL(img.file);
                     filename = img.file.name;
                 } else if (img.url) {
-                    previewUrl = img.url;
+                    previewUrl = getImageUrl(img.url);
                     filename = img.url.split("/").pop() || img.url;
                 }
                 return (

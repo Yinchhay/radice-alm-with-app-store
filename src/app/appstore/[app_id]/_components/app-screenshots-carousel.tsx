@@ -16,6 +16,26 @@ type AppScreenshotsCarouselProps = {
     appName: string;
 };
 
+function getImageUrl(imagePath: string | null | undefined): string {
+    const PLACEHOLDER = "/placeholders/placeholder.png";
+    
+    if (!imagePath) {
+        return PLACEHOLDER;
+    }
+    
+    if (imagePath.startsWith('http')) {
+        return imagePath;
+    }
+    
+    if (imagePath.startsWith('/uploads/')) {
+        const filename = imagePath.replace('/uploads/', '');
+        return `/api/file?filename=${filename}`;
+    }
+
+    return `/api/file?filename=${imagePath}`;
+}
+
+
 export default function AppScreenshotsCarousel({
     screenshots,
     appName,
@@ -26,17 +46,18 @@ export default function AppScreenshotsCarousel({
     const carouselRef = useRef<HTMLDivElement>(null);
     const fullscreenRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (!showFullscreen) return;
+useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "ArrowRight") nextImage();
-            if (e.key === "ArrowLeft") prevImage();
-            if (e.key === "Escape") closeFullscreen();
+            if (showFullscreen) {
+                if (e.key === "Escape") closeFullscreen();
+                if (e.key === "ArrowLeft") prevImage();
+                if (e.key === "ArrowRight") nextImage();
+            }
         };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [showFullscreen, currentImage]);
 
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [showFullscreen]);
 
     useEffect(() => {
         let startX: number | null = null;
@@ -123,7 +144,7 @@ export default function AppScreenshotsCarousel({
                 <div className="mb-4">
                     <div className="relative aspect-[16/9] bg-gray-100 rounded-lg overflow-hidden transition-all duration-300 flex items-center justify-center">
                         <ImageWithFallback
-                            src={screenshots[currentImage]?.imageUrl || PLACEHOLDER}
+                            src={getImageUrl(screenshots[currentImage]?.imageUrl)}
                             alt={`${appName} screenshot ${currentImage + 1}`}
                             width="0"
                             height="0"
@@ -175,7 +196,7 @@ export default function AppScreenshotsCarousel({
                                     }`}
                                 >
                                     <ImageWithFallback
-                                        src={screenshot.imageUrl || PLACEHOLDER}
+                                        src={getImageUrl(screenshot.imageUrl)}
                                         alt={`${appName} screenshot ${index + 1}`}
                                         width="0"
                                         height="0"
@@ -202,7 +223,7 @@ export default function AppScreenshotsCarousel({
                                 </button>
                                 <div className="relative flex items-center justify-center">
                                     <img
-                                        src={screenshots[currentImage]?.imageUrl || PLACEHOLDER}
+                                        src={getImageUrl(screenshots[currentImage]?.imageUrl)}
                                         alt={`${appName} screenshot ${currentImage + 1}`}
                                         className="max-w-full max-h-[80vh] object-contain transition-transform duration-300"
                                         tabIndex={0}

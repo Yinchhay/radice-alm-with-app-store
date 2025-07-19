@@ -9,6 +9,24 @@ const typeColors: Record<number, { name: string; color: string }> = {
     3: { name: "API", color: "#34A853" }
 }
 
+function getImageUrl(imagePath: string | null | undefined): string {
+    if (!imagePath) {
+        return "/placeholders/placeholder.png";
+    }
+    
+    if (imagePath.startsWith('http')) {
+        return imagePath;
+    }
+    
+    if (imagePath.startsWith('/uploads/')) {
+        const filename = imagePath.replace('/uploads/', '');
+        return `/api/file?filename=${filename}`;
+    }
+    
+    return `/api/file?filename=${imagePath}`;
+}
+
+
 export function AppCard({ app, clickable = true }: { app: App; clickable?: boolean }) {
     const [imageError, setImageError] = useState(false);
 
@@ -17,7 +35,7 @@ export function AppCard({ app, clickable = true }: { app: App; clickable?: boole
             <div className="w-full aspect-[16/9] border-2 border-gray-100 overflow-hidden rounded-lg relative">
                 {!imageError && app.cardImage ? (
                     <Image
-                        src={app.cardImage.startsWith("/") ? app.cardImage : `/placeholders/placeholder.png`}
+                        src={getImageUrl(app.cardImage)}
                         alt={app.project?.name || "App"}
                         className="w-full h-full object-cover"
                         fill

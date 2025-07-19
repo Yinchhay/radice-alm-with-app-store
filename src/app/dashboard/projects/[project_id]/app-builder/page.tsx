@@ -17,7 +17,7 @@ export default function AppBuilderPage({ params }: { params: { project_id: strin
         </Link>
         
         <div className="pl-6 mt-4">
-          <DashboardPageTitle title="App Builder" />
+          <DashboardPageTitle title="App Listing Form" />
         </div>
       </div>
       
