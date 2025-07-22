@@ -59,6 +59,23 @@ export async function saveUploadedFile(
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
 
+// what i add
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    let exists = false;
+    for (let i = 0; i < 5; i++) {
+        try {
+            await fs.access(filePath);
+            exists = true;
+            break;
+        } catch {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+    }
+    if (!exists) {
+        throw new Error(`File not available after upload: ${filePath}`);
+    }
+
     return `/uploads/${uniqueFilename}`;
 }
 
