@@ -339,8 +339,8 @@ function AppVersionHistory({ params }: { params: { app_id: string } }) {
         );
     }
 
-    // Combine current and previous versions
-    const allVersions = [
+    // Combine current and previous versions and deduplicate
+    let allVersions = [
         ...(versions.current ? [versions.current] : []),
         ...versions.previous,
     ].sort((a, b) => {
@@ -351,6 +351,15 @@ function AppVersionHistory({ params }: { params: { app_id: string } }) {
             return b.minorVersion - a.minorVersion;
         }
         return b.patchVersion - a.patchVersion;
+    });
+
+    // Deduplicate by versionNumber + content
+    const seen = new Set();
+    allVersions = allVersions.filter(v => {
+        const key = `${v.versionNumber}-${v.content || ''}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
     });
 
     const filteredVersions = allVersions.filter((version) => {

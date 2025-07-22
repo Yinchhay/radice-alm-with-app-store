@@ -58,7 +58,20 @@ export default function VersionLogsTab({ appId }: VersionLogsTabProps) {
     setLoading(true);
     setError(null);
     fetchVersionLogs(appId)
-      .then(setVersionLogs)
+      .then((logs) => {
+        const seen = new Set();
+        const filtered = logs.filter(log => {
+          // Remove logs with summary containing 'Draft created by cloning accepted app'
+          if (log.summary && log.summary.toLowerCase().includes('draft created by cloning accepted app')) {
+            return false;
+          }
+          const key = `${log.version}-${log.summary}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setVersionLogs(filtered);
+      })
       .catch(() => setError('Failed to fetch version logs'))
       .finally(() => setLoading(false));
   }, [appId]);
