@@ -1407,7 +1407,7 @@ export default function InformationTab({ projectId, onDataRefresh }: Information
             }
             
             setSaveMessage("Submitted for review!");
-            router.push(window.location.pathname);
+            router.push("/dashboard/projects");
         } catch (err) {
             setSaveMessage("Failed to continue.");
         } finally {
