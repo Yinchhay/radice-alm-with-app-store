@@ -106,11 +106,24 @@ export default function FeedbackTab({ projectId }: FeedbackTabProps) {
     }
   }, [projectId]);
 
+  // Calculate average rating
+  const averageRating =
+    feedbackList.length > 0
+      ? feedbackList.reduce((sum, f) => sum + (Number(f.starRating) || 0), 0) / feedbackList.length
+      : 0;
+
   // Standard heading for all states
   const MainHeading = (
     <div className="space-y-1 mb-6">
       <h1 className="text-[24px] font-semibold">Feedback</h1>
       <p className="text-gray-500 text-sm">This is where you can view feedback submitted by your users for all apps in this project</p>
+      {feedbackList.length > 0 && (
+        <div className="flex items-center gap-2 mt-2">
+          <span className="text-lg font-semibold text-yellow-500">{averageRating.toFixed(1)}</span>
+          <StarRating count={Math.round(averageRating)} />
+          <span className="text-xs text-gray-500">({feedbackList.length} reviews)</span>
+        </div>
+      )}
     </div>
   );
 

@@ -21,7 +21,7 @@ interface VersionLogsTabProps {
 
 async function fetchVersionLogs(appId: number): Promise<VersionLog[]> {
   // Use absolute URL for local dev
-  const res = await fetch(`http://localhost:3000/api/public/app/${appId}/version`);
+  const res = await fetch(`/api/public/app/${appId}/version`);
   const data = await res.json();
   if (!data.success || !data.data) return [];
   // Map the API response to VersionLog[]
@@ -35,7 +35,7 @@ async function fetchVersionLogs(appId: number): Promise<VersionLog[]> {
     type: v.majorVersion > 0 && v.minorVersion === 0 && v.patchVersion === 0 ? 'major' : v.minorVersion > 0 && v.patchVersion === 0 ? 'minor' : 'patch',
     timeAgo: v.createdAt ? timeAgo(new Date(v.createdAt)) : '',
     summary: v.content || '',
-    changes: v.changes || [], // If you store changes as an array in content, otherwise parse from content
+    changes: v.changes || [],
   }));
 }
 

@@ -153,24 +153,6 @@ export default function InformationSection({
                     </button>
                 </div>
             </div>
-
-            <h3 className="text-[20px] font-semibold mt-6 mb-2">Web URL</h3>
-            <input
-                type="text"
-                value={webUrl}
-                onChange={(e) => setWebUrl(e.target.value)}
-                className={`w-full px-3 py-1.5 border ${webUrlError ? "border-red-500" : "border-gray-300"} rounded-md text-sm`}
-                placeholder="https://yourapp.com"
-            />
-            {errors.webUrl && (
-                <div className="text-xs text-red-500">{errors.webUrl}</div>
-            )}
-            <div className="text-xs text-gray-500">
-                Enter the full URL, including http:// or https://
-            </div>
-            {webUrlError && (
-                <div className="text-xs text-red-500 font-semibold">{webUrlError}</div>
-            )}
         </>
     );
 } 
