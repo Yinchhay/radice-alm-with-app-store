@@ -388,6 +388,7 @@ export default function InformationTab({ projectId, onDataRefresh }: Information
         "major",
     );
     const [whatsNew, setWhatsNew] = useState("");
+    const [whatsNewManuallyEdited, setWhatsNewManuallyEdited] = useState(false);
     const [latestAcceptedVersion, setLatestAcceptedVersion] = useState<{
         major: number;
         minor: number;
@@ -720,16 +721,17 @@ export default function InformationTab({ projectId, onDataRefresh }: Information
 
     useEffect(() => {
         // Don't set whatsNew from app.aboutDesc - it should come from version history
-        // Only set it if it's not already set from version history
+        // Only set it if it's not already set from version history and not manually edited
         if (
             appData &&
             appData.app &&
             typeof appData.app.aboutDesc === "string" &&
-            !whatsNew
+            !whatsNew &&
+            !whatsNewManuallyEdited
         ) {
             setWhatsNew(appData.app.aboutDesc);
         }
-    }, [appData, whatsNew]);
+    }, [appData, whatsNew, whatsNewManuallyEdited]);
 
     useEffect(() => {
         setWebUrlError(validateWebUrl(webUrl));
@@ -757,12 +759,10 @@ export default function InformationTab({ projectId, onDataRefresh }: Information
                         minor: data.data.current.minorVersion ?? 0,
                         patch: data.data.current.patchVersion ?? 0,
                     });
-                    
-                    // Also set the whatsNew content from the latest accepted version
-                    if (data.data.current.content) {
+                    // Only set whatsNew if not manually edited
+                    if (data.data.current.content && !whatsNewManuallyEdited) {
                         setWhatsNew(data.data.current.content);
                     }
-                    
                     // Set the update type from the latest accepted version if available
                     if (data.data.current.updateType) {
                         setUpdateType(data.data.current.updateType);
@@ -775,7 +775,7 @@ export default function InformationTab({ projectId, onDataRefresh }: Information
             }
         }
         fetchLatestAcceptedVersion();
-    }, [appData?.appId]);
+    }, [appData?.appId, whatsNewManuallyEdited]);
 
     const formatSize = (bytes: number) =>
         bytes < 1024
@@ -1407,7 +1407,7 @@ export default function InformationTab({ projectId, onDataRefresh }: Information
             }
             
             setSaveMessage("Submitted for review!");
-            window.location.reload();
+            router.push(window.location.pathname);
         } catch (err) {
             setSaveMessage("Failed to continue.");
         } finally {
@@ -1556,7 +1556,10 @@ export default function InformationTab({ projectId, onDataRefresh }: Information
                     updateType={updateType}
                     setUpdateType={setUpdateType}
                     whatsNew={whatsNew}
-                    setWhatsNew={setWhatsNew}
+                    setWhatsNew={(val: string) => {
+                        setWhatsNew(val);
+                        setWhatsNewManuallyEdited(true);
+                    }}
                     errors={errors}
                     latestAcceptedVersion={latestAcceptedVersion}
                     getNextVersion={getNextVersion}
