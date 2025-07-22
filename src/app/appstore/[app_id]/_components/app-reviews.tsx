@@ -52,8 +52,6 @@ export default function AppReviews({
     const [reviews, setReviews] = useState<Feedback[]>(propReviews || []);
     const [averageRating, setAverageRating] = useState(0);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-
-    // Fetch reviews only if propReviews is not provided
     const fetchReviews = async () => {
         try {
             const response = await fetch(`/api/public/app/${appId}/feedback`);
@@ -61,34 +59,40 @@ export default function AppReviews({
             const data = await response.json();
             const fetchedReviews = data.data.feedbacks || [];
             
-            // Sort reviews in descending order (newest first)
             const sortedReviews = fetchedReviews.slice().sort((a: Feedback, b: Feedback) => {
                 const dateA = new Date(a.createdAt).getTime();
                 const dateB = new Date(b.createdAt).getTime();
-                return dateB - dateA; // Newest first (descending order)
+                return dateB - dateA;
             });
             
             setReviews(sortedReviews);
             setAverageRating(data.data.averageRating || 0);
         } catch (error) {
-            console.error(error);
-            setReviews([]);
+            console.error("Error fetching reviews:", error);
         }
     };
 
     useEffect(() => {
         if (propReviews) {
-            // Sort propReviews in descending order (newest first)
             const sortedPropReviews = propReviews.slice().sort((a: Feedback, b: Feedback) => {
                 const dateA = new Date(a.createdAt).getTime();
                 const dateB = new Date(b.createdAt).getTime();
-                return dateB - dateA; // Newest first (descending order)
+                return dateB - dateA;
             });
             setReviews(sortedPropReviews);
             return;
         }
         fetchReviews();
     }, [appId, propReviews]);
+    
+    useEffect(() => {
+        if (reviews.length > 0) {
+            const avg = reviews.reduce((sum, r) => sum + Number(r.starRating || 0), 0) / reviews.length;
+            setAverageRating(avg);
+        } else {
+            setAverageRating(0);
+        }
+    }, [reviews]);
 
     const handleStarClick = (starValue: number) => {
         if (!isAuthenticated) {
@@ -196,23 +200,27 @@ export default function AppReviews({
     return (
         <div>
             {showHeader && (
-                <div className="flex items-center gap-2 mb-8">
-                    <span className="flex items-baseline">
-                        <span className="text-xl font-semibold leading-none">
-                            Ratings and Reviews
-                        </span>
+                <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xl font-semibold leading-none">Ratings and Reviews</span>
                         {reviews.length > 0 && (
                             <span className="text-base font-normal text-gray-500 leading-none ml-2">
                                 ({reviews.length >= 5 ? "5+" : reviews.length} ratings)
                             </span>
                         )}
-                    </span>
-                    <a
-                        href={`/appstore/${appId}/app-all-reviews-page`}
-                        className="w-4 h-4 inline-block align-middle relative top-[2px]"
-                    >
-                        <img src={"/ui/arrow-right-black.svg"} alt="arrow" />
-                    </a>
+                        <a
+                            href={`/appstore/${appId}/app-all-reviews-page`}
+                            className="w-4 h-4 inline-block align-middle relative top-[2px]"
+                        >
+                            <img src={"/ui/arrow-right-black.svg"} alt="arrow" />
+                        </a>
+                    </div>
+                    {reviews.length > 0 && (
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg font-semibold text-yellow-500">{averageRating.toFixed(1)}</span>
+                            <span style={{ pointerEvents: 'none', cursor: 'default' }}>{renderStars(Math.round(averageRating))}</span>
+                        </div>
+                    )}
                 </div>
             )}
             <div className="mb-10">

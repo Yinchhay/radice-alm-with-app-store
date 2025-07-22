@@ -53,7 +53,6 @@ export default function BugReportForm({
         }
         setIsSubmitting(true);
         try {
-            // Use FormData to send files directly
             const formData = new FormData();
             formData.append('title', bugTitle);
             formData.append('description', bugDescription);
